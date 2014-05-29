@@ -1,4 +1,4 @@
-module Bnf (World, parse) where
+module Bnf (World, parse, load) where
 
 import System.FilePath
 import Bnf.BNF

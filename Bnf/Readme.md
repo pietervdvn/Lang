@@ -9,7 +9,7 @@ Usage:
 ======
 
 * Define a BNF file/bnf file cluster
-* Load the bnf with loader. This will give you a map of type {fully qualified name --> module}
+* Load the bnf with load. This will give you a map of type {fully qualified name --> module}
 * Throw this world into PtGen.parse. (parse world (fqn of the module the rule is in) ("name of the rule you want to parse") "string to parse").
 	You now have a parsetree.
 

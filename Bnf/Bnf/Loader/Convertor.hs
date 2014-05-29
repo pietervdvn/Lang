@@ -114,9 +114,9 @@ isImported (IOImport _ _ mode terms _) name
 
 -- converts the IOrules into name --> Expression maps. Checks if each stated rule can be resolved against a given name
 localRules	:: FQN -> [Name] -> IOModule -> Map Name Expression
-localRules fqn imps	
-		=  let known = S.fromList imps in
-			fromList . map (\r@(IORule name _ _ _ _) -> (name, checkExpr' fqn r known)) . getRules
+localRules fqn imps iom	
+ 		=  let known = S.fromList $ (map (\(_, nm, _) -> nm) $ locallyDefined iom) ++ imps in
+			fromList $ map (\r@(IORule name _ _ _ _) -> (name, checkExpr' fqn r known)) $ getRules iom
 
 checkExpr'	:: FQN -> IORule -> S.Set Name -> Expression
 checkExpr' fqn (IORule name e _ _ pos) known
