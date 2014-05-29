@@ -1,0 +1,27 @@
+name:                Consumer
+
+version:             0.1.0.0
+
+synopsis:            Consumer: monadic (but very usefull) clusterfuck
+
+description:         Base classes which get used in lot's of places. Consumer is a monadic clusterfuck which carries a state and result. ConsumerL is the same, but with multiple states on the same poisition. 			Parser contains some stuff specifically to work with strings.
+
+author:              pietervdvn
+
+maintainer:          pietervdvn@gmail.com
+
+build-type:          Simple
+
+cabal-version:       >=1.8
+
+
+library
+  exposed-modules:
+    Consumer
+    ConsumerL
+    Normalizable
+    Parser
+    StdDef
+
+  build-depends:       base ==4.6.*
+  

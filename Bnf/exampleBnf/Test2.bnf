@@ -1,0 +1,9 @@
+Test2
+
+author		"Pieter Vander Vennet"
+date		[2013, 12, 23, 01, 18, 42]
+desc		"The syntaxis of tests!"
+
+import Test1
+
+ a	::= b

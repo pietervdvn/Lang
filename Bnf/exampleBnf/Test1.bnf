@@ -1,0 +1,9 @@
+Test1
+
+author		"Pieter Vander Vennet"
+date		[2013, 12, 23, 01, 18, 42]
+desc		"Testing bnf"
+
+import Test2
+
+ b	 ::= a
