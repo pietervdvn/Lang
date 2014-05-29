@@ -20,4 +20,4 @@ data FQN	= FQN [PName] MName
 	deriving (Eq, Ord)
 
 instance Show FQN where
-	show (FQN _ mn) 	= mn
+	show (FQN path mn) 	= foldr (\p acc -> p++"."++acc) mn path

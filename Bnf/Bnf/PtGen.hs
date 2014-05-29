@@ -2,7 +2,7 @@ module Bnf.PtGen where
 
 import Prelude hiding (lookup)
 import Data.Maybe
-import Data.Map (Map, lookup, member)
+import Data.Map (Map, lookup, member, keys)
 import Control.Monad.Trans
 
 import Bnf.BNF
@@ -162,7 +162,9 @@ getModule	=  do	(_, m, _, _)	<- get
 
 goto	:: FQN -> Context -> Context	
 goto country (world, _, _, _)
-	= (world, fromJust $ lookup country world, country, error "Uh oh, should not happen. Tried to go to "++ show country ++", and no current rule name is set.")
+	= if country `member` world then
+		(world, fromJust $ lookup country world, country, error "Uh oh, should not happen. Tried to go to "++ show country ++", and no current rule name is set.")
+		else error $ "You tried to load "++show country++" but it wasn't found :(\n\tTry one of these: "++ (concatMap show $ keys world )
 
 gotoN	:: Name -> Context -> Context
 gotoN nm (w, c, fqn, _)

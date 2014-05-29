@@ -1,4 +1,4 @@
-module Bnf (World, parse, load) where
+module Bnf (World, parse, load, toFQN) where
 
 import System.FilePath
 import Bnf.BNF
@@ -17,4 +17,6 @@ load fp	= do	let name 	= takeBaseName fp
 		modules	<- L.load (FQN [] name) wdir
 		return $ convert modules
 
-
+toFQN	:: [String] -> FQN
+toFQN path
+	= FQN (init path) $ last path
