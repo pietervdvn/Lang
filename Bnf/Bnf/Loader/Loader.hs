@@ -12,7 +12,9 @@ import Control.Monad
 import StateT
 import Data.Map (Map, lookup, member, empty, insert, toList)
 import System.FilePath
+import Data.Tuple
 {--
+
 
 This module implements the loader. 
 
@@ -35,10 +37,10 @@ the load method will find it if the filepath is:
 
 Returned: all IOModules imported by this IOModule
 -}
-load	:: FQN -> FilePath -> IO [IOModule]
+load	:: FQN -> FilePath -> IO [(IOModule, FilePath)]
 load fqn pwd
 	= do	dict <- loadWithImports [(fqn, pwd)] pwd empty
-		return $ map snd $ toList dict
+		return $ map swap $ toList dict
 
 {- Loads recursivily modules that aren't loaded yet. Keeps track of the working dir (wherer the program was invoked) and the active dir (where the last module was loaded).-}
 loadWithImports	:: [(FQN, FilePath)] -> FilePath -> Map FilePath IOModule -> IO (Map FilePath IOModule)

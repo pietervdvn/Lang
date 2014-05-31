@@ -5,12 +5,13 @@ import StdDef
 import Bnf.FQN
 import Data.Set (Set)
 import qualified Data.Set as S
+import Data.Map hiding (map, filter)
 
 {--
 
 This module implements the data structure that represents a bnf-module (with more meta), such as imported, private, start rule, etc... 
 Not all rules are known in here, but once all files have been parsed, these 'IOModules' are slimmed down to contain only the strictly needed data to parse.
-That is the task of the code in moduleloader.
+That is the task of the code in Loader.
 --}
 
 type Metadata	= Either Int String
@@ -44,6 +45,12 @@ getFqn (IOM fqn _ _ _)
 getRules	:: IOModule -> [IORule]
 getRules (IOM _ _ _ rules)
 		= rules
+
+-- converts the IOrules into name --> Expression maps. 
+localRules	:: FQN -> [Name] -> IOModule -> Map Name Expression
+localRules fqn imps iom	
+ 		=  let known = S.fromList $ (map (\(_, nm, _) -> nm) $ locallyDefined iom) ++ imps in
+			fromList $ map (\(IORule name e _ _ _) -> (name, e)) $ getRules iom
 
 localExports	:: IOModule -> Set (FQN, Name)
 localExports	=  S.fromList . map (\(fqn, n, _) -> (fqn, n)) . filter (\(_,_,public) -> public ) . locallyDefined

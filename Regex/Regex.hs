@@ -29,8 +29,7 @@ start (longest $ match $ regex "<your regex>") "<String to match from start>"
 instance Show Regex where
 	 -- toggle these options if needed, showReg is the default, classic show while debug gives most information about the regex structure 
 	show	= showReg -- -}
-	{-
-	show 	= debug -- -}
+	--show 	= debug -- -}
 
 regex		:: RegexDesc -> Regex
 regex str	=  unpack $ run regexp (str,'\n', 0, (0,0))

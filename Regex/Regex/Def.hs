@@ -28,7 +28,7 @@ data Regex =      Empty				-- does not consume a char, used for technical reason
 
 		| BetweenTimes Int Int Regex	--  BetweenTimes: "{i,j}". i <= j
 		| MinTimes Int Regex		-- At least i times
-	deriving (Eq, Ord)
+	deriving (Eq, Ord, Show)
 
 
 -- checks if this regex might match whitespace as first chars; assumes normalized input

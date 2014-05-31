@@ -1,4 +1,4 @@
-module Bnf.Loader.ExportCalculator (calcExports, Exports, Imports) where
+module Bnf.Loader.ExportCalculator (calcExports, calcImports, importOne', Exports, Imports) where
 
 import Bnf.Meta.IOModule
 import Bnf.BNF
@@ -13,6 +13,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Maybe
 import Control.Arrow
+import Data.List (nub)
 
 {--
 
@@ -33,6 +34,25 @@ calcExports	:: [IOModule] -> Map FQN Exports
 calcExports modules
 			=  let (seed, context) = (initialMap modules, createContext modules) in
 				snd $ runstate (calculateExports (S.fromList $ M.keys seed) context) seed
+
+
+calcImports		:: IOModule -> Map FQN Exports -> Map Name FQN
+calcImports (IOM fqn _ imports _) ctx
+		=  let all 	= map (flip importOne' ctx) imports in
+			M.fromList $ nub $ concat $ all 
+
+importOne'	:: IOImport -> Map FQN Exports -> [(Name, FQN)]
+importOne' imp
+		=  importOne imp . fromJust . M.lookup (getFQN imp)
+
+-- assumes set of exports corresponds is from the module this improt is handling
+importOne	:: IOImport -> Exports -> [(Name, FQN)]
+importOne imprt@(IOImport fqn _ mode terms _)
+		= (`zip` repeat fqn) . filter (isImported imprt) . map snd . S.toList
+
+isImported	:: IOImport -> Name -> Bool
+isImported (IOImport _ _ mode terms _) name
+	= fromMaybe (mode == BlackList) (lookup name terms)
 
 
 -- the initial map where each fqn maps on locally exported rules
