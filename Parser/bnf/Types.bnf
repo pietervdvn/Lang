@@ -1,0 +1,23 @@
+Types
+
+author		"Pieter Vander Vennet"
+date		[2014, 06, 7, 18, 24, 42]
+desc		"The syntaxis of types in Languate"
+
+public import Prelude
+
+_simpleType	::= globalIdent | localIdent | "\(" type "\)"
+
+
+_commaSepTypes	::= simpleType ( "," simpleType)*
+_list		::= "\[" commaSepTypes "\]"
+_set		::= "\{" commaSepTypes "\}"
+_dict		::= "\{" commaSepTypes "-->" commaSepTypes "\}"
+
+_tuple		::= "\(" type ("," type)+ "\)"
+
+_baseType	::= dict | set | list | tuple | simpleType
+
+_curry		::= baseType ("->" baseType)*
+
+type		::= curry
