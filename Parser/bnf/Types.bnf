@@ -16,9 +16,9 @@ desc		"The syntaxis of types in Languate.
 
 public import Prelude
 
-_knownType	::= globalIdent
-_freeType	::= localIdent
-_void		::= "\(\)"
+_$knownType	::= globalIdent
+_$freeType	::= localIdent
+_$void		::= "\(\)"
 _simpleType	::= knownType | freeType | void | "\(" type "\)"
 
 
