@@ -6,10 +6,13 @@ desc		"The syntaxis of types in Languate"
 
 public import Prelude
 
-_simpleType	::= globalIdent | localIdent | "\(" type "\)"
+_knownType	::= globalIdent
+_freeType	::= localIdent
+_void		::= "\(\)"
+_simpleType	::= knownType | freeType | void | "\(" type "\)"
 
 
-_commaSepTypes	::= simpleType ( "," simpleType)*
+_commaSepTypes	::= type ( "," type)*
 _list		::= "\[" commaSepTypes "\]"
 _set		::= "\{" commaSepTypes "\}"
 _dict		::= "\{" commaSepTypes "-->" commaSepTypes "\}"
@@ -18,6 +21,6 @@ _tuple		::= "\(" type ("," type)+ "\)"
 
 _baseType	::= dict | set | list | tuple | simpleType
 
-_curry		::= baseType ("->" baseType)*
+_curry		::= baseType ("->" baseType)+
 
-type		::= curry
+type		::= curry | baseType

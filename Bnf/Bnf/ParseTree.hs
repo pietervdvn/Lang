@@ -116,4 +116,4 @@ showRI (fqn, rule, _)
 
 showCoor	:: Coor -> String
 showCoor (_, l, c)
-		= "line "++ fill 3 (show l)++", pos "++ fill 3 (show c)
+		= fill 3 (show l)++", c"++ fill 3 (show c)
