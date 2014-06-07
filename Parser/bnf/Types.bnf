@@ -2,7 +2,17 @@ Types
 
 author		"Pieter Vander Vennet"
 date		[2014, 06, 7, 18, 24, 42]
-desc		"The syntaxis of types in Languate"
+desc		"The syntaxis of types in Languate. 
+		Valid types are: 
+		Int
+		Nat
+		Int -> Nat
+		{Set}
+		{Dict --> To}
+		[List]
+		()		-- void
+		(a -> b) -> c
+		"
 
 public import Prelude
 
