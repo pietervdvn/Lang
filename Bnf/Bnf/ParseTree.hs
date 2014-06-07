@@ -6,7 +6,7 @@ import Bnf.FQN
 import Data.Maybe
 import Data.List (intersperse)
 import Normalizable
-import Control.Monad.Writer
+import Control.Monad.Writer hiding (getFirst, getLast)
 {--
 
 This module implements the basic ADT that represents a parse tree.
@@ -23,11 +23,23 @@ type RuleInfo	= (FQN, Name, Coor)
 
 data ParseTree	= T RuleInfo String
 		| S RuleInfo [ParseTree]
-
+ 		
 
 getContent	:: ParseTree -> String
 getContent (T _ str)	= str
 getContent (S _ pts)	= concatMap getContent pts
+
+-- length $ getContent pt === getLength pt
+getLength		:: ParseTree -> Int
+getLength (T _ str)	= length str
+getLength (S _ pts)	= foldl (\ acc pt -> acc + getLength pt) 0 pts
+
+-- parseLength >= length, actually parsed chars
+getParseLength		:: ParseTree -> Int
+getParseLength pt	=  let lst = getLast pt in
+			   let (_,_,(pos,_,_)) = getInf lst in
+				pos + getLength lst
+
 
 instance Normalizable ParseTree where
 	normalize	= n
@@ -41,16 +53,21 @@ getName (_,name,_)	= name
 
 -- gets the position of the leftmost token
 getPosition	:: ParseTree -> Position
-getPosition pt	=  let (_,_,(_,l,c))	= getFirstInf pt in
+getPosition pt	=  let (_,_,(_,l,c))	= getInf $ getFirst pt in
 			(l,c)
 
 getInf		:: ParseTree -> RuleInfo
 getInf (T inf _)	= inf
 getInf (S inf _)	= inf
 
-getFirstInf	:: ParseTree -> RuleInfo
-getFirstInf (S _ (pt:_))	= getFirstInf pt
-getFirstInf (T inf _)	= inf
+getFirst	:: ParseTree -> ParseTree
+getFirst (S _ (pt:_))	= getFirst pt
+getFirst pt	= pt
+
+getLast		:: ParseTree -> ParseTree
+getLast (S _ pts)
+		= getLast $ last pts
+getLast pt	= pt
 
 _isEmpty	:: ParseTree -> Bool
 _isEmpty (S _ [])	= True

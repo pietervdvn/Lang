@@ -4,7 +4,7 @@ import Bnf.Meta.Pt2BnfExpr (parseExpr)
 import Bnf.ParseTree
 import Bnf.BNF
 import Bnf.Converter
-import Control.Monad.Writer
+import Control.Monad.Writer hiding (getFirst)
 import StdDef
 import Bnf.Meta.IOModule
 import Normalizable
@@ -14,7 +14,7 @@ This module implements the conversion from a pt to a bnf rule
 
 parseRule	:: ParseTree -> Writer Errors IORule
 parseRule pt	=  do	conved	<- simpleConvert h t s pt
-			conv (getFirstInf pt) conved
+			conv (getInf $ getFirst pt) conved
 
 conv		:: RuleInfo -> AST -> Writer Errors IORule
 conv inf (Modded (Modifiers init priv token) ast)

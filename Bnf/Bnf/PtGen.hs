@@ -24,11 +24,25 @@ This module implements a parser, which parses text using a given rule.
 type Context	= (World, Module, FQN, Name)
 
 data Exception	= RuleNotFound RuleInfo Name
+		| NoFullParse RuleInfo
 	deriving (Show)
 data Pr	a	= P (Parser Exception a)
 type St a	= StateT Context Pr a
 
 
+-- forces that the complete string be parsed. Errors if this was not the case
+parseFull	:: World -> FQN -> Name -> String -> Maybe (Either Exception ParseTree)
+parseFull w fqn rule str
+		= case parse w fqn rule str of
+			Nothing		-> Nothing
+			Just (Left ex)	-> Just $ Left ex
+			Just (Right pt)	-> Just $ _isFull str pt
+
+_isFull		:: String -> ParseTree -> Either Exception ParseTree
+_isFull str pt	=  if getParseLength pt == length str then Right pt
+			else Left $ NoFullParse $ getInf $ getLast pt
+
+-- parses as much as possible
 parse	:: World -> FQN -> Name -> String -> Maybe (Either Exception ParseTree)
 parse world fqn name
 	=  fmap (fmap (normalize . fst)) . runPr (runstateT (p (Call name)) (goto fqn (world, error "The fqn you gave is not defined", fqn, name)))

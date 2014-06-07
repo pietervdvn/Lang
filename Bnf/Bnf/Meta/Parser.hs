@@ -3,7 +3,7 @@ module Bnf.Meta.Parser (parse) where
 import Control.Monad.Writer
 import Data.Map hiding (map)
 import Bnf.PtGen (lastParsePos)
-import qualified Bnf.PtGen
+import Bnf.PtGen (parseFull)
 import Bnf.Meta.BnfRegex
 import Bnf.Meta.BnfModule
 import Bnf.Meta.BnfExpr
@@ -19,7 +19,7 @@ import Control.Arrow
 
 -- actually parse the string.
 parse	:: String -> (Maybe IOModule, [Either Warning Error])
-parse str	=  case Bnf.PtGen.parse world fqnMod "module" str of
+parse str	=  case parseFull world fqnMod "module" str of
 			Nothing 		-> (Nothing, [Right (defErrRuleInf $ calcErrPos str, "No parse result")] )
 			(Just (Left e))		-> (Nothing, [Right (defErrRuleInf defErrPos, show e)])
 			(Just (Right pt))	-> pm pt
