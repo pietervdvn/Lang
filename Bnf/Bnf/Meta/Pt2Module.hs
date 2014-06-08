@@ -126,6 +126,8 @@ s "meta" (Meta head:rest)
 			Meta $ head ++ tail
 s "rules" iorules
 		=  unpck iorules []
+s "imports" imps
+		= unpckImp imps []
 s nm items	=  error $ "[Pt2Module] Seq fallthrough for '"++nm++"' with "++show items
 
 unpck		:: [AST] -> [IORule] -> AST
@@ -133,4 +135,8 @@ unpck [] acc	=  Rule acc
 unpck (Rule ior:rs) acc
 		= unpck rs (ior++acc)
 
+unpckImp	:: [AST] -> [IOImport] -> AST
+unpckImp [] acc	=  Import acc
+unpckImp (Import ioi:rs) acc
+		=  unpckImp rs (ioi++acc)
 

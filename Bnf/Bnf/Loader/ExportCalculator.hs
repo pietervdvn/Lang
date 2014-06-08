@@ -14,6 +14,7 @@ import qualified Data.Set as S
 import Data.Maybe
 import Control.Arrow
 import Data.List (nub)
+import Data.Tuple (swap)
 
 {--
 
@@ -48,7 +49,7 @@ importOne' imp
 -- assumes set of exports corresponds is from the module this improt is handling
 importOne	:: IOImport -> Exports -> [(Name, FQN)]
 importOne imprt@(IOImport fqn _ mode terms _)
-		= (`zip` repeat fqn) . filter (isImported imprt) . map snd . S.toList
+		= map swap . filter (isImported imprt . snd) . S.toList
 
 isImported	:: IOImport -> Name -> Bool
 isImported (IOImport _ _ mode terms _) name

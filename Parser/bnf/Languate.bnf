@@ -6,4 +6,6 @@ desc		"The syntaxis of the Languate programming language"
 
 public import Types
 
+
+
 lang	::= nat nat

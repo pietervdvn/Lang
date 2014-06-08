@@ -4,14 +4,16 @@ author		"Pieter Vander Vennet"
 date		[2014, 06, 7, 18, 24, 42]
 desc		"The syntaxis of types in Languate. 
 		Valid types are: 
-		Int
-		Nat
-		Int -> Nat
-		{Set}
-		{Dict --> To}
-		[List]
-		()		-- void
-		(a -> b) -> c
+		Int		-- a normal type, defined either as ADT or typeclass
+		Nat		-- idem
+		Int -> Nat	-- a function signature
+		{Int}		-- a set of ints
+		{Int, String}	-- A set of int,string tuples
+		{Int --> String}	-- A dict (hashmap) from int to string
+		[Int]		-- list of int
+		()		-- void type
+		(a -> b) -> c	-- a function which takes a function
+		{a,b -> c}	=== { a, (b -> c) }
 		"
 
 public import Prelude
@@ -19,7 +21,8 @@ public import Prelude
 _$knownType	::= globalIdent
 _$freeType	::= localIdent
 _$void		::= "\(\)"
-_simpleType	::= knownType | freeType | void | "\(" type "\)"
+_$infer		::= "_"		-- compiler should infer which is the type
+_simpleType	::= knownType | freeType | void | infer | "\(" type "\)"
 
 
 _commaSepTypes	::= type ( "," type)*

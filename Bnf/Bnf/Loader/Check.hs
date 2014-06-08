@@ -102,13 +102,13 @@ prep		:: [(Name, [IOImport])] -> String
 prep 		=  foldr (\toPrep acc -> "\n\t"++ prep' toPrep ++ acc) ""
 
 
-prep'		:: (Name, [IOImport]) -> String
+prep'		:: ( Name, [IOImport]) -> String
 prep' (nm, imps)
 		= show nm ++ " is exported by "++( init $ foldr 
 			(\(IOImport fqn _ _ _ pos) acc ->  show fqn++" "++show pos++","++acc) "" imps )
 
 
-ambigueImports	:: [(IOImport, [(Name, FQN)])] -> [(Name, [IOImport])]
+ambigueImports	:: [(IOImport, [(Name, FQN)])] -> [( Name, [IOImport])]
 ambigueImports all
 		=  let realAmb	= amb $ concatMap snd all in
 		   let dict	= map swap $ expand $ map (fmap (map fst)) all :: [(Name, IOImport)] in
