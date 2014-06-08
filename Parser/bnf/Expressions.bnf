@@ -7,4 +7,4 @@ desc		"The syntaxis of an expression in Languate"
 public import Prelude
 
 call		::= localIdent	| globalIdent
-$op		::= "(!['=(,)_ \t\n\"a..zA..Z])(![()(,) \t\n\"a..zA..Z])*"
+op		::= "(!['=(,)_ \t\n\"a..zA..Z])(![()(,) \t\n\"a..zA..Z])*"
