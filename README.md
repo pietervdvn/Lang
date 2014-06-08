@@ -3,10 +3,17 @@ Lang
 
 Yet another programming language
 
+
+Getting started
+===============
+
+Install submodules first with ````cabal install <module>```` in following order: [regex, bnf, parser].
+
+To parse stuff with the bnf-lib, see the readme in bnf.
+
+
 Repo structure
 ==============
-
-Install submodules first with ````cabal install <module>```` in following order: [regex, bnf, parser]
 
 Regex
 -----
