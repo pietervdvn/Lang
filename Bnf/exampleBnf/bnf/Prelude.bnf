@@ -1,0 +1,16 @@
+Prelude
+
+author		"Pieter Vander Vennet"
+date		[2014, 5, 29, 21, 48, 42]
+desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and floats; basic identifiers, string notations"
+
+
+localIdent	::= "[a..z][A..Za..z0..9]*"
+globalIdent	::= "[A..Z][A..Za..z0..9]*"
+
+_digit		::= "[0..9']"
+_hexdigit	::= "[0..9a..fA..F']"
+_hexprefix	::= "0x"
+_bindigit	::= "[01]"
+_binprefix	::= "0b"
+nat		::= "0x[0..9a..fA..F]+" | "0b[01]+"+ | "[0..9]+"

@@ -1,0 +1,10 @@
+Expressions
+
+author		"Pieter Vander Vennet"
+date		[2014, 6, 08, 19, 37, 42]
+desc		"The syntaxis of an expression in Languate"
+
+public import Prelude
+
+call		::= localIdent	| globalIdent	
+
