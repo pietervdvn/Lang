@@ -4,9 +4,11 @@ author		"Pieter Vander Vennet"
 date		[2014, 5, 29, 21, 48, 42]
 desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and floats; basic identifiers, string notations"
 
+dquote		::= "[\"]"
 
 localIdent	::= "[a..z][A..Za..z0..9]*"
 globalIdent	::= "[A..Z][A..Za..z0..9]*"
+
 
 _digit		::= "[0..9']"
 _hexdigit	::= "[0..9a..fA..F']"

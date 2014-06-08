@@ -54,6 +54,9 @@ conv (Sequence asts)	= R.Seq $ map conv asts
 conv (SubR ast)		= R.Seq [conv ast]
 
 t	:: Name -> String -> AST
+
+t "rangeUnitChar" ('\\':[c])
+			= RangeChar $ c
 t "rangeUnitChar" str	= RangeChar $ head str
 
 t "normalChar" ('\\':[c])

@@ -6,6 +6,8 @@ desc		"The syntaxis of an expression in Languate"
 
 public import Prelude
 
-call		::= localIdent	| globalIdent	
+call		::= localIdent	| globalIdent
+op		::= opFirstChar opChar*
 
-operator	::= "op"
+_opFirstChar	::= "!['=(,)_ \t\n\"a..zA..Z]"
+_opChar		::= "![()(,) \t\n\"a..zA..Z]"
