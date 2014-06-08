@@ -5,7 +5,8 @@ date		[2014, 5, 29, 21, 48, 42]
 desc		"The syntaxis of the Languate programming language"
 
 public import Types
+public import Expressions
 
 
+lang	::= nat nat -- comment
 
-lang	::= nat nat

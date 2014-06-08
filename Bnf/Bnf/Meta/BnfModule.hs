@@ -25,7 +25,7 @@ modul	= Seq [Call "moduleName",Call "nl", Call "meta", Call "imports", Call "rul
 rules		= More $ Seq [Call "rule", Call "nl"]
 rule		= Seq [ Call "modifier", Call "localIdent", rgx "=|::=", Call "expression",Opt $ Call "comment"]
 modifier	= Star $ rgx "[>_$]"
-nl		= More $ rgx "\n"
+nl		= More $ Seq [Opt $ Call "comment", rgx "\n"]
 
 
 --- Metadata
