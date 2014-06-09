@@ -158,10 +158,11 @@ Three modifiers can be used when declaring a rule:
 
 * > makes a rule initial, this means that the parser will try to parse this rule as first. It is more of a human indication that it really gets used...
 * _ makes a rule private; this means that when another bnf-file imports this bnf-file, this private rule will not be seen in its scope
-* $ tokenizes a rule. This means that all the contents of the parsetree are concatenated to a single string.
+* $ tokenizes a rule. This means that all the contents of the parsetree are concatenated to a single string. Note that white space is still parsed between the two rules. (We still have TODO this)
 	Usefull for e.g. localIdent:
 
 	$localIdent	::= "[a..z]" "[a..zA..Z0..9]"*
+
 
 
 Parsing order
