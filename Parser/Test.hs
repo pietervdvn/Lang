@@ -18,6 +18,6 @@ t rule str	=  do	world	<- load "bnf/Languate"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
-			print $ normalize pt
+			print $ simplify $ normalize pt
 
 main	= t "lang" "123"
