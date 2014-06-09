@@ -9,7 +9,10 @@ localIdent	::= "[a..z][A..Za..z0..9]*"
 globalIdent	::= "[A..Z][A..Za..z0..9]*"
 
 
-nat		::= "0x[0..9a..fA..F]+" | "0b[01]+" | "[0..9]('?[0..9])"
+_hex		::= "0x[0..9a..fA..F]('?[0..9a..fA..F])*"
+_binary		::= "0b[01]('?[01])*"
+_decimal	::=  "[0..9]('?[0..9])*"
+nat		::= hex | binary | decimal
 -- no need for int, this is an operator (minus) followed by a nat
 float		::= "[0..9]('?[0..9])*\.[0..9]('?[0..9])+"
 

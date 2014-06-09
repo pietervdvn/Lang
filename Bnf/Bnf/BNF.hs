@@ -107,7 +107,6 @@ seqN rules constr
 			[r]	-> r
 			rs	-> constr rs 
 
-
 isEmpty		:: Expression -> Bool
 isEmpty (Choice [])	= True
 isEmpty (Seq [])	= True

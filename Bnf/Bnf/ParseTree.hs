@@ -88,6 +88,14 @@ filterPt _ token
 instance Show ParseTree where
 	show = _s
 
+-- simplification for humans only
+simplify	:: ParseTree -> ParseTree
+simplify (S _ [pt])
+		= simplify pt
+simplify (S inf pts)
+		= S inf $ map simplify pts
+simplify pt	= pt
+
 
 _s		:: ParseTree -> String
 _s (T inf cont)	= "$"++ showInf inf ++ show cont

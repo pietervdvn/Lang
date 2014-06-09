@@ -8,7 +8,8 @@ public import Prelude
 
 call		::= localIdent	| globalIdent
 
-op		::= "(!['=(,)_\t\n\"a..zA..Z ])(![()(,)\t\n\"a..zA..Z ])*"
+op		::= "(!['=(,)_\t\n\"a..zA..Z0..9 ])(![(,)\t\n\"a..zA..Z0..9 ])*"
 
 
-expr0		::= (call | op)+
+expr		::= (call | nat | float | "\(" expr "\)" | op )+
+
