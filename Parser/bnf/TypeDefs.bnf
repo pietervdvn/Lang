@@ -1,0 +1,38 @@
+TypeDefs
+
+author		"Pieter Vander Vennet"
+date		[2013, 12, 23, 01, 18, 42]
+desc		"The syntaxis of all kind of TypeDefinitions: 
+		
+		data Data a 	= A a | B Int
+
+		-- want named fields?
+
+		data Record	= A i : Int | B b : Bool 
+		data Record	= {i : Int, b : Bool }		-- no constructor needed for one, is Record
+		
+		record syntax also creates functions to set and modify: (e.g. for the last one:)
+
+		seti	: Record -> Int -> Record
+		modi	: Record -> Int -> Int -> Record
+
+		e.g. 'record.modi (+1)' or (.modi (+1) )
+
+		type Name	= String	-- real synonym, strings can be used as Name
+		
+		subtype CanonicalPath	= FilePath
+
+		A subtype establishes a subset relationship. It means that every 'CanonicalPath' is a 'Filepath', but not vice-versa. 
+		This means that each 'CanonicalPath-object' can be used in functions with 'FilePath' as argument, but not the other way round.
+		To create them, you use the constructor. This constructor has the same name as the subtype (thus 'CanonicalPath'). To keep the
+		constructor hidden withing the local module, you add an underscore.
+		
+		subtype _CanonicalPath	= FilePath
+
+		This does not make the type private. As soon as there is one function exported with the given type, the type is public too.
+	
+		"
+
+import Prelude
+
+
