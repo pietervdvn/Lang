@@ -1,10 +1,53 @@
---- 
-Boolean and function 
+Bool
 ---
-~ annihilator for and	: b => False and b	=== False
-~ neutral element for and: b => True and b	=== b
-> True and True			=== True
-> False and True and False	=== False
-and		: Bool -> Bool -> Bool
+The bool type is a type which represents logical values.
+
+---	
+
+--## Definition
+
+data Bool	= False 
+		| True
+
+--## Logical operations
+
+-- Logical 'and'-function. Returns True if, and only if both arguments are True
+~ annihilator for and	: b => False && b	=== False
+~ neutral element for and: b => True && b	=== b
+> True && True			=== True
+> False && True && False	=== False
+(&&)		: Bool -> Bool -> Bool
 True True	= True
 *		= False
+
+-- Logical 'or'-function. Returns False if, and only if both arguments are False
+~ annihilator for or	: b => True || b	=== True
+~ neutral element for or: b => False  || b	=== b
+> False || False		=== False
+> False || True || False	=== True
+(||)		: Bool -> Bool -> Bool
+False False	= True
+*		= False
+
+-- Locical 'not' function (aka invert).
+~ double not	: b => ! !b == b
+> ! True	=== False
+> ! False	=== True
+(!)	: Bool -> Bool
+True	= False
+False	= True
+
+
+--## Convertion to other types
+
+-- show to get a String representation
+show	: Bool -> String
+True	= "True"
+False	= "False"
+
+-- convert with cast
+> (Int) True	=== 1
+convert	: Bool -> Int
+True	= 1
+False	= 0
+
