@@ -1,4 +1,6 @@
--- boolean and
+--- 
+Boolean and function 
+---
 ~ annihilator for and	: b => False and b	=== False
 ~ neutral element for and: b => True and b	=== b
 > True and True			=== True

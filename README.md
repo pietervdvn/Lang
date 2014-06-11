@@ -35,3 +35,12 @@ Parser
 ------
 
 The actual parser.
+
+Selling points
+==============
+
+* Haskell-like syntax (but cleaned up a little)
+* Type Directed name resolution
+* Type interference
+* Laws, examples
+

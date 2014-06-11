@@ -2,14 +2,9 @@ Comments
 
 author		"Pieter Vander Vennet"
 date		[2014, 06, 09, 17, 56, 42]
-desc		"The syntaxis of comments. This includes the syntaxis of docstring comments, and
-		special tags, and laws. Both comments and laws do not have any effect on
-		execution of the program, but if a law is not met, the program won't compile."
-
+desc		"The syntaxis of comments. There always is a comment above each declaration, it is the docstring. The documentation tool is for later; it'll be markdown/literate"
+ 
 public import Prelude
-
--- a comment which is directly above a declaration counts as its docstring
--- This will be actually implemented in a later phase
 
 comment		::= "--" "!\n"*
 $mlcommentWord	::= ("!-"+|"--!-"|"-!-")
