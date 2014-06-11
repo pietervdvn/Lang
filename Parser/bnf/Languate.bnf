@@ -8,4 +8,4 @@ import Functions
 import Comments
 import Expressions
 
-lang	::= nat nat
+lang	::= (function nl+) + 

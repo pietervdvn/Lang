@@ -1,0 +1,8 @@
+-- boolean and
+~ annihilator for and	: b => False and b	=== False
+~ neutral element for and: b => True and b	=== b
+> True and True			=== True
+> False and True and False	=== False
+and		: Bool -> Bool -> Bool
+True True	= True
+*		= False

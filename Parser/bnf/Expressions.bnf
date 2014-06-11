@@ -8,8 +8,8 @@ public import Prelude
 
 _call		::= localIdent | globalIdent
 
- -- TODO add "==" as op
- op		::= "(!['=(,)_\t\n\"a..zA..Z0..9\[\]{}- ])(![(,)\t\n\"a..zA..Z0..9 ])*&![\n]" | "==" | "-"
+ -- TODO add "==" and "-" as op
+ op		::= "(!['=(,)_\t\n\"a..zA..Z0..9\[\]{}- ])(![(,)\t\n\"a..zA..Z0..9 ])*" -- | "==" | "-"
 
 
 _tuple		::= "\(" expr ("," expr)+ "\)"	-- has to contain a ","
