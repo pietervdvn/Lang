@@ -1,0 +1,46 @@
+Functions
+
+author		"Pieter Vander Vennet"
+date		[2013, 12, 23, 01, 18, 42]
+desc		"The syntaxis of "
+
+public import Types
+public import Prelude
+import Expressions
+import Comments
+public import Patterns
+
+{- lawnames are simple strings which allow spaces. 
+   Note that these should not be case sensitive when referred to in docs;
+   each law has a name which does not have to be unique -}
+_$lawname		::= "[a..zA..Z0..9]"+	
+_lawDeclaration	::= localIdent ("," localIdent)* (":" type)?
+_lawDeclarations	::= lawDeclaration ("," lawDeclaration)*
+law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "===" expr
+
+
+declaration	::= localIdent ":" type?
+
+-- OBLIGATED COMMENTS! Yes, each declaration is OBLIGATED to have a docstring!
+function	::= (comment "\n" | mlcomment "\n") (law nl)* declaration
+
+{-
+law example
+return is a defined function
+
+~ neutral element : a => (return a) >>= f	=== f a
+-> we have to define a upfront. As it's type is not important (any type), no type is given
+
+~ neutral element : m : Monad a => m >>= return	=== m
+-> here, m is unkown (return and >>= are known)
+-> It's type is a Monad, so that is defined
+
+-- not : Float, as these are **not** associative!
+~ associativity	: a,b,c : Int =>	(a + b) + c === a + (b + c)
+
+
+~ more types	: b : Bool, n : Int, g,h : Float =>  ...
+
+-}
+
+

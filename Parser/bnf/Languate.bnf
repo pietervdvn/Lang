@@ -4,8 +4,8 @@ author		"Pieter Vander Vennet"
 date		[2014, 5, 29, 21, 48, 42]
 desc		"The syntaxis of the Languate programming language"
 
-public import Types
-public import Expressions
-
+import Functions
+import Comments
+import Expressions
 
 lang	::= nat nat

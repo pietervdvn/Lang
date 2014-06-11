@@ -1,0 +1,37 @@
+Patterns
+
+author		"Pieter Vander Vennet"
+date		[2014, 06, 11, 20, 37, 42]
+desc		"The syntaxis of pattern matching in Languate"
+
+import Prelude
+import Expressions
+
+-- patterns starting with $ are evaluated and should match the argument
+patternRoot	::= "\*" | "_" 
+		| ( "$" simpleExpr | globalIdent | localIdent | nat | map | list | tuple| "\(" pattern "\)" )  (("@" patternRoot)?)
+
+{-
+following expressions match a ...
+{a}	-- set with single element 'a' / map with single key 'a'
+{a:as}	-- set with element 'a'/ map with key 'a'
+{a --> b : as} -- map with a key 'a' which maps on 'b'
+{a --> b}	-- map with single pair
+{0}		-- set with single element which is 0
+{0 --> a}	-- map with only key, 0, which maps on an element 'a'
+{0 --> 1}	-- map in which the key 0 maps on zero (no other elements)
+{a --> 0}	-- map in which some element has value 0. Not efficient, never used
+
+A set can not be differentiated from a map
+-}
+mapPart		::= freePattern ("-->" freePattern)?
+map		::= "\{" mapPart ("," mapPart)* (":" patternRoot)? "\}"
+
+list		::= "\[" freePattern ("," freePattern)* (":" freePattern)? "\]"
+
+tuple		::= "\(" freePattern ("," freePattern)+ "\)"
+
+pattern		::= globalIdent patternRoot | "-" nat
+freePattern	::= patternRoot | pattern
+
+

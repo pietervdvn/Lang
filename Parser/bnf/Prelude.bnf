@@ -4,10 +4,12 @@ author		"Pieter Vander Vennet"
 date		[2014, 5, 29, 21, 48, 42]
 desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and floats; basic identifiers, string notations"
 
+import Comments
 
 localIdent	::= "[a..z][A..Za..z0..9]*"
 globalIdent	::= "[A..Z][A..Za..z0..9]*"
 
+nl		::= (mlcomment |comment) ? "\n"
 
 _hex		::= "0x[0..9a..fA..F]('?[0..9a..fA..F])*"
 _binary		::= "0b[01]('?[01])*"

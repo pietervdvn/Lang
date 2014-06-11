@@ -6,15 +6,18 @@ desc		"The syntaxis of an expression in Languate"
 
 public import Prelude
 
- call		::= localIdent	| globalIdent
+_call		::= localIdent | globalIdent
 
- op		::= "(!['=(,)_\t\n\"a..zA..Z0..9\[\]{} ])(![(,)\t\n\"a..zA..Z0..9 ])*"
+ -- TODO add "==" as op
+ op		::= "(!['=(,)_\t\n\"a..zA..Z0..9\[\]{}- ])(![(,)\t\n\"a..zA..Z0..9 ])*" -- | "=="
 
 
 
- tuple		::= "\(" expr ("," expr)+ "\)"	-- has to contain a ","
+_tuple		::= "\(" expr ("," expr)+ "\)"	-- has to contain a ","
 _commaSepExpr	::= expr ("," expr)*		-- can be a single expression too
- set		::= "\{" commaSepExpr "\}"	-- dubbles as map, "-->" is a 'normal' operator
- list		::= "\[" commaSepExpr "\]"
- expr		::= (call | nat | float | tuple | set | list | "\(" expr "\)" | op )+
+_set		::= "\{" commaSepExpr "\}"	-- dubbles as map, "-->" is a 'normal' operator
+_list		::= "\[" commaSepExpr "\]"
+ -- expression not contains spaces (or containing spaces in () )
+ simpleExpr	::= call | nat | float | tuple | set | list | "\(" expr "\)" | op
+ expr		::= simpleExpr+
 
