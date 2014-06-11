@@ -10,6 +10,8 @@ import Expressions
 -- patterns starting with $ are evaluated and should match the argument
 patternRoot	::= "\*" | "_" 
 		| ( "$" simpleExpr | globalIdent | localIdent | nat | map | list | tuple| "\(" pattern "\)" )  (("@" patternRoot)?)
+pattern		::= globalIdent patternRoot | "-" nat
+freePattern	::= patternRoot | pattern
 
 {-
 following expressions match a ...
@@ -24,14 +26,12 @@ following expressions match a ...
 
 A set can not be differentiated from a map
 -}
-mapPart		::= freePattern ("-->" freePattern)?
-map		::= "\{" mapPart ("," mapPart)* (":" patternRoot)? "\}"
+_mapPart		::= freePattern ("-->" freePattern)?
+_map		::= "\{" mapPart ("," mapPart)* (":" patternRoot)? "\}"
 
-list		::= "\[" freePattern ("," freePattern)* (":" freePattern)? "\]"
+_list		::= "\[" freePattern ("," freePattern)* (":" freePattern)? "\]"
 
-tuple		::= "\(" freePattern ("," freePattern)+ "\)"
+_tuple		::= "\(" freePattern ("," freePattern)+ "\)"
 
-pattern		::= globalIdent patternRoot | "-" nat
-freePattern	::= patternRoot | pattern
 
 

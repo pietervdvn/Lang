@@ -4,6 +4,7 @@ module Bnf.Meta.BnfModule where
 
 import Bnf.BNF
 import Bnf.Meta.BnfExpr (fqnBnf, rgx, localIdent)
+import Bnf.Meta.BnfRegex (fqnRegex)
 import Bnf.FQN
 import Data.Map (fromList)
 
@@ -14,7 +15,7 @@ modMod	= Module (fromList
 			("meta",metas),("metafield",field),("content", content),("string",string),("int",int),("list",list),("listContent", listContent),
 			("localIdent", localIdent),("rules",rules),("rule",rule),
 			("modifier",modifier),("nl",nl),("dquote",rgx "\""),("comma",rgx ",")]) 
-		(fromList [("expression", fqnBnf),("comment",fqnBnf)])
+		(fromList [("expression", fqnBnf),("comment",fqnBnf),("regex", fqnRegex)])
 
 
 

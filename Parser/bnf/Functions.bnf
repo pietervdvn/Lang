@@ -22,7 +22,7 @@ law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "===" expr
 declaration	::= localIdent ":" type?
 
 -- OBLIGATED COMMENTS! Yes, each declaration is OBLIGATED to have a docstring!
-function	::= (comment "\n" | mlcomment "\n") (law nl)* declaration
+function	::= (comment "\n" | mlcomment "\n") (law nl)* -- declaration nl (patternRoot "=" expr)+
 
 {-
 law example

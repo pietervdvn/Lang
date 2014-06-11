@@ -55,8 +55,10 @@ conv (SubR ast)		= R.Seq [conv ast]
 
 t	:: Name -> String -> AST
 
-t "rangeUnitChar" ('\\':[c])
-			= RangeChar $ c
+t "rangeUnitChar" "\\t"	= RangeChar '\t'
+t "rangeUnitChar" "\\n"	= RangeChar '\n'
+t "rangeUnitChar" "\\f"	= RangeChar '\f'
+			
 t "rangeUnitChar" str	= RangeChar $ head str
 
 t "normalChar" ('\\':[c])
@@ -130,4 +132,5 @@ s _ [ast]		= ast
 
 
 s name ast	= error $ "Sequence fallthrough for "++name++ " with asts "++ show ast
+
 
