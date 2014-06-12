@@ -25,7 +25,12 @@ type Context	= (World, Module, FQN, Name)
 
 data Exception	= RuleNotFound RuleInfo Name
 		| NoFullParse RuleInfo
-	deriving (Show)
+
+instance Show Exception where
+	show (RuleNotFound (modul, _, _) name)	= "The rule "++name++" wasn't found in module '"++show modul++"'"
+	show (NoFullParse inf)		= "We couldn't parse the full string, we were at "++show inf
+
+
 data Pr	a	= P (Parser Exception a)
 type St a	= StateT Context Pr a
 
@@ -45,7 +50,8 @@ _isFull str pt	=  if getParseLength pt == length str then Right pt
 -- parses as much as possible
 parse	:: World -> FQN -> Name -> String -> Maybe (Either Exception ParseTree)
 parse world fqn name
-	=  fmap (fmap (normalize . fst)) . runPr (runstateT (p (Call name)) (goto fqn (world, error "The fqn you gave is not defined", fqn, name)))
+	| name == ""	=  error $ "You should not pass the empty string as a rulename"
+	| otherwise	=  fmap (fmap (normalize . fst)) . runPr (runstateT (p (Call name)) (goto fqn (world, error "No goto called. Should not happen", fqn, name)))
 
 -- lastParsePos	:: World -> FQN -> Name -> String -> Pos
 lastParsePos world fqn name
@@ -86,7 +92,8 @@ p (Call name)	=  do	Module local imported	<- getModule
 				pt 	<- p (Call name) 		-- call the method in it's local place
 				put s
 				return pt
-				else do	info	<- getInfo
+				else do	modify $ gotoN name
+					info	<- getInfo
 					lft $ throw $ RuleNotFound info name
 p (Token rule)	= do	inf	<- getInfo
 			tree	<- p rule
@@ -177,8 +184,8 @@ getModule	=  do	(_, m, _, _)	<- get
 goto	:: FQN -> Context -> Context	
 goto country (world, _, _, _)
 	= if country `member` world then
-		(world, fromJust $ lookup country world, country, error "Uh oh, should not happen. Tried to go to "++ show country ++", and no current rule name is set.")
-		else error $ "You tried to load "++show country++" but it wasn't found :(\n\tTry one of these: "++ (concatMap show $ keys world )
+		(world, fromJust $ lookup country world, country, error "Uh oh, should not happen. No rulename is set.")
+		else error $ "You tried to load module '"++show country++"' but it wasn't found :(\n\tTry one of these: "++ (show $ keys world )
 
 gotoN	:: Name -> Context -> Context
 gotoN nm (w, c, fqn, _)
