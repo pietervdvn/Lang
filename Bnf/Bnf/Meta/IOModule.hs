@@ -46,6 +46,10 @@ getRules	:: IOModule -> [IORule]
 getRules (IOM _ _ _ rules)
 		= rules
 
+getRuleName	:: IORule -> Name
+getRuleName (IORule name _ _ _ _)
+		= name
+
 -- converts the IOrules into name --> Expression maps. 
 localRules	:: FQN -> [Name] -> IOModule -> Map Name Expression
 localRules fqn imps iom	

@@ -28,6 +28,7 @@ There are quite some hoops to jump through
 4 No ambiguous imports should exist (importing rule 'int' from both Primitives and Arithmetic) -- if they don't point to the same thing of course!
 5 No module should be imported twice (warning)
 6 All calls in expressions should be resolved
+7 No rules should be declared twice
 --}
 
 
@@ -52,6 +53,7 @@ chck context path iom m
 	= do	checkFileName (getFqn iom) path
 		checkImports context iom
 		checkExpressions iom m
+		checkDoubleDefines iom
 		return m
 
 
@@ -144,8 +146,11 @@ checkDoubleImports fqn imps
 				(foldr (\(fqn, _) acc -> show fqn ++ " is imported on "++ (show $ map snd $ filter ((==) fqn . fst) all) ++ acc) "" duplicates)
 			
 
-
-
+-- 7
+checkDoubleDefines	:: IOModule -> Writer Errors ()
+checkDoubleDefines iom	=  do	let dubbleNames	= dubbles $ map getRuleName $ getRules iom
+				when (not $ null dubbleNames) $ addErr (getFqn iom) (0,0)
+					"Double declare" $ "Some rules are declared multiple times: "++show dubbleNames
 
 
 checkExpressions	:: IOModule -> Module -> Writer Errors ()
