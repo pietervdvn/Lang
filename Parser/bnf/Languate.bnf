@@ -8,6 +8,9 @@ import Functions
 import Comments
 import Expressions
 import TypeDefs
+import Imports
 
-lang	::= (function nl+) + 
+
+statement	::= function | nls data | nls synonym | nls subtype
+lang	::= globalIdent "\n" nlcomment (nls? import)* statement+ nls
 

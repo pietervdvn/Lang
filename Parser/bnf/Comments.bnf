@@ -6,8 +6,14 @@ desc		"The syntaxis of comments. There always is a comment above each declaratio
  
 public import Prelude
 
-comment		::= "--" "!\n"*
+-- one or more newlines, with exactly one comment in them
+nlcomment	::= "\n"* (mlcomment | comment) "\n"+
+
+nl		::= (mlcomment | comment) ? "\n"
+nls		::= nl+
+
+
+$comment		::= "--" "!\n"*
 $mlcommentWord	::= ("!-"+|"--!-"|"-!-")
 mlcomment	::= "---" mlcommentWord* "---+"
-
 

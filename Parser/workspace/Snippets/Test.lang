@@ -4,6 +4,11 @@ The bool type is a type which represents logical values.
 
 ---	
 
+
+import Prelude
+public import String hiding { ++, abc}
+import Data.Maybe showing {fromJust}
+
 --## Definition
 
 data Bool	= False 
@@ -30,7 +35,7 @@ False False	= True
 *		= False
 
 -- Locical 'not' function (aka invert).
-~ double not	: b => ! !b == b
+~ double not	: b => ! !b === b
 > ! True	=== False
 > ! False	=== True
 (!)	: Bool -> Bool

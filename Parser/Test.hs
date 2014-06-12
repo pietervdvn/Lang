@@ -14,7 +14,7 @@ This module loads and compiles the bnf's to test them
 pt		:: String -> String -> IO ParseTree
 pt rule str	=  do	world	<- load "bnf/Languate"
 			print $ length $ show world	-- force evaluation, as to show exceptions
-			let pt'	= fromJust $ parse world (toFQN ["Languate"]) rule str
+			let pt'	= fromJust $ parse world (toFQN ["Languate"]) rule $ str++"\n"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception

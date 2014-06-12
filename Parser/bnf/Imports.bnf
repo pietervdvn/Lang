@@ -1,0 +1,14 @@
+Imports
+
+author		"Pieter Vander Vennet"
+date		[2014, 06, 12, 19, 27, 42]
+desc		"The syntaxis of imports in Languate"
+
+import Prelude
+import Expressions
+
+-- TODO without spaces!
+
+_id		::= localIdent | globalIdent | op | "\(" op "\)"
+_limiters	::= ("hiding" | "showing") "\{" id (","? id)* "\}"
+import	::= "public"? "import" (globalIdent "\.")* globalIdent limiters?
