@@ -17,6 +17,6 @@ _commaSepExpr	::= expr ("," expr)*		-- can be a single expression too
 _set		::= "\{" commaSepExpr "\}"	-- dubbles as map, "-->" is a 'normal' operator
 _list		::= "\[" commaSepExpr "\]"
  -- expression not contains spaces (or containing spaces in () )
- simpleExpr	::= call | nat | float | tuple | set | list | "\(" expr "\)" | op
+ simpleExpr	::= call | nat | float | tuple | set | list | "\(" expr "\)" | op | "\n\t" expr
  expr		::= simpleExpr+
 

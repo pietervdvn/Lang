@@ -7,5 +7,7 @@ desc		"The syntaxis of the Languate programming language"
 import Functions
 import Comments
 import Expressions
+import TypeDefs
 
 lang	::= (function nl+) + 
+

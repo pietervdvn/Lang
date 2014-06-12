@@ -32,8 +32,10 @@ _dict		::= "\{" commaSepTypes "-->" commaSepTypes "\}"
 
 _tuple		::= "\(" type ("," type)+ "\)"
 
-_baseType	::= dict | set | list | tuple | simpleType
+-- type without space (or withing a delimiter)
+baseType	::= dict | set | list | tuple | simpleType
+appliedType	::= (globalIdent localIdent+) | baseType
 
-_curry		::= baseType ("->" baseType)+
+_curry		::= appliedType ("->" appliedType)+
 
-type		::= curry | baseType
+type		::= curry | appliedType

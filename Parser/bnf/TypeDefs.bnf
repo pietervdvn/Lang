@@ -4,13 +4,19 @@ author		"Pieter Vander Vennet"
 date		[2013, 12, 23, 01, 18, 42]
 desc		"The syntaxis of all kind of TypeDefinitions: 
 		
-		data Data a 	= A a | B Int
+		data
+		====
 
+		data Data a 	= A a | B Int
+		--or
+		data Record	= Record String Int Bool
+				| Exception String LineNr
 		-- want named fields?
 
-		data Record	= A i : Int | B b : Bool 
-		data Record	= {i : Int, b : Bool }		-- no constructor needed for one, is Record
+		data Record	= A i : Int 
+				| B b : Bool, i : Int, path name : Name 
 		
+
 		record syntax also creates functions to set and modify: (e.g. for the last one:)
 
 		seti	: Record -> Int -> Record
@@ -18,7 +24,19 @@ desc		"The syntaxis of all kind of TypeDefinitions:
 
 		e.g. 'record.modi (+1)' or (.modi (+1) )
 
+		To make a constructor private, add a _ before the constructor
+
+		-- docstring for record
+		data Record	= _A i : Int	-- docstring for record a
+				| B b : Bool	-- docstring for record b
+		(A is private, B is public)
+
+
+		Type synonyms and subtypes
+		==========================
+
 		type Name	= String	-- real synonym, strings can be used as Name
+		type Mappable a	= Functor a
 		
 		subtype CanonicalPath	= FilePath
 
@@ -29,10 +47,28 @@ desc		"The syntaxis of all kind of TypeDefinitions:
 		
 		subtype _CanonicalPath	= FilePath
 
-		This does not make the type private. As soon as there is one function exported with the given type, the type is public too.
-	
+
+		Are types public?
+		================		
+
+		As soon as a single function is public, all of the types of it's arguments are public too.
 		"
 
 import Prelude
+import Types
+import Comments
+
+
+_optNamed	::= (localIdent+ ":")? type
+_named		::= (localIdent+ ":") type
+_namedSum	::= named ("," optNamed)*	-- first item is obligated named, to disambituate the parser; the first compromise
+_constructor	::= globalIdent
+_sum		::= "_"? constructor (namedSum | baseType+)? 
+ data		::= "data" globalIdent localIdent* "=" sum (comment? "\n\t"? "\|" sum)* (comment "\n")?
+
+ synonym	::= "type" globalIdent localIdent* "=" type
+
+ subtype	::= "subtype" "_"? globalIdent localIdent* "=" type
+
 
 
