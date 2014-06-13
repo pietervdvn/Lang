@@ -1,0 +1,19 @@
+Readme
+------
+
+This project contains the basic data types that each program will use, and serves as example project for the languate compiler.
+
+Note that this document is a languate code file. The built-in MD is converted to html.
+
+Implemented datatypes
+=====================
+
+Data implements the following modules:
+----
+
+import Data.Bool
+
+
+
+> ! True = False
+> (Nat) True	= 1
