@@ -1,4 +1,4 @@
-module Bnf (World, parse, load, toFQN, simplify) where
+module Bnf (World, parse, load, toFQN, simplify, simpleConvert) where
 
 import System.FilePath
 import Bnf.BNF
@@ -7,6 +7,7 @@ import Bnf.Loader.Convertor
 import Bnf.PtGen
 import Bnf.FQN
 import Bnf.ParseTree
+import Bnf.Converter (simpleConvert)
 {--
 This module reexports all needed stuff! 
 You'll want to import Bnf.Converter and .ParseTree too!

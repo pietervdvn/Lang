@@ -6,6 +6,10 @@ import Normalizable
 import Data.Maybe
 import Bnf.ParseTree
 
+import Def.Pt2Prelude
+import Control.Monad.Writer
+
+import System.IO.Unsafe
 {--
 
 This module loads and compiles the bnf's to test them 
@@ -14,20 +18,19 @@ This module loads and compiles the bnf's to test them
 
 pt		:: String -> String -> IO ParseTree
 pt rule str	=  do	world	<- load "bnf/Languate"
-			print $ length $ show world	-- force evaluation, as to show exceptions
 			let pt'	= fromJust $ parse world (toFQN ["Languate"]) rule $ str++"\n"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
 			return $ normalize pt
 
-t rule str	=  pt rule str >>= print . simplify
+-- ts rule str	=  pt rule str >>= print . simplify
 
-tr rule str	= pt rule str >>= print
+-- tr rule str	= pt rule str >>= print
 
-
+{-
 tf		:: FilePath -> IO ()
 tf fp		=  do	str 	<- readFile fp
-			t "lang" str
+			ts "lang" str --}
 
-main	= t "lang" "123"
+ts rule str	= parseString (unsafePerformIO $ pt rule str)

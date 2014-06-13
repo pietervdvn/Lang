@@ -1,4 +1,4 @@
-module Parser.Def.Def where
+module Def.Def where
 
 {--
 
@@ -13,8 +13,8 @@ The structures here include comments (except those withing expressions); the dat
 --}
 
 
-
-
-
+type Comment	= String
+-- a comment just before any declaration, (thus with no newlines in between)
+type DocString	= Comment
 
 

@@ -238,9 +238,9 @@ Use it to simplify the node.
 
 Now we now these two functions, we can convert the parsetree with them:
 	
-	simpleConverter (const $ const Nothing) s t
+	simpleConvert (const $ const Nothing) s t
 
-````simpleConverter```` is a function that takes a parsetree and emits an AST (together with a bunch of errors/warnings, if there are any), by traversing the pt.
+````simpleConvert```` is a function that takes a parsetree and emits an AST (together with a bunch of errors/warnings, if there are any), by traversing the pt.
 
 
 The AST is not the data structure that is used for the rest of the compiler pipeline. To represent an expression, we use the following data structure:
@@ -259,7 +259,7 @@ To convert the AST into the Expr, we'll define a simple recursive function:
 Now we can parse an expression!
 
 	parseExpr	:: ParseTree -> Writer Errors Expression
-	parseExpr pt 	=  do	parsed	<- simpleConverter h t s pt
+	parseExpr pt 	=  do	parsed	<- simpleConvert h t s pt
 				let conved	= conv parsed
 				-- eventually, we can check certain properties here and issue a warning/error with tell. See Control.Monad.Writer docs
 				return conved

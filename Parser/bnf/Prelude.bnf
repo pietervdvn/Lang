@@ -14,8 +14,11 @@ _binary		::= "0b[01]('?[01])*"
 _decimal	::=  "[0..9]('?[0..9])*"
 nat		::= hex | binary | decimal
 -- no need for int, this is an operator (minus) followed by a nat
-float		::= "[0..9]('?[0..9])*\.[0..9]('?[0..9])+"
+float		::= "[0..9]('?[0..9])*\.[0..9]('?[0..9])*"
 
 
-char		::= "'!['\\]'" | "'\\[ntr'\\]'" | "'\\[0..9]+'" 
+_normalChar	::= "'!['\\]'"
+_escapedChar	::= "'\\[ntr'\\]'"
+_numericChar	::= "'\\" nat "'"
+char		::= normalChar | escapedChar | numericChar 
 string		::= "\"(\\[\\\"]|![\\\"])*\""
