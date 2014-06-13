@@ -7,17 +7,23 @@ desc		"The syntaxis of an expression in Languate"
 public import Prelude
 import Comments
 
+import Types
+
 _call		::= localIdent | globalIdent
 
  -- TODO add "==" and "-" as op
- op		::= "(!['=(,)_\t\n\"a..zA..Z0..9\[\]{}- ])(![(,)\t\n\"a..zA..Z0..9 ])*" -- | "==" | "-"
+ op		::= "(!['=~(,)_\t\n\"a..zA..Z0..9\[\]{}- ])(![(,)\t\n\"a..zA..Z0..9 ])*" | "\{\}" | "\[\]" | "\(\)" -- | "==" | "-"
 
-
-_tuple		::= "\(" expr ("," expr)+ "\)"	-- has to contain a ","
+_commaSepExprP	::= expr ("," expr)+
+_tuple		::= "\(" commaSepExprP "\)"	-- has to contain a ","
 _commaSepExpr	::= expr ("," expr)*		-- can be a single expression too
-_set		::= "\{" commaSepExpr "\}"	-- dubbles as map, "-->" is a 'normal' operator
+_set		::= "\{" commaSepExpr "\}"	
 _list		::= "\[" commaSepExpr "\]"
+
+_arrowTuple	::= expr "-->" expr
+_dictCont	::= arrowTuple ("," arrowTuple)*
+_dict		::= "\{" dictCont "\}"
  -- expression not contains spaces (or containing spaces in () )
- simpleExpr	::= char | string | call | nat | float | tuple | set | list | "\(" expr "\)" | op
+ simpleExpr	::= char | string | float | nat | tuple | dict | set | list | "\(" expr "\)" | "~" type | "~~" | call | op
  expr		::= simpleExpr+
 

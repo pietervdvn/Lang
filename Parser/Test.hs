@@ -6,7 +6,8 @@ import Normalizable
 import Data.Maybe
 import Bnf.ParseTree
 
-import Def.Pt2Prelude
+import Def.Pt2Type
+import Def.Pt2Expr
 import Control.Monad.Writer
 
 import System.IO.Unsafe
@@ -22,7 +23,7 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
-			return $ normalize pt
+			return pt
 
 -- ts rule str	=  pt rule str >>= print . simplify
 
@@ -33,4 +34,4 @@ tf		:: FilePath -> IO ()
 tf fp		=  do	str 	<- readFile fp
 			ts "lang" str --}
 
-ts rule str	= parseString (unsafePerformIO $ pt rule str)
+ts str	= fst $ runWriter $ pt2type (unsafePerformIO $ pt "type" str)

@@ -58,8 +58,8 @@ t	:: Name -> String -> AST
 t "rangeUnitChar" "\\t"	= RangeChar '\t'
 t "rangeUnitChar" "\\n"	= RangeChar '\n'
 t "rangeUnitChar" "\\f"	= RangeChar '\f'
-t "rangeUnitChar" "\\\""
-			= RangeChar '"'
+t "rangeUnitChar" ('\\':c:cs)
+			= RangeChar c
 t "rangeUnitChar" str	= RangeChar $ head str
 
 t "normalChar" ('\\':[c])

@@ -1,4 +1,4 @@
-module Def.Pt2Prelude where
+module Def.Pt2Prelude (parseString, parseChar, parseNat, parseFloat) where
 {- Converts prelude things to parsed things -}
 
 import StdDef
