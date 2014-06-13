@@ -7,6 +7,7 @@ import Bnf.Converter hiding (convert)
 import Control.Monad.Writer
 
 import Def.Pt2Prelude
+import Def.Pt2Type
 import qualified Def.Def as Def
 import Def.Def hiding (Seq, Flt, Nat, Chr, List, Tuple)
 
@@ -37,8 +38,8 @@ convert (Tuple asts)
 		= Def.Tuple $ map convert asts
 convert (Seq asts)
 		= Def.Seq $ map convert asts
+convert (Cst t)	= Cast t
 convert AutoCst	= AutoCast
--- TODO cast
 convert ast	= error $ "Convert fallthrough! "++show ast
 
 desugareString	:: String -> Expression
@@ -69,7 +70,7 @@ data AST	= FC String	-- A Function Call to a constructor (globalIdent), function
 		| Seq 	[AST]
 		| AutoCst
 		| Cst Type
-		| CstT
+		| CstT	-- open cast, ~(
 	deriving (Show)
 
 
@@ -78,6 +79,7 @@ h "char"	=  hook $ Chr . parseChar
 h "string"	=  hook $ Str . parseString
 h "nat"		=  hook $ Nat . parseNat
 h "float"	=  hook $ Flt . parseFloat
+h "type" 	=  \pt -> Just $ pt2type pt >>= return . Cst
 h _		=  const Nothing
 
 hook		:: (ParseTree -> AST) -> ParseTree -> Maybe (Writer Errors AST)
@@ -95,7 +97,7 @@ t _ "["			= ListO
 t _ "]"			= ListC
 t _ ","			= Comma
 t _ "~~"		= AutoCst
-t _ "~"			= CstT
+t _ "~("		= CstT
 t _ "-->"		= DictArrow
 t nm cont	=  error $ "Pt2Expr: Token fallthrough for rule '"++nm++"' with content '"++cont++"'"
 
@@ -134,9 +136,10 @@ s "tuple" [ParO, exprs, ParC]
 		= Tuple $ unpack exprs
 s "simpleExpr" [ParO, expr, ParC]
 		= expr
+s "simpleExpr" [CstT, Cst typ, ParC]
+		= Cst typ
 s "expr" [exp]	= exp
 s "expr" exprs	= Seq exprs
--- TODO cast
 s _ [expr]  = expr
 s nm exprs	= error $ "Pt2Expr: Sequence fallthrough for rule '"++nm++"' with content "++show exprs
 

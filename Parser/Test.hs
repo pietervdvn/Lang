@@ -34,4 +34,4 @@ tf		:: FilePath -> IO ()
 tf fp		=  do	str 	<- readFile fp
 			ts "lang" str --}
 
-ts str	= fst $ runWriter $ pt2type (unsafePerformIO $ pt "type" str)
+ts str	= fst $ runWriter $ pt2expr (unsafePerformIO $ pt "expr" str)

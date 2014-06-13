@@ -24,6 +24,6 @@ _arrowTuple	::= expr "-->" expr
 _dictCont	::= arrowTuple ("," arrowTuple)*
 _dict		::= "\{" dictCont "\}"
  -- expression not contains spaces (or containing spaces in () )
- simpleExpr	::= char | string | float | nat | tuple | dict | set | list | "\(" expr "\)" | "~" type | "~~" | call | op
+ simpleExpr	::= char | string | float | nat | tuple | dict | set | list | "\(" expr "\)" | "~\(" type "\)" | "~~" | call | op
  expr		::= simpleExpr+
 
