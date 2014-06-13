@@ -192,10 +192,8 @@ Loading from IO
 Loading from file is possible with ````load "file"````, with ````import Bnf````. This will give you a world object. This function will print a number, this is to deep evaluate the data and cause an exception if some things are incorrect.
 
 
-So, what are these functions?
------------------------------
-
-### Parsing a simple language
+Parsing a simple language
+------------------------
 
 e.g. You have a straight-line language that consist of assign and print statements (which both work on expressions)
 
@@ -209,9 +207,10 @@ You'll have a bnf that describes expressions, and one that describes a statement
     expr	::= int ("+" expr)? | localIdent
     statement	::= "print" expr+ | localIdent ":=" expr
 
-### Parsing expressions
+Lets parse this!
 
-#### Simple expression
+Simple expressions
+-------------------
 
 To parse a simple expression, you define an AST. This AST is an intermediate representation. The idea is that we simplify it constantly as much as possible.
 
@@ -229,7 +228,8 @@ We do this with two functions: ````t```` (tokenize) converts single tokens of th
 	t "localIdent" name
 			= Ident name
 
-The other important function is ````s```` (simplify/sequence). It is called on each node. 
+The other important function is ````s```` (simplify/sequence). It is called on each node, with the rulename that created the node and what is in that Pt.
+Use it to simplify the node.
 
 	s 		:: Name -> [AST] -> AST
 	s "expr" [expr1, PlusE expr2]
@@ -264,7 +264,8 @@ Now we can parse an expression!
 				-- eventually, we can check certain properties here and issue a warning/error with tell. See Control.Monad.Writer docs
 				return conved
 
-### Parsing statements
+Parsing statements, using hooks
+-------------------------------
 
 We'll define the statement AST as following:
 	
@@ -314,7 +315,8 @@ To actually parse, we can use
 	parseStmt pt	=  do	parsed	<- simpleConver h s t pt
 				return $ conv parsed
 
-### Putting it together
+Putting it together
+-------------------
 
 Note that all warnings and errors given by the expression parser, will be included when this monad is ran.
 To run, use:
@@ -325,5 +327,6 @@ parseLanguage str
 		= let parseTree 	= parse world fqn "statement" str in	-- parses the string with the bnfs in world
 			runWriter $ parseStmt parseTree
 
-Erros is a list of type [Either Warning Error]. Both Warning and Error are tuples that contain all the ruleinfo (parsed according to what rule), position info in string (line + col number) and a textual message of what was expected.
+Errors is a list of type [Either Warning Error]. Both Warning and Error are tuples that contain all the ruleinfo (parsed according to what rule), position info in string (line + col number) and a textual message of what was expected.
+
 
