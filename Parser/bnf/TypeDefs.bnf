@@ -48,6 +48,38 @@ desc		"The syntaxis of all kind of TypeDefinitions:
 		subtype _CanonicalPath	= FilePath
 
 
+		Classes
+		=======
+
+		A typeclass declares a number of functions (without the implementation). When a certain type has all these functions, it is (automatically) part of this typeclass.
+		E.g.
+
+		class Show s where
+			show	: s -> String
+
+
+		Bool implements show, there is *no* need to make it explicit:
+
+		show : Bool -> String
+		True	= "True"
+		False	= "False"
+
+
+		Default methods can be written as
+
+		print	:: Show -> IO ()
+		s	=  putStrLn $ show s
+
+
+		One can define laws with the class. If the laws are not fullfilled, the type is NOT part of the class.
+
+		class Monad m a where
+			~ neutral element: return a >>= f 	= f a
+			~ neutral element: m >>= return 	= m
+			return 	:: a -> m a
+			(>>=)	:: m a -> (a -> m b) -> m b
+
+
 		Are types public?
 		================		
 

@@ -16,11 +16,10 @@ public import Patterns
 _$lawname		::= "[a..zA..Z0..9]"+	
 _lawDeclaration	::= localIdent ("," localIdent)* (":" type)?
 _lawDeclarations	::= lawDeclaration ("," lawDeclaration)*
-law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "===" expr
+law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "=" expr
 
 -- examples are like laws, but simpler. They serve the purpose of showing the reader what a function does
-example		::= ">" expr "===" expr
-
+example		::= ">" expr "=" expr
 
 declaration	::= (localIdent | "\(" op "\)" ) ":" type?
 

@@ -12,5 +12,5 @@ import Imports
 
 
 statement	::= function | nls data | nls synonym | nls subtype
-lang	::= globalIdent "\n" nlcomment (nls? import)* statement+ nls
+lang	::= globalIdent "\n" nlcomment (nls? import)* statement+ (example nl)* nls
 
