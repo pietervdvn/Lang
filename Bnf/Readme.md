@@ -189,8 +189,8 @@ The actual parsing
 Loading from IO
 ---------------
 
-First, we'll need to load these bnfmodules. I'm still implementing that, so hang on.
-TODO
+Loading from file is possible with ````load "file"````, with ````import Bnf````. This will give you a world object. This function will print a number, this is to deep evaluate the data and cause an exception if some things are incorrect.
+
 
 So, what are these functions?
 -----------------------------
@@ -211,8 +211,11 @@ You'll have a bnf that describes expressions, and one that describes a statement
 
 ### Parsing expressions
 
-Hooks can be usefull to keep ASTs modular.
-You'll probably have some converter to convert an parsetree into an expression (which an intermediate AST-step):
+#### Simple expression
+
+To parse a simple expression, you define an AST. This AST is an intermediate representation. The idea is that we simplify it constantly as much as possible.
+
+We do this with two functions: ````t```` (tokenize) converts single tokens of the pt into a token (which is AST too).
 
 	data AST 	= Value Int
 			| Ident name
@@ -220,25 +223,24 @@ You'll probably have some converter to convert an parsetree into an expression (
 			| PlusE AST
 			| PlusT
 
-	h		:: Name -> ParseTree -> Maybe (Writer Errors AST)
-	h _ _		=  Nothing -- no hooks for this converter
-	
 	t 		:: Name -> String -> AST
 	t _ "*"		=  PlusT
 	t "int" i	= Value $ read i	-- read is a builtin function that parses int
 	t "localIdent" name
 			= Ident name
 
+The other important function is ````s```` (simplify/sequence). It is called on each node. 
+
 	s 		:: Name -> [AST] -> AST
 	s "expr" [expr1, PlusE expr2]
 			= Plus expr1 expr2
 	s _ [expr]	= expr
 
-Now we now these three functions, we can convert the parsetree with:
+Now we now these two functions, we can convert the parsetree with them:
 	
-	simpleConverter h s t
+	simpleConverter (const $ const Nothing) s t
 
-which is a function that takes a parsetree and emits an AST (together with a bunch of errors/warnings, if there are any)
+````simpleConverter```` is a function that takes a parsetree and emits an AST (together with a bunch of errors/warnings, if there are any), by traversing the pt.
 
 
 The AST is not the data structure that is used for the rest of the compiler pipeline. To represent an expression, we use the following data structure:

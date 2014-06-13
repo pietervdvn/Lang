@@ -16,7 +16,9 @@ load	:: FilePath -> IO World
 load fp	= do	let name 	= takeBaseName fp
 		let wdir	= init $ dropFileName fp
 		modules	<- L.load (FQN [] name) wdir
-		return $ convert modules
+		let world = convert modules
+		print $ length $ show world
+		return world
 
 toFQN	:: [String] -> FQN
 toFQN path
