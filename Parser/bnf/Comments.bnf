@@ -11,9 +11,9 @@ nlcomment	::= "\n"* (mlcomment | comment) "\n"+
 
 nl		::= (mlcomment | comment) ? "\n"
 nls		::= nl+
+nltab		::=  (mlcomment | comment) ? "\n\t"
 
-
-$comment		::= "--" "!\n"*
-$mlcommentWord	::= ("!-"+|"--!-"|"-!-")
-mlcomment	::= "---" mlcommentWord* "---+"
+$comment		::= "--" "!\n*"
+$mlcommentCont	::= "((!-+)|((--!-)|(-!-)))"*
+mlcomment	::= "---+" mlcommentCont "---+"
 

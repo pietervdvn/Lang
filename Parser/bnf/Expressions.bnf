@@ -5,6 +5,7 @@ date		[2014, 6, 08, 19, 37, 42]
 desc		"The syntaxis of an expression in Languate"
 
 public import Prelude
+import Comments
 
 _call		::= localIdent | globalIdent
 
@@ -17,6 +18,6 @@ _commaSepExpr	::= expr ("," expr)*		-- can be a single expression too
 _set		::= "\{" commaSepExpr "\}"	-- dubbles as map, "-->" is a 'normal' operator
 _list		::= "\[" commaSepExpr "\]"
  -- expression not contains spaces (or containing spaces in () )
- simpleExpr	::= char | string | call | nat | float | tuple | set | list | "\(" expr "\)" | op | "\n\t" expr
+ simpleExpr	::= char | string | call | nat | float | tuple | set | list | "\(" expr "\)" | op
  expr		::= simpleExpr+
 

@@ -11,6 +11,6 @@ import TypeDefs
 import Imports
 
 
-statement	::= function | nls data | nls synonym | nls subtype
-lang	::= globalIdent "\n" nlcomment (nls? import)* statement+ (example nl)* nls
+statement	::= function | nls? data | nls? synonym | nls? subtype | nls? class
+lang	::= globalIdent "\n" nlcomment (nls? import)* statement* (example nl)* nls? 
 

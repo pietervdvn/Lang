@@ -1,0 +1,32 @@
+Misc
+----
+
+Some miscallaneous, general functions, such as id and const.
+
+----
+
+import Bool
+
+-- The identity function, returns it's argument
+> id 42		= 42
+~ id: a => id a 	= a
+> neutral: id id 	= id
+id	: a -> a
+a	= a
+
+
+-- The const function, returns it first argument (and ignores the second)
+> const 42 "String"	= 42
+const	: a -> b -> a
+a _	= a
+
+-- Conditional choice
+if		: Bool -> a -> a -> a
+if True  a _	= a
+if False _ b	= b 
+
+-- Flips the arguments of the given function
+> flip const 42 "String"	= "String"
+~ double flip: f => flip $ flip f = f
+flip	: (a -> b -> c) -> b -> a -> c
+f b a	= f a b
