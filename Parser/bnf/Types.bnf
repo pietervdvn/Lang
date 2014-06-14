@@ -14,6 +14,7 @@ desc		"The syntaxis of types in Languate.
 		()		-- void type
 		(a -> b) -> c	-- a function which takes a function
 		{a,b -> c}	=== { a, (b -> c) }
+		Int?		=== Maybe Int
 		"
 
 public import Prelude
@@ -33,7 +34,7 @@ _dict		::= "\{" commaSepTypes "-->" commaSepTypes "\}"
 _tuple		::= "\(" type ("," type)+ "\)"
 
 -- type without space (or withing a delimiter)
-baseType	::= dict | set | list | tuple | simpleType
+baseType	::= (dict | set | list | tuple | simpleType) "\?"?
 appliedType	::= ((globalIdent | localIdent) baseType+) | baseType
 
 _curry		::= appliedType ("->" appliedType)+

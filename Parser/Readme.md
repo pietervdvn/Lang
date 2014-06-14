@@ -77,7 +77,7 @@ Doubletilde is an operator which tries to infer the wanted type, and converts to
 Builtin Types
 -------------
 
-There are some builtin types that should not be overwritten
+There are some builtin types that should not be overwritten, as they have syntactic sugar.
 
 - Void
 - Nat
@@ -88,4 +88,5 @@ There are some builtin types that should not be overwritten
 - Set
 - Tuple
 - String
+- Maybe
 

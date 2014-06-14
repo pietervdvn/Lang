@@ -11,7 +11,9 @@ import Def.Pt2Expr
 import Control.Monad.Writer
 
 import System.IO.Unsafe
+import StdDef
 {--
+
 
 This module loads and compiles the bnf's to test them 
 
@@ -33,4 +35,6 @@ tf		:: FilePath -> IO ()
 tf fp		=  do	str 	<- readFile fp
 			pt "lang" str >>= print . simplify
 
-ts str	= fst $ runWriter $ pt2expr (unsafePerformIO $ pt "expr" str)
+gts			:: (ParseTree -> Writer x a) -> Name -> String -> a
+gts convertor rule str	= fst $ runWriter $ convertor (unsafePerformIO $ pt rule str)
+

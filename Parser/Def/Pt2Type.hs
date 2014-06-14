@@ -22,6 +22,7 @@ data AST	= KnownType String
 		| ParO	| ParC
 		| Comma	| CommaSepTypes [AST]
 		| Arrow	| MultiType [AST]
+		| MaybeT
 		| Currow	-- Curry arrow
 	deriving (Show)
 
@@ -44,8 +45,8 @@ h		:: StdDef.Name -> ParseTree -> Maybe (Writer Errors AST)
 h _		=  const Nothing
 
 t		:: Name -> String -> AST
-t "globalIdent" s	= KnownType s
-t "localIdent" s	= FreeType s
+t "knownType" s	= KnownType s
+t "freeType" s	= FreeType s
 t "void"  _	= KnownType "Void"
 t "infer" _	= Unknown
 t _ "("		= ParO
@@ -57,6 +58,7 @@ t _ "}"		= ParC
 t _ ","		= Comma
 t _ "-->"	= Arrow
 t _ "->"	= Currow
+t _ "?"		= MaybeT
 t nm cont	= error $ "Pt2Type: Token fallthrough for rule '"++nm++"' with content '"++cont++"'"
 
 
@@ -94,6 +96,8 @@ s "curry" [Currow, typ]
 s "curry" [typ, MultiType typs]
 		= CurryType $ typ:typs
 s "curry" typs	= MultiType typs
+s "baseType" [ast, MaybeT]
+		= AppliedType (KnownType "Maybe") [ast]
 s _ [ast]  	= ast
 s nm ast	= error $ "Pt2Type: Sequence fallthrough for rule '"++nm++"' with content "++show ast
 
