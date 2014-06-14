@@ -41,4 +41,4 @@ bar		= Seq [Opt $ Call "comment", rgx "(\n\t)?", rgx "\\|"]
 dquote		= rgx "\""
 _dquote		= Call "dquote"
 rgx 		= Rgx . regex
-wsrgx		= NWs . rgx
+wsrgx		= NWs . rgx	
