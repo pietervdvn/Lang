@@ -7,6 +7,7 @@ import Bnf.ParseTree
 
 import Def.Pt2Type
 import Def.Pt2Expr
+import Def.Pt2Comment
 import Control.Monad.Writer
 
 import System.IO.Unsafe

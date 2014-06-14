@@ -10,6 +10,7 @@ import Expressions
 import TypeDefs
 import Imports
 
+a	::= "b"
 
 statement	::= function | nls? data | nls? synonym | nls? subtype | nls? class
 

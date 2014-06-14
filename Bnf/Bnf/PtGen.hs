@@ -142,9 +142,7 @@ p (NWs expr)	= do	(_,mode)	<- get
 -- parses whitespace if eatWS is activi
 pWs		:: St ()
 pWs		=  do	(_,mode)	<- get
-			when (mode == EatWS) $ void $ lft $ longest $ match ws
-			where void a	= return ()
-
+			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())
 
 _seq		:: [ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo

@@ -3,6 +3,7 @@ module Bnf.Meta.Parser (parse) where
 import Control.Monad.Writer
 import Data.Map hiding (map)
 import Bnf.PtGen (parseFull, lastParsePos)
+import qualified Bnf.PtGen as PtGen
 import Bnf.Meta.BnfRegex
 import Bnf.Meta.BnfModule
 import Bnf.Meta.BnfExpr
@@ -34,3 +35,8 @@ calcErrPos	:: String -> (Int, Int, Int)
 calcErrPos	=  lastParsePos world fqnMod "module"
 
 world	= fromList [(fqnMod, modMod),(fqnBnf, bnfMod),(fqnRegex, regexMod)]
+
+
+test	:: String -> String -> Maybe (Either PtGen.Exception ParseTree)
+test rule str
+	= PtGen.parse world fqnMod rule str

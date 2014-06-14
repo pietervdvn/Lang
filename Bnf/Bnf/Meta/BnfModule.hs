@@ -43,7 +43,7 @@ listContent	= Star $ Seq [Choice [Call "string", Call "int"], Opt $ Call "comma"
 
 -- the [a..z]* after import is to make sure people use whitespace (localIdent will fail)
 imports		= Star $ Seq [Call "import", Call "nl"]
-imprt		= Seq [ Opt $ rgx "public", rgx "import[a..z]*", Call "moduleName", Opt $ Call "hider"]
+imprt		= Seq [ Opt $ rgx "public", rgx "import", Call "moduleName", Opt $ Call "hider"]
 moduleName	= Choice [ Seq [ Call "packName", rgx "\\.", Call "moduleName"],  Call "globalIdent" ]
 hider		= Seq [ Choice [ rgx "hiding", rgx "showing"], rgx "\\{", More $ Seq [Call "localIdent", Opt $ Call "comma"], rgx "\\}" ]
 globalIdent	= rgx "[A..Z][a..zA..Z0..9]*"
