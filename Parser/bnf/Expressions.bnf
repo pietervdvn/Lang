@@ -12,9 +12,8 @@ import Types
 _call		::= localIdent | globalIdent
 
  -- TODO add "==" and "-" as op
- op		::= %( "(!['~(,)_\t\n\"a..zA..Z0..9\[\]{} ])"   "(![(,)\t\n\"a..zA..Z0..9 ])*" ) & ! "--"
+ op		::= %( "(!['~(,)_\t\n\"a..zA..Z0..9\[\]{} ])"   "(![(,)\t\n\"a..zA..Z0..9 ])*" & ! "--")
 		| "\{\}" | "\[\]" | "\(\)"
-		| "-"
 
 _commaSepExprP	::= expr ("," expr)+
 _tuple		::= "\(" commaSepExprP "\)"	-- has to contain a ","
