@@ -1,0 +1,8 @@
+AndTest
+
+author		"Pieter Vander Vennet"
+date		[2014, 06, 14, 20, 21, 42]
+desc		"Test of and syntaxis "
+
+
+not	::= "[a..z]" & !"a"
