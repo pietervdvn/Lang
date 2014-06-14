@@ -1,4 +1,4 @@
-module Bnf.BNF (Module (Module), World, Expression (Rgx, WsRgx, Token, Call, Opt, Star, Choice, More, Seq, Set, And), tokenize, isEmpty, ws) where
+module Bnf.BNF (Module (Module), World, Expression (Rgx, NWs, Token, Call, Opt, Star, Choice, More, Seq, Set, And), tokenize, isEmpty, ws) where
 
 import Bnf.FQN
 import Data.Map hiding (map, filter, foldr)
@@ -20,7 +20,7 @@ type World	= Map FQN Module
 ws		= regex "[ \t]*"
 
 data Expression	= Rgx Regex	-- A simple regex which is parsed and given as token (with name that of the current rule)
-		| WsRgx Regex	-- a regex which parses the leading whitespace itself
+		| NWs Expression	-- Indication that no ws should be parsed in the following expression
 		| Token Expression	-- The rule is tokenized (with name the current rule)
 		| Call Name	-- call another rule
 		| Opt Expression	-- rule is optional
@@ -51,7 +51,7 @@ expand str
 						-- If a rule is reversed (false in the snd), then this rule should *not* be parsed to add the first rule to the PT
 s	:: Expression -> String
 s (Rgx regex)	= " \""++(show regex)++"\""
-s (WsRgx regex)	= s (Rgx regex)
+s (NWs expr)	= " %(" ++(show expr) ++ ")"
 s (Token expression)	= " $("++s expression++")"
 s (Call name)	= " "++name
 s (Choice exprs)= " (" ++ sOrred exprs ++" )"
@@ -65,20 +65,9 @@ s (Set exprs)	= " {"++ sOrred exprs ++ " }"
 sOrred	:: [Expression] -> String
 sOrred exprs = foldr (\e acc -> s e ++ " |" ++ acc) (s $ last exprs) (init $ exprs)
 
--- converts an expression to a token by adding token, and by checking that, if the first chars of the first regex contain whitespace, using wsregex
+-- converts an expression to a token by adding token, and by checking that
 tokenize	:: Expression -> Expression
-tokenize(Rgx rgx)
-	| startsWithWS rgx	= WsRgx rgx
-	| otherwise		= Rgx rgx
-tokenize (Choice es)
-	= Choice $ map tokenize es
-tokenize (Opt e)	= Opt $ tokenize e
-tokenize (Star es)	= Star $ tokenize es
-tokenize (More es)	= More $ tokenize es
-tokenize (Seq es)	= Seq $ map tokenize es
-tokenize (Set es)	= Set $ map tokenize es
-tokenize (And e es)	= And (tokenize e) (map (first tokenize) es)
-tokenize e		= e
+tokenize	= Token
 
 
 
@@ -96,8 +85,11 @@ n (And r rb)	= case filter (not . isEmpty . fst) $ map (first n) rb of
 			[]	-> n r
 			rest	-> And (n r) rb 
 n (Token r)	= case n r of
-			(Token r)	-> r
-			r		-> r
+			r@(Token _)	-> r
+			r		-> Token r
+n (NWs e)	= case n e of
+			e@(NWs _)	-> e
+			e		-> NWs e
 n rule		= rule
 
 
@@ -116,21 +108,6 @@ isEmpty (Token t)	= isEmpty t
 isEmpty (Star t)	= isEmpty t
 isEmpty (More t)	= isEmpty t
 isEmpty (Opt t)		= isEmpty t
+isEmpty (NWs t)		= isEmpty t
 isEmpty _		= False
-{-
-$token	= "regex" -- whitespace sensitive IF the regex starts with ws
-parserule	= token | more tokens "anonToken" -- non whitespace sensitive (but newline sensitive)
-_localRule	= 
->initialRule	= 
 
-
-= rule* === rule rule+	-- rule is parsed as much as possible (optionaly none)
-= rule+
-= rule?
-= (ruleA ruleB) | ruleC
-=== rulea ruleB | ruleC
-= set {needed1 | needed2 } -- both 'set needed1'  and 'set needed2' are valid
-= rule1 & rule2 : rule 1 is parsed if rule 2 if parsed, but rule 2 is NOT integrated in rule2
-= rule1 & !(rule2) : rule 1 is parsed if rule 2 can not be parsed
-
--}

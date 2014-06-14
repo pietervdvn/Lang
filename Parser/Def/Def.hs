@@ -31,6 +31,8 @@ data Expression	= Nat Int
 	deriving (Show)
 
 
+data Pattern	= Assign
+
 data Type	= Normal String	-- A normal type, e.g. Bool
 		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
 		| Applied Type [Type]
@@ -38,3 +40,6 @@ data Type	= Normal String	-- A normal type, e.g. Bool
 		| TupleType [Type]
 		| Infer
 	deriving (Show)
+
+data Law	= Law Name Expression Expression
+		| Example Expression (Maybe Expression)

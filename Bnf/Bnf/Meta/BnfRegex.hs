@@ -56,5 +56,5 @@ __literal c	= '\\':[c]
 
 -- dot	::= "\."
 _dot		= Call "dot"
-rgx 	= WsRgx . regex
+rgx 		= NWs . Rgx . regex
 dot		= rgx "\\."

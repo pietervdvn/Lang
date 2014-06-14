@@ -4,6 +4,8 @@ import Prelude hiding (lookup)
 import Data.Maybe
 import Data.Map (Map, lookup, member, keys)
 import Control.Monad.Trans
+import Control.Monad
+import Control.Arrow
 
 import Bnf.BNF
 import Bnf.FQN
@@ -32,7 +34,9 @@ instance Show Exception where
 
 
 data Pr	a	= P (Parser Exception a)
-type St a	= StateT Context Pr a
+data Mode	= EatWS 	| LeaveWS
+	deriving (Eq)
+type St a	= StateT (Context, Mode) Pr a
 
 
 -- forces that the complete string be parsed. Errors if this was not the case
@@ -49,13 +53,16 @@ _isFull str pt	=  if getParseLength pt == length str then Right pt
 
 -- parses as much as possible
 parse	:: World -> FQN -> Name -> String -> Maybe (Either Exception ParseTree)
-parse world fqn name
+parse world fqn name str
 	| name == ""	=  error $ "You should not pass the empty string as a rulename"
-	| otherwise	=  fmap (fmap (normalize . fst)) . runPr (runstateT (p (Call name)) (goto fqn (world, error "No goto called. Should not happen", fqn, name)))
+	| otherwise	=  fmap (fmap (normalize . fst)) $ runPr (runstateT (p (Call name)) (_startState world fqn name)) str
 
 -- lastParsePos	:: World -> FQN -> Name -> String -> Pos
 lastParsePos world fqn name
-	= runPrPos $ runstateT (p (Call name)) (goto fqn (world, error "The fqn you gave is not defined", fqn, name))
+	= runPrPos $ runstateT (p (Call name)) $ _startState world fqn name
+
+_startState world fqn name	= (_startContext world fqn name, EatWS)
+_startContext world fqn name	= (goto fqn (world, error "The fqn you gave is not defined", fqn, name))
 
 instance Monad Pr where
 	return x	= P (return x)
@@ -81,26 +88,26 @@ p		:: Expression -> St ParseTree
 p (Call name)	=  do	Module local imported	<- getModule
 			if name `member` local then do
 				s <- get
-				modify $ gotoN name
+				modify $ first $ gotoN name
+				modify $ second $ const EatWS
 				pt	<- p (fromJust $ lookup name local)
 				put s
 				return pt
 			 else if name `member` imported then do
 				s <- get
 				let country	= fromJust $ lookup name imported
-				modify $ goto country	-- switch of context by going to the referenced module
+				modify $ first $ goto country	-- switch of context by going to the referenced module
 				pt 	<- p (Call name) 		-- call the method in it's local place
 				put s
 				return pt
-				else do	modify $ gotoN name
+				else do	modify $ first $ gotoN name
 					info	<- getInfo
 					lft $ throw $ RuleNotFound info name
 p (Token rule)	= do	inf	<- getInfo
 			tree	<- p rule
 			return $ T inf $ getContent tree
-p (Rgx regex)	= do	lft $ longest $ match ws
-			p (WsRgx regex)
-p (WsRgx regex)	= do	inf 	<- getInfo
+p (Rgx regex)	= do	pWs
+			inf 	<- getInfo
 			tk	<- lft $ longest $ match regex
 			return $ T inf tk
 p (Choice [])
@@ -125,6 +132,18 @@ p (And toP conditions)
 		= do	r	<- p toP
 			conds	<- mapM (isolate . pCond) conditions
 			if and conds then return r else lft abort
+p (NWs expr)	= do	(_,mode)	<- get
+			modify $ second $ const LeaveWS
+			pt		<- p expr
+			modify $ second $ const mode
+			return pt
+
+
+-- parses whitespace if eatWS is activi
+pWs		:: St ()
+pWs		=  do	(_,mode)	<- get
+			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())
+
 
 _seq		:: [ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo
@@ -167,7 +186,7 @@ pref a b	=  liftP ((>:) (unliftP a) (unliftP b))
 
 getInfo		:: St RuleInfo
 getInfo		=  do	coor	<- lft getCoor
-			(_,_, fqn, name)	<- get
+			((_,_, fqn, name),_)	<- get
 			return (fqn, name, coor)
 
 
@@ -177,7 +196,7 @@ getCoor		=  do	ind	<- index
 			return (ind, line, ind - col)	-- the minus is to compensate the behaviour of the newline counter
 
 getModule	:: St Module
-getModule	=  do	(_, m, _, _)	<- get
+getModule	=  do	((_, m, _, _),_)	<- get
 			return m
 
 
