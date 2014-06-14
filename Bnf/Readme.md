@@ -117,7 +117,7 @@ Choices can be put on the next line, but *need* a *tab* indentation:
 	stmt	= "print" expr*
 		| localIdent ":=" expr
 
-### Modifiers
+#### Modifiers
 
 Our good old friends, * + and ? are included.
 
@@ -125,6 +125,8 @@ Our good old friends, * + and ? are included.
 * With +, an expression is repeated as much as possible (but at least once)
 * With ?, an expression is optional (parsed if possible)
 * With % (prependend), the following expression is parsed without whitespace. This means that, ````%("a" "b")```` will equal ````"ab"````. Called rules still parse whitespace: ````a ::= "a" "b"; b ::= %("a" a)```` will parse ````aa b```` (but not ````a ab````)
+* With $ (prependend), the following expression will be summoned into a single Token in the parsetree
+
 
 There are also some other operators:
 

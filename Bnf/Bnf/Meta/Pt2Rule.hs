@@ -20,11 +20,11 @@ conv		:: RuleInfo -> AST -> Writer Errors IORule
 conv inf (Modded (Modifiers init priv token) ast)
 		= do	IORule name expr _ _ pos	<- conv inf ast
 			when (init && priv) $ tell [_initialNotPublWarn inf]
-			let expr'	= if token then normalize $ Token $ tokenize expr
+			let expr'	= if token then Token $ tokenize expr
 						else expr
-			return $ IORule name expr' (not priv) init pos
+			return $ IORule name (normalize expr') (not priv) init pos
 conv (_,_,(_,l,c)) (Rule name expr)
-		= return $ IORule name expr True False (l,c)
+		= return $ IORule name  (normalize expr) True False (l,c)
 
 _initialNotPublWarn inf
 		= Left (inf, "The initial rule "++ show (getName inf) ++" is not public")

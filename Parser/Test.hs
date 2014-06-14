@@ -29,9 +29,8 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 
 -- tr rule str	= pt rule str >>= print
 
-{-
 tf		:: FilePath -> IO ()
 tf fp		=  do	str 	<- readFile fp
-			ts "lang" str --}
+			pt "lang" str >>= print . simplify
 
 ts str	= fst $ runWriter $ pt2expr (unsafePerformIO $ pt "expr" str)

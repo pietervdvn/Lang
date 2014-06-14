@@ -29,6 +29,7 @@ conv (Plus ast)		= B.More $ conv ast
 conv (Quest ast)	= B.Opt $ conv ast
 conv (Star ast)		= B.Star $ conv ast
 conv (NoWS ast)		= B.NWs $ conv ast
+conv (Tokenize ast)	= B.Token $ conv ast
 conv ast		= error $ "Could not convert "++ show ast
 
 
@@ -38,11 +39,12 @@ data AST	= SubExpr AST
 		| SetItem AST
 		| Sequence [AST]
 		| NoWS AST
+		| Tokenize AST
 		| Rgx Regex
 		| Ident Name
 		| RuleCall Name
 		| Plus AST	| Quest AST	| Star AST
-		| PlusT	| QuestT| StarT	| NoWST
+		| PlusT	| QuestT| StarT	| NoWST	| TokenizeT
 		| ParO	| ParC
 		| AccO	| AccC
 		| DQuote
@@ -68,6 +70,7 @@ t _ "?"		= QuestT
 t _ "+"		= PlusT
 t _ "*"		= StarT
 t _ "%"		= NoWST
+t _ "$"		= TokenizeT
 t _ "\n\t"	= NewLine
 
 
@@ -86,8 +89,13 @@ s "expression" (Choice heads:tails)
 
 s "sequence" terms	= Sequence terms
 
+s "factor" [NoWST]	= NoWST
+s "factor" [TokenizeT]	= TokenizeT
+
 s "factor" (NoWST:terms)
 			= NoWS $ s "factor" terms
+s "factor" (TokenizeT:terms)
+			= Tokenize $ s "factor" terms
 s "factor" [term]	= term
 s "factor" [term, PlusT]
 			= Plus term
