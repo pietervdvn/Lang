@@ -129,8 +129,8 @@ p (Set rules)	= do	(head, rest)	<- pOne rules
 			S i tail	<- p (Set rest)
 			return $ S i (head:tail)
 p (And toP conditions)
-		= do	r	<- p toP
-			conds	<- mapM (isolate . pCond) conditions
+		= do	conds	<- mapM (isolate . pCond) conditions	-- apply conditions in an isoloated way *before* the side effects of parsing toP
+			r	<- p toP
 			if and conds then return r else lft abort
 p (NWs expr)	= do	(_,mode)	<- get
 			modify $ second $ const LeaveWS
@@ -161,13 +161,13 @@ pStar rule	=  do	head	<- p rule
 
 
 pCond		:: (Expression, Bool) -> St Bool
-pCond (rule, isPositive)
+pCond (rule, markedInvert)
 		=  do	parser		<- emulateT $ p rule	-- parser :: Pr (ParseTree, Context)
 			result		<- lft $ emulate $ unliftP parser
 			let outcome = getOutcome result
 			case outcome of
-				Res _	-> return isPositive
-				Nope	-> return $ not isPositive
+				Res _	-> return $ not $ markedInvert
+				Nope	-> return $ markedInvert
 				(Exc e)	-> lft $ throw e
 
 pOne		:: [Expression] -> St (ParseTree, [Expression])

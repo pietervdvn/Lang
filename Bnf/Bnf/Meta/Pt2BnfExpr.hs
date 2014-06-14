@@ -101,10 +101,9 @@ s "andExpr" [AndT, NotT, ast]
 			= AndTail [NotS ast]
 s "andExpr" [AndT, ast]	= ast
 s "andExpr" (AndTail init:asts)
-			= AndTail (init++asts)
+			= AndTail (init++ cleanAndTail asts)
 s "andExpr" [ast, AndTail tail]
 			= And ast tail
-
 
 
 s "sequence" terms	= Sequence terms
@@ -139,3 +138,10 @@ s _ [ast]	= ast
 s name ast	= error $ "Sequence fallthrough for "++name++ " with asts "++ show ast
 
 
+-- unpacks 'andtail', but only on the first level
+cleanAndTail	:: [AST] -> [AST]
+cleanAndTail []	=  []
+cleanAndTail (AndTail tail:asts)
+		= tail ++ cleanAndTail asts
+cleanAndTail (ast:asts)
+		= ast:cleanAndTail asts
