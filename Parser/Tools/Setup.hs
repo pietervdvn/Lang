@@ -9,3 +9,4 @@ This module setups the file structure for a languate project, in a given locatio
 
 init	:: FilePath -> IO ()
 init fp	=  do	print "Initializing project at "++show fp
+		print "This actually doesn't do anything yet"

@@ -1,7 +1,6 @@
 module Test where
 
 import Bnf
-import Data.Maybe
 import Normalizable
 import Data.Maybe
 import Bnf.ParseTree

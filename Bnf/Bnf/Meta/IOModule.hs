@@ -53,7 +53,7 @@ getRuleName (IORule name _ _ _ _)
 -- converts the IOrules into name --> Expression maps. 
 localRules	:: FQN -> [Name] -> IOModule -> Map Name Expression
 localRules fqn imps iom	
- 		=  let known = S.fromList $ (map (\(_, nm, _) -> nm) $ locallyDefined iom) ++ imps in
+ 		=  let known = S.fromList $ map (\(_, nm, _) -> nm) (locallyDefined iom) ++ imps in
 			fromList $ map (\(IORule name e _ _ _) -> (name, e)) $ getRules iom
 
 localExports	:: IOModule -> Set (FQN, Name)

@@ -40,8 +40,8 @@ sm	:: Module -> String
 sm (Module name2expr name2fqn)
 	= showImports name2fqn ++ "\n" ++ showRules name2expr
 
-showImports name2fqn	= concat $ map (\(name, fqn) -> "import "++show fqn++" showing {"++name++"}\n") $ toList $ name2fqn
-showRules name2expr 	= concat $ map (\(name, expr) -> " "++expand name++"\t::= "++show expr++"\n" ) $ toList $ name2expr
+showImports 	= concatMap (\(name, fqn) -> "import "++show fqn++" showing {"++name++"}\n") . toList
+showRules 	= concatMap (\(name, expr) -> ' ':expand name++"\t::= "++show expr++"\n" ) . toList
 
 expand	:: String -> String
 expand str
@@ -50,10 +50,10 @@ expand str
 
 						-- If a rule is reversed (false in the snd), then this rule should *not* be parsed to add the first rule to the PT
 s	:: Expression -> String
-s (Rgx regex)	= " \""++(show regex)++"\""
-s (NWs expr)	=  "%" ++(show expr)
+s (Rgx regex)	= " \""++ show regex ++"\""
+s (NWs expr)	= " %" ++ show expr
 s (Token expression)	= " $"++s expression
-s (Call name)	= " "++name
+s (Call name)	= ' ':name
 s (Choice exprs)= " (" ++ sOrred " |" exprs ++" )"
 s (Opt expr)	= s expr ++ "?"
 s (Star expr)	= s expr ++ "*"
@@ -61,16 +61,15 @@ s (More expr)	= s expr ++ "+"
 s (Seq exprs)	= " (" ++ foldr (\e acc -> s e ++ acc) "" exprs ++ " )"
 s (Set exprs)	= " {"++ sOrred " |" exprs ++ " }"
 s (And expr exprs)
-		= (s expr) ++ (sAnd " &" exprs)
+		= s expr ++ sAnd " &" exprs
 
 
 sAnd	:: String -> [(Expression, Bool)] -> String
-sAnd str exprs
-	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ str++ acc) "" exprs
+sAnd st	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ st ++ acc) "" exprs
 
 sOrred	:: String -> [Expression] -> String
 sOrred str exprs 
-	= foldr (\e acc -> s e ++ str ++ acc) (s $ last exprs) (init $ exprs)
+	= foldr (\e acc -> s e ++ str ++ acc) (s $ last exprs) (init exprs)
 
 -- converts an expression to a token by adding token, and by checking that
 tokenize	:: Expression -> Expression

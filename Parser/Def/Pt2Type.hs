@@ -107,7 +107,7 @@ pt2ast	=  simpleConvert h t s
 
 pt2type	:: ParseTree -> Writer Errors Type
 pt2type	pt
-	= do	ast <- simpleConvert h t s pt
+	= do	ast <- pt2ast pt
 		return $ convert ast
 
 unpack	:: AST -> [AST]

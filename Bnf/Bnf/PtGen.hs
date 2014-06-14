@@ -54,7 +54,7 @@ _isFull str pt	=  if getParseLength pt == length str then Right pt
 -- parses as much as possible
 parse	:: World -> FQN -> Name -> String -> Maybe (Either Exception ParseTree)
 parse world fqn name str
-	| name == ""	=  error $ "You should not pass the empty string as a rulename"
+	| name == ""	=  error "You should not pass the empty string as a rulename"
 	| otherwise	=  fmap (fmap (normalize . fst)) $ runPr (runstateT (p (Call name)) (_startState world fqn name)) str
 
 -- lastParsePos	:: World -> FQN -> Name -> String -> Pos
@@ -62,7 +62,7 @@ lastParsePos world fqn name
 	= runPrPos $ runstateT (p (Call name)) $ _startState world fqn name
 
 _startState world fqn name	= (_startContext world fqn name, EatWS)
-_startContext world fqn name	= (goto fqn (world, error "The fqn you gave is not defined", fqn, name))
+_startContext world fqn name	= goto fqn (world, error "The fqn you gave is not defined", fqn, name)
 
 instance Monad Pr where
 	return x	= P (return x)
@@ -142,7 +142,7 @@ p (NWs expr)	= do	(_,mode)	<- get
 -- parses whitespace if eatWS is activi
 pWs		:: St ()
 pWs		=  do	(_,mode)	<- get
-			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())
+			when (mode == EatWS) $ void $ lft $ longest $ match ws
 
 
 _seq		:: [ParseTree] -> St ParseTree
@@ -166,8 +166,8 @@ pCond (rule, markedInvert)
 			result		<- lft $ emulate $ unliftP parser
 			let outcome = getOutcome result
 			case outcome of
-				Res _	-> return $ not $ markedInvert
-				Nope	-> return $ markedInvert
+				Res _	-> return $ not markedInvert
+				Nope	-> return markedInvert
 				(Exc e)	-> lft $ throw e
 
 pOne		:: [Expression] -> St (ParseTree, [Expression])
@@ -204,7 +204,7 @@ goto	:: FQN -> Context -> Context
 goto country (world, _, _, _)
 	= if country `member` world then
 		(world, fromJust $ lookup country world, country, error "Uh oh, should not happen. No rulename is set.")
-		else error $ "You tried to load module '"++show country++"' but it wasn't found :(\n\tTry one of these: "++ (show $ keys world )
+		else error $ "You tried to load module '"++show country++"' but it wasn't found :(\n\tTry one of these: "++ show (keys world )
 
 gotoN	:: Name -> Context -> Context
 gotoN nm (w, c, fqn, _)

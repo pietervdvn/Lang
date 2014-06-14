@@ -5,6 +5,7 @@ import Bnf.ParseTree
 import Bnf
 import Bnf.Converter hiding (convert)
 import Control.Monad.Writer
+import Control.Monad
 
 import Def.Pt2Prelude
 import Def.Pt2Type
@@ -79,7 +80,7 @@ h "char"	=  hook $ Chr . parseChar
 h "string"	=  hook $ Str . parseString
 h "nat"		=  hook $ Nat . parseNat
 h "float"	=  hook $ Flt . parseFloat
-h "type" 	=  \pt -> Just $ pt2type pt >>= return . Cst
+h "type" 	=  Just . liftM Cst . pt2type
 h _		=  const Nothing
 
 hook		:: (ParseTree -> AST) -> ParseTree -> Maybe (Writer Errors AST)
@@ -108,14 +109,14 @@ s "commaSepExpr" [Comma, expr]
 s "commaSepExpr" [expr, CommaSepExpr exprs]
 		= CommaSepExpr $ expr:exprs
 s "commaSepExpr" exprs
-		= CommaSepExpr $ exprs
+		= CommaSepExpr exprs
 
 s "commaSepExprP" [Comma, expr]
 		= expr
 s "commaSepExprP" [expr, CommaSepExpr exprs]
 		= CommaSepExpr $ expr:exprs
 s "commaSepExprP" exprs
-		= CommaSepExpr $ exprs
+		= CommaSepExpr exprs
 
 s "arrowTuple" [expKey, DictArrow, expValue]
 		= Tuple [expKey, expValue]

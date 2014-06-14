@@ -27,7 +27,7 @@ https://www.youtube.com/watch?v=gY2VADkYanQ.
 
 convert	:: [(IOModule, FilePath)] -> World
 convert modules
-	=  let context = calcExports $ map fst $ modules in
+	=  let context = calcExports $ map fst modules in
 		M.fromList $ map (\m -> (getFqn $ fst m, convertOne context m) ) modules
 
 convertOne	:: Map FQN Exports -> (IOModule, FilePath) -> Module
@@ -49,7 +49,7 @@ dubblesErrMsg	:: [Name] -> [(Name, FQN)] -> String
 dubblesErrMsg dubbles imps
 		= "Some terms are found in more then one module:"++
 			foldr (\term acc -> "\n\t" ++ term++" is found in "++ 
-				(show $ occursIn term imps) ++ acc) "" (nub dubbles)
+				show (occursIn term imps) ++ acc) "" (nub dubbles)
 
 occursIn	:: Name -> [(Name, FQN)] -> [FQN]
 occursIn name	=  map snd . filter ((==) name . fst)

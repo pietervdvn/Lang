@@ -2,8 +2,7 @@ module Bnf.Meta.Parser (parse) where
 
 import Control.Monad.Writer
 import Data.Map hiding (map)
-import Bnf.PtGen (lastParsePos)
-import Bnf.PtGen (parseFull)
+import Bnf.PtGen (parseFull, lastParsePos)
 import Bnf.Meta.BnfRegex
 import Bnf.Meta.BnfModule
 import Bnf.Meta.BnfExpr

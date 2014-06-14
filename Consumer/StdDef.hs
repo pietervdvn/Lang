@@ -9,3 +9,6 @@ type Position	= (LineNumber, CharNumber)
 
 todo	= error "TODO"
 todos	= error . (++) "TODO: "
+
+const2		:: a -> b -> c -> c
+const2 _ _ 	= id

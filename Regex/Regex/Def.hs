@@ -42,9 +42,9 @@ startsWithWS (Invert rgx)
 startsWithWS (Seq (rgx:_))
 		= startsWithWS rgx
 startsWithWS (Or rgxes)
-		= or $ map startsWithWS rgxes
+		= any startsWithWS rgxes
 startsWithWS (And rgxes)
-		= or $ map startsWithWS rgxes	-- yes, we do or; if one of the firsts is sensitive all of them are
+		= any startsWithWS rgxes	-- yes, we do or; if one of the firsts is sensitive all of them are
 startsWithWS (BetweenTimes _ _ rgx)
 		= startsWithWS rgx
 startsWithWS (MinTimes _ rgx)

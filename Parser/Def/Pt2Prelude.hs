@@ -14,7 +14,7 @@ import Control.Arrow
 
 
 _exec	:: (Name -> String -> a) -> ParseTree -> a
-_exec t	= fst . runWriter . simpleConvert (const $ const $ Nothing) t (\_ [f] -> f)
+_exec t	= fst . runWriter . simpleConvert (const $ const Nothing) t (\_ [f] -> f)
 
 -- ## Parsing Strings
 
@@ -94,18 +94,18 @@ prep str	= map toLower $ filter (/= '\'') str
 parseBin	:: String -> Int -> Int
 parseBin "" acc	= acc
 parseBin (n:nr)	acc
-		= parseBin nr ((ord n) - 48 + 2 * acc)
+		= parseBin nr (ord n - 48 + 2 * acc)
 
 parseHex	:: String -> Int -> Int
 parseHex "" acc	= acc
 parseHex (n:nr) acc
-	| n `elem` ['0'..'9']	= parseHex nr ( (ord n) - 48 + 16 * acc)
-	| otherwise	= parseHex nr ( (ord n) - (97 - 10) + 16 * acc)
+	| n `elem` ['0'..'9']	= parseHex nr (ord n - 48 + 16 * acc)
+	| otherwise	= parseHex nr (ord n - (97 - 10) + 16 * acc)
 
 parseDec	:: String -> Int -> Int
 parseDec "" acc	= acc
 parseDec (n:nr) acc
-		= parseDec nr ( (ord n) - 48 + 10 * acc)
+		= parseDec nr (ord n - 48 + 10 * acc)
 
 both	:: (a,a) -> (a -> b) -> (b,b)
 both (a,b) f	= (f a, f b)

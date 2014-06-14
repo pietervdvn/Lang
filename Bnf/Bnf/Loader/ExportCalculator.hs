@@ -39,8 +39,8 @@ calcExports modules
 
 calcImports		:: IOModule -> Map FQN Exports -> Map Name FQN
 calcImports (IOM fqn _ imports _) ctx
-		=  let all 	= map (flip importOne' ctx) imports in
-			M.fromList $ nub $ concat $ all 
+		=  let all 	= map (`importOne'` ctx) imports in
+			M.fromList $ nub $ concat all 
 
 importOne'	:: IOImport -> Map FQN Exports -> [(Name, FQN)]
 importOne' imp

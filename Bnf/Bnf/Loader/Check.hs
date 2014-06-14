@@ -64,8 +64,8 @@ checkFileName fqn@(FQN dirs name) path
 		when (name /= filename) $ addErr fqn (0,0) "FileName" $ "The FileName " ++ show filename++" does not match the modulename "++show name
 		let expected 	= foldr (\dir acc -> dir ++ "/" ++ acc) "" dirs
 		let real	= dropFileName path
-		let same	= and $ zipWith (==) (reverse expected) (reverse real)
-		when (not same)	$ addErr fqn (0,0) "FileName" $ "The filepath "++show real ++" does not match the expected filepath "++show expected
+		let correct	= and $ zipWith (==) (reverse expected) (reverse real)
+		unless correct	$ addErr fqn (0,0) "FileName" $ "The filepath "++show real ++" does not match the expected filepath "++show expected
 		
 
 -- Checks all the import stuff!
@@ -87,7 +87,7 @@ checkStatedExist fqn ctx (IOImport imp _ _ terms pos)
 				let names	= map fst terms			:: [Name]
 				let exported	= map snd $ S.toList exports	:: [Name]
 				let unknown	= filter (not . (`elem` exported)) names  :: [Name]
-				when (not $ null unknown) $ addErr fqn pos "Import: unresolved" $
+				unless (null unknown) $ addErr fqn pos "Import: unresolved" $
 					"The terms "++show unknown++" are not exported by "++ show imp
 				return ()
 
@@ -97,7 +97,7 @@ checkAmbigueImports ctx iom@(IOM fqn _ imps _)
 				-- all contains the raw imports in a (ioimport, [name, fqn]) fashion
 				-- we can scrub it four doubles now
 				let ambigue	= ambigueImports all
-				when (not $ null ambigue) $ addErr fqn (0,0) "Ambigue import" $
+				unless (null ambigue) $ addErr fqn (0,0) "Ambigue import" $
 					"Some terms can refer to multiple declarations: "++ prep ambigue
 
 prep		:: [(Name, [IOImport])] -> String
@@ -106,8 +106,8 @@ prep 		=  foldr (\toPrep acc -> "\n\t"++ prep' toPrep ++ acc) ""
 
 prep'		:: ( Name, [IOImport]) -> String
 prep' (nm, imps)
-		= show nm ++ " is exported by "++( init $ foldr 
-			(\(IOImport fqn _ _ _ pos) acc ->  show fqn++" "++show pos++","++acc) "" imps )
+		= show nm ++ " is exported by "++ init $ foldr 
+			(\(IOImport fqn _ _ _ pos) acc ->  show fqn++" "++show pos++","++acc) "" imps 
 
 
 ambigueImports	:: [(IOImport, [(Name, FQN)])] -> [( Name, [IOImport])]
@@ -141,15 +141,15 @@ checkDoubleImports	:: FQN ->  [IOImport] -> Writer Errors ()
 checkDoubleImports fqn imps
 		= do 	let duplicates 	= nub $ dubbles $ map (\(IOImport fqn pub _ _ _) -> (fqn, pub)) imps
 			let all		= map (\(IOImport fqn _ _ _ pos) -> (fqn, pos)) imps
-			when (not $ null duplicates) $ addWarn fqn (snd $ all !! 1) "Duplicate imports" $
+			unless (null duplicates) $ addWarn fqn (snd $ all !! 1) "Duplicate imports" $
 				"Some imports are done multiple times: "  ++
-				(foldr (\(fqn, _) acc -> show fqn ++ " is imported on "++ (show $ map snd $ filter ((==) fqn . fst) all) ++ acc) "" duplicates)
+				foldr (\(fqn, _) acc -> show fqn ++ " is imported on "++ show (map snd $ filter ((==) fqn . fst) all) ++ acc) "" duplicates
 			
 
 -- 7
 checkDoubleDefines	:: IOModule -> Writer Errors ()
 checkDoubleDefines iom	=  do	let dubbleNames	= dubbles $ map getRuleName $ getRules iom
-				when (not $ null dubbleNames) $ addErr (getFqn iom) (0,0)
+				unless (null dubbleNames) $ addErr (getFqn iom) (0,0)
 					"Double declare" $ "Some rules are declared multiple times: "++show dubbleNames
 
 
@@ -164,7 +164,7 @@ checkExpressions (IOM fqn _ _ rules) (Module local imported)
 checkExpression	:: FQN -> S.Set Name -> IORule -> Writer Errors ()
 checkExpression fqn known (IORule name expr _ _ pos)
 			= do	let unknown	= nub $ unknownCalls known expr
-				when (not $ null unknown) $ addWarn fqn pos "Unresolved call" $
+				unless (null unknown) $ addWarn fqn pos "Unresolved call" $
 					"The declaration of "++name++" has "++
 					(if length unknown == 1 then " an unresolved call: " else " some unresolved calls: ") ++ show unknown
 
@@ -205,4 +205,4 @@ coor (line, col)	= (0, line, col)
 
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []
-dubbles (a:as)	=  (if (a `elem` as) then (a:) else id) $ dubbles as
+dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as
