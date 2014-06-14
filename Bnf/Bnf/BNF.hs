@@ -65,7 +65,7 @@ s (And expr exprs)
 
 
 sAnd	:: String -> [(Expression, Bool)] -> String
-sAnd st	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ st ++ acc) "" exprs
+sAnd st	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ st ++ acc) ""
 
 sOrred	:: String -> [Expression] -> String
 sOrred str exprs 

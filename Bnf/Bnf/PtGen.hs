@@ -143,6 +143,7 @@ p (NWs expr)	= do	(_,mode)	<- get
 pWs		:: St ()
 pWs		=  do	(_,mode)	<- get
 			when (mode == EatWS) $ void $ lft $ longest $ match ws
+			where void a	= return ()
 
 
 _seq		:: [ParseTree] -> St ParseTree
