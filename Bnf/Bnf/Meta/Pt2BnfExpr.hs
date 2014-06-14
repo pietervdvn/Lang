@@ -28,6 +28,7 @@ conv (RuleCall call)	= B.Call call
 conv (Plus ast)		= B.More $ conv ast
 conv (Quest ast)	= B.Opt $ conv ast
 conv (Star ast)		= B.Star $ conv ast
+conv (NoWS ast)		= B.NWs $ conv ast
 conv ast		= error $ "Could not convert "++ show ast
 
 
@@ -36,11 +37,12 @@ data AST	= SubExpr AST
 		| Set [AST]
 		| SetItem AST
 		| Sequence [AST]
+		| NoWS AST
 		| Rgx Regex
 		| Ident Name
 		| RuleCall Name
 		| Plus AST	| Quest AST	| Star AST
-		| PlusT	| QuestT| StarT
+		| PlusT	| QuestT| StarT	| NoWST
 		| ParO	| ParC
 		| AccO	| AccC
 		| DQuote
@@ -65,6 +67,7 @@ t "or" _	= Bar
 t _ "?"		= QuestT
 t _ "+"		= PlusT
 t _ "*"		= StarT
+t _ "%"		= NoWST
 t _ "\n\t"	= NewLine
 
 
@@ -83,6 +86,8 @@ s "expression" (Choice heads:tails)
 
 s "sequence" terms	= Sequence terms
 
+s "factor" (NoWST:terms)
+			= NoWS $ s "factor" terms
 s "factor" [term]	= term
 s "factor" [term, PlusT]
 			= Plus term

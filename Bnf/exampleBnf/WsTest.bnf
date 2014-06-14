@@ -5,3 +5,8 @@ date		[2014, 06, 14, 15, 34, 42]
 desc		"Test of token and no whitespace operator (%)"
 
 token		= "a"*
+
+withWS		= "a" "a"
+
+withoutWS	= %("a" "a")
+

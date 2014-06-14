@@ -27,7 +27,7 @@ expression	= Choice [ More $ Seq [Call "sequence", _or, Call "expression"] , Cal
 
 sequenceRule	= More $ Call "factor"
 
-factor		= Seq [ Call "term", Opt $ rgx "[+*?]"]
+factor		= Seq [ Opt $ rgx "%", Call "term", Opt $ rgx "[+*?]"]
 
 term		= Choice [ Call "localIdent"
 			 , Seq [_dquote, Call "regex", _dquote]

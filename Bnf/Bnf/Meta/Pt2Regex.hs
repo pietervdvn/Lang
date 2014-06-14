@@ -88,7 +88,6 @@ t _ "*"		= Star
 t _ "+"		= Plus
 t _ "?"		= Quest
 
-
 t name _	= error $ "Token fallthrough for "++name
 
 
