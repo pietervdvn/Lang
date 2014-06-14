@@ -121,9 +121,10 @@ Choices can be put on the next line, but *need* a *tab* indentation:
 
 Our good old friends, * + and ? are included.
 
-* With *, a rule is repeated as much as possible.
-* With +, a rule is repeated as much as possible (but at least once)
-* With ?, a rule is optional (parsed if possible)
+* With *, an expression is repeated as much as possible.
+* With +, an expression is repeated as much as possible (but at least once)
+* With ?, an expression is optional (parsed if possible)
+* With % (prependend), the following expression is parsed without whitespace. This means that, ````%("a" "b")```` will equal ````"ab"````. Called rules still parse whitespace: ````a ::= "a" "b"; b ::= %("a" a)```` will parse ````aa b```` (but not ````a ab````)
 
 There are also some other operators:
 

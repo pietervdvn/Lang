@@ -1,5 +1,6 @@
 module Def.Def where
 
+import StdDef
 {--
 
 This module implements the data structures representing a parsed module.
