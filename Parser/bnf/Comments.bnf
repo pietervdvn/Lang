@@ -13,8 +13,6 @@ nl		::= (mlcomment | comment) ? "\n"
 nls		::= nl+
 nltab		::=  (mlcomment | comment) ? "\n\t"
 
-_$commentCont	::="!\n"*
-comment		::= "--" commentCont
-_$mlcommentCont	::= %"((!-+)|((--!-)|(-!-)))|[ \t]"*
-mlcomment	::= "---+" mlcommentCont "---+"
+comment		::= "--" $%"!\n"*
+mlcomment	::= "---+" %$( "!-+" | "--!-|-!-" | "[ \t]")*  "---+"
 

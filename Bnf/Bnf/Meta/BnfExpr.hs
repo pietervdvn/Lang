@@ -7,7 +7,15 @@ import Regex
 import Bnf.FQN
 
 fqnBnf	= FQN [] "bnf"
-bnfMod	= Module (fromList [("expression", expression),("sequence", sequenceRule),("factor", factor),("term", term),("localIdent", localIdent),("or",bar),("dquote",dquote),("comment", comment)]) (fromList [("regex", fqnRegex)])
+bnfMod	= Module (fromList 
+		[("expression", expression)
+		,("andExpr", andExpr)
+		,("sequence", sequenceRule)
+		,("factor", factor)
+		,("term", term)
+		,("localIdent", localIdent)
+		,("or",bar),("dquote",dquote)
+		,("comment", comment)]) (fromList [("regex", fqnRegex)])
 
 
 
@@ -23,7 +31,13 @@ comment		= Choice [ Seq [rgx "--", rgx "!\n*"]
 
 --  "/\*" ("!\*"+ | "\*+![*/]" )* "\*+/"
 
-expression	= Choice [ More $ Seq [Call "sequence", _or, Call "expression"] , Call "sequence" ]
+expression	= Choice [ More $ Seq [Call "andExpr", _or, Call "expression"] , Call "andExpr" ]
+
+
+andExpr		= Choice [ Seq [
+				Call "sequence", More $ Seq [rgx "\\&", Opt $ rgx "\\!", Call "sequence"]
+				]
+			 , Call "sequence" ]
 
 sequenceRule	= More $ Call "factor"
 
@@ -45,3 +59,17 @@ dquote		= rgx "\""
 _dquote		= Call "dquote"
 rgx 		= Rgx . regex
 wsrgx		= NWs . rgx	
+
+
+
+{--
+
+term	::= localIdent | regex | (expr) 
+factor	::= "%"? "$"? term | "$"? "%"? term
+
+seq	::= factor +
+andExpr	::= (seq ("&" "!"? seqre)+) | seq 
+expr	::= (andExpr "|" expr) | andExpr
+
+
+--}

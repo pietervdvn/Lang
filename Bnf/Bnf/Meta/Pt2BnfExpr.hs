@@ -30,8 +30,14 @@ conv (Quest ast)	= B.Opt $ conv ast
 conv (Star ast)		= B.Star $ conv ast
 conv (NoWS ast)		= B.NWs $ conv ast
 conv (Tokenize ast)	= B.Token $ conv ast
+conv (And ast asts)	= B.And (conv ast) $ map convAnd asts
 conv ast		= error $ "Could not convert "++ show ast
 
+
+convAnd		:: AST -> (B.Expression, Bool)
+convAnd (NotS ast)
+		= (conv ast, True)
+convAnd ast	= (conv ast, False)
 
 data AST	= SubExpr AST
 		| Choice [AST]
@@ -48,6 +54,9 @@ data AST	= SubExpr AST
 		| ParO	| ParC
 		| AccO	| AccC
 		| DQuote
+		| AndT	| NotT
+		| NotS AST	| AndTail [AST]
+		| And AST [AST]
 		| Bar	| NewLine
 	deriving (Show)
 
@@ -71,6 +80,8 @@ t _ "+"		= PlusT
 t _ "*"		= StarT
 t _ "%"		= NoWST
 t _ "$"		= TokenizeT
+t _ "&"		= AndT
+t _ "!"		= NotT
 t _ "\n\t"	= NewLine
 
 
@@ -85,6 +96,15 @@ s "expression" [seq1, Bar, seq2]
 s "expression" (Choice heads:tails)
 			= let Choice tail	= s "expression" tails in
 				Choice $ heads++tail
+
+s "andExpr" [AndT, NotT, ast]
+			= AndTail [NotS ast]
+s "andExpr" [AndT, ast]	= ast
+s "andExpr" (AndTail init:asts)
+			= AndTail (init++asts)
+s "andExpr" [ast, AndTail tail]
+			= And ast tail
+
 
 
 s "sequence" terms	= Sequence terms

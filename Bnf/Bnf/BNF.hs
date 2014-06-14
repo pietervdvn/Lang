@@ -51,19 +51,26 @@ expand str
 						-- If a rule is reversed (false in the snd), then this rule should *not* be parsed to add the first rule to the PT
 s	:: Expression -> String
 s (Rgx regex)	= " \""++(show regex)++"\""
-s (NWs expr)	= " %(" ++(show expr) ++ ")"
-s (Token expression)	= " $("++s expression++")"
+s (NWs expr)	=  "%" ++(show expr)
+s (Token expression)	= " $"++s expression
 s (Call name)	= " "++name
-s (Choice exprs)= " (" ++ sOrred exprs ++" )"
+s (Choice exprs)= " (" ++ sOrred " |" exprs ++" )"
 s (Opt expr)	= s expr ++ "?"
 s (Star expr)	= s expr ++ "*"
 s (More expr)	= s expr ++ "+"
 s (Seq exprs)	= " (" ++ foldr (\e acc -> s e ++ acc) "" exprs ++ " )"
-s (Set exprs)	= " {"++ sOrred exprs ++ " }"
--- TODO and
+s (Set exprs)	= " {"++ sOrred " |" exprs ++ " }"
+s (And expr exprs)
+		= (s expr) ++ (sAnd " &" exprs)
 
-sOrred	:: [Expression] -> String
-sOrred exprs = foldr (\e acc -> s e ++ " |" ++ acc) (s $ last exprs) (init $ exprs)
+
+sAnd	:: String -> [(Expression, Bool)] -> String
+sAnd str exprs
+	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ str++ acc) "" exprs
+
+sOrred	:: String -> [Expression] -> String
+sOrred str exprs 
+	= foldr (\e acc -> s e ++ str ++ acc) (s $ last exprs) (init $ exprs)
 
 -- converts an expression to a token by adding token, and by checking that
 tokenize	:: Expression -> Expression
