@@ -11,4 +11,4 @@ import Expressions
 
 _id		::= localIdent | globalIdent | op | "\(" op "\)"
 _limiters	::= ("hiding" | "showing") "\{" id (","? id)* "\}"
-import	::= "public"? "import" (globalIdent "\.")* globalIdent limiters?
+import	::= "public"? "import" %((globalIdent "\.")* globalIdent) limiters?
