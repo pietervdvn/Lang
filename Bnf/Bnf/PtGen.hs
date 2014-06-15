@@ -142,7 +142,7 @@ p (NWs expr)	= do	(_,mode)	<- get
 -- parses whitespace if eatWS is activi
 pWs		:: St ()
 pWs		=  do	(_,mode)	<- get
-			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())
+			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())	-- DO NOT CHANGE TO 'void $ longest....'. The lazyness won't evaluate the whitespace!
 
 _seq		:: [ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo

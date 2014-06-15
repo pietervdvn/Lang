@@ -18,8 +18,6 @@ type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
 type DocString	= Comment
 
-
-
 data Expression	= Nat Int
 		| Flt Float
 		| Chr Char
