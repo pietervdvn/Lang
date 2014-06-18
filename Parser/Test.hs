@@ -24,7 +24,7 @@ This module loads and compiles the bnf's to test them
 pt		:: String -> String -> IO ParseTree
 pt rule str	=  do	world	<- load "bnf/Languate"
 			let mpt	= parse world (toFQN ["Languate"]) rule $ str++"\n"
-			let pt' = fromMaybe mpt $ error "Incorrect parse, not even a single character could be parsed!"
+			let pt' = fromMaybe (error "Incorrect parse, not even a single character could be parsed!") mpt
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
