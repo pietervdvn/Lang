@@ -39,7 +39,7 @@ s "nlcomment" []
 s "nlcomment" (Comment str:_)
 		= Comment str
 s _ [ast]  	= ast
-s nm ast	= error $ "Pt2Type: Sequence fallthrough for rule '"++nm++"' with content "++show ast
+s nm ast	= error $ "Pt2Comment: Sequence fallthrough for rule '"++nm++"' with content "++show ast
 
 
 pt2ast	:: ParseTree -> Writer Errors AST

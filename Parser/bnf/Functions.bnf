@@ -24,7 +24,7 @@ example		::= ">" expr "=" expr
 declaration	::= (localIdent | "\(" op "\)" ) ":" type?
 
 -- OBLIGATED COMMENTS! Yes, each declaration is OBLIGATED to have a docstring!
-function	::= nlcomment+ ( (law | example) nl)* declaration nl (patternRoot* "=" expr (nltab expr)* nl)+
+function	::= nlcomment+ ( (law | example) nl)* declaration+ nl (patternRoot* "=" expr (nltab expr)* nl)+
 
 {-
 law example

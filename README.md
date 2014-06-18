@@ -36,11 +36,16 @@ Parser
 
 The actual parser.
 
+Expirments
+----------
+
+Haskell code experiments to try out concepts
+
 Selling points
 ==============
 
 * Haskell-like syntax (but cleaned up a little)
-* Type Directed name resolution
+* Type Directed name resolution (ad hoc overloading, like in most OOP-languages)
 * Type interference
 * Laws, examples
 

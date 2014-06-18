@@ -34,9 +34,13 @@ Built-in functions (used in desugaring)
 
     empty	: List a
     prepend	: a -> List a -> List a
+    unprepend	: collection : Collection => collection a -> Maybe (a, collection a) -- used in patterns
+    getLonely	: [a] -> Maybe a
+    just	: a -> Maybe a
     toSet	: List a -> Set a
     toDict	: List (a,b)	-> Dict (a,b)
     toString	: List Char -> String
+    convert	: a -> b
     ~		-- cast
     ~~		-- autocast
 
@@ -48,6 +52,16 @@ The 'toString' is to hide the fact that String is not a simple '[Char]'. String 
 
 These methods are called with a special data structure in the AST, this is only because these can reach an other namespace.
 
+Convert is used to add a conversion in the castin.
+
+GetLonely is used in pattern matching, to match patterns as "[a]", "{a}". It should return Nothing if here are zero or multiple elements. Dicts should implement two versions (: {a --> b} -> Maybe a; {a --> b} -> Maybe (a,b) )
+
+getLoneley list	= if isEmpty list then Nothing 
+			else if isEmpty $ tail list 
+				then Just head list
+				else Nothing; 
+
+just is used in pattern matching, to convert "(a,b) -> Maybe (a,b)" to deconstruct tuples. 
 
 ### Tilde
 
@@ -83,6 +97,7 @@ There are some builtin types that should not be overwritten, as they have syntac
 - Nat
 - Int
 - Char
+- Collection	-- supertype of List, Map and Set (and more?)
 - Dict
 - List
 - Set

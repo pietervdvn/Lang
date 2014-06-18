@@ -3,7 +3,7 @@ module Def.Def where
 import StdDef
 {--
 
-This module implements the data structures representing a parsed module.
+This module implements the data structures representing a parsed module. It is possible to recreate the source code starting from a datastructure like this (module some whitespace that's moved)
 
 The data flow is:
 
@@ -30,7 +30,28 @@ data Expression	= Nat Int
 	deriving (Show)
 
 
-data Pattern	= Assign
+data Pattern	= Assign Name	-- gives a name to the argument
+		| Let Name Expression	-- evaluates the expression, and assigns it to the given name
+		| Deconstruct Name [Pattern]	{- deconstructs the argument with a function of type a -> Maybe (d,e,f,...), in which a is of the type of the corresponding argument. The patterns then match the tuple (there should be exactly the same number). If the maybe returns Nothing, matching fails
+ Map/Set/List syntactic sugar is translated into something like this. A constructor works in the opposite way here-}
+		| Multi [Pattern]	-- at-patterns
+		| Eval Expression	-- evaluates an expression, which should equal the argument. Matching against ints is (secretly) done with this. 
+		| DontCare		-- underscore
+		| MultiDontCare		-- star
+	deriving (Show)
+
+{- Deconstruct "unprepend" 
+unprepend	: {a} -> (a,{a})
+unprepend	: {a --> b} -> ( (a,b), {a --> b} )
+unprepend dict	= ( head dict, tail dict)
+
+thus, a pattern like
+
+{a --> b, c : tail} gets translated to
+Deconstruct "unprepend" [ Deconstruct "id" [Assign "a", Assign "b"],  Deconstruct "unprepend" [ Deconstruct "id" [Assign "c", Dontcare], Assign "tail"]
+                          ^ splitting of key       ^ key        ^ value ^ deconstruct of tail                                 ^about the value  ^the actual tail, after 2 unprepends
+
+-}
 
 data Type	= Normal String	-- A normal type, e.g. Bool
 		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
