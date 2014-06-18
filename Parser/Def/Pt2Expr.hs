@@ -80,7 +80,7 @@ h "char"	=  hook $ Chr . parseChar
 h "string"	=  hook $ Str . parseString
 h "nat"		=  hook $ Nat . parseNat
 h "float"	=  hook $ Flt . parseFloat
-h "type" 	=  Just . liftM Cst . pt2type
+h "baseType" 	=  Just . liftM Cst . pt2type
 h _		=  const Nothing
 
 hook		:: (ParseTree -> AST) -> ParseTree -> Maybe (Writer Errors AST)
@@ -98,7 +98,7 @@ t _ "["			= ListO
 t _ "]"			= ListC
 t _ ","			= Comma
 t _ "~~"		= AutoCst
-t _ "~("		= CstT
+t _ "~"			= CstT
 t _ "-->"		= DictArrow
 t nm cont	=  error $ "Pt2Expr: Token fallthrough for rule '"++nm++"' with content '"++cont++"'"
 
@@ -137,7 +137,7 @@ s "tuple" [ParO, exprs, ParC]
 		= Tuple $ unpack exprs
 s "simpleExpr" [ParO, expr, ParC]
 		= expr
-s "simpleExpr" [CstT, Cst typ, ParC]
+s "simpleExpr" [CstT, Cst typ]
 		= Cst typ
 s "expr" [exp]	= exp
 s "expr" exprs	= Seq exprs
