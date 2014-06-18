@@ -8,6 +8,7 @@ import Bnf.ParseTree
 import Def.Pt2Type
 import Def.Pt2Expr
 import Def.Pt2Comment
+import Def.Pt2Pattern
 import Control.Monad.Writer
 
 import System.IO.Unsafe
@@ -19,9 +20,11 @@ This module loads and compiles the bnf's to test them
 
 --}
 
+-- creates a parsetree. Give the rule it should parse against and the string it should parse, you'll get the parsetree
 pt		:: String -> String -> IO ParseTree
 pt rule str	=  do	world	<- load "bnf/Languate"
-			let pt'	= fromJust $ parse world (toFQN ["Languate"]) rule $ str++"\n"
+			let mpt	= parse world (toFQN ["Languate"]) rule $ str++"\n"
+			let pt' = fromMaybe mpt $ error "Incorrect parse, not even a single character could be parsed!"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
@@ -31,10 +34,13 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 
 -- tr rule str	= pt rule str >>= print
 
+
 tf		:: FilePath -> IO ()
 tf fp		=  do	str 	<- readFile fp
 			pt "lang" str >>= print . simplify
 
+
+-- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
 gts			:: (ParseTree -> Writer x a) -> Name -> String -> a
 gts convertor rule str	= fst $ runWriter $ convertor (unsafePerformIO $ pt rule str)
 
