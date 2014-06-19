@@ -1,4 +1,4 @@
-module Def.Pt2Pattern where
+module Def.Pt2Pattern (pt2pattern) where
 
 import StdDef
 import Bnf

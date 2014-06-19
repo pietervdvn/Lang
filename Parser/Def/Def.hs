@@ -61,5 +61,6 @@ data Type	= Normal String	-- A normal type, e.g. Bool
 		| Infer
 	deriving (Show)
 
-data Law	= Law Name Expression Expression
-		| Example Expression (Maybe Expression)
+data Law	= Law Name [(Name, Maybe Type)] Expression Expression
+		| Example Expression Expression
+	deriving (Show)

@@ -9,6 +9,7 @@ import Def.Pt2Type
 import Def.Pt2Expr
 import Def.Pt2Comment
 import Def.Pt2Pattern
+import Def.Pt2Law
 import Control.Monad.Writer
 
 import System.IO.Unsafe
