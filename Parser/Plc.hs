@@ -13,4 +13,26 @@ module Plc where
 
 The frontend/executable of the languate compiler
 
+
+
+TODO
+
+- Finish parser
+
+- Module retrieval from disk using imports
+
+- Semantic analysis
+	- building of symbol tables
+	- type check+infer
+
+- Interpreter
+
+- Lawcheck (dirty)
+
+- Manifest parser
+- Docgen
+
+- Cross-project parsing
+
+
 --}

@@ -14,6 +14,12 @@ The structures here include comments (except those withing expressions); the dat
 --}
 
 
+data Function	= Function DocString [(Name, Type)] [Line]
+	deriving (Show)
+
+data Line	= Line [Pattern] Expression
+	deriving (Show)
+
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
 type DocString	= Comment
@@ -27,6 +33,7 @@ data Expression	= Nat Int
 		| Cast Type	| AutoCast
 		| Call String
 		| Operator String
+		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment 
 	deriving (Show)
 
 

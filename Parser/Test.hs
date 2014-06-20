@@ -11,6 +11,8 @@ import Def.Parser.Pt2Comment
 import Def.Parser.Pt2Pattern
 import Def.Parser.Pt2Law
 import Def.Parser.Pt2Declaration
+import Def.Parser.Pt2Function
+import Def.Parser.Pt2Line
 import Control.Monad.Writer
 
 import System.IO.Unsafe

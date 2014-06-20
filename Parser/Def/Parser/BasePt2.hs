@@ -22,11 +22,12 @@ Declarations may have multiple (explicit) types
 
 modName	= "Pt2Function"
 
-pt2func	:: ParseTree -> Function
+pt2func	:: ParseTree -> 
 pt2func	=  pt2a h t s convert . cleanAll ["nl"]
 
-convert		:: AST -> Function
+convert		:: AST -> Expression
 convert ast	=  convErr modName ast
+
 
 data AST	= Declaration Name Type
 		| LawAst Law
@@ -36,7 +37,7 @@ data AST	= Declaration Name Type
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nltab", Comm . pt2nls)]
+h		=  []
 
 t		:: Name -> String -> AST
 t nm cont	=  tokenErr modName nm cont
