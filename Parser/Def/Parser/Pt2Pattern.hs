@@ -1,16 +1,15 @@
-module Def.Pt2Pattern (pt2pattern) where
+module Def.Parser.Pt2Pattern (pt2pattern) where
 
 import StdDef
 import Bnf
 import Bnf.ParseTree
-import Bnf.Converter hiding (convert)
 
 import Control.Monad.Writer
 import Control.Monad
-
+import Def.Parser.Utils
 import Def.Def 
-import Def.Pt2Expr
-import Def.Pt2Prelude
+import Def.Parser.Pt2Expr
+import Def.Parser.Pt2Prelude
 
 import Data.Maybe
 {--
@@ -48,10 +47,8 @@ data AST	= Star
 		| Comma	| ColonT
 	deriving (Show)
 
-h		:: Name -> ParseTree -> Maybe (Writer Errors AST)
-h "simpleExpr"	=  Just . fmap Expr . pt2expr
-h "nat"		=  Just . return . Expr . Nat . parseNat
-h _		=  const Nothing
+h		:: [(Name, ParseTree -> AST)]
+h		= [("simpleExpr", Expr . pt2expr),("nat", Expr . Nat . parseNat)]
 
 
 t		:: Name -> String -> AST
@@ -76,7 +73,7 @@ t _ "@"		=  At
 t _ ","		=  Comma
 t _ "-->"	=  ArrowT
 t _ ":"		=  ColonT
-t name str	=  error $ "Pt2Pattern: Token fallthrough for rule '"++name++"' with content "++show str
+t name str	=  tokenErr "Pt2Pattern" name str
 
 s		:: Name -> [AST] -> AST
 s "patternRoot" [Dollar, Expr e]
@@ -134,7 +131,7 @@ s "tuple" (TuplePart ast:parts)
 s "tuple" [TupleO, pattern, TupleP patterns, TupleC]
 		= TupleP (pattern:patterns)
 s _ [ast]  	= ast
-s nm ast	= error $ "Pt2Pattern: Sequence fallthrough for rule '"++nm++"' with content "++show ast
+s nm asts	= seqErr "Pt2Pattern" nm asts
 
 buildListAST	:: [AST] -> [AST] -> AST
 buildListAST [] heads
@@ -169,7 +166,7 @@ convert (Deconstr name asts)
 			= Deconstruct name $ map convert asts	
 convert (AtPart asts)	= Multi $ map convert asts
 convert (SetP asts mValAsts mtail)
-			= if or $ map isJust mValAsts 
+			= if any isJust mValAsts 
 				then convDict asts (map fm mValAsts) mtail
 				else convSet asts mtail
 				where fm	= fromMaybe Underscore
@@ -177,8 +174,7 @@ convert (ListP asts mtail)
 		= convList asts mtail
 convert (TupleP asts)
 		= Deconstruct "just" $ map convert asts
-convert ast	= error $ "Todo! But here is the ast: "++show ast
-
+convert ast	= convErr "Pt2Pattern" ast
 
 convList	:: [AST] -> Maybe AST -> Pattern
 convList [] (Just tail)
@@ -204,6 +200,5 @@ convSet [head] Nothing
 convSet (head:headtail) tail
 		=  Deconstruct "unprepend" [convert head, convSet headtail tail]
 
-pt2pattern	:: ParseTree -> Writer Errors Pattern
-pt2pattern pt	=  do	ast	<- simpleConvert h t s pt
-			return $ convert ast
+pt2pattern	:: ParseTree -> Pattern
+pt2pattern	=  pt2a h t s convert

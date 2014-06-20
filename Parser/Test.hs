@@ -5,11 +5,12 @@ import Normalizable
 import Data.Maybe
 import Bnf.ParseTree
 
-import Def.Pt2Type
-import Def.Pt2Expr
-import Def.Pt2Comment
-import Def.Pt2Pattern
-import Def.Pt2Law
+import Def.Parser.Pt2Type
+import Def.Parser.Pt2Expr
+import Def.Parser.Pt2Comment
+import Def.Parser.Pt2Pattern
+import Def.Parser.Pt2Law
+import Def.Parser.Pt2Declaration
 import Control.Monad.Writer
 
 import System.IO.Unsafe
@@ -29,6 +30,7 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
+			print "TODO: Pt2: Function, Import, Languate, TypeDefs"
 			return pt
 
 -- ts rule str	=  pt rule str >>= print . simplify
@@ -42,6 +44,6 @@ tf fp		=  do	str 	<- readFile fp
 
 
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
-gts			:: (ParseTree -> Writer x a) -> Name -> String -> a
-gts convertor rule str	= fst $ runWriter $ convertor (unsafePerformIO $ pt rule str)
+gts			:: (ParseTree -> a) -> Name -> String -> a
+gts convertor rule str	= convertor (unsafePerformIO $ pt rule str)
 

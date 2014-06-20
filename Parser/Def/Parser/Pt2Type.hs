@@ -1,12 +1,11 @@
-module Def.Pt2Type (pt2type) where
+module Def.Parser.Pt2Type (pt2type) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Bnf.Converter hiding (convert)
 import Control.Monad.Writer
-
-import Def.Pt2Prelude
+import Def.Parser.Utils
+import Def.Parser.Pt2Prelude
 import Def.Def hiding (Tuple)
 {--
 This module parses Types! YAY
@@ -38,11 +37,7 @@ convert (Tuple asts)
 		= TupleType $ map convert asts
 convert (CurryType asts)
 		= Curry $ map convert asts
-convert	ast	=  error $ "Still to do the convert! Here is the ast though:\n"++show ast
-
-
-h		:: StdDef.Name -> ParseTree -> Maybe (Writer Errors AST)
-h _		=  const Nothing
+convert	ast	=  convErr "Pt2Type" ast
 
 t		:: Name -> String -> AST
 t "knownType" s	= KnownType s
@@ -59,8 +54,7 @@ t _ ","		= Comma
 t _ "-->"	= Arrow
 t _ "->"	= Currow
 t _ "?"		= MaybeT
-t nm cont	= error $ "Pt2Type: Token fallthrough for rule '"++nm++"' with content '"++cont++"'"
-
+t nm cont	= tokenErr "Pt2Type" nm cont
 
 s		:: Name -> [AST] -> AST
 s "simpleType" [ParO, typ, ParC]
@@ -99,16 +93,7 @@ s "curry" typs	= MultiType typs
 s "baseType" [ast, MaybeT]
 		= AppliedType (KnownType "Maybe") [ast]
 s _ [ast]  	= ast
-s nm ast	= error $ "Pt2Type: Sequence fallthrough for rule '"++nm++"' with content "++show ast
-
-
-pt2ast	:: ParseTree -> Writer Errors AST
-pt2ast	=  simpleConvert h t s
-
-pt2type	:: ParseTree -> Writer Errors Type
-pt2type	pt
-	= do	ast <- pt2ast pt
-		return $ convert ast
+s nm ast	= seqErr "Pt2Type" nm ast
 
 unpack	:: AST -> [AST]
 unpack (CommaSepTypes asts)	= asts
@@ -118,5 +103,7 @@ asTuple	:: [AST] -> AST
 asTuple [ast]	= ast
 asTuple asts	= Tuple asts
 
-hook		:: (ParseTree -> AST) -> ParseTree -> Maybe (Writer Errors AST)
-hook f		=  Just . return . f 
+
+pt2type :: ParseTree -> Type
+pt2type	= pt2a [] t s convert
+

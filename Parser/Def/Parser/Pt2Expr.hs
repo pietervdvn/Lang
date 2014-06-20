@@ -1,14 +1,13 @@
-module Def.Pt2Expr (pt2expr) where
+module Def.Parser.Pt2Expr (pt2expr) where
 
 import StdDef
 import Bnf.ParseTree
-import Bnf
-import Bnf.Converter hiding (convert)
+import Bnf hiding (SimpleConvert)
 import Control.Monad.Writer
 import Control.Monad
-
-import Def.Pt2Prelude
-import Def.Pt2Type
+import Def.Parser.Utils
+import Def.Parser.Pt2Prelude
+import Def.Parser.Pt2Type
 import qualified Def.Def as Def
 import Def.Def hiding (Seq, Flt, Nat, Chr, List, Tuple)
 
@@ -18,9 +17,8 @@ This module converts the ParseTree (of an expression) into a Expression, via an 
 
 --}
 
-pt2expr		:: ParseTree -> Writer Errors Expression
-pt2expr	pt	= do	ast	<- pt2ast pt
-			return $ convert ast
+pt2expr		:: ParseTree -> Expression
+pt2expr		=  pt2a h t s convert
 
 convert		:: AST -> Expression
 convert (FC id)	=  Call id
@@ -41,7 +39,8 @@ convert (Seq asts)
 		= Def.Seq $ map convert asts
 convert (Cst t)	= Cast t
 convert AutoCst	= AutoCast
-convert ast	= error $ "Convert fallthrough! "++show ast
+convert ast	= convErr "Pt2Expr" ast
+
 
 desugareString	:: String -> Expression
 desugareString s
@@ -75,16 +74,11 @@ data AST	= FC String	-- A Function Call to a constructor (globalIdent), function
 	deriving (Show)
 
 
-h		:: StdDef.Name -> ParseTree -> Maybe (Writer Errors AST)
-h "char"	=  hook $ Chr . parseChar
-h "string"	=  hook $ Str . parseString
-h "nat"		=  hook $ Nat . parseNat
-h "float"	=  hook $ Flt . parseFloat
-h "baseType" 	=  Just . liftM Cst . pt2type
-h _		=  const Nothing
-
-hook		:: (ParseTree -> AST) -> ParseTree -> Maybe (Writer Errors AST)
-hook f		=  Just . return . f
+h		=  	[ ("char",	Chr . parseChar)
+			, ("string", 	Str . parseString)
+			, ("nat",	Nat . parseNat)
+			, ("float",	Flt . parseFloat)
+			, ("baseType", 	Cst . pt2type)]
 
 t		:: Name -> String -> AST
 t "localIdent" id	= FC id
@@ -100,7 +94,7 @@ t _ ","			= Comma
 t _ "~~"		= AutoCst
 t _ "~"			= CstT
 t _ "-->"		= DictArrow
-t nm cont	=  error $ "Pt2Expr: Token fallthrough for rule '"++nm++"' with content '"++cont++"'"
+t nm cont	=  tokenErr "Pt2Expr" nm cont
 
 
 s		:: Name -> [AST] -> AST
@@ -142,11 +136,7 @@ s "simpleExpr" [CstT, Cst typ]
 s "expr" [exp]	= exp
 s "expr" exprs	= Seq exprs
 s _ [expr]  = expr
-s nm exprs	= error $ "Pt2Expr: Sequence fallthrough for rule '"++nm++"' with content "++show exprs
-
-
-pt2ast	:: ParseTree -> Writer Errors AST
-pt2ast	=  simpleConvert h t s
+s nm exprs	= seqErr "Pt2Expr" nm exprs
 
 unpack		:: AST -> [AST]
 unpack (CommaSepExpr asts)	
