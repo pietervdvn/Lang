@@ -13,6 +13,7 @@ import Def.Parser.Pt2Law
 import Def.Parser.Pt2Declaration
 import Def.Parser.Pt2Function
 import Def.Parser.Pt2Line
+import Def.Parser.Pt2Import
 import Control.Monad.Writer
 
 import System.IO.Unsafe

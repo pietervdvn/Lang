@@ -63,6 +63,19 @@ getLoneley list	= if isEmpty list then Nothing
 
 just is used in pattern matching, to convert "(a,b) -> Maybe (a,b)" to deconstruct tuples. 
 
+A constructor defines two functions: the constructor and deconstructor.
+
+E.g.
+
+    Either a b = Left a | Right b
+
+instantatiates
+
+    Left   : a -> Either a b
+    Left   : Either a b -> Maybe a
+    Right  : b -> Either a b
+    Right  : Either a b -> Maybe b
+
 ### Tilde
 
 Tilde acts as a cast (if convert is defined). E.g., for Bool is defined:

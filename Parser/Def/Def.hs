@@ -71,3 +71,10 @@ data Type	= Normal String	-- A normal type, e.g. Bool
 data Law	= Law Name [(Name, Maybe Type)] Expression Expression
 		| Example Expression Expression
 	deriving (Show)
+
+
+-- restrict is the blacklist/whitelist of the showing/hiding in an import statement
+data Restrict	= BlackList [Name] | WhiteList [Name]
+	deriving (Show)
+data Import	= Import [Name] Name Restrict
+	deriving (Show)
