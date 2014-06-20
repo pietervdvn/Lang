@@ -1,4 +1,4 @@
-module Def.Parser.Utils (simpleConvert, exec, pt2a, convErr, tokenErr, seqErr) where
+module Def.Parser.Utils (simpleConvert, exec, pt2a, convErr, tokenErr, seqErr, inLst) where
 
 -- some convenience methods which return often
 
@@ -40,3 +40,6 @@ tokenErr str nm tok
 
 seqErr str nm asts
 		=  error $ "Sequencer error in "++str++" on rule "++nm++" with asts "++show asts
+
+inLst		:: a -> [a]
+inLst a		=  [a]

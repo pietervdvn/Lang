@@ -25,7 +25,6 @@ t _ "---"	= MlCommDelim
 t _ "\n"	= Nl
 t _ "\n\t"	= Nl
 t _ text	= Comment text
-t nm cont	= tokenErr "Pt2Comment" nm cont
 
 
 s		:: Name -> [AST] -> AST

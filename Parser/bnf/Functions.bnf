@@ -26,8 +26,8 @@ declaration	::= (localIdent | "\(" op "\)" ) ":" type?
 -- OBLIGATED COMMENTS! Yes, each declaration is OBLIGATED to have a docstring!
 -- functions might have multiple types too
 _patterns	::= patternRoot*
-line		::= patterns "=" expr (nltab expr)*
-function	::= nlcomment+ ( (law | example) nl)* (declaration nl)+ (line nl)+
+clause		::= patterns "=" expr (nltab expr)*
+function	::= nlcomment+ ( (law | example) nl)* (declaration nl)+ (clause nl)+
 
 {-
 law example

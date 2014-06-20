@@ -14,10 +14,10 @@ The structures here include comments (except those withing expressions); the dat
 --}
 
 
-data Function	= Function DocString [(Name, Type)] [Line]
+data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
 
-data Line	= Line [Pattern] Expression
+data Clause	= Clause [Pattern] Expression
 	deriving (Show)
 
 type Comment	= String

@@ -15,16 +15,15 @@ import Def.Def
 This module converts the ParseTree into a single line (thus patterns + expression)
 
 --}
--- data Line	= Line [Pattern] Expression
 
 modName	= "Pt2Line"
 
-pt2line	:: ParseTree -> Line
+pt2line	:: ParseTree -> Clause
 pt2line	=  pt2a h t s convert
 
-convert		:: AST -> Line
+convert		:: AST -> Clause
 convert (Ln pats e)
-		=  Line pats e
+		=  Clause pats e
 convert ast	=  convErr modName ast
 
 
