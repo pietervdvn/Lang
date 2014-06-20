@@ -32,7 +32,7 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
-			print "TODO: Pt2: Function, Import, Languate, TypeDefs"
+			print "TODO: Pt2: Import, Languate, TypeDefs"
 			return pt
 
 -- ts rule str	=  pt rule str >>= print . simplify
