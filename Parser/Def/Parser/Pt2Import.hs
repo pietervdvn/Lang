@@ -26,19 +26,38 @@ pt2imp	:: ParseTree -> Import
 pt2imp	=  pt2a h t s convert . cleanAll ["dot"]
 
 convert		:: AST -> Import
+convert (Root asts)
+		=  buildImport asts
 convert ast	=  convErr modName ast
 
+
+buildImport	:: [AST] -> Import
+buildImport []	=  Import False [] "" $ BlackList []
+buildImport (PublicT:tail)
+		= let Import _ path name restrict = buildImport tail in
+			Import True path name restrict
+buildImport (ImportT:tail)
+		= buildImport tail
+buildImport (Path p:tail)
+		= let Import public _ _ restrict = buildImport tail in
+			Import public (init' p) (last p) restrict
+buildImport (Restriction r:tail)
+		= let Import public path name _ = buildImport tail in
+			Import public path name r
+buildImport ast	=  convErr (modName++"-buildImport") $ Root ast
 
 data AST	= ImportT
 		| Ident Name
 		| Path [Name]
+		| Restriction Restrict
 		| ParO	| ParC
 		| Dot	| PublicT
+		| Root [AST]
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  []
+h		=  [("limiters",Restriction . pt2restrict)]
 
 t		:: Name -> String -> AST
 t "globalIdent" id
@@ -53,9 +72,12 @@ t nm cont	=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
-s "path" asts	= Path $ accPath asts
+s _ asts@(Ident _:_)
+		= Path $ accPath asts
+s _ asts@(Path _:_)
+		= Path $ accPath asts
 s _ [ast]	= ast
-s nm asts	= seqErr modName nm asts
+s _ asts	= Root asts
 
 accPath		:: [AST] -> [Name]
 accPath []	=  []

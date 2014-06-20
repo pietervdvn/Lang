@@ -58,9 +58,6 @@ conv asts	= convErr (modName++"-conv") (Root asts)
 
 preComms	:: [AST] -> [Comment]
 preComms	=  init' . concatMap (\(Comm c) -> c) . filter isComment
-			where	init'	:: [a] -> [a]
-				init' []	=  []
-				init' ls	= init ls
 
 data AST	= Decl (Name, Type)
 		| Decls [(Name,Type)]

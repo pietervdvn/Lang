@@ -76,5 +76,6 @@ data Law	= Law Name [(Name, Maybe Type)] Expression Expression
 -- restrict is the blacklist/whitelist of the showing/hiding in an import statement
 data Restrict	= BlackList [Name] | WhiteList [Name]
 	deriving (Show)
-data Import	= Import [Name] Name Restrict
+-- represents an import statement. public - Path - ModuleName- restrictions
+data Import	= Import Bool [Name] Name Restrict
 	deriving (Show)
