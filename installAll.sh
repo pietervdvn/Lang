@@ -1,10 +1,7 @@
 #! /bin/bash
 
-cd Consumer
-cabal install --force
-cd ../Regex
-cabal install --force
-cd ../Bnf
-cabal install --force
-cd ../Parser
+# installs all subcomponents, in the right order!
 
+cabal install Consumer/ --force
+cabal install Regex/ --force
+cabal install Bnf/ --force
