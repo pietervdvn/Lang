@@ -9,20 +9,51 @@ import Types
 import Comments
 import Functions
 
+
+ -------------
+ -- ADT DEF --
+ -------------
+
 _optNamed	::= (localIdent+ ":")? type
 _named		::= (localIdent+ ":") type
-_namedSum	::= named ("," optNamed)*	-- first item is obligated named, to disambituate the parser; the first compromise
+-- first item is obligatedly named, to disambituate the parser; the first compromise of the language...
+_namedSum	::= named ("," optNamed)*
 _constructor	::= globalIdent
 _sum		::= "_"? constructor (namedSum | baseType+)? 
- data		::= "data" globalIdent localIdent* "=" sum (comment? "\n\t"? "\|" sum)* (comment "\n")?
+
+_nlt		::= "\n\t"
+_simpleSums	::= ("\|" sum)+
+-- contains the docstrings above or on the same line
+_commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
+_sums		::= (nlt commentedSum)*
+ data		::= "data" "_"? globalIdent localIdent* "=" sum simpleSums? comment? sums
+
+ -------------
+ -- SYN DEF --
+ -------------
+
 
  synonym	::= "type" globalIdent localIdent* "=" type
 
+ -------------
+ -- SUB DEF --
+ -------------
+
  subtype	::= "subtype" "_"? globalIdent localIdent* "=" type
+
+ ------------------------
+ -- CLASS+INSTANCE DEF --
+ ------------------------
 
  class		::= "class" globalIdent localIdent+ ":" (nltab classBody)+ nl
  classBody	::= (law | declaration)
+
+ instance	::= "instance" globalIdent baseType
+
 {-
+-- (only comments below this point)
+
+
 data
 ====
 
@@ -43,12 +74,18 @@ modi	: Record -> Int -> Int -> Record
 
 e.g. 'record.modi (+1)' or (.modi (+1) )
 
-To make a constructor private, add a _ before the constructor
+To make a single constructor private, add a _ before the constructor
 
 -- docstring for record
 data Record	= _A i : Int	-- docstring for record a
+		-- alternative docstring location for b
 		| B b : Bool	-- docstring for record b
+		| C	| D	-- docstring for *both* C and D
 (A is private, B is public)
+
+To make all the constructors private, put an underscore before the name
+
+data _Record	= ...
 
 
 Type synonyms and subtypes
@@ -98,6 +135,10 @@ class Monad m a where
 	return 	:: a -> m a
 	(>>=)	:: m a -> (a -> m b) -> m b
 
+Instance
+========
+
+Instance is not obligated. If it is stated, the compiler will check it actually implements all the needed stuff, with the needed laws.
 
 Are types public?
 ================		
