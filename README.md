@@ -7,7 +7,7 @@ Yet another programming language
 Getting started
 ===============
 
-Install submodules first with ````cabal install <module>```` in following order: [consumer, regex, bnf, parser].
+Execute ````installAll````. If this fail, install all submodules first with ````cabal install <module>```` in following order: [consumer, regex, bnf].
 
 To parse stuff with the bnf-lib, see the readme in bnf.
 
