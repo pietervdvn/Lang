@@ -34,8 +34,15 @@ instance Show Exception where
 
 
 data Pr	a	= P (Parser Exception a)
-data Mode	= EatWS 	| LeaveWS
+data Mode	= EatWS 	
+		| LeaveWS	| LeaveOnce
 	deriving (Eq)
+
+weaken		:: Mode -> Mode
+weaken LeaveWS	=  LeaveOnce
+weaken mode	=  mode
+
+
 type St a	= StateT (Context, Mode) Pr a
 
 
@@ -89,7 +96,7 @@ p (Call name)	=  do	Module local imported	<- getModule
 			if name `member` local then do
 				s <- get
 				modify $ first $ gotoN name
-				modify $ second $ const EatWS
+				modify $ second $ weaken
 				pt	<- p (fromJust $ lookup name local)
 				put s
 				return pt
@@ -132,7 +139,8 @@ p (And toP conditions)
 		= do	conds	<- mapM (isolate . pCond) conditions	-- apply conditions in an isoloated way *before* the side effects of parsing toP
 			r	<- p toP
 			if and conds then return r else lft abort
-p (NWs expr)	= do	(_,mode)	<- get
+p (NWs expr)	= do	pWs
+			(_,mode)	<- get
 			modify $ second $ const LeaveWS
 			pt		<- p expr
 			modify $ second $ const mode
@@ -141,8 +149,10 @@ p (NWs expr)	= do	(_,mode)	<- get
 
 -- parses whitespace if eatWS is activi
 pWs		:: St ()
-pWs		=  do	(_,mode)	<- get
-			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())	-- DO NOT CHANGE TO 'void $ longest....'. The lazyness won't evaluate the whitespace!
+pWs		=  do	(ctx,mode)	<- get
+			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())
+			when (mode == LeaveOnce) $ put (ctx, EatWS)
+				
 
 _seq		:: [ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo
