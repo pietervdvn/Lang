@@ -12,7 +12,7 @@ import Imports
 
 a	::= "b"
 
-statement	::= function | nls? data | nls? synonym | nls? subtype | nls? class
+statement	::= function | data | nls? synonym | nls? subtype | nls? class
 
 lang	::= globalIdent exported? "\n" nlcomment (nls? import)* statement* (example nl)* nls? 
 
