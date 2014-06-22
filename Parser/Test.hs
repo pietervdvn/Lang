@@ -14,8 +14,7 @@ import Def.Parser.Pt2Declaration
 import Def.Parser.Pt2Function
 import Def.Parser.Pt2Line
 import Def.Parser.Pt2Import
-import Def.Parser.Pt2DataDefSum
-import Def.Parser.Pt2DataDefProd
+import Def.Parser.Pt2DataDef
 import Control.Monad.Writer
 
 import System.IO.Unsafe

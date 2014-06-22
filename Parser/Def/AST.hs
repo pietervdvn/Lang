@@ -25,18 +25,16 @@ data Visible	= Private
 	deriving (Show)
 
 data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
+	deriving (Show)
 
 setComment	:: Comment -> ADTSum -> ADTSum
 setComment comm (ADTSum nm v _ nmts)
 		=  ADTSum nm v (Just comm) nmts
 	
-instance Show ADTSum where
-	show (ADTSum nm _ Nothing nmt)	= "<adtsum "++nm++show (map snd nmt) ++">"
-	show (ADTSum nm _ (Just c) nmt)	= "<adtsum "++nm++show (map snd nmt) ++"--"++c++">"
-
 -- data List a  = Cons a (List a) | Nil
--- becomes : ADTDef "List" ["a"] _[products
-data ADTDef	= ADTDef Name [Type] DocString [ADTSum]
+-- becomes : ADTDef "List" ["a"] "Comment about a list" product
+data ADTDef	= ADTDef Name [Name] DocString [ADTSum]
+	deriving (Show)
 
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
