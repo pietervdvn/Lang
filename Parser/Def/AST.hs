@@ -48,6 +48,11 @@ data ADTDef	= ADTDef Name [Name] DocString [ADTSum]
 data SynDef	= SynDef Name [Name] Type
 	deriving (Show)
 
+-- e.g. subtype Name = String -- see bnf for usage
+-- no obligated docstring for this one!
+data SubDef	= SubDef Name [Name] Type
+	deriving (Show)
+
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
 
