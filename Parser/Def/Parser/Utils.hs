@@ -36,7 +36,7 @@ convErr		:: Show ast => Name -> ast -> a
 convErr str ast	=  error $ "Convert error in "++str++" on "++show ast
 
 tokenErr str nm tok
-		=  error $ "Tokenize error in "++str++" on rule "++nm++" with token "++tok
+		=  error $ "Tokenize error in "++str++" on rule "++nm++" with token "++show tok
 
 seqErr str nm asts
 		=  error $ "Sequencer error in "++str++" on rule "++nm++" with asts "++show asts

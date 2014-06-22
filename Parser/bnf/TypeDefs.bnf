@@ -29,7 +29,8 @@ _simpleSums	::= ("\|" sum)+
 -- contains the docstrings above or on the same line
 _commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
 _sums		::= (nlt commentedSum)*
- data		::= nlcomment+ "data" "_"? globalIdent localIdent* "=" sum simpleSums? comment? sums
+ prod		::= sum simpleSums? comment? sums
+ data		::= nlcomment+ "data" "_"? globalIdent localIdent* "=" prod
 
  -------------
  -- SYN DEF --
