@@ -24,8 +24,7 @@ convert (Data comms vis name frees sums)
 convert ast	=  convErr modName ast
 
 
-data AST	= Comm Comment
-		| Comms [Comment]
+data AST	= Comms [Comment]
 		| Ident Name
 		| FreeTypes [Name]
 		| Prod [ADTSum]
@@ -35,7 +34,7 @@ data AST	= Comm Comment
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nlcomment", Comm . pt2comment),("prod", Prod . pt2prod),("freeTypes", FreeTypes . pt2freetypes)]
+h		=  [("nlcomments", Comms . pt2nlcomments),("prod", Prod . pt2prod),("freeTypes", FreeTypes . pt2freetypes)]
 
 t		:: Name -> String -> AST
 t "globalIdent" id
@@ -49,8 +48,7 @@ t nm cont	=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
-s "nlcomments" asts
-		= Comms $ map (\(Comm c) -> c) asts
+
 s _ (Comms comms:DataT:PrivT:tail)
 		= let Data comms' _ name freetypes sums = s "data" (Comms comms:DataT:tail) in
 			Data comms' Private name freetypes sums

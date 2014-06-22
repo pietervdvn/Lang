@@ -16,6 +16,7 @@ import Def.Parser.Pt2Line
 import Def.Parser.Pt2Import
 import Def.Parser.Pt2DataDef
 import Def.Parser.Pt2TypeDef
+import Def.Parser.Pt2ClassDef
 import Control.Monad.Writer
 
 import System.IO.Unsafe
@@ -35,7 +36,7 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
-			print "TODO: Pt2: TypeDefs, Languate"
+			print "TODO: Pt2: ClassDef, Languate"
 			return pt
 
 -- ts rule str	=  pt rule str >>= print . simplify

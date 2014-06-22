@@ -15,4 +15,4 @@ nltab		::=  (mlcomment | comment) ? "\n\t"
 
 comment		::= "--" $%"!\n"*
 mlcomment	::= "---+" %$( "!-+" | "--!-|-!-" | "[ \t]")*  "---+"
-
+nlcomments	::= nlcomment+

@@ -1,4 +1,4 @@
-module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls) where
+module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls, pt2nlcomments) where
 
 
 import StdDef
@@ -62,14 +62,16 @@ hNl		= [("comment",pt2ast),("nlcomment", pt2ast)]
 			where pt2ast	= simpleConvert [] t s
 
 
-
+pt2nlcomments	=  pt2nls
 pt2nls		:: ParseTree -> [Comment]
 pt2nls		=  pt2a hNls (tokenErr "Pt2Comment-nls") sNls (\(Comments strs) -> strs)
 
 
 hNls		:: [(Name, ParseTree -> AST)]
-hNls		=  [("nl", Comments . catMaybes . (\a->[a]) . pt2nl)]
+hNls		=  [("nl", Comments . catMaybes . (\a->[a]) . pt2nl),("nlcomment",Comment . pt2comment)]
 
 sNls		:: Name -> [AST] -> AST
+sNls "nlcomments" asts
+		= Comments $ map (\(Comment c) -> c) asts
 sNls "nls" [Nl]	= Comments []
 sNls "nls" asts = Comments $ concatMap (\(Comments strs) -> strs) asts

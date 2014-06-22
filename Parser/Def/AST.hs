@@ -14,16 +14,14 @@ The structures here include comments (except those withing expressions); the dat
 --}
 
 
-{- data ADT	= A | B | C 
-
-A single constructor is represented by a single ADTSum-object.
-
--}
 
 data Visible	= Private	
 		| Public
 	deriving (Show)
 
+{- data ADT	= A | B | C 
+
+A single constructor is represented by a single ADTSum-object -}
 data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 	deriving (Show)
 
@@ -53,11 +51,19 @@ data SynDef	= SynDef Name [Name] Type
 data SubDef	= SubDef Name [Name] Type
 	deriving (Show)
 
+-- Name: name of the new class; second Name: name of it in the functions; [(Name,Type)]: declarations
+data ClassDef	= ClassDef Name Name DocString [Law] [(Name,Type)]
+	deriving (Show)
+data Instance	= Instance Name Type
+	deriving (Show)
+
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
 
 data Clause	= Clause [Pattern] Expression
 	deriving (Show)
+
+
 
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
