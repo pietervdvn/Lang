@@ -1,4 +1,4 @@
-module Bnf.BNF (Module (Module), World, Expression (Rgx, NWs, Token, Call, Opt, Star, Choice, More, Seq, Set, And), tokenize, isEmpty, ws) where
+module Bnf.BNF (Module (Module), World, Expression (Rgx, NWs, Token, Call, Opt, Star, Choice, More, Seq, Set, And), isEmpty, ws) where
 
 import Bnf.FQN
 import Data.Map hiding (map, filter, foldr)
@@ -70,12 +70,6 @@ sAnd st	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ st ++ acc) ""
 sOrred	:: String -> [Expression] -> String
 sOrred str exprs 
 	= foldr (\e acc -> s e ++ str ++ acc) (s $ last exprs) (init exprs)
-
--- converts an expression to a token by adding token, and by checking that
-tokenize	:: Expression -> Expression
-tokenize	= Token
-
-
 
 instance Normalizable Expression where
 	normalize	= n
