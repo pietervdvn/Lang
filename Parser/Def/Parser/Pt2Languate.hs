@@ -17,7 +17,7 @@ This module converts the ParseTree into a full
 
 modName	= "Pt2Function"
 
-pt2func	:: ParseTree -> 
+pt2func	:: ParseTree -> Int
 pt2func	=  pt2a h t s convert . cleanAll ["nl"]
 
 convert		:: AST -> Expression

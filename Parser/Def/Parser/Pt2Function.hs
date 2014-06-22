@@ -23,7 +23,7 @@ Declarations may have multiple (explicit) types
 modName	= "Pt2Function"
 
 pt2func	:: ParseTree -> ([Comment],Function)
-pt2func	=  pt2a h t s convert . cleanAll ["nl"]
+pt2func	=  pt2a h (tokenErr modName) s convert . cleanAll ["nl"]
 
 convert		:: AST -> ([Comment], Function)
 convert (Root asts)
@@ -69,11 +69,6 @@ data AST	= Decl (Name, Type)
 h		:: [(Name, ParseTree -> AST)]
 h		=  [("nlcomment", Comm . inLst . pt2comment),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
 
-t		:: Name -> String -> AST
-t nm cont	=  tokenErr modName nm cont
-
-
-s		:: Name -> [AST] -> AST
 s _ comms@(Comm _:Comm _:_)
 		= Comm $ accComms comms
 s _ lws@(LawAst _:_)

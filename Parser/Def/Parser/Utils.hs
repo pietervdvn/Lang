@@ -15,13 +15,13 @@ pt2a		:: [(Name, ParseTree -> ast)] -> (Name -> String -> ast) -> (Name -> [ast]
 pt2a h t s conv	=  conv . simpleConvert h t s
 
 -- just like the real simple convert, but with this exception-writer things stripped out.
-simpleConvert	:: [(Name, (ParseTree -> ast))] -> (Name -> String -> ast) -> (Name -> [ast] -> ast) -> ParseTree -> ast
+simpleConvert	:: [(Name, ParseTree -> ast)] -> (Name -> String -> ast) -> (Name -> [ast] -> ast) -> ParseTree -> ast
 simpleConvert h t s pt
 	=  fst $ runWriter $ Conv.simpleConvert (_modify h) t s pt
 
 
 -- used to convert the simple hooks into a form which writes errors
-_modify		:: (Monad m) => [(Name, ParseTree -> ast)] -> (Name -> ParseTree -> Maybe (m ast))
+_modify		:: (Monad m) => [(Name, ParseTree -> ast)] -> Name -> ParseTree -> Maybe (m ast)
 _modify hs nm pt=  case lookup nm hs of
 			Nothing	-> Nothing
 			(Just f')	-> Just $ return $ f' pt

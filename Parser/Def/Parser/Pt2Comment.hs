@@ -68,7 +68,7 @@ pt2nls		=  pt2a hNls (tokenErr "Pt2Comment-nls") sNls (\(Comments strs) -> strs)
 
 
 hNls		:: [(Name, ParseTree -> AST)]
-hNls		=  [("nl", Comments . catMaybes . (\a->[a]) . pt2nl),("nlcomment",Comment . pt2comment)]
+hNls		=  [("nl", Comments . catMaybes . (:[]) . pt2nl),("nlcomment",Comment . pt2comment)]
 
 sNls		:: Name -> [AST] -> AST
 sNls "nlcomments" asts
