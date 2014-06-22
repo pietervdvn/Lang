@@ -38,7 +38,7 @@ _freeTypes	::= localIdent*
  -- SYN DEF --
  -------------
 
- synonym	::= "type" globalIdent localIdent* "=" type
+ synonym	::= "type" globalIdent freeTypes "=" type
 
  -------------
  -- SUB DEF --
