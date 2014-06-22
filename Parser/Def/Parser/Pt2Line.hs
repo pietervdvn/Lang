@@ -8,7 +8,7 @@ import Def.Parser.Utils
 import Def.Parser.Pt2Expr
 import Def.Parser.Pt2Pattern
 import Def.Parser.Pt2Comment
-import Def.Def
+import Def.AST
 
 {--
 

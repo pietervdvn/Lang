@@ -14,12 +14,15 @@ import Functions
  -- ADT DEF --
  -------------
 
-_optNamed	::= (localIdent+ ":")? type
-_named		::= (localIdent+ ":") type
+_idents		::= localIdent+
+_optNamed	::= (idents ":")? type
+_named		::= (idents ":") type
 -- first item is obligatedly named, to disambituate the parser; the first compromise of the language...
-_namedSum	::= named ("," optNamed)*
-_constructor	::= globalIdent
-_sum		::= "_"? constructor (namedSum | baseType+)? 
+_namedSum	::= named (comma optNamed)*
+
+_$constructor	::= globalIdent
+_types		::= baseType+
+ sum		::= "_"? constructor (namedSum | types)? 
 
 _nlt		::= "\n\t"
 _simpleSums	::= ("\|" sum)+

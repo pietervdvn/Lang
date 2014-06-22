@@ -10,7 +10,7 @@ import Def.Parser.Pt2Prelude
 import Def.Parser.Pt2Type
 import Def.Parser.Pt2Expr
 import Def.Parser.Pt2Pattern
-import Def.Def
+import Def.AST
 
 {--
 

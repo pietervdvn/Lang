@@ -1,4 +1,4 @@
-module Def.Def where
+module Def.AST where
 
 import StdDef
 {--
@@ -13,6 +13,19 @@ The structures here include comments (except those withing expressions); the dat
 
 --}
 
+
+{- data ADT	= A | B | C 
+
+A single constructor is represented by a single ADTSum-object.
+
+-}
+
+data Visible	= Private	
+		| Public
+	deriving (Show)
+
+data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
+	deriving (Show)
 
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
@@ -39,8 +52,10 @@ data Expression	= Nat Int
 
 data Pattern	= Assign Name	-- gives a name to the argument
 		| Let Name Expression	-- evaluates the expression, and assigns it to the given name
-		| Deconstruct Name [Pattern]	{- deconstructs the argument with a function of type a -> Maybe (d,e,f,...), in which a is of the type of the corresponding argument. The patterns then match the tuple (there should be exactly the same number). If the maybe returns Nothing, matching fails
- Map/Set/List syntactic sugar is translated into something like this. A constructor works in the opposite way here-}
+		{- Deconstructs the argument with a function of type a -> Maybe (d,e,f,...), in which a is of the type of the corresponding argument.
+			The patterns then match the tuple (there should be exactly the same number). If the maybe returns Nothing, matching fails
+ 				Map/Set/List syntactic sugar is translated into something like this. A constructor works in the opposite way here-}
+		| Deconstruct Name [Pattern]
 		| Multi [Pattern]	-- at-patterns
 		| Eval Expression	-- evaluates an expression, which should equal the argument. Matching against ints is (secretly) done with this. 
 		| DontCare		-- underscore
@@ -77,5 +92,5 @@ data Law	= Law Name [(Name, Maybe Type)] Expression Expression
 data Restrict	= BlackList [Name] | WhiteList [Name]
 	deriving (Show)
 -- represents an import statement. public - Path - ModuleName- restrictions
-data Import	= Import Bool [Name] Name Restrict
+data Import	= Import Visible [Name] Name Restrict
 	deriving (Show)

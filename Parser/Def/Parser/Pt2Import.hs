@@ -11,7 +11,7 @@ import Def.Parser.Pt2Type
 import Def.Parser.Pt2Expr
 import Def.Parser.Pt2Pattern
 import Def.Parser.Pt2Comment
-import Def.Def
+import Def.AST
 
 {--
 
@@ -32,10 +32,10 @@ convert ast	=  convErr modName ast
 
 
 buildImport	:: [AST] -> Import
-buildImport []	=  Import False [] "" $ BlackList []
+buildImport []	=  Import Private [] "" $ BlackList []
 buildImport (PublicT:tail)
 		= let Import _ path name restrict = buildImport tail in
-			Import True path name restrict
+			Import Public path name restrict
 buildImport (ImportT:tail)
 		= buildImport tail
 buildImport (Path p:tail)

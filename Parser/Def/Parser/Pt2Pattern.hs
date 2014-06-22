@@ -7,7 +7,7 @@ import Bnf.ParseTree
 import Control.Monad.Writer
 import Control.Monad
 import Def.Parser.Utils
-import Def.Def 
+import Def.AST 
 import Def.Parser.Pt2Expr
 import Def.Parser.Pt2Prelude
 

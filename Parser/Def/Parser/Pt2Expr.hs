@@ -8,8 +8,8 @@ import Control.Monad
 import Def.Parser.Utils
 import Def.Parser.Pt2Prelude
 import Def.Parser.Pt2Type
-import qualified Def.Def as Def
-import Def.Def hiding (Seq, Flt, Nat, Chr, List, Tuple)
+import qualified Def.AST as Def
+import Def.AST hiding (Seq, Flt, Nat, Chr, List, Tuple)
 
 {--
 

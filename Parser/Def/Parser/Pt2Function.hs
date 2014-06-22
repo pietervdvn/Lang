@@ -14,7 +14,7 @@ import Def.Parser.Pt2Comment
 import Def.Parser.Pt2Law
 import Def.Parser.Pt2Declaration
 import Def.Parser.Pt2Line
-import Def.Def
+import Def.AST
 
 {--
 

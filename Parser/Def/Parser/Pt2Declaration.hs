@@ -7,7 +7,7 @@ import Control.Monad.Writer
 import Control.Monad
 
 import Def.Parser.Pt2Type
-import Def.Def
+import Def.AST
 import Def.Parser.Utils
 
 

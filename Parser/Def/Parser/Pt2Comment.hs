@@ -7,7 +7,7 @@ import Bnf hiding (simpleConvert)
 import Control.Monad.Writer
 import Data.Maybe
 
-import Def.Def hiding (Tuple)
+import Def.AST hiding (Tuple)
 import Def.Parser.Utils
 {--
 See module name
