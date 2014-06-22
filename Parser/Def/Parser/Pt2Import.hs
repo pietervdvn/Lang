@@ -3,14 +3,7 @@ module Def.Parser.Pt2Import (pt2imp, pt2restrict) where
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Control.Monad.Writer
-import Control.Monad
 import Def.Parser.Utils
-import Def.Parser.Pt2Prelude
-import Def.Parser.Pt2Type
-import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Pattern
-import Def.Parser.Pt2Comment
 import Def.AST
 
 {--

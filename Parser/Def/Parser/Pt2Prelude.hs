@@ -4,7 +4,6 @@ module Def.Parser.Pt2Prelude (parseString, parseChar, parseNat, parseFloat) wher
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Control.Monad.Writer
 import Def.Parser.Utils
 import Data.Char
 import Data.List

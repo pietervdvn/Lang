@@ -42,6 +42,11 @@ setCommentIf _ sum
 data ADTDef	= ADTDef Name [Name] DocString [ADTSum]
 	deriving (Show)
 
+
+-- e.g. type Name = String
+-- no obligated docstring for this one!
+data SynDef	= SynDef Name [Name] Type
+
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
 

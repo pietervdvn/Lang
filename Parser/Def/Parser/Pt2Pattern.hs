@@ -4,8 +4,6 @@ import StdDef
 import Bnf
 import Bnf.ParseTree
 
-import Control.Monad.Writer
-import Control.Monad
 import Def.Parser.Utils
 import Def.AST 
 import Def.Parser.Pt2Expr

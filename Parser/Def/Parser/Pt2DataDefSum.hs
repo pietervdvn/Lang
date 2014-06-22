@@ -3,14 +3,8 @@ module Def.Parser.Pt2DataDefSum (pt2sum) where
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Control.Monad.Writer
-import Control.Monad
 import Def.Parser.Utils
-import Def.Parser.Pt2Prelude
 import Def.Parser.Pt2Type
-import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Pattern
-import Def.Parser.Pt2Comment
 import Def.AST
 
 {--

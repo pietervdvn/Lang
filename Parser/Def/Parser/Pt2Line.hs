@@ -3,7 +3,6 @@ module Def.Parser.Pt2Line (pt2line) where
 import StdDef
 import Bnf
 import Bnf.ParseTree (ParseTree)
-import Control.Monad
 import Def.Parser.Utils
 import Def.Parser.Pt2Expr
 import Def.Parser.Pt2Pattern

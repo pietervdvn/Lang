@@ -3,9 +3,7 @@ module Def.Parser.Pt2Type (pt2type) where
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Control.Monad.Writer
 import Def.Parser.Utils
-import Def.Parser.Pt2Prelude
 import Def.AST hiding (Tuple)
 {--
 This module parses Types! YAY

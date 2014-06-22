@@ -1,10 +1,9 @@
-module Def.Parser.Pt2DataDef (pt2adtdef) where
+module Def.Parser.Pt2DataDef (pt2adtdef, pt2freetypes) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
 import Def.Parser.Utils
-import Def.Parser.Pt2Type
 import Def.Parser.Pt2Comment
 import Def.Parser.Pt2DataDefProd
 import Def.AST
@@ -36,7 +35,7 @@ data AST	= Comm Comment
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nlcomment", Comm . pt2comment),("prod", Prod . pt2prod)]
+h		=  [("nlcomment", Comm . pt2comment),("prod", Prod . pt2prod),("freeTypes", FreeTypes . pt2freetypes)]
 
 t		:: Name -> String -> AST
 t "globalIdent" id
@@ -63,6 +62,16 @@ s _ [Comms comms, DataT, Ident name,EqualT, Prod sums]
 s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
 
+pt2freetypes	:: ParseTree -> [Name]
+pt2freetypes	=  pt2a [] (\"localIdent" id -> Id id) sf conv
 
+sf		:: Name -> [ASTf] -> ASTf
+sf _		=  Ids . map (\(Id id) -> id)
+
+data ASTf	= Id Name
+		| Ids [Name]
+
+conv		:: ASTf -> [Name]
+conv (Ids nms)	=  nms
 
 

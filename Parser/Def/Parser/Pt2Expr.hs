@@ -3,8 +3,6 @@ module Def.Parser.Pt2Expr (pt2expr) where
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (SimpleConvert)
-import Control.Monad.Writer
-import Control.Monad
 import Def.Parser.Utils
 import Def.Parser.Pt2Prelude
 import Def.Parser.Pt2Type

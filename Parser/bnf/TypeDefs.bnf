@@ -31,12 +31,12 @@ _commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums 
 _sums		::= (nlt commentedSum)*
 _prod		::= sum simpleSums? comment? sums
 _nlcomments	::= nlcomment+
- data		::= nlcomments "data" "_"? globalIdent localIdent* "=" prod
+_freeTypes	::= localIdent*
+ data		::= nlcomments "data" "_"? globalIdent freeTypes "=" prod
 
  -------------
  -- SYN DEF --
  -------------
-
 
  synonym	::= "type" globalIdent localIdent* "=" type
 

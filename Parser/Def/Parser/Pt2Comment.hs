@@ -4,7 +4,6 @@ module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls) where
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Control.Monad.Writer
 import Data.Maybe
 
 import Def.AST hiding (Tuple)

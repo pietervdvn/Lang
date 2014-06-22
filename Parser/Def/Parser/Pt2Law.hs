@@ -3,13 +3,9 @@ module Def.Parser.Pt2Law (pt2law) where
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (SimpleConvert)
-import Control.Monad.Writer
-import Control.Monad
 import Def.Parser.Utils
-import Def.Parser.Pt2Prelude
 import Def.Parser.Pt2Type
 import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Pattern
 import Def.AST
 
 {--
