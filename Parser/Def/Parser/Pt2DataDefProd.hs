@@ -64,7 +64,7 @@ s "commentedSum" []
 		= Sums []
 s "commentedSum" (Comm c:BarT:Sum sum:tail)
 		= let Sums sums = s "commentedSum" tail in
-			Sums $ (setComment c sum):sums
+			Sums $ map (setCommentIf c) $ sum:sums
 s _ asts@(Sum _:_)
 		= Sums $ accSums asts
 s _ [BarT, ast]	= ast

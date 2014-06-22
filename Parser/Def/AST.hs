@@ -30,6 +30,12 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 setComment	:: Comment -> ADTSum -> ADTSum
 setComment comm (ADTSum nm v _ nmts)
 		=  ADTSum nm v (Just comm) nmts
+
+setCommentIf	:: Comment -> ADTSum -> ADTSum
+setCommentIf comm sum@(ADTSum _ _ Nothing _)
+		= setComment comm sum
+setCommentIf _ sum
+		= sum
 	
 -- data List a  = Cons a (List a) | Nil
 -- becomes : ADTDef "List" ["a"] "Comment about a list" product
