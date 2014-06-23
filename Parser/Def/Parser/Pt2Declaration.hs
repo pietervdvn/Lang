@@ -30,7 +30,7 @@ convert ast	= convErr "pt2Declaration" ast
 
 data AST	= Type Type
 		| Ident Name
-		| Colon
+		| Colon	| ParO	| ParC
 		| Decl Name Type
 	deriving (Show)
 
@@ -41,11 +41,16 @@ h 		= [("type", Type . pt2type)]
 t		:: Name -> String -> AST
 t "localIdent" id
 		=  Ident id
+t "op" id	=  Ident id
 t _ ":"		=  Colon
+t _ "("		=  ParO
+t _ ")"		=  ParC
 t nm cont	=  tokenErr "Pt2Declaration" nm cont
 
 
 s		:: Name -> [AST] -> AST
+s _ [ParO, Ident id, ParC]
+		= Ident id
 s _ [Ident nm, Colon, Type t]
 		= Decl nm t
 s _ [Ident nm, Colon]

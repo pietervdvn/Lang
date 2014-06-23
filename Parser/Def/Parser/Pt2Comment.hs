@@ -1,4 +1,4 @@
-module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls, pt2nl,pt2nlcomments) where
+module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls,pt2nlcomments) where
 
 
 import StdDef

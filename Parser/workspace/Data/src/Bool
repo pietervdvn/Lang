@@ -1,13 +1,7 @@
 Bool
 ---
 The bool type is a type which represents logical values.
-
----	
-
-
-import Prelude
-public import String hiding { ++, abc}
-import Data.Maybe showing {fromJust}
+---
 
 --## Definition
 

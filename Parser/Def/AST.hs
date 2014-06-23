@@ -71,6 +71,25 @@ data Statement	= FunctionStm 	Function
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
 
+setDocStr	:: Comment -> Function -> Function
+setDocStr docString (Function _ decls laws clauses)
+		= Function docString decls laws clauses
+
+addClause	:: Clause -> Function -> Function
+addClause clause (Function docString decls laws clauses)
+		= Function docString decls laws $ clause:clauses
+
+addLaw		:: Law -> Function -> Function
+addLaw law (Function docString decls laws clauses)
+		= Function docString decls (law:laws) clauses
+
+addDecl		:: (Name,Type) -> Function -> Function
+addDecl decl (Function docString decls laws clauses)
+		= Function docString (decl:decls) laws clauses
+
+
+-- (Function docString decls laws clauses)
+
 data Clause	= Clause [Pattern] Expression
 	deriving (Show)
 

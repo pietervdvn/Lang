@@ -26,31 +26,25 @@ pt2func	:: ParseTree -> ([Comment],Function)
 pt2func	=  pt2a h (tokenErr modName) s convert . cleanAll ["nl"]
 
 convert		:: AST -> ([Comment], Function)
-convert (Root asts)
-		= (preComms asts, conv asts)
-convert ast	=  convErr modName ast
+convert ast@(Root(Comm comms:_))
+		= (init' comms,conv ast $ Function "" [] [] [])
 
-conv		:: [AST] -> Function
-conv []		=  Function "" [] [] []
-conv (LineT clause:tail)
-		= let Function docstr types laws clauses	= conv tail in
-			Function docstr types laws (clause:clauses)
-conv (Laws ls:tail)	
-		= let Function docstr types laws clauses = conv tail in
-			Function docstr types (ls++laws) clauses
-conv (LawAst law:tail)	
-		= let Function docstr types laws clauses = conv tail in
-			Function docstr types (law:laws) clauses
-conv (Decl typ:tail)
-		= let Function docstr types laws clauses = conv tail in
-			Function docstr (typ:types) laws clauses
-conv (Decls typs:tail)
-		= let Function docstr types laws clauses = conv tail in
-			Function docstr (typs++types) laws clauses
-conv (Comm comms:tail)
-		= let Function _ types laws clauses  = conv tail in
-			Function (last comms) types laws clauses
-conv asts	= convErr (modName++"-conv") (Root asts)
+conv		:: AST -> Function -> Function
+conv (LineT clause)
+		= addClause clause
+conv (Laws laws)	
+		= conv $ Root $ map LawAst laws
+conv (LawAst law)	
+		= addLaw law
+conv (Decl typ)
+		= addDecl typ
+conv (Decls decls)
+		= conv $ Root $ map Decl decls
+conv (Comm comms)
+		= setDocStr (last comms)
+conv (Root asts)
+		= \func -> foldr (\ast func -> conv ast func) func asts
+conv asts	= convErr (modName++"-conv") asts
 	
 
 preComms	:: [AST] -> [Comment]
