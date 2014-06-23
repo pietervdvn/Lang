@@ -12,3 +12,6 @@ withoutWS	= %("a" "a")
 
 
 tokenize	= %$("a" *)
+
+
+regex		= "a b"

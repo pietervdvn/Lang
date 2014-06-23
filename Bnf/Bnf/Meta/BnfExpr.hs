@@ -47,7 +47,7 @@ factor' str1 str2
 		= Seq [  Opt $ rgx str1, Opt $ rgx str2 , Call "term", Opt $ rgx "[+*?]"]
 
 term		= Choice [ Call "localIdent"
-			 , Seq [_dquote, Call "regex", _dquote]
+			 , DeepNWs $ Seq [_dquote, Call "regex", _dquote]
 			 , Seq [rgx "\\(", Call "expression", rgx "\\)"]
 			 , Seq [ rgx "\\{", Call "sequence", More $ Seq [_or, Call "sequence"], rgx "\\}"] ] 
 

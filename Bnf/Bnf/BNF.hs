@@ -1,4 +1,4 @@
-module Bnf.BNF (Module (Module), World, Expression (Rgx, NWs, Token, Call, Opt, Star, Choice, More, Seq, Set, And), isEmpty, ws) where
+module Bnf.BNF (Module (Module), World, Expression (Rgx, NWs, DeepNWs, Token, Call, Opt, Star, Choice, More, Seq, Set, And), isEmpty, ws) where
 
 import Bnf.FQN
 import Data.Map hiding (map, filter, foldr)
@@ -21,6 +21,7 @@ ws		= regex "[ \t]*"
 
 data Expression	= Rgx Regex	-- A simple regex which is parsed and given as token (with name that of the current rule)
 		| NWs Expression	-- Indication that no ws should be parsed in the following expression
+		| DeepNWs Expression	-- Indication that no ws should be parsed in the following expression, but also in called expressions.
 		| Token Expression	-- The rule is tokenized (with name the current rule)
 		| Call Name	-- call another rule
 		| Opt Expression	-- rule is optional

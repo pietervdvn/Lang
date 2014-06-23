@@ -36,6 +36,7 @@ instance Show Exception where
 data Pr	a	= P (Parser Exception a)
 data Mode	= EatWS 	
 		| LeaveWS	| LeaveOnce
+		| DeepLeaveWS	-- not influenced by calls
 	deriving (Eq)
 
 weaken		:: Mode -> Mode
@@ -139,9 +140,14 @@ p (And toP conditions)
 		= do	conds	<- mapM (isolate . pCond) conditions	-- apply conditions in an isoloated way *before* the side effects of parsing toP
 			r	<- p toP
 			if and conds then return r else lft abort
-p (NWs expr)	= do	pWs
+p (NWs expr)	= putMode LeaveWS expr
+p (DeepNWs expr)= putMode DeepLeaveWS expr
+
+-- sets the whitespace-eatmode to the provided mode, parses expression in this mode, restores the original mode.
+putMode		:: Mode -> Expression -> St ParseTree
+putMode m expr	= do	pWs
 			(_,mode)	<- get
-			modify $ second $ const LeaveWS
+			modify $ second $ const m
 			pt		<- p expr
 			modify $ second $ const mode
 			return pt
