@@ -1,11 +1,12 @@
 Functor
 -------
-
 A functor is some kind of container, which supports a mapping.
 See (wikipedia)[https://en.wikipedia.org/wiki/Functor].
 
 -------
 
+
+-- Actual implementation
 class Functor f:
 	~ identity: map id	= id
 	map	: (a -> b) -> f a -> f b

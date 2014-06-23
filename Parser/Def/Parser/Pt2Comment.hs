@@ -20,10 +20,10 @@ data AST	= Comment String
 
 t		:: Name -> String -> AST
 t "comment" "--"= CommentO
-t _ "---"	= MlCommDelim
 t _ "\n"	= Nl
 t _ "\n\t"	= Nl
-t _ text	= Comment text
+t _ text	= if all ('-'==) text then MlCommDelim
+			else Comment text
 
 
 s		:: Name -> [AST] -> AST
