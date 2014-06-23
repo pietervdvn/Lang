@@ -32,7 +32,13 @@ data Restrict	= BlackList [Name] | WhiteList [Name]
 	deriving (Show)
 
 
-data Statement	= Statement
+data Statement	= FunctionStm 	Function
+		| ADTDefStm	ADTDef
+		| SynDefStm	SynDef
+		| SubDefStm	SubDef
+		| ClassDefStm	ClassDef
+		| InstanceStm 	Instance
+		| Comments [Comment]
 
 
 -- ## Things about function defitions

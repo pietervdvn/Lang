@@ -1,4 +1,4 @@
-module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls, pt2nlcomments) where
+module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls, pt2nl,pt2nlcomments) where
 
 
 import StdDef
@@ -13,7 +13,7 @@ See module name
 --}
 
 data AST	= Comment String
-		| Comments [String]
+		| Comms [String]
 		| CommentO	| MlCommDelim
 		| Nl
 	deriving (Show)
@@ -64,14 +64,14 @@ hNl		= [("comment",pt2ast),("nlcomment", pt2ast)]
 
 pt2nlcomments	=  pt2nls
 pt2nls		:: ParseTree -> [Comment]
-pt2nls		=  pt2a hNls (tokenErr "Pt2Comment-nls") sNls (\(Comments strs) -> strs)
+pt2nls		=  pt2a hNls (tokenErr "Pt2Comment-nls") sNls (\(Comms strs) -> strs)
 
 
 hNls		:: [(Name, ParseTree -> AST)]
-hNls		=  [("nl", Comments . catMaybes . (:[]) . pt2nl),("nlcomment",Comment . pt2comment)]
+hNls		=  [("nl", Comms . catMaybes . (:[]) . pt2nl),("nlcomment",Comment . pt2comment)]
 
 sNls		:: Name -> [AST] -> AST
 sNls "nlcomments" asts
-		= Comments $ map (\(Comment c) -> c) asts
-sNls "nls" [Nl]	= Comments []
-sNls "nls" asts = Comments $ concatMap (\(Comments strs) -> strs) asts
+		= Comms $ map (\(Comment c) -> c) asts
+sNls "nls" [Nl]	= Comms []
+sNls "nls" asts = Comms $ concatMap (\(Comms strs) -> strs) asts
