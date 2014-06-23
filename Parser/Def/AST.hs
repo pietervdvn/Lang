@@ -16,12 +16,35 @@ The structures here include comments (except those withing expressions); the dat
 
 
 data Module	= Module Name Restrict Imports [Statement]
+	deriving (Show)
 
+setname	:: Name -> Module -> Module
+setname name (Module _ restrict imps stms)
+		= Module name restrict imps stms
+
+setExports	:: [Name] -> Module -> Module
+setExports names (Module name _ imps stms)
+		= Module name (WhiteList names) imps stms
+
+imports		:: (Imports -> Imports) -> Module -> Module
+imports f (Module name restrict imps stms)
+		= Module name restrict (f imps) stms
+
+addStm		:: Statement -> Module -> Module
+addStm (Comments []) mod
+		= mod
+addStm stm (Module name restrict imps stms)
+		= Module name restrict imps (stm:stms)
+
+
+addStms		:: [Statement] -> Module -> Module
+addStms stms mod
+		= foldr (\stm mod -> addStm stm mod) mod stms
 
 -- ## Stuf about imports
 
-data Imports	= Imp Import
-		| ImpComms [Comment]	-- comments hovering around imports
+-- for comments hovering around imports
+type Imports	= [Either Comment Import]
 
 
 -- represents an import statement. public - Path - ModuleName- restrictions
@@ -39,6 +62,8 @@ data Statement	= FunctionStm 	Function
 		| ClassDefStm	ClassDef
 		| InstanceStm 	Instance
 		| Comments [Comment]
+		| ExampleStm	Law
+	deriving (Show)
 
 
 -- ## Things about function defitions

@@ -7,10 +7,9 @@ desc		"The syntaxis of imports in Languate"
 import Prelude
 import Expressions
 
-_id		::= localIdent | globalIdent | op | "\(" op "\)"
-limiters	::= ("hiding" | "showing") "\{" id (comma? id)* "\}"
+id		::= localIdent | globalIdent | "\(" op "\)"
+idSet		::= "\{" id (comma? id)* "\}"
+limiters	::= ("hiding" | "showing") idSet
 import		::= "public"? "import" %((globalIdent dot)* globalIdent) limiters?
 
 _dot		::= %"\."
-_comma		::= ","
-

@@ -1,4 +1,4 @@
-module Def.Parser.Pt2Import (pt2imp, pt2restrict) where
+module Def.Parser.Pt2Import (pt2imp, pt2restrict, pt2idset) where
 
 import StdDef
 import Bnf.ParseTree
@@ -83,6 +83,17 @@ accPath (Path ids:tail)
 
 pt2restrict	:: ParseTree -> Restrict
 pt2restrict	=  pt2a [] tr sr convertR . cleanAll ["comma"]
+
+pt2idset	:: ParseTree -> [Name]
+pt2idset	=  pt2a [] tr sr convertIdSet . cleanAll ["comma"]
+
+convertIdSet	:: ASTR -> [Name]
+convertIdSet (Hide names)
+		= names
+convertIdSet (Show names)
+		= names
+convertIdSet (Asts asts)
+		= getNames asts
 
 data ASTR	= Idnt Name
 		| Asts [ASTR]

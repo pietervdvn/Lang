@@ -10,11 +10,10 @@ import Expressions
 import TypeDefs
 import Imports
 
-statement	::= function | data | nls? synonym | nls? subtype | nls? class
 
-lang	::= globalIdent exported? "\n" nlcomment (nls? import)* statement* (example nl)* nls? 
+{- Where it all begins -}
 
-identifier	::= op	| globalIdent | localIdent
-exportedCont	::= identifier (","? identifier)*
-exported	::= "\{" exportedCont "\}"
+statement	::= function | data | nls? synonym | nls? subtype | class
+
+lang	::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (example nl)* nls? 
 

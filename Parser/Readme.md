@@ -3,6 +3,11 @@ PARSER
 
 This module contains the actual data structure representing the languate language, alongside with the parser + its bnf files.
 
+In this document:
+Overview of the structure of the file
+Common reasons code won't parse
+Overview of builtin functions (which are desugared)
+
 Overview
 ========
 
@@ -17,7 +22,8 @@ Bugs and comments are welcome in the bug tracker (both about the syntax and the 
 Def
 ---
 
-Code will come there
+Def.AST is the abstract syntax tree, which is a one-on-one mapping from the textual representation.
+Def.Parser.Pt2* is code which parses a rule and converts it into an AST
 
 
 workspace
@@ -28,6 +34,23 @@ An example workspace with languate code. Acts as a example/regression test/tryou
 The subfiles in there (will) represent modules.
 
 Feel free to add your own! (Once the code works :p)
+
+Why doesn't my code parse?
+==========================
+
+- Check if each parenthese has a match: ````()````, ````[]````, ````{}````.
+- Check if each function has a docstring
+- Check if each class definition has a docstring
+- Check if each module has a docstring
+- Check if the class definition has a name:
+
+    class Functor:	-- wrong, won't parse
+    class Functor functor:	-- will work
+
+- Still no success? File a bug
+
+Built-in stuff
+==============
 
 Built-in functions (used in desugaring)
 ------------------
