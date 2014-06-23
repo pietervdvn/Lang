@@ -67,7 +67,7 @@ data AST	= Decl (Name, Type)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nlcomment", Comm . inLst . pt2comment),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
+h		=  [("nlcomment", Comm . (:[]) . pt2comment),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
 
 s _ comms@(Comm _:Comm _:_)
 		= Comm $ accComms comms

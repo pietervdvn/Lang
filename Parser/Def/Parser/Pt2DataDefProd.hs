@@ -50,7 +50,7 @@ s		:: Name -> [AST] -> AST
 s _ [Sums sums, Comm c]
 		= Sums $ map (setComment c) sums
 s _ [Sum sum, Comm c]
-		= Sums $ inLst $ setComment c sum
+		= Sums $ (:[]) $ setComment c sum
 s "prod" (Sum sum:Sums sums:Comm c:tail)
 		= let Sums sums' = s "prod" tail in
 			Sums $ map (setComment c) (sum:sums) ++ sums'

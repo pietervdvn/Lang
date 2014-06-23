@@ -8,10 +8,11 @@ import Def.AST
 
 {--
 
+Where it all comes together
+	to start it all.
 
-Where it all comes together.
 
-This module converts the ParseTree into a full 
+This module converts the ParseTree into a full module.
 
 --}
 

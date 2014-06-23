@@ -3,11 +3,11 @@ module Def.AST where
 import StdDef
 {--
 
-This module implements the data structures representing a parsed module. It is possible to recreate the source code starting from a datastructure like this (module some whitespace that's moved)
+This module implements the data structures representing a parsed module. It is possible to recreate the source code starting from a datastructure like this (module some whitespace that's moved and a few dropped comments (but most should be preserverd)
 
 The data flow is:
 
-String -> parsetree -> ast (per bnf-module) -> here defined data structures -> Cleaned up ADT's/CORE (typechecked/type-inferred/disambiguated functions) -> Interpreter
+String -> parsetree -> cpt (often called ast in a pt2...) -> ast (here defined data structure) -> semantic analysis -> Interpreter
 
 The structures here include comments (except those withing expressions); the data structures preserve order. These data structures are thus a good starting point for doc generation (but you'll have to sugar a little again, e.g. NormalType List -> [a], a:b:c:#empty -> [a,b,c] ...
 
@@ -15,47 +15,27 @@ The structures here include comments (except those withing expressions); the dat
 
 
 
-data Visible	= Private	
-		| Public
+data Module	= Module Name Restrict Imports [Statement]
+
+
+-- ## Stuf about imports
+
+data Imports	= Imp Import
+		| ImpComms [Comment]	-- comments hovering around imports
+
+
+-- represents an import statement. public - Path - ModuleName- restrictions
+data Import	= Import Visible [Name] Name Restrict
 	deriving (Show)
-
-{- data ADT	= A | B | C 
-
-A single constructor is represented by a single ADTSum-object -}
-data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
-	deriving (Show)
-
-setComment	:: Comment -> ADTSum -> ADTSum
-setComment comm (ADTSum nm v _ nmts)
-		=  ADTSum nm v (Just comm) nmts
-
-setCommentIf	:: Comment -> ADTSum -> ADTSum
-setCommentIf comm sum@(ADTSum _ _ Nothing _)
-		= setComment comm sum
-setCommentIf _ sum
-		= sum
-	
--- data List a  = Cons a (List a) | Nil
--- becomes : ADTDef "List" ["a"] "Comment about a list" product
-data ADTDef	= ADTDef Name [Name] DocString [ADTSum]
+-- restrict is the blacklist/whitelist of the showing/hiding in an import statement
+data Restrict	= BlackList [Name] | WhiteList [Name]
 	deriving (Show)
 
 
--- e.g. type Name = String
--- no obligated docstring for this one!
-data SynDef	= SynDef Name [Name] Type
-	deriving (Show)
+data Statement	= Statement
 
--- e.g. subtype Name = String -- see bnf for usage
--- no obligated docstring for this one!
-data SubDef	= SubDef Name [Name] Type
-	deriving (Show)
 
--- Name: name of the new class; second Name: name of it in the functions; [(Name,Type)]: declarations
-data ClassDef	= ClassDef Name Name DocString [Law] [(Name,Type)]
-	deriving (Show)
-data Instance	= Instance Name Type
-	deriving (Show)
+-- ## Things about function defitions
 
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
@@ -63,11 +43,19 @@ data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 data Clause	= Clause [Pattern] Expression
 	deriving (Show)
 
+data Visible	= Private	
+		| Public
+	deriving (Show)
 
 
-type Comment	= String
--- a comment just before any declaration, (thus with no newlines in between)
-type DocString	= Comment
+data Type	= Normal String	-- A normal type, e.g. Bool
+		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
+		| Applied Type [Type]
+		| Curry [Type]
+		| TupleType [Type]
+		| Infer
+	deriving (Show)
+
 
 data Expression	= Nat Int
 		| Flt Float
@@ -107,22 +95,65 @@ Deconstruct "unprepend" [ Deconstruct "id" [Assign "a", Assign "b"],  Deconstruc
 
 -}
 
-data Type	= Normal String	-- A normal type, e.g. Bool
-		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
-		| Applied Type [Type]
-		| Curry [Type]
-		| TupleType [Type]
-		| Infer
-	deriving (Show)
+-- ### stuff 'around' function definitions
 
 data Law	= Law Name [(Name, Maybe Type)] Expression Expression
 		| Example Expression Expression
 	deriving (Show)
 
+type Comment	= String
+-- a comment just before any declaration, (thus with no newlines in between)
+type DocString	= Comment
 
--- restrict is the blacklist/whitelist of the showing/hiding in an import statement
-data Restrict	= BlackList [Name] | WhiteList [Name]
+
+-- # Type magic
+
+-- ## New adts
+
+{- data ADT	= A | B | C 
+
+A single constructor is represented by a single ADTSum-object -}
+data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 	deriving (Show)
--- represents an import statement. public - Path - ModuleName- restrictions
-data Import	= Import Visible [Name] Name Restrict
+
+setComment	:: Comment -> ADTSum -> ADTSum
+setComment comm (ADTSum nm v _ nmts)
+		=  ADTSum nm v (Just comm) nmts
+
+setCommentIf	:: Comment -> ADTSum -> ADTSum
+setCommentIf comm sum@(ADTSum _ _ Nothing _)
+		= setComment comm sum
+setCommentIf _ sum
+		= sum
+	
+-- data List a  = Cons a (List a) | Nil
+-- becomes : ADTDef "List" ["a"] "Comment about a list" product
+data ADTDef	= ADTDef Name [Name] DocString [ADTSum]
 	deriving (Show)
+
+
+-- ## Synonym and subtyping
+
+-- e.g. type Name = String
+-- no obligated docstring for this one!
+data SynDef	= SynDef Name [Name] Type
+	deriving (Show)
+
+-- e.g. subtype Name = String -- see bnf for usage
+-- no obligated docstring for this one!
+data SubDef	= SubDef Name [Name] Type
+	deriving (Show)
+
+
+-- ## Creating classes and instances
+
+-- Name: name of the new class; second Name: name of it in the functions; [(Name,Type)]: declarations
+data ClassDef	= ClassDef Name Name DocString [Law] [(Name,Type)]
+	deriving (Show)
+data Instance	= Instance Name Type
+	deriving (Show)
+
+
+
+
+
