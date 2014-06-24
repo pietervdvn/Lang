@@ -36,15 +36,20 @@ BNF
 
 A bnf lib to load, parse and 'execute' bnf-files. See the readme in the bnf-dir for a tutorial.
 
-Parser
-------
-
-The actual parser.
-
 Expirments
 ----------
 
 Haskell code experiments to try out concepts
+
+
+Compiler pipeline
+-----------------
+
+- Parser: File -> Module
+- Loader: File -> [Module] (loads deps from imports)
+- Semananalyse: Semantic analyses (type check+infer)
+
+
 
 Selling points
 ==============
