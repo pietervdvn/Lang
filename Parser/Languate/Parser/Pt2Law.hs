@@ -1,12 +1,12 @@
-module Def.Parser.Pt2Law (pt2law) where
+module Languate.Parser.Pt2Law (pt2law) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (SimpleConvert)
-import Def.Parser.Utils
-import Def.Parser.Pt2Type
-import Def.Parser.Pt2Expr
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2Expr
+import Languate.AST
 
 {--
 

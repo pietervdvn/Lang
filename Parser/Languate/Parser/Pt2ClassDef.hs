@@ -1,15 +1,15 @@
-module Def.Parser.Pt2ClassDef (pt2classDef, pt2instance) where
+module Languate.Parser.Pt2ClassDef (pt2classDef, pt2instance) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Def.Parser.Utils
-import Def.Parser.Pt2Law
-import Def.Parser.Pt2Declaration
-import Def.Parser.Pt2DataDef
-import Def.Parser.Pt2Comment
-import Def.Parser.Pt2Type
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Law
+import Languate.Parser.Pt2Declaration
+import Languate.Parser.Pt2DataDef
+import Languate.Parser.Pt2Comment
+import Languate.Parser.Pt2Type
+import Languate.AST
 import Control.Arrow
 
 {--

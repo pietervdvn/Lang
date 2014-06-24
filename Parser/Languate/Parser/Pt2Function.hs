@@ -1,17 +1,17 @@
-module Def.Parser.Pt2Function (pt2func) where
+module Languate.Parser.Pt2Function (pt2func) where
 
 import StdDef
 import Bnf.ParseTree hiding (Line)
 import Bnf
-import Def.Parser.Utils
-import Def.Parser.Pt2Type
-import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Pattern
-import Def.Parser.Pt2Comment
-import Def.Parser.Pt2Law
-import Def.Parser.Pt2Declaration
-import Def.Parser.Pt2Line
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2Expr
+import Languate.Parser.Pt2Pattern
+import Languate.Parser.Pt2Comment
+import Languate.Parser.Pt2Law
+import Languate.Parser.Pt2Declaration
+import Languate.Parser.Pt2Line
+import Languate.AST
 
 {--
 

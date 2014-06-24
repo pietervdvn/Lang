@@ -1,13 +1,13 @@
-module Def.Parser.Pt2Pattern (pt2pattern) where
+module Languate.Parser.Pt2Pattern (pt2pattern) where
 
 import StdDef
 import Bnf
 import Bnf.ParseTree
 
-import Def.Parser.Utils
-import Def.AST 
-import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Prelude
+import Languate.Parser.Utils
+import Languate.AST 
+import Languate.Parser.Pt2Expr
+import Languate.Parser.Pt2Prelude
 
 import Data.Maybe
 {--

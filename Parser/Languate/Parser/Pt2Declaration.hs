@@ -1,11 +1,11 @@
-module Def.Parser.Pt2Declaration (pt2decl) where
+module Languate.Parser.Pt2Declaration (pt2decl) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Def.Parser.Pt2Type
-import Def.AST
-import Def.Parser.Utils
+import Languate.Parser.Pt2Type
+import Languate.AST
+import Languate.Parser.Utils
 
 
 {--

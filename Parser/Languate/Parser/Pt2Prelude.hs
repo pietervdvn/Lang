@@ -1,10 +1,10 @@
-module Def.Parser.Pt2Prelude (parseString, parseChar, parseNat, parseFloat) where
+module Languate.Parser.Pt2Prelude (parseString, parseChar, parseNat, parseFloat) where
 {- Converts prelude things to parsed things -}
 
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Def.Parser.Utils
+import Languate.Parser.Utils
 import Data.Char
 import Data.List
 import Data.Maybe

@@ -1,11 +1,11 @@
-module Def.Parser.Pt2DataDefSum (pt2sum) where
+module Languate.Parser.Pt2DataDefSum (pt2sum) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Def.Parser.Utils
-import Def.Parser.Pt2Type
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Type
+import Languate.AST
 
 {--
 

@@ -5,3 +5,4 @@
 cabal install Consumer/ --force
 cabal install Regex/ --force
 cabal install Bnf/ --force
+cabal install Parser/ --force

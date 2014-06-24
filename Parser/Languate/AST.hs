@@ -1,4 +1,4 @@
-module Def.AST where
+module Languate.AST where
 
 import StdDef
 {--
@@ -17,29 +17,6 @@ The structures here include comments (except those withing expressions); the dat
 
 data Module	= Module Name Restrict Imports [Statement]
 	deriving (Show)
-
-setname	:: Name -> Module -> Module
-setname name (Module _ restrict imps stms)
-		= Module name restrict imps stms
-
-setExports	:: [Name] -> Module -> Module
-setExports names (Module name _ imps stms)
-		= Module name (WhiteList names) imps stms
-
-imports		:: (Imports -> Imports) -> Module -> Module
-imports f (Module name restrict imps stms)
-		= Module name restrict (f imps) stms
-
-addStm		:: Statement -> Module -> Module
-addStm (Comments []) mod
-		= mod
-addStm stm (Module name restrict imps stms)
-		= Module name restrict imps (stm:stms)
-
-
-addStms		:: [Statement] -> Module -> Module
-addStms stms mod
-		= foldr (\stm mod -> addStm stm mod) mod stms
 
 -- ## Stuf about imports
 
@@ -70,23 +47,6 @@ data Statement	= FunctionStm 	Function
 
 data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 	deriving (Show)
-
-setDocStr	:: Comment -> Function -> Function
-setDocStr docString (Function _ decls laws clauses)
-		= Function docString decls laws clauses
-
-addClause	:: Clause -> Function -> Function
-addClause clause (Function docString decls laws clauses)
-		= Function docString decls laws $ clause:clauses
-
-addLaw		:: Law -> Function -> Function
-addLaw law (Function docString decls laws clauses)
-		= Function docString decls (law:laws) clauses
-
-addDecl		:: (Name,Type) -> Function -> Function
-addDecl decl (Function docString decls laws clauses)
-		= Function docString (decl:decls) laws clauses
-
 
 -- (Function docString decls laws clauses)
 
@@ -166,16 +126,6 @@ A single constructor is represented by a single ADTSum-object -}
 data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 	deriving (Show)
 
-setComment	:: Comment -> ADTSum -> ADTSum
-setComment comm (ADTSum nm v _ nmts)
-		=  ADTSum nm v (Just comm) nmts
-
-setCommentIf	:: Comment -> ADTSum -> ADTSum
-setCommentIf comm sum@(ADTSum _ _ Nothing _)
-		= setComment comm sum
-setCommentIf _ sum
-		= sum
-	
 -- data List a  = Cons a (List a) | Nil
 -- becomes : ADTDef "List" ["a"] "Comment about a list" product
 data ADTDef	= ADTDef Name [Name] DocString [ADTSum]

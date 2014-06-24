@@ -1,27 +1,27 @@
-module Test where
+module Languate.MaintanceAccess.TestPt2AST where
 
 import Bnf
 import Normalizable
 import Data.Maybe
 import Bnf.ParseTree
 
-import Def.Parser.Pt2Type
-import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Comment
-import Def.Parser.Pt2Pattern
-import Def.Parser.Pt2Law
-import Def.Parser.Pt2Declaration
-import Def.Parser.Pt2Function
-import Def.Parser.Pt2Line
-import Def.Parser.Pt2Import
-import Def.Parser.Pt2DataDef
-import Def.Parser.Pt2TypeDef
-import Def.Parser.Pt2ClassDef
-import Def.Parser.Pt2Statement
+import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2Expr
+import Languate.Parser.Pt2Comment
+import Languate.Parser.Pt2Pattern
+import Languate.Parser.Pt2Law
+import Languate.Parser.Pt2Declaration
+import Languate.Parser.Pt2Function
+import Languate.Parser.Pt2Line
+import Languate.Parser.Pt2Import
+import Languate.Parser.Pt2DataDef
+import Languate.Parser.Pt2TypeDef
+import Languate.Parser.Pt2ClassDef
+import Languate.Parser.Pt2Statement
 
-import Def.Parser.Pt2Languate
+import Languate.Parser.Pt2Languate
 
-import Def.File2AST
+import Languate.File2AST
 import System.IO.Unsafe
 import StdDef
 {--
@@ -42,7 +42,7 @@ tf ... ... "file to read"
 
 -- creates a parsetree. Give the rule it should parse against and the string it should parse, you'll get the parsetree
 pt		:: String -> String -> IO ParseTree
-pt rule str	=  do	world	<- load "bnf/Languate"
+pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
 			let mpt	= parseFull world (toFQN ["Languate"]) rule $ str++"\n"
 			let pt' = fromMaybe (error "Incorrect parse, not even a single character could be parsed! Check if everything has it's docstring") mpt
 			let pt  = case pt' of
@@ -58,7 +58,7 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 tf		:: (ParseTree -> a) -> Name -> FilePath -> a
 tf convertor rule fp
 		=  let	str 	= unsafePerformIO $ readFile fp in
-			tst converter rule str
+			tst convertor rule str
 
 
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something

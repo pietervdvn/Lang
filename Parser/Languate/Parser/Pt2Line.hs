@@ -1,13 +1,13 @@
-module Def.Parser.Pt2Line (pt2line) where
+module Languate.Parser.Pt2Line (pt2line) where
 
 import StdDef
 import Bnf
 import Bnf.ParseTree (ParseTree)
-import Def.Parser.Utils
-import Def.Parser.Pt2Expr
-import Def.Parser.Pt2Pattern
-import Def.Parser.Pt2Comment
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Expr
+import Languate.Parser.Pt2Pattern
+import Languate.Parser.Pt2Comment
+import Languate.AST
 
 {--
 

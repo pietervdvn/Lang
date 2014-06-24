@@ -1,12 +1,13 @@
-module Def.Parser.Pt2DataDefProd (pt2prod) where
+module Languate.Parser.Pt2DataDefProd (pt2prod) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Def.Parser.Utils
-import Def.Parser.Pt2Comment
-import Def.Parser.Pt2DataDefSum
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Comment
+import Languate.Parser.Pt2DataDefSum
+import Languate.AST
+import Languate.Parser.Utils
 
 {--
 

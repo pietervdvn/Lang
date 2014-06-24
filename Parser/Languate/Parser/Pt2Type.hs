@@ -1,10 +1,10 @@
-module Def.Parser.Pt2Type (pt2type) where
+module Languate.Parser.Pt2Type (pt2type) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Def.Parser.Utils
-import Def.AST hiding (Tuple)
+import Languate.Parser.Utils
+import Languate.AST hiding (Tuple)
 {--
 This module parses Types! YAY
 --}

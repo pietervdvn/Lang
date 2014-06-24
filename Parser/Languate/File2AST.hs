@@ -1,4 +1,4 @@
-module Def.File2AST (loadBnf) where
+module Languate.File2AST (loadBnf, parse, load) where
 
 {--
 
@@ -7,9 +7,9 @@ This module loads a module from file and makes an AST-module of it.
 --}
 
 import StdDef
-import Def.AST
+import Languate.AST
 import qualified Bnf
-import Def.Parser.Pt2Languate
+import Languate.Parser.Pt2Languate
 import Data.Maybe
 
 

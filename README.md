@@ -15,6 +15,11 @@ To parse stuff with the bnf-lib, see the readme in bnf.
 Repo structure
 ==============
 
+Workspace
+---------
+
+Contains actual languate code!
+
 Consumer
 --------
 

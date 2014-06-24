@@ -1,15 +1,15 @@
-module Def.Parser.Pt2Statement (pt2stm) where
+module Languate.Parser.Pt2Statement (pt2stm) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Def.Parser.Pt2Comment
-import Def.Parser.Pt2Function
-import Def.Parser.Pt2DataDef
-import Def.Parser.Pt2TypeDef
-import Def.Parser.Pt2ClassDef
-import Def.Parser.Utils
-import Def.AST
+import Languate.Parser.Pt2Comment
+import Languate.Parser.Pt2Function
+import Languate.Parser.Pt2DataDef
+import Languate.Parser.Pt2TypeDef
+import Languate.Parser.Pt2ClassDef
+import Languate.Parser.Utils
+import Languate.AST
 
 {--
 

@@ -1,10 +1,10 @@
-module Def.Parser.Pt2Import (pt2imp, pt2restrict, pt2idset) where
+module Languate.Parser.Pt2Import (pt2imp, pt2restrict, pt2idset) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Def.Parser.Utils
-import Def.AST
+import Languate.Parser.Utils
+import Languate.AST
 
 {--
 

@@ -1,4 +1,4 @@
-module Def.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls,pt2nlcomments) where
+module Languate.Parser.Pt2Comment (pt2comment, pt2nl, pt2nls,pt2nlcomments) where
 
 
 import StdDef
@@ -6,8 +6,8 @@ import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
 import Data.Maybe
 
-import Def.AST hiding (Tuple)
-import Def.Parser.Utils
+import Languate.AST hiding (Tuple)
+import Languate.Parser.Utils
 {--
 See module name
 --}

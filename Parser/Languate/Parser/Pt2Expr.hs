@@ -1,13 +1,13 @@
-module Def.Parser.Pt2Expr (pt2expr) where
+module Languate.Parser.Pt2Expr (pt2expr) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (SimpleConvert)
-import Def.Parser.Utils
-import Def.Parser.Pt2Prelude
-import Def.Parser.Pt2Type
-import qualified Def.AST as Def
-import Def.AST hiding (Seq, Flt, Nat, Chr, List, Tuple)
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Prelude
+import Languate.Parser.Pt2Type
+import qualified Languate.AST as Languate
+import Languate.AST hiding (Seq, Flt, Nat, Chr, List, Tuple)
 
 {--
 
@@ -21,20 +21,20 @@ pt2expr		=  pt2a h t s convert
 convert		:: AST -> Expression
 convert (FC id)	=  Call id
 convert (Op id)	=  Operator id
-convert (Chr c)	=  Def.Chr c
+convert (Chr c)	=  Languate.Chr c
 convert (Str s)	=  desugareString s
-convert (Nat i)	=  Def.Nat i
-convert (Flt f)	=  Def.Flt f
+convert (Nat i)	=  Languate.Nat i
+convert (Flt f)	=  Languate.Flt f
 convert (List asts)
 		=  desugareList $ map convert asts;
 convert (Set asts)
-		=  Def.Seq [BuiltIn "toSet", convert $ List asts]
+		=  Languate.Seq [BuiltIn "toSet", convert $ List asts]
 convert (Dict asts)
-		= Def.Seq [BuiltIn "toDict", convert $ List asts]
+		= Languate.Seq [BuiltIn "toDict", convert $ List asts]
 convert (Tuple asts)
-		= Def.Tuple $ map convert asts
+		= Languate.Tuple $ map convert asts
 convert (Seq asts)
-		= Def.Seq $ map convert asts
+		= Languate.Seq $ map convert asts
 convert (Cst t)	= Cast t
 convert AutoCst	= AutoCast
 convert ast	= convErr "Pt2Expr" ast
@@ -42,12 +42,12 @@ convert ast	= convErr "Pt2Expr" ast
 
 desugareString	:: String -> Expression
 desugareString s
-		= Def.Seq [BuiltIn "toString", desugareList $ map Def.Chr s]
+		= Languate.Seq [BuiltIn "toString", desugareList $ map Languate.Chr s]
 
 desugareList	:: [Expression] -> Expression
 desugareList []	=  BuiltIn "empty"
 desugareList (exp:exprs)
-		=  Def.Seq [ BuiltIn "prepend", exp , desugareList exprs]
+		=  Languate.Seq [ BuiltIn "prepend", exp , desugareList exprs]
 
 data AST	= FC String	-- A Function Call to a constructor (globalIdent), function (localIdent)
 		| Op String	-- A call to an infix op

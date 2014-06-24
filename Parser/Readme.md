@@ -1,7 +1,10 @@
 PARSER
 ======
 
-This module contains the actual data structure representing the languate language, alongside with the parser + its bnf files.
+This module contains the actual AST data structure representing the languate language, alongside with the parser + its bnf files.
+
+This module is responsible of taking the input file and converting it to an AST. It contains the bnf-files, and parsers.
+
 
 In this document:
 Overview of the structure of the file

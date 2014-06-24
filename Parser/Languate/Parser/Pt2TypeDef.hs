@@ -1,12 +1,12 @@
-module Def.Parser.Pt2TypeDef (pt2syndef,pt2subdef) where
+module Languate.Parser.Pt2TypeDef (pt2syndef,pt2subdef) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Def.Parser.Utils
-import Def.Parser.Pt2Type
-import Def.Parser.Pt2DataDef
-import Def.AST
+import Languate.Parser.Utils
+import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2DataDef
+import Languate.AST
 
 {--
 
