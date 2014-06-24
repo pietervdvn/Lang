@@ -15,5 +15,5 @@ import Imports
 
 statement	::= function | data | nls? synonym | nls? subtype | class
 
-lang	::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (example nl)* nls? 
+module		::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (example nl)* nls? 
 

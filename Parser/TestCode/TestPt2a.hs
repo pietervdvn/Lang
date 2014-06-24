@@ -21,12 +21,22 @@ import Def.Parser.Pt2Statement
 
 import Def.Parser.Pt2Languate
 
+import Def.File2AST
 import System.IO.Unsafe
 import StdDef
 {--
 
+MAINTANCE ACCESS ONLY!
 
-This module loads and compiles the bnf's to test them 
+This module loads and compiles the bnf's to test them.
+
+Usage:
+
+-- test
+tst <function to test, e.g. pt2mod> "rule to parse against, e.g. module" "string to parse" 
+
+--test file does the same, but on a file, with unsafePerformIO
+tf ... ... "file to read"
 
 --}
 
@@ -45,12 +55,13 @@ pt rule str	=  do	world	<- load "bnf/Languate"
 -- tr rule str	= pt rule str >>= print
 
 
-tf		:: FilePath -> IO ()
-tf fp		=  do	str 	<- readFile fp
-			pt "lang" str >>= print . simplify
+tf		:: (ParseTree -> a) -> Name -> FilePath -> a
+tf convertor rule fp
+		=  let	str 	= unsafePerformIO $ readFile fp in
+			tst converter rule str
 
 
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
-gts			:: (ParseTree -> a) -> Name -> String -> a
-gts convertor rule str	= convertor (unsafePerformIO $ pt rule str)
+tst			:: (ParseTree -> a) -> Name -> String -> a
+tst convertor rule str	= convertor (unsafePerformIO $ pt rule str)
 
