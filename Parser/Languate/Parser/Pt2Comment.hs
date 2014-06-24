@@ -37,6 +37,8 @@ s "nlcomment" []
 		= Nl
 s "nlcomment" (Comment str:_)
 		= Comment str
+s _ [MlCommDelim, Nl]
+		= Comment ""	-- emtpy comment detected!
 s _ [ast]  	= ast
 s nm ast	= seqErr "Pt2Comment" nm ast
 

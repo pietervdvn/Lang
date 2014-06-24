@@ -40,6 +40,7 @@ conv (Decl typ)
 		= addDecl typ
 conv (Decls decls)
 		= conv $ Root $ map Decl decls
+conv (Comm [])	= id
 conv (Comm comms)
 		= setDocStr (last comms)
 conv (Root asts)
@@ -60,7 +61,7 @@ data AST	= Decl (Name, Type)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nlcomment", Comm . (:[]) . pt2comment),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
+h		=  [("nls", Comm . pt2nls),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
 
 s _ comms@(Comm _:Comm _:_)
 		= Comm $ accComms comms

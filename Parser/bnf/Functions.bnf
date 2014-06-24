@@ -27,7 +27,7 @@ declaration	::= (localIdent | "\(" op "\)" ) ":" type?
 -- functions might have multiple types too
 _patterns	::= patternRoot*
 clause		::= patterns "=" expr (nltab expr)*
-function	::= nlcomment+ ( (law | example) nl)* (declaration nl)+ (clause nl)+
+function	::= nls* ( (law | example) nl)* (declaration nl)+ (clause nl)+
 
 {-
 law example

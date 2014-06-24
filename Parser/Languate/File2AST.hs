@@ -1,4 +1,4 @@
-module Languate.File2AST (loadBnf, parse, load) where
+module Languate.File2AST (loadBnf, parse, load,load') where
 
 {--
 
@@ -13,8 +13,8 @@ import Languate.Parser.Pt2Languate
 import Data.Maybe
 
 
-loadBnf		:: IO Bnf.World
-loadBnf		=  Bnf.load "bnf/Languate"
+loadBnf		:: FilePath -> IO Bnf.World
+loadBnf	fp	=  Bnf.load fp
 
 -- The bnf-cluster is passed explicitly, they only have to be loaded once.
 parse	:: Bnf.World -> String -> Module
@@ -33,3 +33,8 @@ load	:: Bnf.World -> FilePath -> IO Module
 load bnfs path
 	= do	str	<- readFile path
 		return $ parse bnfs str
+
+load'	:: FilePath -> FilePath -> IO Module
+load' bnfs path
+	=  do	bnfw	<- loadBnf bnfs
+		load bnfw path  

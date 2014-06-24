@@ -11,3 +11,8 @@ class Functor f:
 	~ identity: map id	= id
 	map	: (a -> b) -> f a -> f b
 
+di	: a -> a
+id	: a -> a
+a	= a
+
+
