@@ -31,8 +31,8 @@ convert (Clss name inFuncName comms laws declarations)
 convert ast	=  convErr modName ast
 
 
-data AST	= Clss Name Name [Comment] [Law] [(Name,Type)]
-		| Body [Law] [(Name,Type)]
+data AST	= Clss Name Name [Comment] [Law] [(Name,Type,Maybe Comment)]
+		| Body [Law] [(Name,Type,Maybe Comment)]
 		| Ident Name	| LIdent Name
 		| Lw Law	| Decl (Name, Type)
 		| FreeT [Name]	| Comms [Comment]
@@ -42,7 +42,8 @@ data AST	= Clss Name Name [Comment] [Law] [(Name,Type)]
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nlcomments", Comms . pt2nlcomments), ("law", Lw . pt2law ),("declaration", Decl . pt2decl),("freeTypes",FreeT . pt2freetypes)]
+h		=  [("nlcomments", Comms . pt2nlcomments), ("comment", Comms . (:[]) . pt2comment), ("mlcomment", Comms . (:[]) . pt2comment)
+		   , ("law", Lw . pt2law ),("declaration", Decl . pt2decl),("freeTypes",FreeT . pt2freetypes)]
 
 t		:: Name -> String -> AST
 t "globalIdent" n
@@ -55,23 +56,27 @@ t nm cont	=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
+s _ [ast]	= ast
 s "classBody" asts
-		= uncurry Body $ triage asts
+		= uncurry Body $ triage asts Nothing
 s _ [Comms comms, ClassT, Ident name, LIdent lname, ColonT, Body laws decls]
 		= Clss name lname comms laws decls
-s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
 
 
-triage		:: [AST] -> ([Law], [(Name,Type)])
-triage []
+triage		:: [AST] -> Maybe Comment -> ([Law], [(Name,Type, Maybe Comment)])
+triage [] _
 		= ([], [])
-triage (Lw law:tail)
-		= first (law:) $ triage tail
-triage (Decl decl:tail)
-		= second (decl:) $ triage tail
-triage (Body laws decls:tail)
-		= first (laws++) $ second (decls++) $ triage tail
+triage (Lw law:tail) comm
+		= first (law:) $ triage tail comm
+triage (Decl (n,t):tail) comm
+		= second ((n,t,comm):) $ triage tail comm
+triage (Body laws decls:tail) comm
+		= first (laws++) $ second (decls++) $ triage tail comm
+triage (Comms []:tail) comm
+		= triage tail comm
+triage (Comms (a:_):tail) _
+		= triage tail (Just a)
 
 
 -- INSTANCE DEF --

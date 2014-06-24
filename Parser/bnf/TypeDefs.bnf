@@ -52,7 +52,7 @@ _typeDef	::= globalIdent freeTypes "=" type
  ------------------------
 
  class		::= nlcomments "class" globalIdent localIdent ":" classBody
- classBody	::= (nltab (law | declaration | comment | mlcomment))+ nl
+ classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
  instance	::= "instance" globalIdent baseType
 
