@@ -53,8 +53,8 @@ setExports	:: [Name] -> Module -> Module
 setExports names (Module name _ imps stms)
 		= Module name (WhiteList names) imps stms
 
-imports		:: (Imports -> Imports) -> Module -> Module
-imports f (Module name restrict imps stms)
+modImports		:: (Imports -> Imports) -> Module -> Module
+modImports f (Module name restrict imps stms)
 		= Module name restrict (f imps) stms
 
 addStm		:: Statement -> Module -> Module

@@ -1,6 +1,7 @@
 module Languate.AST where
 
 import StdDef
+import Data.Either
 {--
 
 This module implements the data structures representing a parsed module. It is possible to recreate the source code starting from a datastructure like this (module some whitespace that's moved and a few dropped comments (but most should be preserverd)
@@ -15,13 +16,16 @@ The structures here include comments (except those withing expressions); the dat
 
 
 
-data Module	= Module Name Restrict Imports [Statement]
+data Module	= Module {moduleName::Name, exports::Restrict, imports::Imports, statements::[Statement]}
 	deriving (Show)
 
 -- ## Stuf about imports
 
 -- for comments hovering around imports
 type Imports	= [Either Comment Import]
+
+imports'	:: Module -> [Import]
+imports' 	=  rights . imports
 
 
 -- represents an import statement. public - Path - ModuleName- restrictions

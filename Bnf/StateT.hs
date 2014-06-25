@@ -44,7 +44,11 @@ emulateT m	=  do	s	<- get
 			return $ runstateT m s 
 
 get	:: (Monad m) => StateT s m s
-get	=  StateT $ \ s -> return (s,s)			
+get	=  StateT $ \ s -> return (s,s)	
+
+get'	:: (Monad m) => (s -> a) -> StateT s m a
+get' f	=  do	s	<- get
+		return $ f s		
 
 put	:: (Monad m) => s -> StateT s m ()
 put s	=  StateT $ \ _ -> return ((),s)

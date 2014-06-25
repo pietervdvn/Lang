@@ -4,7 +4,7 @@ Misc
 Some miscallaneous, general functions, such as id and const.
 ----
 
-import Bool
+import Data.Bool
 
 -- The identity function, returns it's argument
 > id 42		= 42

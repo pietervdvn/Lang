@@ -37,9 +37,9 @@ toMod (Exports exps)
 toMod Nl	= id
 toMod (Comms c)	= addStm $ Comments c
 toMod (Imps comms imp)
-		= imports $ (++) $ map Left comms ++ [Right imp]
+		= modImports $ (++) $ map Left comms ++ [Right imp]
 toMod (Imp imp)
-		= imports (Right imp:)
+		= modImports (Right imp:)
 toMod (Stm stms)
 		=  addStms stms
 toMod (Root asts)
