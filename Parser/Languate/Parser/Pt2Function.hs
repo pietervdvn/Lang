@@ -44,7 +44,7 @@ conv (Comm [])	= id
 conv (Comm comms)
 		= setDocStr (last comms)
 conv (Root asts)
-		= \func -> foldr (\ast func -> conv ast func) func asts
+		= \func -> foldr conv func asts
 	
 
 preComms	:: [AST] -> [Comment]

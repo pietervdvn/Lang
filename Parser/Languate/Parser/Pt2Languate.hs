@@ -43,7 +43,7 @@ toMod (Imp imp)
 toMod (Stm stms)
 		=  addStms stms
 toMod (Root asts)
-		=  \mod -> foldr (\ast mod -> toMod ast mod) mod asts
+		=  \mod -> foldr toMod mod asts
 toMod (Examp ex)
 		=  addStm $ ExampleStm ex
 

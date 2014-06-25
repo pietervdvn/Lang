@@ -25,6 +25,10 @@ instance MonadTrans (StateT s) where
 	lift ma	= StateT $ \ s -> do	a	<- ma
 					return (a,s)
 
+instance (Monad m) => Functor (StateT s m) where
+	fmap f m	= do	a	<- m
+				return $ f a
+
 isolate	:: (Monad m) => StateT s m a -> StateT s m a
 isolate m	= do	s	<- get
 			v	<- m

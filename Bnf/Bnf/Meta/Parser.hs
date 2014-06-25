@@ -38,5 +38,4 @@ world	= fromList [(fqnMod, modMod),(fqnBnf, bnfMod),(fqnRegex, regexMod)]
 
 
 test	:: String -> String -> Maybe (Either PtGen.Exception ParseTree)
-test rule str
-	= PtGen.parse world fqnMod rule str
+test	= PtGen.parse world fqnMod

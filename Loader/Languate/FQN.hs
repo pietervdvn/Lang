@@ -74,19 +74,19 @@ toFqpn auth pck	= do	auth'	<- toAuthor auth
 
 -- an authors name consists of [a..zA..Z0..9 -], e.g. "Pieter Vander Vennet"
 toAuthor	:: Name -> Maybe Author
-toAuthor nm	= constrIfValid " -" Author nm
+toAuthor	= constrIfValid " -" Author
 -- [a..zA..Z-]*, e.g. languate-core
 toPackName	:: Name -> Maybe PackageName
-toPackName nm	=  constrIfValid "-" PackName nm
+toPackName	=  constrIfValid "-" PackName
 
 toModName	:: Name -> Maybe ModuleName
-toModName nm	=  constrIfValid "" ModName nm
+toModName	=  constrIfValid "" ModName
 
 -- is valid if all chars in the string are in [a..zA..Z]++the passed chars
-valid		:: [Char] -> Name -> Bool
+valid		:: String -> Name -> Bool
 valid extra	=  all (`elem` extra++['a'..'z']++['A'..'Z']++['0'..'9'])
 
-constrIfValid	:: [Char] -> (Name -> a) -> Name -> Maybe a
+constrIfValid	:: String -> (Name -> a) -> Name -> Maybe a
 constrIfValid extra constr name
 		= if valid extra name then Just $ constr name else Nothing
 
@@ -94,4 +94,4 @@ constrIfValid extra constr name
 splitOn		:: (a -> Bool) -> [a] -> [[a]]
 splitOn f []	=  []
 splitOn f ls	=  let (h,t)	= break f ls in
-			h:(splitOn f $ drop 1 t)
+			h:splitOn f (drop 1 t)

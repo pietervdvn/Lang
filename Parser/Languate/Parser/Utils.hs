@@ -66,7 +66,7 @@ addStm stm (Module name restrict imps stms)
 
 addStms		:: [Statement] -> Module -> Module
 addStms stms mod
-		= foldr (\stm mod -> addStm stm mod) mod stms
+		= foldr addStm mod stms
 
 
 

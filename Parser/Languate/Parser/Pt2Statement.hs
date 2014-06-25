@@ -60,8 +60,7 @@ unc constr f pt =  let (comms, a) = f pt in
 			Comms comms $ constr a
 
 t		:: Name -> String -> AST
-t nm cont	=  tokenErr modName nm cont
-
+t 		=  tokenErr modName
 
 s		:: Name -> [AST] -> AST
 s _ [Comm comms, ast]

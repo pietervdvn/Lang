@@ -40,20 +40,20 @@ data Context	= Context { bnfs :: Bnf.World, fqpn :: FQPN, toLoad:: ToLoad, loade
 -- loads as long as there are things in the toLoad-list
 loadRec	:: StateT Context IO ()
 loadRec	=  do	done	<- get' $ null . toLoad
-		when (not done) $ do 	loadNext
+		unless done $ do 	loadNext
 					loadRec
 
 loadNext	:: StateT Context IO ()
 loadNext	=  do	request	<- pop
 			cached	<- get' $ member (snd request) . loaded
-			when (not cached) $ uncurry loadF request
+			unless cached $ uncurry loadF request
 
 loadF		:: FQN -> FQN -> StateT Context IO ()
 loadF requestor fqn
 		=  do	fpr	<- get' root
 			let fp	=  fpr ++ relativePath fqn
 			exists	<- lift $ doesFileExist fp
-			if (not exists) then modify $ addNotFound requestor fqn
+			if not exists then modify $ addNotFound requestor fqn
 			else do bnf	<- get' bnfs
 				modul	<- lift $ load bnf fp
 				cache	<- get' loaded

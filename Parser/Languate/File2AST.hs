@@ -14,7 +14,7 @@ import Data.Maybe
 
 
 loadBnf		:: FilePath -> IO Bnf.World
-loadBnf	fp	=  Bnf.load fp
+loadBnf		=  Bnf.load
 
 -- The bnf-cluster is passed explicitly, they only have to be loaded once.
 parse	:: Bnf.World -> String -> Module

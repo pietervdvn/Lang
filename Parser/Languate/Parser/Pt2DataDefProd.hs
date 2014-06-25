@@ -7,7 +7,6 @@ import Languate.Parser.Utils
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2DataDefSum
 import Languate.AST
-import Languate.Parser.Utils
 
 {--
 

@@ -97,7 +97,7 @@ p (Call name)	=  do	Module local imported	<- getModule
 			if name `member` local then do
 				s <- get
 				modify $ first $ gotoN name
-				modify $ second $ weaken
+				modify $ second weaken
 				pt	<- p (fromJust $ lookup name local)
 				put s
 				return pt
@@ -156,7 +156,7 @@ putMode m expr	= do	pWs
 -- parses whitespace if eatWS is activi
 pWs		:: St ()
 pWs		=  do	(ctx,mode)	<- get
-			when (mode == EatWS) $ (lft $ longest $ match ws >> return ())
+			when (mode == EatWS) $ void $ lft $ longest $ match ws
 			when (mode == LeaveOnce) $ put (ctx, EatWS)
 				
 

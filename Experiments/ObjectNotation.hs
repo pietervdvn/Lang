@@ -32,7 +32,7 @@ setX x (Point _ y)
 		= Point x y
 
 setRecord	:: Game -> Record -> Game
-setRecord _ r	=  Game r
+setRecord _	=  Game
 
 setPoint	:: Record -> Point -> Record
 setPoint (Record _ n) p
