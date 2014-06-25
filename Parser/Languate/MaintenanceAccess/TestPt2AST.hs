@@ -1,4 +1,4 @@
-module Languate.MaintanceAccess.TestPt2AST where
+module Languate.MaintenanceAccess.TestPt2AST where
 
 import Bnf
 import Normalizable

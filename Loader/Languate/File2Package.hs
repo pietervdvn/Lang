@@ -54,11 +54,11 @@ loadF requestor fqn
 			let fp	=  fpr ++ relativePath fqn
 			exists	<- lift $ doesFileExist fp
 			if not exists then modify $ addNotFound requestor fqn
-			else do bnf	<- get' bnfs
-				modul	<- lift $ load bnf fp
-				cache	<- get' loaded
-				modify $ setLoaded $ insert fqn modul cache
-				addImports fqn modul
+				else do bnf	<- get' bnfs
+					modul	<- lift $ load bnf fp
+					cache	<- get' loaded
+					modify $ setLoaded $ insert fqn modul cache
+					addImports fqn modul
 
 -- adds all the imports to the toLoad-list
 addImports	:: FQN -> Module -> StateT Context IO ()

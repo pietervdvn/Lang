@@ -16,6 +16,6 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     Languate.File2AST, Languate.AST, Languate.MaintanceAccess.TestPt2AST
+  exposed-modules:     Languate.File2AST, Languate.AST, Languate.MaintenanceAccess.TestPt2AST
   other-modules:       Languate.Parser.Pt2Expr, Languate.Parser.Pt2DataDef, Languate.Parser.Pt2Function, Languate.Parser.Pt2DataDefProd, Languate.Parser.Pt2ClassDef, Languate.Parser.Pt2Languate, Languate.Parser.Pt2TypeDef, Languate.Parser.Pt2Comment, Languate.Parser.Pt2Line, Languate.Parser.Pt2Law, Languate.Parser.Pt2Pattern, Languate.Parser.Pt2Import, Languate.Parser.Pt2Statement, Languate.Parser.Utils, Languate.Parser.Pt2Prelude, Languate.Parser.Pt2Type, Languate.Parser.Pt2Declaration, Languate.Parser.Pt2DataDefSum    
   build-depends:       base ==4.6.*, Consumer ==0.1.*, Bnf ==0.1.*, mtl ==2.1.*

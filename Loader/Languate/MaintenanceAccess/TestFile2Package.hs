@@ -1,4 +1,4 @@
-module Languate.TestFile2Package where
+module Languate.MaintenanceAccess.TestFile2Package where
 
 import Languate.File2Package
 import Languate.FQN
