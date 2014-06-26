@@ -106,7 +106,7 @@ prep 		=  foldr (\toPrep acc -> "\n\t"++ prep' toPrep ++ acc) ""
 
 prep'		:: ( Name, [IOImport]) -> String
 prep' (nm, imps)
-		= show nm ++ " is exported by "++ (init $ foldr (\(IOImport fqn _ _ _ pos) acc ->  show fqn++" "++show pos++","++acc) "" imps)
+		= show nm ++ " is exported by "++ init (foldr (\(IOImport fqn _ _ _ pos) acc ->  show fqn++" "++show pos++","++acc) "" imps)
 
 
 ambigueImports	:: [(IOImport, [(Name, FQN)])] -> [( Name, [IOImport])]
@@ -201,7 +201,3 @@ rinfo fqn pos name	= (fqn, name, coor pos)
 
 coor			:: Position -> Coor
 coor (line, col)	= (0, line, col)
-
-dubbles		:: Eq a => [a] -> [a]
-dubbles []	=  []
-dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as

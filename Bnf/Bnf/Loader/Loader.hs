@@ -64,7 +64,7 @@ search	fqn pwd cld
 		let paths	= paths1 ++ paths0
 		let existing	= nub $ snd $ unzip $ filter fst $ zip exists paths
 		if 0 == length existing then
-			error $ show fqn ++ " not found starting from '"++pwd ++"', looked at "++show paths++" but none exist"
+			error $ show fqn ++ " not found starting from '"++pwd ++"', looked at "++show paths++" but none exist (working dir is "++pwd++")"
 		 else when (1 /= length existing) $
 			putStrLn $ "Warning: multiple "++ show fqn ++" found: "++ show existing ++ "\nThe deepest one is used: "++last existing
 		return $ last existing

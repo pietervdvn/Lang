@@ -1,0 +1,21 @@
+Maybe
+-----
+The maybe type is widely used in syntac sugar (?) and in pattern matching.
+-----
+
+import Data.Bool
+
+-- The Maybe datatype
+data Maybe a	= Nothing
+		| Just a
+
+-- The 'isJust' function returns 'True' iff its argument is of the form 'Just _'.
+isJust		: Maybe a -> Bool
+(Just _)	= True
+_		= False
+
+-- The 'isNothing' function returns 'True' iff its argument is 'Nothing'.
+isNothign	: Maybe a -> Bool
+Nothing		= True
+_		= False
+

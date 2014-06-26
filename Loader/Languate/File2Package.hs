@@ -10,25 +10,41 @@ import qualified Bnf
 import Languate.FQN
 import Languate.AST
 import Languate.File2AST
-import Data.Map hiding (null, map, filter)
+import Data.Map hiding (null, map, filter, foldr, foldl)
 import StateT
 import Control.Monad
 import Control.Monad.Trans
 import Data.Maybe
 import System.Directory
 
+
+-- loadpackage, but crashes when imports are not found
+loadPackage'	:: FQN -> FilePath -> IO (Map FQN Module)
+loadPackage' fqn fp
+		= do	(package, notFound)	<- loadPackage fqn fp
+			unless (null notFound) $ printErr notFound
+			return package
+
+printErr	:: [(FQN,FQN)] -> IO ()
+printErr notFound
+		= do	putStrLn $ msg notFound
+			error "Not all imported modules were found."
+
+msg		:: [(FQN, FQN)] -> String
+msg		= foldl (\acc (requestor, notF) -> acc++"\n\t"++show notF++" (needed by "++ show requestor++")") " The Following packages where not found:"
+
 {- loads all modules needed for file. FQN is the name of the module that should be loaded, Filepath the path to 'src' in the project.
 Imports of which the file was not found, are the second value in the tuple. It is a list, containing 
 [this module wanted the import, this module was not found]
 -}
-loadPackage	:: FQN -> FilePath -> IO ([(FQN, Module)],[(FQN,FQN)])
+loadPackage	:: FQN -> FilePath -> IO (Map FQN Module,[(FQN,FQN)])
 loadPackage fqn src
 		=  do	let FQN fqpn _ _	= fqn
 			bnfs	<- loadBnf "../Parser/bnf/Languate.bnf"
 			let ctx	= Context bnfs fqpn [(fqn, fqn)] empty src []
 			(_, ctx)	<- runstateT loadRec ctx
 			let notF	= notFound ctx
-			return (toList $ loaded ctx, notF)
+			return (loaded ctx, notF)
 
 -- left fqn imports the right fqn
 type ToLoad	= [(FQN,FQN)]
@@ -55,6 +71,7 @@ loadF requestor fqn
 			exists	<- lift $ doesFileExist fp
 			if not exists then modify $ addNotFound requestor fqn
 				else do bnf	<- get' bnfs
+					lift $ putStrLn $ "Loading '"++show fqn++"'"
 					modul	<- lift $ load bnf fp
 					cache	<- get' loaded
 					modify $ setLoaded $ insert fqn modul cache

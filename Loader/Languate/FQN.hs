@@ -6,6 +6,7 @@ This module implements the FQN-datatype, which represents a fully qualified name
 
 --}
 import StdDef
+import Data.Maybe
 
 
 newtype Author	= Author Name
@@ -46,7 +47,10 @@ relativePath (FQN _ mods mod)
 
 toFQPN		:: String -> Maybe FQPN
 toFQPN fqpn	=  do	let (auth,pack)	= break (==':') fqpn
-			toFqpn auth pack
+			toFqpn auth $ drop 1 pack
+
+toFQN'		:: String -> FQN
+toFQN'		=  fromJust . toFQN
 
 toFQN		:: String -> Maybe FQN
 toFQN fqn	=  do	let splitted	= splitOn (==':') fqn

@@ -58,4 +58,3 @@ Selling points
 * Type Directed name resolution (ad hoc overloading, like in most OOP-languages)
 * Type interference
 * Laws, examples
-

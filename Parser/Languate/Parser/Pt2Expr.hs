@@ -28,9 +28,9 @@ convert (Flt f)	=  Languate.Flt f
 convert (List asts)
 		=  desugareList $ map convert asts;
 convert (Set asts)
-		=  Languate.Seq [BuiltIn "toSet", convert $ List asts]
+		=  Languate.Seq [Call "toSet", convert $ List asts]
 convert (Dict asts)
-		= Languate.Seq [BuiltIn "toDict", convert $ List asts]
+		= Languate.Seq [Call "toDict", convert $ List asts]
 convert (Tuple asts)
 		= Languate.Tuple $ map convert asts
 convert (Seq asts)
@@ -45,9 +45,9 @@ desugareString s
 		= Languate.Seq [BuiltIn "toString", desugareList $ map Languate.Chr s]
 
 desugareList	:: [Expression] -> Expression
-desugareList []	=  BuiltIn "empty"
+desugareList []	=  Call "empty"
 desugareList (exp:exprs)
-		=  Languate.Seq [ BuiltIn "prepend", exp , desugareList exprs]
+		=  Languate.Seq [ Call "prepend", exp , desugareList exprs]
 
 data AST	= FC String	-- A Function Call to a constructor (globalIdent), function (localIdent)
 		| Op String	-- A call to an infix op

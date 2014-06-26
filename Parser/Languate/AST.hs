@@ -2,6 +2,7 @@ module Languate.AST where
 
 import StdDef
 import Data.Either
+import Data.List
 {--
 
 This module implements the data structures representing a parsed module. It is possible to recreate the source code starting from a datastructure like this (module some whitespace that's moved and a few dropped comments (but most should be preserverd)
@@ -55,7 +56,14 @@ data Function	= Function DocString [(Name, Type)] [Law] [Clause]
 -- (Function docString decls laws clauses)
 
 data Clause	= Clause [Pattern] Expression
-	deriving (Show)
+instance Show Clause where
+	show (Clause patterns expr)	= tabs 3 (unwords $ map show patterns)++"="++show expr
+
+tabs	:: Int -> String -> String
+tabs t str
+	= str ++ replicate ((length str `div` 8) - t) '\t'
+
+
 
 data Visible	= Private	
 		| Public
@@ -68,7 +76,20 @@ data Type	= Normal String	-- A normal type, e.g. Bool
 		| Curry [Type]
 		| TupleType [Type]
 		| Infer
-	deriving (Show)
+	deriving (Eq, Ord)
+instance Show Type where
+	show (Curry tps)	= intercalate " -> " $ map show tps
+	show t		= st t
+
+st		:: Type -> String
+st (Normal str)	=  str
+st (Free str)	=  str
+st (Applied t tps)
+		=  "("++show t ++" "++ unwords (map show tps)++")"
+st (Curry tps)	=  "("++intercalate " -> " (map show tps)++")"
+st (TupleType tps)
+		=  "(" ++ intercalate ", " (map show tps) ++")"
+st Infer	= "_"
 
 
 data Expression	= Nat Int
@@ -81,8 +102,25 @@ data Expression	= Nat Int
 		| Call String
 		| Operator String
 		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment 
-	deriving (Show)
 
+instance Show Expression where
+	show	= se
+
+se		:: Expression -> String
+se (Nat i)	= show i
+se (Flt flt)	= show flt
+se (Chr c)	= show c
+se (Seq expr)	= "("++unwords (map show expr) ++ ")"
+se (Tuple exprs)
+		= "("++intercalate ", " (map show exprs) ++ ")"
+se (BuiltIn str)
+		= '#':str
+se (Cast t)	= "~("++show t++")"
+se AutoCast	= "~~"
+se (Call str)	= str
+se (Operator str)
+		= str
+se _		= ""
 
 data Pattern	= Assign Name	-- gives a name to the argument
 		| Let Name Expression	-- evaluates the expression, and assigns it to the given name
@@ -93,8 +131,24 @@ data Pattern	= Assign Name	-- gives a name to the argument
 		| Multi [Pattern]	-- at-patterns
 		| Eval Expression	-- evaluates an expression, which should equal the argument. Matching against ints is (secretly) done with this. 
 		| DontCare		-- underscore
+
 		| MultiDontCare		-- star
-	deriving (Show)
+instance Show Pattern where
+	show 	= sp
+
+sp		:: Pattern -> String
+sp (Assign nm)	=  nm
+sp (Let nm expr)
+		=  nm++":=("++show expr++")"
+sp (Deconstruct nm patterns)
+		= "("++nm++" "++ unwords (map show patterns)++")"
+sp (Multi patterns)
+		= intercalate "@" $ map show patterns
+sp (Eval expr)	= '$':show expr
+sp DontCare	= "_"
+sp MultiDontCare
+		= "*"
+
 
 {- Deconstruct "unprepend" 
 unprepend	: {a} -> (a,{a})
@@ -133,7 +187,9 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 -- data List a  = Cons a (List a) | Nil
 -- becomes : ADTDef "List" ["a"] "Comment about a list" product
 data ADTDef	= ADTDef Name [Name] DocString [ADTSum]
-	deriving (Show)
+instance Show ADTDef where
+	show (ADTDef name frees docstr sums)
+		= "-- "++docstr++"\ndata "++name++foldr (\f acc -> f++" "++acc) " " frees ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
 
 
 -- ## Synonym and subtyping
@@ -155,8 +211,8 @@ data SubDef	= SubDef Name [Name] Type
 data ClassDef	= ClassDef Name Name DocString [Law] [(Name,Type,Maybe Comment)]
 	deriving (Show)
 data Instance	= Instance Name Type
-	deriving (Show)
-
+instance Show Instance where
+	show (Instance name t)	= "instance "++name++" "++show t
 
 
 

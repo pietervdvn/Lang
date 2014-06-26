@@ -22,3 +22,7 @@ init' ls	=  init ls
 tail'		:: [a] -> [a]
 tail' []	=  []
 tail' ls	=  tail ls
+
+dubbles		:: Eq a => [a] -> [a]
+dubbles []	=  []
+dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as

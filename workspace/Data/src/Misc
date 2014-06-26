@@ -29,3 +29,10 @@ if False _ b	= b
 ~ double flip: f => flip $ flip f = f
 flip	: (a -> b -> c) -> b -> a -> c
 f b a	= f a b
+
+
+-- Used for lensing, applies the function on the right on the argument on the left to provide OO-like syntax
+~ application: a:a, f : (a -> b) => a.f = f a
+> [1,2,3].map (+1)	= [2,3,4]
+(.)	: a -> (a -> b) -> b
+a f	= f a
