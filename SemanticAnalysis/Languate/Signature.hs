@@ -9,3 +9,4 @@ import StdDef
 
 data Signature	= Signature Name Type
 	deriving (Show, Eq, Ord)
+

@@ -17,6 +17,10 @@ data SymbolTable a	= Empty
 			| Child {parent:: SymbolTable a, content:: Map Signature a}
 	deriving (Show)
 
+
+data TypeTable		= Empt
+			| TT {par::TypeTable, cont::Map Name [Type]}
+
 setParent		:: SymbolTable a -> SymbolTable a -> SymbolTable a
 setParent p (Child _ cont)
 			= Child p cont
@@ -25,12 +29,17 @@ setParent p (Empty)	= p
 type SimpleTable	= SymbolTable (DocString, [Clause])
 
 
-find			:: Signature -> SymbolTable a -> Maybe a
+find			:: Name -> SymbolTable a -> Maybe a
 find _ Empty		=  Nothing
 find sign (Child p cont)
-			= case lookup sign cont of
+			=  let smap	= simpleMap cont in
+			   case lookup sign smap of
 				Nothing	-> find sign p
 				a	-> a
+
+
+simpleMap		:: Map Signature a -> Map Name a
+simpleMap		=  fromList . map (\(Signature name _, a) -> (name, a)) . toList
 
 
 -- a simple importer without public imports, which gives the symbol tables for each
