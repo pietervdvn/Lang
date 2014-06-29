@@ -21,6 +21,7 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 -- prefix	a & b & c	=> a (& b (& c))
 data InfixMode	= RightMost	| LeftMost	| Prefix	
 data Context	= Context {typeTable::TypeTable, infixOrdering:: Map Name Int}
+	deriving (Show)
 
 -- the context gives the type of each 
 typeCheck	:: Context -> Expression -> TypedExpression
@@ -40,7 +41,20 @@ typeCheck ctx (Tuple exprs)
 typeCheck ctx (BuiltIn name)
 		= let typ	= getBuiltinType name in
 			TCall [typ] ('#':name) []
+-- TODO: casts
+-- TODO: clean expressions
+typeCheck ctx (Cast t)
+		= todos "typecheck: Casts: search path in typechecker"
+typeCheck ctx AutoCast
+		= todos "typehcheck: Autocast"
+typeCheck ctx (Operator op)
+		= callFor ctx op
+typecheck ctx (Call name)
+		= callFor ctx name
+typecheck ctx (ExpNl _)
+		= error "typecheck encountered a nl, your expression was not cleaned"
 
+callFor	ctx nm	= TCall (lookupType (typeTable ctx) nm) nm []
 
 
 
@@ -52,7 +66,13 @@ typeOf (TChr _)	=  [Normal "Char"]
 typeOf (TCall tps _ _)
 		=  tps
 
+-- looks up the type of the given function into the context
+-- might crash on a 'not found'
+lookupType	:: TypeTable -> Name -> [Type]
+lookupType tt name
+		= fromMaybe (error $ errMsg name) $ M.lookup name $ cont tt
 
+errMsg name	= "Typechecker: Name not found: "++name++". The pre-typecheck sanitizer was not run (and should be implemented)"
 
 -- Calls are applied first
 -- operators take all what's on the left; this compiles the expression into a stack based one
@@ -78,7 +98,7 @@ getPriority _ AutoCast
 		=  1
 getPriority ctx (Operator op)
 		= fromMaybe 2 $ M.lookup op ctx
-getPriortiy _ _	=  0
+getPriority _ _	=  0
 
 
 -- generates all possible choices

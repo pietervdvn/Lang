@@ -20,6 +20,7 @@ data SymbolTable a	= Empty
 
 data TypeTable		= Empt
 			| TT {par::TypeTable, cont::Map Name [Type]}
+	deriving (Show)
 
 setParent		:: SymbolTable a -> SymbolTable a -> SymbolTable a
 setParent p (Child _ cont)

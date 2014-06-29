@@ -8,6 +8,8 @@ import Prelude hiding (lookup)
 import Languate.SymbolTable
 import Data.Maybe
 import Languate.AST
+import Languate.BuiltIns
+import Languate.TypeChecker
 {--
 Dev code for semantic analysis.
 --}
@@ -18,3 +20,7 @@ bool	= toFQN' "pietervdvn:Data:Data.Bool"
 bool'	= fromJust $ lookup bool package
 
 t	= buildWithImports package
+
+
+tt	= TT Empt $ fromList [("+",[ [nat,nat] --> nat])]
+tctx	= Context tt $ fromList [("+",3),("-",3),("*",2),("/",2),("%",2)]
