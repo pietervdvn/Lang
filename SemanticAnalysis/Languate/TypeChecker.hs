@@ -49,9 +49,9 @@ typeCheck ctx AutoCast
 		= todos "typehcheck: Autocast"
 typeCheck ctx (Operator op)
 		= callFor ctx op
-typecheck ctx (Call name)
+typeCheck ctx (Call name)
 		= callFor ctx name
-typecheck ctx (ExpNl _)
+typeCheck ctx (ExpNl _)
 		= error "typecheck encountered a nl, your expression was not cleaned"
 
 callFor	ctx nm	= TCall (lookupType (typeTable ctx) nm) nm []
@@ -66,20 +66,7 @@ typeOf (TChr _)	=  [Normal "Char"]
 typeOf (TCall tps _ _)
 		=  tps
 
--- looks up the type of the given function into the context
--- might crash on a 'not found'
-lookupType	:: TypeTable -> Name -> [Type]
-lookupType tt name
-		= fromMaybe (error $ errMsg name) $ M.lookup name $ cont tt
 
-errMsg name	= "Typechecker: Name not found: "++name++". The pre-typecheck sanitizer was not run (and should be implemented)"
-
--- Calls are applied first
--- operators take all what's on the left; this compiles the expression into a stack based one
-order		:: Context -> [Expression] -> TypedExpression
-order ctx [expr] =  typeCheck ctx expr
-order ctx exprs	=   let priors	= map (getPriority $ infixOrdering ctx) exprs in
-			error $ show $ build $ zip exprs priors
 
 
 -- 0: get's evaluated first
@@ -99,6 +86,16 @@ getPriority _ AutoCast
 getPriority ctx (Operator op)
 		= fromMaybe 2 $ M.lookup op ctx
 getPriority _ _	=  0
+
+
+
+-- looks up the type of the given function into the context
+-- might crash on a 'not found'
+lookupType	:: TypeTable -> Name -> [Type]
+lookupType tt name
+		= fromMaybe (error $ errMsg name) $ M.lookup name $ cont tt
+
+errMsg name	= "Typechecker: Name not found: "++name++". The pre-typecheck sanitizer was not run (and should be implemented)"
 
 
 -- generates all possible choices

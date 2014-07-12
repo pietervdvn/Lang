@@ -50,7 +50,7 @@ add node@(Node j cont rlts) t@(as, i)
 
 singleton	:: ([a], Int) -> RLT a
 singleton (as, i)
-		= Node i as []
+		= Node i as [Nil]
 
 
 group		:: [(a,Int)] -> [([a],Int)]

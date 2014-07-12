@@ -24,3 +24,6 @@ t	= buildWithImports package
 
 tt	= TT Empt $ fromList [("+",[ [nat,nat] --> nat])]
 tctx	= Context tt $ fromList [("+",3),("-",3),("*",2),("/",2),("%",2)]
+
+-- type check test
+tc 	= typeCheck tctx $ Seq [ Nat 1, Operator "+", Nat 2, Operator "*", Nat 2]
