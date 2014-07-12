@@ -23,7 +23,7 @@ data Call	= Expr Priority InfixMode Expression
 
 
 instance Show Call where
-	show (Expr p m e)	= show e++"<"++show p++" "++show m++">"
+	show (Expr p m e)	= show e -- ++"<"++show p++" "++show m++">"
 	show (FCall _ _ c cs)	= show c++"(" ++ foldr (\e acc -> show e ++ " " ++ acc) "" cs ++ ")"
 
 type PriorityTable	= Map String (Priority, InfixMode)
@@ -70,8 +70,17 @@ advancedMerge p calls
 
 
 mergeRight	:: Priority -> [Call] -> Call
-mergeRight p 	=  todo
-
+mergeRight p [c]
+		=  c
+mergeRight p [c,c']
+	| priority c == p
+		= error $ errMsg "Prefix" "right" ++ show c
+	| otherwise
+		= FCall p Right c' [c]	-- normal postfix usage
+mergeRight p (c:c':cs)
+	| priority c' == p
+		= FCall p Right c' [c, mergeRight p cs]
+	| otherwise	= mergeRight p (c':c:cs)
 
 -- 4 + 5 + 6
 -- (4 +)
@@ -79,14 +88,17 @@ mergeRight p 	=  todo
 mergeLeft	:: Priority -> [Call] -> Call
 mergeLeft p [c]	= c
 mergeLeft p [c,c']
-	| priority c' == p	
-		= error $ "Postfix usage of a left associative operator is not allowed, used parentheses instead. Error on expression: "++show c'-- postfix, not allowed in left mode
+	| priority c == p	
+		= error $ errMsg "Prefix" "left" ++ show c'-- postfix, not allowed in left mode
 	| otherwise
-		= FCall p Left c' $ [c]
+		= FCall p Left c' [c]
 mergeLeft p (c:c':cs)
 	| priority c' == p
 		= FCall p Left c' $ [c, mergeLeft p cs]
 	| otherwise	= mergeLeft p (c':c:cs)
+
+
+errMsg usage dir	= usage++ " usage of a "++dir++" associative operator is not allowed, use parentheses instead. Error on expression: "
 
 
 checkModes	:: [InfixMode] -> InfixMode
