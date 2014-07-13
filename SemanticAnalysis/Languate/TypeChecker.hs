@@ -90,37 +90,6 @@ apply' functTypes (argType:argTypes)
 
 
 
-
-
-
-fitsIn		:: Type -> Type -> Bool
-fitsIn t (Free _)
-		= True
-fitsIn t t'	= t == t'
-
-
-bind		:: Type -> Type -> [Type] -> [Type]
-bind t t'	= map (bindOne t t')
-
-
--- binds the first argument as the second.
--- > bindOne Nat (Free "a") (Free "a") = Nat
--- > bindOne Nat Int _	= error _
--- > bindONe Nat (Free "a") Int = Int
-bindOne		:: Type -> Type -> Type -> Type
-bindOne t (Free a) (Free a')
-	| a == a'	= t
-	| otherwise	= Free a'
-bindOne t t' (Applied appT types)
-		= Applied (bindOne t t' appT) $ bind t t' types
-bindOne t t' (Curry types)
-		= Curry $ bind t t' types
-bindOne t t' (TupleType types)
-		= TupleType $ bind t t' types
-bindOne t t' typ	= if t == t' then typ
-			else error $ "Could not bind "++show t ++" and "++show t'
-
-
 apply		:: [Type] -> [[Type]] -> [Type]
 apply funcTypes argTypess
 		= do	argTypes	<- argTypess
@@ -136,7 +105,6 @@ typeOf (TCall tps _)
 		=  tps
 typeOf (TApplication tps _ _)
 		=  tps
-
 
 
 

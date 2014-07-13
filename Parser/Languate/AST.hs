@@ -84,11 +84,26 @@ instance Normalizable Type where
 
 
 nt	:: Type -> Type
-nt (Applied t [])	= t
-nt (Curry [t])		= t
-nt (TupleType [t])	= t
+nt (Applied t [])	= nt t
+nt (Applied t [t'])	= Applied (nt t) [nt t']
+-- all applied types are written as ( (State Int) Bool) to make biding easier
+-- > deriveBindings (m a) (State Int Bool) = [ (m, State Int), (a, Bool)
+nt (Applied t ts)	= Applied (nt $ Applied t $ init ts) [nt $ last ts]
+nt (Curry [t])		= nt t
+nt (Curry ts)		= Curry [nt $ head ts, nt $ Curry $ tail ts ]
+nt (TupleType [t])	= nt t
+nt (TupleType ts)	= TupleType $ map nt ts
 nt t			= t
 
+
+traverse	:: (Type -> Type) -> Type -> Type
+traverse f (Applied t ts)
+		= Applied (traverse f t) $ map (traverse f) ts
+traverse f (Curry ts)
+		= Curry $ map (traverse f) ts
+traverse f (TupleType ts)
+		= TupleType $ map (traverse f) ts
+traverse f t	= f t
 
 instance Show Type where
 	show t		= st t
