@@ -3,16 +3,18 @@ module Languate.TypeChecker where
 import Languate.AST
 import Languate.SymbolTable
 import Languate.BuiltIns
-import Languate.RightLeaningTree
 import StdDef
 import Data.Map (Map, insert, member, keys)
 import qualified Data.Map as M
 import Data.Maybe
-
+import Languate.Order
+import Control.Monad.Reader
+import Normalizable
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
-			| TCall [Type] Name [TypedExpression]		
+			| TApplication [Type] TypedExpression [TypedExpression]
+			| TCall [Type] Name	
 	deriving (Show)
 			
 
@@ -20,42 +22,109 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 -- leftmost:    a & b & c	=> (a & b) & c
 -- prefix	a & b & c	=> a (& b (& c))
 data InfixMode	= RightMost	| LeftMost	| Prefix	
-data Context	= Context {typeTable::TypeTable, infixOrdering:: Map Name Int}
+data Context	= Context {typeTable::TypeTable, priorityTable::PriorityTable}
 	deriving (Show)
 
 -- the context gives the type of each 
-typeCheck	:: Context -> Expression -> TypedExpression
-typeCheck _ (Nat i)
-		= TNat i
-typeCheck _ (Flt f)
-		= TFlt f
-typeCheck _ (Chr c)
-		= TChr c
-typeCheck ctx (Seq expr)
-		= order ctx expr
-typeCheck ctx (Tuple exprs)
-		= let typed	= map (typeCheck ctx) exprs	in
-		  let types	= map typeOf typed   		in
-		  let possible	= combine types	     		in
-		  	TCall (map (Applied $ Normal "Tuple") possible) "#asTuple" typed	
-typeCheck ctx (BuiltIn name)
-		= let typ	= getBuiltinType name in
-			TCall [typ] ('#':name) []
+typeCheck	:: Expression -> Reader Context TypedExpression
+typeCheck (Nat i)
+		= return $ TNat i
+typeCheck (Flt f)
+		= return $ TFlt f
+typeCheck (Chr c)
+		= return $ TChr c
+typeCheck (Seq exprs)
+		= do	ctx	<- ask
+			let call	= runReader (asCall $ Seq exprs) $ priorityTable ctx
+			checkCall call
+typeCheck (Tuple exprs)
+		= do	ctx		<- ask
+			typed		<- mapM typeCheck exprs
+			let types	= map typeOf typed
+		 	let possible	= combine types
+		  	return $ TApplication (map (Applied $ Normal "Tuple") possible) (TCall [] "#asTuple") typed	
+typeCheck (BuiltIn name)
+		= do	let typ	= getBuiltinType name
+			return $ TCall [typ] ('#':name)
 -- TODO: casts
--- TODO: clean expressions
-typeCheck ctx (Cast t)
+typeCheck (Cast t)
 		= todos "typecheck: Casts: search path in typechecker"
-typeCheck ctx AutoCast
+typeCheck AutoCast
 		= todos "typehcheck: Autocast"
-typeCheck ctx (Operator op)
-		= callFor ctx op
-typeCheck ctx (Call name)
-		= callFor ctx name
-typeCheck ctx (ExpNl _)
+typeCheck (Operator op)
+		= do	ctx	<- ask
+			return $ callFor ctx op
+typeCheck (Call name)
+		= do	ctx	<- ask
+			return $ callFor ctx name
+typeCheck (ExpNl _)
 		= error "typecheck encountered a nl, your expression was not cleaned"
 
-callFor	ctx nm	= TCall (lookupType (typeTable ctx) nm) nm []
 
+-- simple function call; operator/function without args
+callFor	ctx nm	= TCall (lookupType (typeTable ctx) nm) nm
+
+
+
+-- application: an expression as (+1) is applied on arguments; e.g. (+1) 1
+checkCall	:: Call -> Reader Context TypedExpression
+checkCall (Expr _ _ e)
+		= typeCheck e
+checkCall (FCall _ _ function args)
+		= do	typedArgs	<- mapM checkCall args
+			typedFunction	<- checkCall function
+			let types	= apply (typeOf typedFunction) $ combine $ map typeOf typedArgs
+			return $ TApplication types typedFunction typedArgs
+
+-- tries to apply/reduce the type, filters out non-matching combinations
+-- > apply [ Nat -> Nat -> Nat] [Nat] = [Nat -> Nat]
+-- > apply [ Bool -> Nat -> Nat, Nat -> Nat -> Nat] [Bool] = [Nat -> Nat]
+-- > apply [ Nat -> Nat] [Bool] = []
+apply'		:: [Type] -> [Type] -> [Type]
+apply' funcTypes []	= funcTypes
+apply' functTypes (argType:argTypes)
+		=  do	typ	<- fmap normalize functTypes
+			case typ of
+				Curry (t:ts)	-> if argType `fitsIn` t then apply' [Curry $ bind argType t ts] (bind argType t argTypes) else []
+				t		-> []
+
+
+
+
+
+
+fitsIn		:: Type -> Type -> Bool
+fitsIn t (Free _)
+		= True
+fitsIn t t'	= t == t'
+
+
+bind		:: Type -> Type -> [Type] -> [Type]
+bind t t'	= map (bindOne t t')
+
+
+-- binds the first argument as the second.
+-- > bindOne Nat (Free "a") (Free "a") = Nat
+-- > bindOne Nat Int _	= error _
+-- > bindONe Nat (Free "a") Int = Int
+bindOne		:: Type -> Type -> Type -> Type
+bindOne t (Free a) (Free a')
+	| a == a'	= t
+	| otherwise	= Free a'
+bindOne t t' (Applied appT types)
+		= Applied (bindOne t t' appT) $ bind t t' types
+bindOne t t' (Curry types)
+		= Curry $ bind t t' types
+bindOne t t' (TupleType types)
+		= TupleType $ bind t t' types
+bindOne t t' typ	= if t == t' then typ
+			else error $ "Could not bind "++show t ++" and "++show t'
+
+
+apply		:: [Type] -> [[Type]] -> [Type]
+apply funcTypes argTypess
+		= do	argTypes	<- argTypess
+			apply' funcTypes argTypes
 
 
 typeOf		:: TypedExpression -> [Type]
@@ -63,7 +132,9 @@ typeOf (TNat _)	=  [Normal "Nat", Normal "Int"]
 typeOf (TFlt _)
 		=  [Normal "Float"]
 typeOf (TChr _)	=  [Normal "Char"]
-typeOf (TCall tps _ _)
+typeOf (TCall tps _)
+		=  tps
+typeOf (TApplication tps _ _)
 		=  tps
 
 

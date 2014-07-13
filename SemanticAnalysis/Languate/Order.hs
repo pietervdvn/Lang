@@ -1,4 +1,4 @@
-module Languate.Order where
+module Languate.Order (PriorityTable, Call (Expr, FCall), InfixMode (Left, Right), Priority, asCall) where
 
 {--
 
@@ -113,9 +113,9 @@ group p (c:cs)	=  do	let p'	= priority c
 			if p == p' then do
 				tail	<- group p cs
 				return $ c:tail
-			else do	let (lower, tail)	= gather p $ c:cs
-				head		<- merge lower
-				fmap (head:) $ group p tail
+				else do	let (lower, tail)	= gather p $ c:cs
+					head		<- merge lower
+					fmap (head:) $ group p tail
 
 
 -- collects all calls in the first list until a call with equal priority is found

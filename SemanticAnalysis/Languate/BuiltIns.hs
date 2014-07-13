@@ -32,3 +32,5 @@ getBuiltinType b	= fromMaybe (error $ "Builtin "++b++" not found") $ lookup b bu
 
 nat	= (§) "Nat"
 int	= (§) "Int"
+
+asMaybe a	= Applied (Normal "Maybe") [a]

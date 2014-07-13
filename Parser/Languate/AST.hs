@@ -3,6 +3,7 @@ module Languate.AST where
 import StdDef
 import Data.Either
 import Data.List
+import Normalizable
 {--
 
 This module implements the data structures representing a parsed module. It is possible to recreate the source code starting from a datastructure like this (module some whitespace that's moved and a few dropped comments (but most should be preserverd)
@@ -77,18 +78,29 @@ data Type	= Normal String	-- A normal type, e.g. Bool
 		| TupleType [Type]
 		| Infer
 	deriving (Eq, Ord)
+
+instance Normalizable Type where
+	normalize	= nt
+
+
+nt	:: Type -> Type
+nt (Applied t [])	= t
+nt (Curry [t])		= t
+nt (TupleType [t])	= t
+nt t			= t
+
+
 instance Show Type where
-	show (Curry tps)	= intercalate " -> " $ map show tps
 	show t		= st t
 
 st		:: Type -> String
 st (Normal str)	=  str
 st (Free str)	=  str
 st (Applied t tps)
-		=  "("++show t ++" "++ unwords (map show tps)++")"
-st (Curry tps)	=  "("++intercalate " -> " (map show tps)++")"
+		=  "("++st t ++" "++ unwords (map st tps)++")"
+st (Curry tps)	=  "("++intercalate " -> " (map st tps)++")"
 st (TupleType tps)
-		=  "(" ++ intercalate ", " (map show tps) ++")"
+		=  "(" ++ intercalate ", " (map st tps) ++")"
 st Infer	= "_"
 
 

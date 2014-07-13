@@ -16,4 +16,4 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Languate.SymbolTable, Languate.FunctionGenerators, Languate.Signature, Languate.MaintenanceAccess.TestSemantal
   -- other-modules:       
-  build-depends:       base ==4.6.*, Consumer ==0.1.*, containers ==0.5.*, Parser ==0.1.*, Languate-Loader ==0.1.*
+  build-depends:       base ==4.6.*, Consumer ==0.1.*, containers ==0.5.*, Parser ==0.1.*, Languate-Loader ==0.1.*, mtl ==2.1.*
