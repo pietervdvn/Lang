@@ -86,11 +86,11 @@ n (And r rb)	= case filter (not . isEmpty . fst) $ map (first n) rb of
 			[]	-> n r
 			rest	-> And (n r) rb 
 n (Token r)	= case n r of
-			r@(Token _)	-> r
-			r		-> Token r
+			r'@(Token _)	-> r'
+			r'		-> Token r'
 n (NWs e)	= case n e of
-			e@(NWs _)	-> e
-			e		-> NWs e
+			e'@(NWs _)	-> e'
+			e'		-> NWs e'
 n rule		= rule
 
 

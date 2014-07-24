@@ -29,7 +29,7 @@ testBuild	= buildWithImports package
 
 
 -- the environment
-tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> (asMaybe nat)])
+tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> asMaybe nat])
 				, (".", [dotType])
 				, ("c", [nat])
 				, ("nat2int", [ [nat] --> int] )

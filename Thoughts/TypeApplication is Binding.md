@@ -6,8 +6,14 @@ Take 'id : a -> a', applied to '5 : Nat'. The type of 'id 5' is '(a -> a) Nat'. 
 
 When we can not bind, e.g. '(Int -> Int) Nat', it means a type error happened.
 
+A more complicated example
+--------------------------
+
 This must also happen recursively, e.g. '(m a -> (a -> m b) -> m b) (State Int Bool)'. 
 Here, 'm a' must be bound to 'State Int Bool'. When the bindings are derived, we find that 'm' must be bound to 'State Int' and 'a' must be bound to 'Int': '(State Int Bool -> (Bool -> State Int b) -> State Int b) (State Int Bool)'. We can then apply without problem: '(Bool -> State Int b) -> State Int b)
 
 
-(a -> b -> c) (d -> e) => (a == d; (b -> c) == e)
+And with subtypes?
+------------------
+
+Note that some types can be bound because they are a subtype; e.g. 'List' can be bound to 'Functor' (but not the other way round) as each list is a functor.

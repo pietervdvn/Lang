@@ -11,7 +11,6 @@ the first two args should be compatible. Out of the first two types, bindings ca
 
 import Languate.AST
 import StdDef
-import State
 import Data.Map (Map, lookup, insert, empty, member)
 import qualified Data.Map as Map
 import State
@@ -38,7 +37,7 @@ substitute _ t	= t
 
 
 -- crashes on invalid binding, expects normalized input
-deriveBindings	:: Type -> Type -> [(String, Type)]
+deriveBindings	:: Type -> Type -> Maybe [(String, Type)]
 deriveBindings (Free a) (Free b)
 	| a == b	= []
 	| otherwise	= [(a, Free b),(b, Free a)]
@@ -88,7 +87,7 @@ subsFrees _ t	= t
 buildTable	:: Type -> State FreeTable ()
 buildTable (Free a)
 		=  do	found	<- get' (member a . conts)
-			when (not found) $ do	index	<- get' next
+			unless found $ do	index	<- get' next
 						modify $ setNext $ index +1
 						cont 	<- get' conts
 						modify $ setCont $ insert a index cont

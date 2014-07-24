@@ -28,7 +28,7 @@ getBuiltinType b	= fromMaybe (error $ "Builtin "++b++" not found") $ lookup b bu
 
 
 (§)	:: Name -> Type
-(§) nm	=  Normal nm
+(§) 	=  Normal
 
 nat	= (§) "Nat"
 int	= (§) "Int"

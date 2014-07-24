@@ -10,6 +10,7 @@ import Data.Maybe
 import Languate.Order
 import Control.Monad.Reader
 import Normalizable
+import TypeBinding
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}

@@ -94,7 +94,7 @@ mergeLeft p [c,c']
 		= FCall p Left c' [c]
 mergeLeft p (c:c':cs)
 	| priority c' == p
-		= FCall p Left c' $ [c, mergeLeft p cs]
+		= FCall p Left c' [c, mergeLeft p cs]
 	| otherwise	= mergeLeft p (c':c:cs)
 
 
@@ -105,7 +105,7 @@ checkModes	:: [InfixMode] -> InfixMode
 checkModes (m:ms)
 		= let correct	= all (m==) ms in
 			if correct then m else
-				error $ "Error in expression: mixed modes with the same precedence level. Some operators have a right-infix, some a left infix; try to change the precedence mode of your own operators"
+				error "Error in expression: mixed modes with the same precedence level. Some operators have a right-infix, some a left infix; try to change the precedence mode of your own operators"
 
 group		:: Priority -> [Call] -> Reader PriorityTable [Call]
 group _ []	=  return []

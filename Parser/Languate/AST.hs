@@ -106,7 +106,7 @@ traverse f (TupleType ts)
 traverse f t	= f t
 
 instance Show Type where
-	show t		= st t
+	show	= st
 
 st		:: Type -> String
 st (Normal str)	=  str
