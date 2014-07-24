@@ -31,7 +31,8 @@ testBuild	= buildWithImports package
 
 -- the environment (typetable)
 tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> asMaybe nat])
-				, (".", [dotType, dotType', dotType'', dotTypeState])
+				, ("f1", [ [tEntity] --> nat ])
+				, (".", [pipeType, dotType, dotType', dotTypeState])
 				, ("c", [nat])
 				, ("g", [nat])
 				, ("nat2int", [ [nat] --> int] )
@@ -41,14 +42,22 @@ tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] 
 				, ("point", [ [tEntity] --> tPoint, [ [tPoint] --> tPoint, tEntity] --> tEntity ])
 				, ("x", [ [tPoint] --> int, [[int] --> int, tPoint] --> tPoint])
 				, ("p", [tPoint, [tPoint] --> tPoint])
+				, ("|", [pipeType])	-- same as (.), but binds left
+				, ("$", [revPipeType])
 				] ++ map (\op -> (op, [[nat,nat] --> nat, [int,nat] --> int, [nat,int] --> int, [int,int] --> int])) ["+","-","*","/","%"]
 
 -- a -> (a -> b) -> b
-dotType	= Curry [Free "a", Curry [Free "a", Free "b"], Free "b"]
+pipeType	= Curry [Free "a", Curry [Free "a", Free "b"], Free "b"]
+
+-- (a -> b) -> a -> b
+revPipeType	= [ [Free "a"] --> Free "b", Free "a"] --> Free "b"
 
 -- a -> (b -> a -> a) -> b -> a
-dotType'= [ Free "a", [Free "b", Free "a"] --> Free "a", Free "b"] --> Free "a"
+dotType	= [ Free "a", [Free "b", Free "a"] --> Free "a", Free "b"] --> Free "a"
 
+-- (a -> b) -> (b -> c) -> a -> c
+dotType'
+	=[ [Free "a"] --> Free "b", [Free "b"] --> Free "c", Free "a"] --> Free "c"
 
 -- ((b -> b) -> a -> a) -> ((c -> c) -> b -> b) -> a -> a
 dotTypeState= [ [[Free "b"] --> Free "b", Free "a"] --> Free "a"
@@ -56,9 +65,6 @@ dotTypeState= [ [[Free "b"] --> Free "b", Free "a"] --> Free "a"
 	  , [ Free "c"] --> Free "c"
 	  ,   Free "a"] --> Free "a"
 
--- (a -> b) -> (b -> c) -> a -> c
-dotType''
-	=[ [Free "a"] --> Free "b", [Free "b"] --> Free "c", Free "a"] --> Free "c"
 
 tEntity	= Normal "Entity"
 tPoint	= Normal "Point"
@@ -72,7 +78,7 @@ tc expr	= runReader (typeCheck expr) tctx
 
 
 priorTable	:: PriorityTable
-priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), (">>", (15, Right)), ("<<", (15, Left)) ]
+priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
 
 testExprs	= map Seq [[Call "f", Nat 1, Nat 2]
 			  ,[Call "c", Operator "."]
@@ -81,13 +87,17 @@ testExprs	= map Seq [[Call "f", Nat 1, Nat 2]
 			  ,[Nat 1, Operator "+", Nat 2]
 			  ,[Nat 2, Operator "*", Nat 3]
 			  ,[Nat 1 , Operator "+", Nat 2, Operator "*", Nat 3]
-			  ,[Nat 1, Operator "²"],[Nat 2, Operator "/"]
+			  ,[Nat 1, Operator "²"]
+			  ,[Nat 2, Operator "/"]
 			  ,[Operator "/"]
 			  ,[Call "entity", Operator ".", Call "point"]
 			  ,[Call "point", Operator ".", Call "x"]
 			  ,[Call "entity", Operator ".", Call "point", Operator ".", Call "x"]
 			  ,[Call "f", Call "g", Operator "+", Call "entity", Operator ".", Call "point", Operator ".", Call "x"]
-			  ,[Call "f", Operator ">>", Call "g", Operator ">>",Operator "h"],[Call "f", Operator "<<", Call "g", Operator "<<", Operator "h"]]
+			  ,[Nat 1, Operator "|"]
+			  ,[Nat 1, Operator "|", Call "²"]
+			  ,[Nat 1, Operator "|", Call "²", Operator "|",Operator "²"]
+			  ,[Call "²", Operator "$", Call "f1", Operator "entity"]]
 
 -- following expressions correctly generate an error
 crashinExprs	= map Seq [[Operator "²", Nat 1], [Operator "/", Nat 2]]

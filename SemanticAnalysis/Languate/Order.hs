@@ -74,7 +74,7 @@ mergeRight p [c]
 		=  c
 mergeRight p [c,c']
 	| priority c == p
-		= error $ errMsg "Prefix" "right" ++ show c
+		= error $ errMsg "Prefix" "right" ++ show c -- prefix, not allowed
 	| otherwise
 		= FCall p Right c' [c]	-- normal postfix usage
 mergeRight p (c:c':cs)
@@ -89,13 +89,13 @@ mergeLeft	:: Priority -> [Call] -> Call
 mergeLeft p [c]	= c
 mergeLeft p [c,c']
 	| priority c == p	
-		= error $ errMsg "Prefix" "left" ++ show c'-- postfix, not allowed in left mode
+		= error $ errMsg "Prefix" "left" ++ show c'-- prefix, not allowed
 	| otherwise
-		= FCall p Left c' [c]
-mergeLeft p (c:c':cs)
-	| priority c' == p
-		= FCall p Left c' [c, mergeLeft p cs]
-	| otherwise	= mergeLeft p (c':c:cs)
+		= FCall p Left c [c']	-- normal postfix usage
+mergeLeft p (c1:op:c2:cs)
+	| priority op == p
+		= mergeLeft p $ (FCall p Left op [c1,c2]):cs
+	| otherwise	= error $ "Invalid usage of a left associative operator, in expression "++show [c1,op,c2]
 
 
 errMsg usage dir	= usage++ " usage of a "++dir++" associative operator is not allowed, use parentheses instead. Error on expression: "
