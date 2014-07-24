@@ -1,4 +1,4 @@
-module Languate.TypeBinding (bind) where
+module Languate.TypeBinding (bind, bind', fitsIn) where
 
 {--
 
@@ -18,16 +18,49 @@ import Control.Monad
 import Prelude hiding (lookup)
 import Data.Maybe
 import Normalizable
+import Data.Either
+
+-- represents which two types can't be bound together
+type NonBinding	= (Type, Type)
+type BindTry a	= Either NonBinding a
+
+
+-- try to bind. If it works, it'll fit
+-- expects normalized input
+-- TODO work with inheritance table
+fitsIn	:: Type -> Type -> Bool
+fitsIn (Normal a) (Normal b)
+	= a == b
+fitsIn _ (Free _)
+	= True
+fitsIn (Applied t ts) (Applied t' ts')
+	= all2 fitsIn (t:ts) (t':ts')
+fitsIn (Curry ts) (Curry ts')
+	= all2 fitsIn ts ts'
+fitsIn (TupleType ts) (TupleType ts')
+	= all2 fitsIn ts ts'
+fitsIn _ _	= False
+
+
+
+
+-- same as bind, except that it crashes when no binding is possible
+bind'	:: Type -> Type -> Type -> Type
+bind' a b c
+	=  case bind a b c of
+		Right typ	-> typ
+		Left (a,b)	-> error $ "Could not bind types "++show a++" and "++show b
 
 -- bind	:: Type -> Type -> Type -> Type
--- a is a fragment from inType, strangeType must be made unique
-bind	:: Type -> Type -> Type -> Type
+-- a is a fragment from inType, which will be substituted with b in the third argument
+-- strangeType must be made unique
+-- TODO work with inheritance table
+bind	:: Type -> Type -> Type -> BindTry Type
 bind a b inType
-	= let (a',tabl)	= makeUnique "a-" a in
-	  let (b', _)	= makeUnique "b-" b in
-	  let bindings	= deriveBindings (normalize a') (normalize b') in
-		traverse (substitute bindings . subsFrees tabl) inType	-- the subsFree table is needed to get the same substitutions as 'a' got.
-
+	= do	let (a',tabl)	= makeUnique "a-" a
+	 	let (b', tabl')	= makeUnique "b-" b
+	 	bindings	<- deriveBindings (normalize a') (normalize b')
+		return $ traverse (substitute bindings . subsFrees tabl') inType	-- the subsFree table is needed to get the same substitutions as 'a' got.
 
 substitute	:: [(String,Type)] -> Type -> Type
 substitute ((a,t'):binds) (Free a')
@@ -36,13 +69,13 @@ substitute ((a,t'):binds) (Free a')
 substitute _ t	= t
 
 
--- crashes on invalid binding, expects normalized input
-deriveBindings	:: Type -> Type -> Maybe [(String, Type)]
+-- , expects normalized input
+deriveBindings	:: Type -> Type -> BindTry [(String, Type)]
 deriveBindings (Free a) (Free b)
-	| a == b	= []
-	| otherwise	= [(a, Free b),(b, Free a)]
-deriveBindings (Free a) t	= [(a, t)]
-deriveBindings t (Free b)	= [(b, t)]
+	| a == b	= return []
+	| otherwise	= return [(a, Free b),(b, Free a)]
+deriveBindings (Free a) t	= return [(a, t)]
+deriveBindings t (Free b)	= return [(b, t)]
 
 deriveBindings (Applied t tps) (Applied t' tps')
 	= deriveBindings' (t:tps) (t':tps')
@@ -52,13 +85,13 @@ deriveBindings (TupleType tps) (TupleType tps')
 	= deriveBindings' tps tps'
 
 deriveBindings a b
-	= if a == b then [] else error $ "Could not bind "++show a ++" and "++show b
+	= if a == b then return [] else Left (a,b)
 
 
 -- free type on the left should be replaced by type on the right
-deriveBindings'	:: [Type] -> [Type] -> [(String, Type)]
-deriveBindings' ts ts'	= concatMap (uncurry deriveBindings) $ zip ts ts'
-
+deriveBindings'	:: [Type] -> [Type] -> BindTry [(String, Type)]
+deriveBindings' ts ts'	= do	lst	<- mapM (uncurry deriveBindings) $ zip ts ts'
+				return $ concat lst
 
 -- > makeUnique (Curry [Free "a", Free "b", Free "b"]) "c" = Curry [Free "c1", Free "c2", Free "c1"]
 -- used before binding to prevent conflicts; e.g. id applied on id:
@@ -74,7 +107,7 @@ makeUnique s t	=  let (_, table)	= runstate (buildTable t) (FreeTable 0 s empty)
 data FreeTable	= FreeTable {next::Int, replaceName::String, conts::Map String Int}
 	deriving (Show)
 
-
+-- used in makeuniqe, to substitute 'Free a' stuff into really unique stuff
 subsFrees	:: FreeTable -> Type -> Type
 subsFrees table (Free a)
 		= let ind	= lookup a $ conts table in

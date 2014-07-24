@@ -11,6 +11,8 @@ import Languate.Order
 import Control.Monad.Reader
 import Normalizable
 import Languate.TypeBinding
+import Data.List (nub)
+import Debug.Trace
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
@@ -45,7 +47,7 @@ typeCheck (Tuple exprs)
 		 	let possible	= combine types
 		  	return $ TApplication (map (Applied $ Normal "Tuple") possible) (TCall [] "#asTuple") typed	
 typeCheck (BuiltIn name)
-		= do	let typ	= getBuiltinType name
+		= do	let typ	= normalize $ getBuiltinType name
 			return $ TCall [typ] ('#':name)
 -- TODO: casts
 typeCheck (Cast t)
@@ -59,11 +61,11 @@ typeCheck (Call name)
 		= do	ctx	<- ask
 			return $ callFor ctx name
 typeCheck (ExpNl _)
-		= error "typecheck encountered a nl, your expression was not cleaned"
+		= error "typecheck encountered a nl, your expression was not cleaned (this is a bug, contact the dev!)"
 
 
 -- simple function call; operator/function without args
-callFor	ctx nm	= TCall (lookupType (typeTable ctx) nm) nm
+callFor	ctx nm	= TCall (map normalize $ lookupType (typeTable ctx) nm) nm
 
 
 
@@ -75,22 +77,30 @@ checkCall (FCall _ _ function args)
 		= do	typedArgs	<- mapM checkCall args
 			typedFunction	<- checkCall function
 			let types	= apply (typeOf typedFunction) $ combine $ map typeOf typedArgs
-			return $ TApplication types typedFunction typedArgs
+			return $ TApplication (map normalize $ nub types) typedFunction typedArgs
 
 -- tries to apply/reduce the type, filters out non-matching combinations
+-- note that the second argument represents the types it is applied to.
 -- > apply [ Nat -> Nat -> Nat] [Nat] = [Nat -> Nat]
 -- > apply [ Bool -> Nat -> Nat, Nat -> Nat -> Nat] [Bool] = [Nat -> Nat]
 -- > apply [ Nat -> Nat] [Bool] = []
 apply'		:: [Type] -> [Type] -> [Type]
 apply' funcTypes []	= funcTypes
 apply' functTypes (argType:argTypes)
-		=  do	typ	<- fmap normalize functTypes
+		=  do	typ	<- fmap normalize functTypes	-- for each of the possibilities (list monad)
 			case typ of
-				Curry (t:ts)	-> if argType `fitsIn` t then apply' [Curry $ bind argType t ts] (bind argType t argTypes) else []
+				Curry (t:ts)	-> _apply argType argTypes t ts
 				t		-> []
 
+_apply argType argTypes t ts
+	= if argType `fitsIn` t 							-- if it fits
+		then apply' [Curry $ map (bind' argType t) ts] (map (bind' argType t) argTypes) 	-- I sits!
+		else []
 
-
+-- applies all possible argument types on the funtion type, gives all possible types
+-- >> let possibleFunctionTypes = [Curry [Nat,Nat] Nat, Curry [Int,Int] Int] 
+-- >> let possibleArgTypes = [ [Nat,Nat], [Nat,Int], [Int,Nat], [Int,Int]]
+-- >> apply possibleFunctionTypes possibleArgTypes = [Nat, Int]
 apply		:: [Type] -> [[Type]] -> [Type]
 apply funcTypes argTypess
 		= do	argTypes	<- argTypess

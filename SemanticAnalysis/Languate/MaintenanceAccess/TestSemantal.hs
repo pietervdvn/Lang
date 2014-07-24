@@ -14,6 +14,7 @@ import Languate.AST
 import Languate.BuiltIns
 import Languate.TypeChecker
 import Languate.Order
+import Data.List (intercalate)
 
 
 {--
@@ -28,13 +29,39 @@ bool'	= fromJust $ lookup bool package
 testBuild	= buildWithImports package
 
 
--- the environment
+-- the environment (typetable)
 tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> asMaybe nat])
-				, (".", [dotType])
+				, (".", [dotType, dotType', dotType'', dotTypeState])
 				, ("c", [nat])
+				, ("g", [nat])
 				, ("nat2int", [ [nat] --> int] )
-				] ++ map (\op -> (op, [[nat,nat] --> nat])) ["+","-","*","/","%"]
-dotType	= Curry [Free "a", Curry [Free "a", Free "b"], Free "b"]cd 
+				, ("²", [ [nat] --> nat] )
+				, ("x" , [ nat, int])
+				, ("entity", [tEntity])
+				, ("point", [ [tEntity] --> tPoint, [ [tPoint] --> tPoint, tEntity] --> tEntity ])
+				, ("x", [ [tPoint] --> int, [[int] --> int, tPoint] --> tPoint])
+				, ("p", [tPoint, [tPoint] --> tPoint])
+				] ++ map (\op -> (op, [[nat,nat] --> nat, [int,nat] --> int, [nat,int] --> int, [int,int] --> int])) ["+","-","*","/","%"]
+
+-- a -> (a -> b) -> b
+dotType	= Curry [Free "a", Curry [Free "a", Free "b"], Free "b"]
+
+-- a -> (b -> a -> a) -> b -> a
+dotType'= [ Free "a", [Free "b", Free "a"] --> Free "a", Free "b"] --> Free "a"
+
+
+-- ((b -> b) -> a -> a) -> ((c -> c) -> b -> b) -> a -> a
+dotTypeState= [ [[Free "b"] --> Free "b", Free "a"] --> Free "a"
+	  , [[Free "c"] --> Free "c", Free "b"] --> Free "b"
+	  , [ Free "c"] --> Free "c"
+	  ,   Free "a"] --> Free "a"
+
+-- (a -> b) -> (b -> c) -> a -> c
+dotType''
+	=[ [Free "a"] --> Free "b", [Free "b"] --> Free "c", Free "a"] --> Free "c"
+
+tEntity	= Normal "Entity"
+tPoint	= Normal "Point"
 
 
 tctx	= Context tt priorTable
@@ -49,9 +76,18 @@ priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(
 
 testExprs	= map Seq [[Call "f", Nat 1, Nat 2]
 			  ,[Call "c", Operator "."]
+			  ,[Call "nat2int", Call "c"]
 			  ,[Call "c", Operator ".", Call "nat2int"]
 			  ,[Nat 1, Operator "+", Nat 2]
-			  ,[Nat 1 , Operator "+", Nat 2, Operator "*", Nat 3],[Nat 1, Operator "²"],[Nat 2, Operator "/"]	,[Operator "/"],[Call "f", Call "x", Operator "+", Call "entity", Operator ".", Call "point", Operator ".", Call "x"],[Call "f", Operator ">>", Call "g", Operator ">>",Operator "h"],[Call "f", Operator "<<", Call "g", Operator "<<", Operator "h"]]
+			  ,[Nat 2, Operator "*", Nat 3]
+			  ,[Nat 1 , Operator "+", Nat 2, Operator "*", Nat 3]
+			  ,[Nat 1, Operator "²"],[Nat 2, Operator "/"]
+			  ,[Operator "/"]
+			  ,[Call "entity", Operator ".", Call "point"]
+			  ,[Call "point", Operator ".", Call "x"]
+			  ,[Call "entity", Operator ".", Call "point", Operator ".", Call "x"]
+			  ,[Call "f", Call "g", Operator "+", Call "entity", Operator ".", Call "point", Operator ".", Call "x"]
+			  ,[Call "f", Operator ">>", Call "g", Operator ">>",Operator "h"],[Call "f", Operator "<<", Call "g", Operator "<<", Operator "h"]]
 
 -- following expressions correctly generate an error
 crashinExprs	= map Seq [[Operator "²", Nat 1], [Operator "/", Nat 2]]
@@ -59,7 +95,9 @@ crashinExprs	= map Seq [[Operator "²", Nat 1], [Operator "/", Nat 2]]
 
 order expr	=  runReader (asCall expr) priorTable
 
-t 		= map tc testExprs
+t'		= map tc testExprs
+
+t		= putStrLn $ unlines $ map (\(e, t) -> show e ++" : "++ (show $ typeOf t)) $ zip testExprs t'
 
 
 {--- 
@@ -86,3 +124,11 @@ e.pos.x.+ 4	=			-- create new entity which is 4 to the right
 
 
 --}
+
+{-
+TApplication [(Entity -> Int),(Entity -> ((Int -> Int) -> Point))] 
+(TCall [(a -> ((a -> b) -> b)),((a -> b) -> ((b -> c) -> (a -> c)))] ".") 
+[TCall [(Entity -> Point),(Entity -> ((Point -> Point) -> Entity))] "point",
+TCall [(Point -> Int),(Point -> ((Int -> Int) -> Point))] "x"]
+-}
+

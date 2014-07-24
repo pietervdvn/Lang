@@ -26,3 +26,8 @@ tail' ls	=  tail ls
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []
 dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as
+
+
+all2	:: (a -> b -> Bool) -> [a] -> [b] -> Bool
+all2 f as bs
+	= all (uncurry f) $ zip as bs
