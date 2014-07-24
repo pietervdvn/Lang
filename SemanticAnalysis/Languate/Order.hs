@@ -94,7 +94,7 @@ mergeLeft p [c,c']
 		= FCall p Left c [c']	-- normal postfix usage
 mergeLeft p (c1:op:c2:cs)
 	| priority op == p
-		= mergeLeft p $ (FCall p Left op [c1,c2]):cs
+		= mergeLeft p $ FCall p Left op [c1,c2] :cs
 	| otherwise	= error $ "Invalid usage of a left associative operator, in expression "++show [c1,op,c2]
 
 

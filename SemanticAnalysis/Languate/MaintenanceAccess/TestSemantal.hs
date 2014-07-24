@@ -107,7 +107,7 @@ order expr	=  runReader (asCall expr) priorTable
 
 t'		= map tc testExprs
 
-t		= putStrLn $ unlines $ map (\(e, t) -> show e ++" : "++ (show $ typeOf t)) $ zip testExprs t'
+t		= putStrLn $ unlines $ map (\(e, t) -> show e ++" : "++ show (typeOf t)) $ zip testExprs t'
 
 
 {--- 

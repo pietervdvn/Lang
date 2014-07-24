@@ -90,7 +90,7 @@ deriveBindings a b
 
 -- free type on the left should be replaced by type on the right
 deriveBindings'	:: [Type] -> [Type] -> BindTry [(String, Type)]
-deriveBindings' ts ts'	= do	lst	<- mapM (uncurry deriveBindings) $ zip ts ts'
+deriveBindings' ts ts'	= do	lst	<- zipWithM deriveBindings ts ts'
 				return $ concat lst
 
 -- > makeUnique (Curry [Free "a", Free "b", Free "b"]) "c" = Curry [Free "c1", Free "c2", Free "c1"]
