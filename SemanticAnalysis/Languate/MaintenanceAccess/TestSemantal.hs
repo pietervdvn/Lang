@@ -34,7 +34,7 @@ tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] 
 				, ("c", [nat])
 				, ("nat2int", [ [nat] --> int] )
 				] ++ map (\op -> (op, [[nat,nat] --> nat])) ["+","-","*","/","%"]
-dotType	= Curry [Free "a", Curry [Free "a", Free "b"], Free "b"]
+dotType	= Curry [Free "a", Curry [Free "a", Free "b"], Free "b"]cd 
 
 
 tctx	= Context tt priorTable

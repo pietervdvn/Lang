@@ -19,4 +19,4 @@ library
                        Regex.Def
 
   other-modules:       EscUtils, Regex.Normalform, Regex.Shw, Regex.Eval, Regex.Prsr, Regex.MetaChars
-  build-depends:       base ==4.6.*, Consumer ==0.1.*
+  build-depends:       base ==4.6.*, Consumer ==0.1.*, Std ==0.1.*
