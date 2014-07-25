@@ -6,7 +6,7 @@ desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and
 
 import Comments
 
-$localIdent	::= "[a..z][A..Za..z0..9]*"
+$localIdent	::= "[a..z][A..Za..z0..9]*'?"
 $globalIdent	::= "[A..Z][A..Za..z0..9]*"
 
 comma		::= ","

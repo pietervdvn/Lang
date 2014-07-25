@@ -19,6 +19,7 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			| TApplication [Type] TypedExpression [TypedExpression]
 			| TCall [Type] Name	
 	deriving (Show)
+type TExpression	= TypedExpression
 			
 
 -- rightmost:	a & b & c	=> a & (b & c)	(rightmost, shortest expression get's evaluated first)
@@ -108,7 +109,7 @@ apply funcTypes argTypess
 
 
 typeOf		:: TypedExpression -> [Type]
-typeOf (TNat _)	=  [Normal "Nat", Normal "Int"]
+typeOf (TNat _)	=  [Normal "Nat"]
 typeOf (TFlt _)
 		=  [Normal "Float"]
 typeOf (TChr _)	=  [Normal "Char"]
@@ -145,7 +146,7 @@ lookupType	:: TypeTable -> Name -> [Type]
 lookupType tt name
 		= fromMaybe (error $ errMsg name) $ M.lookup name $ cont tt
 
-errMsg name	= "Typechecker: Name not found: "++name++". The pre-typecheck sanitizer was not run (and should be implemented)"
+errMsg name	= "Typechecker: Name not found: "++name++". The pre-typecheck sanitizer was not run; this is a bug"
 
 
 -- generates all possible choices

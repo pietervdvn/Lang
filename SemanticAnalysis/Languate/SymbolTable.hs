@@ -39,6 +39,13 @@ find sign (Child p cont)
 				a	-> a
 
 
+findType		:: Name -> TypeTable -> Maybe [Type]
+findType _ Empt		=  Nothing
+findType n (TT p cont)	=  case lookup n cont of
+				Nothing -> findType n p
+				a	-> a
+
+
 simpleMap		:: Map Signature a -> Map Name a
 simpleMap		=  fromList . map (\(Signature name _, a) -> (name, a)) . toList
 
@@ -57,7 +64,7 @@ addImports simple fqn modul
 			   let impT	= map (\fqn -> fromJust $ lookup fqn simple) imps in
 			   foldl setParent local impT
 
---TODO
+--TODO fix with package manager
 fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
 impToFQN	:: Import -> FQN

@@ -19,6 +19,8 @@ import Data.List (intercalate)
 
 {--
 Dev code for semantic analysis.
+
+Contains some example expressions 
 --}
 
 package	= unsafePerformIO $ loadPackage' (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
@@ -26,6 +28,7 @@ package	= unsafePerformIO $ loadPackage' (toFQN' "pietervdvn:Data:Prelude") "../
 bool	= toFQN' "pietervdvn:Data:Data.Bool"
 bool'	= fromJust $ lookup bool package
 
+-- the workspace functions, with all imports	
 testBuild	= buildWithImports package
 
 

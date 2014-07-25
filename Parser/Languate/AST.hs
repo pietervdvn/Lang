@@ -149,6 +149,19 @@ se (Operator str)
 		= str
 se _		= ""
 
+
+isNl		:: Expression -> Bool
+isNl (ExpNl _)	= True
+isNl _		= False
+
+remNl		:: Expression -> Expression
+remNl (Seq es)	=  Seq $ remNls es
+remNl (Tuple es)
+		=  Tuple $ remNls es
+remNl e		= e
+
+remNls		=  filter (not . isNl)
+
 data Pattern	= Assign Name	-- gives a name to the argument
 		| Let Name Expression	-- evaluates the expression, and assigns it to the given name
 		{- Deconstructs the argument with a function of type a -> Maybe (d,e,f,...), in which a is of the type of the corresponding argument.
