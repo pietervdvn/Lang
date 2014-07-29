@@ -15,10 +15,18 @@ Code examples
 Getting started
 ===============
 
-Execute ````installAll````. If this fails, install all submodules first with ````cabal install <module>````; see the installscript for the fight order.
+Install the Haskell platform (ghc+cabal) and mtl.
 
+    sudo apt-get install ghc cabal-install
+    cabal update
+    cabal install mtl
+    
 
+Clone the repo and install all
 
+    git clone git@github.com:pietervdvn/Lang.git
+    cd Lang
+    ./installAll
 
 
 If you want to use the BNF-lib to  parse another languate, see the readme in bnf which contains a complete tutorial.
