@@ -2,12 +2,12 @@ module Languate.Parser.Pt2Expr (pt2expr) where
 
 import StdDef
 import Bnf.ParseTree
-import Bnf hiding (SimpleConvert)
+import Bnf
 import Languate.Parser.Utils
 import Languate.Parser.Pt2Prelude
 import Languate.Parser.Pt2Type
 import qualified Languate.AST as Languate
-import Languate.AST hiding (Seq, Flt, Nat, Chr, List, Tuple)
+import Languate.AST hiding (Seq, Flt, Nat, Chr, Tuple)
 
 {--
 

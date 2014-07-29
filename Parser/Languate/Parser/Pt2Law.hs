@@ -2,7 +2,7 @@ module Languate.Parser.Pt2Law (pt2law) where
 
 import StdDef
 import Bnf.ParseTree
-import Bnf hiding (SimpleConvert)
+import Bnf
 import Languate.Parser.Utils
 import Languate.Parser.Pt2Type
 import Languate.Parser.Pt2Expr

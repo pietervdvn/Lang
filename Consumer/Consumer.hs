@@ -6,6 +6,7 @@ module Consumer where
 
 -- This is an ugly mix of side effects; monad transformers should be used, but are somewhat more impractical to use.
 import StdDef
+import Prelude hiding (catch)
 
 data Outcome e a	= Res a | Exc e | Nope
 	deriving (Ord, Show, Eq)

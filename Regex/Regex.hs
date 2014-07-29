@@ -12,6 +12,7 @@ import Regex.Normalform -- normalize :: Regex -> Regex
 import Regex.Eval -- match :: Regex -> Parser String
 
 import Consumer
+import Prelude hiding (catch)
 import Parser
 
 import EscUtils

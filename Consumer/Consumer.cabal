@@ -14,4 +14,4 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Consumer, ConsumerL, Parser, Normalizable
   -- other-modules:       
-  build-depends:       base ==4.6.*, Std ==0.1.*
+  build-depends:       base ==4.5.*, Std ==0.1.*
