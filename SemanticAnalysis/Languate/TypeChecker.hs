@@ -1,5 +1,6 @@
 module Languate.TypeChecker where
 
+import Languate.TAST
 import Languate.AST
 import Languate.SymbolTable
 import Languate.BuiltIns
@@ -12,14 +13,6 @@ import Control.Monad.Reader
 import Normalizable
 import Languate.TypeBinding
 import Data.List (nub)
-import Debug.Trace
-
-data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
-			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
-			| TApplication [Type] TypedExpression [TypedExpression]
-			| TCall [Type] Name	
-	deriving (Show)
-type TExpression	= TypedExpression
 			
 
 -- rightmost:	a & b & c	=> a & (b & c)	(rightmost, shortest expression get's evaluated first)
@@ -144,7 +137,7 @@ getPriority _ _	=  0
 -- might crash on a 'not found'
 lookupType	:: TypeTable -> Name -> [Type]
 lookupType tt name
-		= fromMaybe (error $ errMsg name) $ M.lookup name $ cont tt
+		= fromMaybe (error $ errMsg name) $ findType name tt
 
 errMsg name	= "Typechecker: Name not found: "++name++". The pre-typecheck sanitizer was not run; this is a bug"
 

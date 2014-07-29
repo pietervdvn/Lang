@@ -17,9 +17,6 @@ import Languate.Order (PriorityTable)
 import Control.Monad.Reader
 import Debug.Trace
 
-data TClause		= TClause [TPattern] TExpression
-	deriving (Show)
-
 -- checks the clause on missing references. We assume all functions have a known type
 checkClause	:: TypeTable -> PriorityTable -> Type -> Clause -> TClause
 checkClause tt prior targetType (Clause patterns expr)

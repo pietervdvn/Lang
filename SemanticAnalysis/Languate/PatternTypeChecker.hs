@@ -14,24 +14,20 @@ import StdDef
 import State
 import Data.Map (member, insert, empty, Map)
 import Languate.AST
+import Languate.TAST
 import Languate.SymbolTable
 import Control.Monad
 import Data.Maybe
 import Normalizable
 
--- TODO eval is left out for a later version
-data TPattern	= TAssign Name
-		| TDeconstruct Name [Pattern]
-		| TMulti [TPattern]
-		| TDontCare
-	deriving (Show)
+
 
 
 type TypedClosure	= Map Name Type
 
 checkPattern	:: TypeTable -> [Pattern] -> [Type] -> ([TPattern], Map Name Type)
 checkPattern tt patterns types
-		= let patterns'	= sanitize (length types) patterns in
+		= let patterns'	= map normalize $ sanitize (length types) patterns in
 			runstate (checkAll tt patterns' types) empty
 
 -- expands multi-dontcare into the proper amount of dont-cares

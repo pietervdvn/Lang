@@ -129,7 +129,7 @@ data Expression	= Nat Int
 		| Call String
 		| Operator String
 		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment 
-
+	deriving (Eq)
 instance Show Expression where
 	show	= se
 
@@ -173,6 +173,7 @@ data Pattern	= Assign Name	-- gives a name to the argument
 		| DontCare		-- underscore
 
 		| MultiDontCare		-- star
+	deriving (Eq)
 instance Show Pattern where
 	show 	= sp
 
@@ -188,6 +189,20 @@ sp (Eval expr)	= '$':show expr
 sp DontCare	= "_"
 sp MultiDontCare
 		= "*"
+
+instance Normalizable Pattern where
+	normalize	= np
+
+np		:: Pattern -> Pattern
+np (Deconstruct nm ptrns)
+		= Deconstruct nm $ filter ((/=) (Multi [])) $ nps ptrns
+np (Multi [p])	= normalize p
+np (Multi pts)	= Multi $ nps pts
+np (Eval e)	= Eval e
+np pt		= pt
+
+
+nps	= map normalize
 
 
 {- Deconstruct "unprepend" 

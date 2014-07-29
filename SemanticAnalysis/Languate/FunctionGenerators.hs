@@ -5,10 +5,12 @@ Some constructs automatically generate functions, e.g. an ADT-definition defines
 --}
 
 import Languate.AST
+import Languate.Signature
 import StdDef
 
 
 -- generates all the functions, based on a statement.
+-- Note that this function might imply already typechecked functions too, which should be included directly
 generate	:: Statement -> [Function]
 generate (FunctionStm func)
 		= [func]
@@ -20,6 +22,16 @@ generate (ClassDefStm classDef)
 		= todos "ClassDef function generation"
 generate _	= []
 
+
+-- generates functions directly for the interpreter, these will mainly be the constructors
+generateConstr	:: Name -> [Name] -> Name -> Int -> [Type] -> (Signature, [TClause])
+generateConstr adtName frees constr int types
+		= let varNames 	= take (length typs) vars in
+		  let typ	= toCurry typs $ apply adtName frees in
+		  let sign	= Signature constr typ in
+		  let pattern	= map Assign varNames in
+		  let expr	= Seq $ [BuiltIn "asADT", Nat int]++map Call varNames in
+			(sign, 
 
 
 
@@ -56,7 +68,7 @@ genConstrFunct adtName frees constr int typs
 		  let typ	= toCurry typs $ apply adtName frees in
 		  let decl	= [(constr, typ)] in
 		  let pattern	= map Assign varNames in
-		  let expr	= Seq $ [BuiltIn "#asADT", Nat int]++map Call varNames in
+		  let expr	= Seq $ [BuiltIn "asADT", Nat int]++map Call varNames in
 			Function docStr decl [{-no laws-}] [Clause pattern expr]
 
 genDeconstr	:: Name -> [Name] -> Name -> Int -> [Type] -> Function
