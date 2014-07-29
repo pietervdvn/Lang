@@ -1,15 +1,27 @@
-Lang
-====
+Languate
+========
 
-Yet another programming language
+Yet another programming language.
 
+Languate aims to be a [simple](http://www.infoq.com/presentations/Simple-Made-Easy), functional programming language, highly inspired by Haskell; but with a more concise syntax. Once it will be finished, tooling will be included from the first run, so that documentation generation, testing, ... is included from the very start.
+
+Code examples
+=============
+
+    map (1+) [1,2,3]
+    [1,2,3].map(1+)
+    
 
 Getting started
 ===============
 
 Execute ````installAll````. If this fails, install all submodules first with ````cabal install <module>````; see the installscript for the fight order.
 
-To parse stuff with the bnf-lib, see the readme in bnf.
+
+
+
+
+If you want to use the BNF-lib to  parse another languate, see the readme in bnf which contains a complete tutorial.
 
 
 Repo structure
@@ -19,6 +31,11 @@ Workspace
 ---------
 
 Contains actual languate code!
+
+StdDef
+------
+
+Some usefull functions, which where missing in the prelude.
 
 Consumer
 --------
@@ -36,20 +53,37 @@ BNF
 
 A bnf lib to load, parse and 'execute' bnf-files. See the readme in the bnf-dir for a tutorial.
 
-Expirments
-----------
+
+Parser
+------
+
+Converts Strings into `Languate.AST`-data
+
+Loader
+------
+
+Loads from file, checks imports and thus loads multiple sources at once. This 'cluster' is then ready for semantic analysis.
+
+Semantic Analysis
+-----------------
+
+The next step in the compiler pipeline, where typechecking happens
+
+Interpreter
+-----------
+
+A simple program which executes 'compiled' programs.
+
+
+Experiments
+-----------
 
 Haskell code experiments to try out concepts
 
+Thoughts
+--------
 
-Compiler pipeline
------------------
-
-- Parser: File -> Module
-- Loader: File -> [Module] (loads deps from imports)
-- Semananalyse: Semantic analyses (type check+infer)
-
-
+Each programming languate needs a blog!
 
 Selling points
 ==============
