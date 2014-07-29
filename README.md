@@ -5,12 +5,26 @@ Yet another programming language.
 
 Languate aims to be a [simple](http://www.infoq.com/presentations/Simple-Made-Easy), functional programming language, highly inspired by Haskell; but with a more concise syntax. Once it will be finished, tooling will be included from the first run, so that documentation generation, testing, ... is included from the very start.
 
+It tries to be haskell without a few syntactic quirks.
+
 Code examples
 =============
 
     map (1+) [1,2,3]
     [1,2,3].map(1+)
     
+    -- docstring for function, the compiler automatically generates the docs; parsed in **markdown**
+    > myFun 0 1 2   = 3     -- example embedded in the source code, acts as testcase (error if incorrect)
+    ~ myFun with zero: myFun 0  = (+)       -- laws, checked by compiler; included in docs
+    myFun   : Int -> Int -> Int
+    0 a b   = a + b
+    x a b   = x*a + b
+    
+    --- multiline
+    comment
+    with ---
+    
+    --## Literate programming features for docs
 
 Getting started
 ===============
