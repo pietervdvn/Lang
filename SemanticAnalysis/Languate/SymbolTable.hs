@@ -17,6 +17,16 @@ data SymbolTable a	= Empty
 			| Child {parent:: SymbolTable a, content:: Map Signature a}
 	deriving (Show)
 
+instance Functor SymbolTable where
+	fmap f Empty	= Empty
+	fmap f (Child p cont)
+			= Child (fmap f p) (Map.map f cont)
+
+mapWithType		:: (Type -> a -> b) -> SymbolTable a -> SymbolTable b
+mapWithType f Empty	=  Empty
+mapWithType f (Child p cont)
+			= Child (mapWithType f p) $ Map.mapWithKey (\(Signature _ t) a -> f t a) cont
+
 
 data TypeTable		= Empt
 			| TT {par::TypeTable, cont::Map Name [Type]}
@@ -26,6 +36,14 @@ setParent		:: SymbolTable a -> SymbolTable a -> SymbolTable a
 setParent p (Child _ cont)
 			= Child p cont
 setParent p (Empty)	= p
+
+
+buildTypeTable		:: SymbolTable a -> TypeTable
+buildTypeTable Empty	=  Empt
+buildTypeTable (Child p cont)
+			=  TT (buildTypeTable p) $ fromList $ merge $ map (\(Signature name types) -> (name, types)) $ keys cont
+
+
 
 type SimpleTable	= SymbolTable (DocString, [Clause])
 
@@ -62,7 +80,7 @@ addImports simple fqn modul
 			=  let local	= fromJust $ lookup fqn simple in
 			   let imps	= map impToFQN $ rights $ imports modul in
 			   let impT	= map (\fqn -> fromJust $ lookup fqn simple) imps in
-			   foldl setParent local impT
+			   foldr setParent local impT
 
 --TODO fix with package manager
 fqpn	= fromJust $ toFQPN "pietervdvn:Data"
@@ -76,7 +94,7 @@ impToFQN (Import _ names name _)
 -- might contain infers
 buildLocal	:: FQN -> Module -> SymbolTable (DocString, [Clause])
 buildLocal fqn mod
-		=  let funcs	= concatMap generate $ statements mod in
+		=  let funcs	= concatMap generate $ statements mod in		-- generates constructor and OO and other functions
 			Child Empty $ fromList $ checkDouble' $ map (genSign fqn) $ concatMap undouble funcs
 
 

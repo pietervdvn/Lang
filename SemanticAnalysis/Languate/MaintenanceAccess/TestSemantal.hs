@@ -12,6 +12,7 @@ import Languate.FQN
 import Languate.SymbolTable
 import Languate.AST
 import Languate.BuiltIns
+import Languate.ModuleTypeChecker
 import Languate.TypeChecker
 import Languate.Order
 import Data.List (intercalate)
@@ -26,11 +27,15 @@ Contains some example expressions
 package	= unsafePerformIO $ loadPackage' (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
 
 bool	= toFQN' "pietervdvn:Data:Data.Bool"
+misc	= toFQN' "pietervdvn:Data:Misc"
 bool'	= fromJust $ lookup bool package
 
 -- the workspace functions, with all imports	
 testBuild	= buildWithImports package
 
+
+
+t		= typeCheckPackage testBuild	
 
 -- the environment (typetable)
 tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> asMaybe nat])
@@ -80,9 +85,6 @@ tc	:: Expression -> TypedExpression
 tc expr	= runReader (typeCheck expr) tctx
 
 
-priorTable	:: PriorityTable
-priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
-
 testExprs	= map Seq [[Call "f", Nat 1, Nat 2]
 			  ,[Call "c", Operator "."]
 			  ,[Call "nat2int", Call "c"]
@@ -108,9 +110,9 @@ crashinExprs	= map Seq [[Operator "²", Nat 1], [Operator "/", Nat 2]]
 
 order expr	=  runReader (asCall expr) priorTable
 
-t'		= map tc testExprs
 
-t		= putStrLn $ unlines $ map (\(e, t) -> show e ++" : "++ show (typeOf t)) $ zip testExprs t'
+-- typechecks the testepxressions, prints it neatly on the screen
+typeCheckTests		= putStrLn $ unlines $ map (\(e, t) -> show e ++" : "++ show (typeOf t)) $ zip testExprs $ map tc testExprs
 
 
 {--- 

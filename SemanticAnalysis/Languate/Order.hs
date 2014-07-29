@@ -5,7 +5,7 @@ module Languate.Order (PriorityTable, Call (Expr, FCall), InfixMode (Left, Right
 This module implements 
 
 --}
-import StdDef
+import StdDef hiding (merge)
 import Languate.AST
 import Data.Map (Map, findWithDefault)
 import Control.Monad.Reader

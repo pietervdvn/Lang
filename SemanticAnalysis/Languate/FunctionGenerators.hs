@@ -93,7 +93,6 @@ nats		= 0:map (+1) nats
 vars		= map (('x':) . show) nats
 
 tuple		:: [Type] -> Type
-tuple []	=  Normal "Void"
 tuple ls	=  TupleType ls
 
 mayb		:: Type -> Type

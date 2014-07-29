@@ -40,10 +40,10 @@ a f	= f a
 (.)	: a -> (b -> a -> a) -> b -> a
 a f b	= f b a
 
-
 (.)		: (a -> b) -> (b -> c) -> a -> c
 a2b b2c a	= b2c (a2b a)
 
+-- Used in lensing, lifts one state-change into the other to chain those telescopically
 (.)		: ((b -> b) -> a -> a) -> ((c -> c) -> b -> b) -> (c -> c) -> a -> a
 bbaa ccbb cc a	= bbaa (ccbb cc) a
 

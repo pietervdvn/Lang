@@ -28,6 +28,7 @@ pt2func	=  pt2a h (tokenErr modName) s convert . cleanAll ["nl"]
 convert		:: AST -> ([Comment], Function)
 convert ast@(Root(Comm comms:_))
 		= (init' comms,conv ast $ Function "" [] [] [])
+convert ast	= ([], conv ast $ Function "" [] [] [])
 
 conv		:: AST -> Function -> Function
 conv (LineT clause)
@@ -42,7 +43,10 @@ conv (Decls decls)
 		= conv $ Root $ map Decl decls
 conv (Comm [])	= id
 conv (Comm comms)
+	| last comms /= ""
 		= setDocStr (last comms)
+	| otherwise
+		= conv (Comm $ init comms)
 conv (Root asts)
 		= \func -> foldr conv func asts
 	

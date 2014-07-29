@@ -23,6 +23,12 @@ tail'		:: [a] -> [a]
 tail' []	=  []
 tail' ls	=  tail ls
 
+-- takes the last element of the list; if the list is empty, take the default
+last'		:: a -> [a] -> a
+last' defaul []	=  defaul
+last' _ ls	=  last ls
+
+
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []
 dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as
@@ -31,3 +37,11 @@ dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as
 all2	:: (a -> b -> Bool) -> [a] -> [b] -> Bool
 all2 f as bs
 	= all (uncurry f) $ zip as bs
+
+
+-- groups entries with the same a together
+merge		:: Eq a => [(a,b)] -> [(a,[b])]
+merge []	= []
+merge ((a,b):ls)
+		= let bs	= map snd $ filter ((==) a . fst) ls in
+			(a,b:bs): merge (filter ((/=) a . fst) ls)
