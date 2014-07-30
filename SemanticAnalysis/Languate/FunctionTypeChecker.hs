@@ -8,6 +8,7 @@ This module the function type checker. It tests wether each clause is of the giv
 
 import StdDef
 import Languate.AST
+import Languate.TAST
 import Languate.PatternTypeChecker
 import Languate.TypeChecker
 import Data.Map (Map)

@@ -11,6 +11,7 @@ import Languate.File2Package
 import Languate.FQN
 import Languate.SymbolTable
 import Languate.AST
+import Languate.TAST
 import Languate.BuiltIns
 import Languate.ModuleTypeChecker
 import Languate.TypeChecker
@@ -26,12 +27,14 @@ Contains some example expressions
 
 package	= unsafePerformIO $ loadPackage' (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
 
-bool	= toFQN' "pietervdvn:Data:Data.Bool"
-misc	= toFQN' "pietervdvn:Data:Misc"
+bool	= fqn "Data.Bool"
+functor	= fqn "Data.Functor" 
+misc	= fqn "ControlFlow"
 bool'	= fromJust $ lookup bool package
+fqn n	= toFQN' $ "pietervdvn:Data:" ++ n
 
 -- the workspace functions, with all imports	
-testBuild	= buildWithImports package
+testBuild	= buildWithImports package	-- build also creates the constructor functions
 
 
 

@@ -33,6 +33,7 @@ checkPattern tt patterns types
 -- expands multi-dontcare into the proper amount of dont-cares
 sanitize	:: Int -> [Pattern] -> [Pattern]
 sanitize 0 []	=  []
+sanitize _ []	=  []
 sanitize i (MultiDontCare:pts)
 		= replicate (i - length pts) DontCare ++ pts
 sanitize i (pt:pts)
@@ -56,8 +57,8 @@ checkOne _ (Let _ _) _
 		= todos "Let expressions in patterns are not supported yet"
 checkOne tt (Deconstruct function patterns) t
 		= do	let funcType	= findType function tt
-			when (isNothing funcType) $ error $ "Deconstruction function not found in pattern: "++function
-			let (Just typs)	= funcType
+			let err		= error $ "Deconstruction function not found (for pattern): "++function
+			let typs	= fromMaybe err funcType
 			let deconstrType	= getDeconstructType t $ map normalize typs
 			when (null deconstrType) $ error $ 
 				"The deconstructor function "++function++

@@ -19,3 +19,10 @@ isNothign	: Maybe a -> Bool
 Nothing		= True
 _		= False
 
+-- Unpacks the 'Maybe'. If it is nothing, the default value is used.
+--~ id: a,x => (Just a) ? x = a
+--> Nothing ? 1	= 1
+-- > (Just 42) ? 1	= 42
+(?)		: a? -> a -> a
+(Just a) _	= a
+_ 	 a	= a

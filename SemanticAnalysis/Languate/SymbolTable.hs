@@ -23,10 +23,14 @@ instance Functor SymbolTable where
 			= Child (fmap f p) (Map.map f cont)
 
 mapWithType		:: (Type -> a -> b) -> SymbolTable a -> SymbolTable b
-mapWithType f Empty	=  Empty
+mapWithType _ Empty	=  Empty
 mapWithType f (Child p cont)
 			= Child (mapWithType f p) $ Map.mapWithKey (\(Signature _ t) a -> f t a) cont
 
+filterTable		:: (a -> Bool) -> SymbolTable a -> SymbolTable a
+filterTable _ Empty	=  Empty
+filterTable f (Child p cont)
+			= Child (filterTable f p) $ Map.filter f cont
 
 data TypeTable		= Empt
 			| TT {par::TypeTable, cont::Map Name [Type]}

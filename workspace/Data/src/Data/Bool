@@ -40,14 +40,15 @@ False	= True
 --## Convertion to other types
 
 -- show to get a String representation
-show	: Bool -> String
+--- show	: Bool -> String
 True	= "True"
-False	= "False"
+False	= "False" 
+---
 
 -- convert with cast
-> (Int) True	= 1
-> (Int) False	= 0
-convert	: Bool -> Int
+> (Nat) True	= 1
+> (Nat) False	= 0
+convert	: Bool -> Nat
 True	= 1
 False	= 0
 

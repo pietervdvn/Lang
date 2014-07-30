@@ -7,6 +7,7 @@ Some constructs automatically generate functions, e.g. an ADT-definition defines
 import Languate.AST
 import Languate.Signature
 import StdDef
+import Languate.TAST
 
 
 -- generates all the functions, based on a statement.
@@ -25,13 +26,13 @@ generate _	= []
 
 -- generates functions directly for the interpreter, these will mainly be the constructors
 generateConstr	:: Name -> [Name] -> Name -> Int -> [Type] -> (Signature, [TClause])
-generateConstr adtName frees constr int types
+generateConstr adtName frees constr int typs
 		= let varNames 	= take (length typs) vars in
 		  let typ	= toCurry typs $ apply adtName frees in
 		  let sign	= Signature constr typ in
 		  let pattern	= map Assign varNames in
 		  let expr	= Seq $ [BuiltIn "asADT", Nat int]++map Call varNames in
-			(sign, 
+			(sign, todo)
 
 
 

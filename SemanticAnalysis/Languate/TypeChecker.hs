@@ -102,7 +102,7 @@ apply funcTypes argTypess
 
 
 typeOf		:: TypedExpression -> [Type]
-typeOf (TNat _)	=  [Normal "Nat"]
+typeOf (TNat _)	=  [Normal "Nat", Normal "Int"]
 typeOf (TFlt _)
 		=  [Normal "Float"]
 typeOf (TChr _)	=  [Normal "Char"]
