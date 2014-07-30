@@ -12,7 +12,9 @@ import Languate.Parser.Pt2Law
 import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2Line
 import Languate.AST
+import Data.Maybe (fromMaybe)
 
+import Debug.Trace
 {--
 
 This module converts the ParseTree into a function declaration, with laws etc.
@@ -23,24 +25,23 @@ Declarations may have multiple (explicit) types
 modName	= "Pt2Function"
 
 pt2func	:: ParseTree -> ([Comment],Function)
-pt2func	=  pt2a h (tokenErr modName) s convert . cleanAll ["nl"]
+pt2func	=  pt2a h (tokenErr modName) s convert
+
+
 
 convert		:: AST -> ([Comment], Function)
-convert ast@(Root(Comm comms:_))
-		= (init' comms,conv ast $ Function "" [] [] [])
-convert ast	= ([], conv ast $ Function "" [] [] [])
+convert ast	= let (Root asts)	= normalize ast in
+		  let commAsts		= filter isComment asts in
+		  let comms		= concatMap (\(Comm c) -> c) commAsts in
+			(init' comms, conv (Root asts) $ Function "" [] [] [])
 
 conv		:: AST -> Function -> Function
 conv (LineT clause)
 		= addClause clause
-conv (Laws laws)	
-		= conv $ Root $ map LawAst laws
 conv (LawAst law)	
 		= addLaw law
 conv (Decl typ)
 		= addDecl typ
-conv (Decls decls)
-		= conv $ Root $ map Decl decls
 conv (Comm [])	= id
 conv (Comm comms)
 	| last comms /= ""
@@ -55,9 +56,7 @@ preComms	:: [AST] -> [Comment]
 preComms	=  init' . concatMap (\(Comm c) -> c) . filter isComment
 
 data AST	= Decl (Name, Type)
-		| Decls [(Name,Type)]
 		| LawAst Law
-		| Laws [Law]
 		| Comm [Comment]
 		| LineT Clause
 		| Root [AST]
@@ -65,40 +64,19 @@ data AST	= Decl (Name, Type)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nls", Comm . pt2nls),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
+h		=  [("nl", Comm . (:[]) . fromMaybe "" . pt2nl), ("nls", Comm . pt2nls),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
 
-s _ comms@(Comm _:Comm _:_)
-		= Comm $ accComms comms
-s _ lws@(LawAst _:_)
-		= Laws $ accLaws lws
-s _ lws@(Laws _:_)
-		= Laws $ accLaws lws
-s _ decls@(Decl _:_)
-		= Decls $ accDecls decls
-s _ decls@(Decls _:_)
-		= Decls $ accDecls decls
 s _ [ast]	= ast
 s _ asts	= Root asts
 
 
-accLaws		:: [AST] -> [Law]
-accLaws	[]	= []
-accLaws (LawAst l:tail)
-		=  l:accLaws tail
-accLaws (Laws ls:tail)
-		= ls++accLaws tail
+normalize	:: AST -> AST
+normalize ast	=  Root $ unflatten ast
 
-accDecls	:: [AST] -> [(Name,Type)]
-accDecls []	= []
-accDecls (Decl l:tail)
-		=  l:accDecls tail
-accDecls (Decls ls:tail)
-		= ls++accDecls tail
-
-accComms	:: [AST] -> [Comment]
-accComms []	= []
-accComms (Comm c:tail)
-		= c++accComms tail
+unflatten	:: AST -> [AST]
+unflatten (Root asts)
+		= concatMap unflatten asts
+unflatten ast	= [ast]
 
 isComment	:: AST -> Bool
 isComment (Comm _)

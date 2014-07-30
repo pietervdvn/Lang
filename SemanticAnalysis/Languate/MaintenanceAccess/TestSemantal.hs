@@ -15,6 +15,7 @@ import Languate.TAST
 import Languate.BuiltIns
 import Languate.ModuleTypeChecker
 import Languate.TypeChecker
+import Languate.ClauseGenerators
 import Languate.Order
 import Data.List (intercalate)
 

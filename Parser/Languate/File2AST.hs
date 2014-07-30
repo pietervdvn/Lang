@@ -16,7 +16,7 @@ import Data.Maybe
 loadBnf		:: FilePath -> IO Bnf.World
 loadBnf		=  Bnf.load
 
--- The bnf-cluster is passed explicitly, they only have to be loaded once.
+-- The bnf-cluster is passed explicitly, it only has to be loaded once.
 parse	:: Bnf.World -> FilePath -> String -> Module
 parse world path str
 		=  let mpt	= Bnf.parseFull world (Bnf.toFQN ["Languate"]) "module" $ str++"\n" in

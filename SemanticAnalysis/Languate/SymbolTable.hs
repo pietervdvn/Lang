@@ -72,7 +72,7 @@ simpleMap		:: Map Signature a -> Map Name a
 simpleMap		=  fromList . map (\(Signature name _, a) -> (name, a)) . toList
 
 
--- a simple importer without public imports, which gives the symbol tables for each
+-- a simple importer without public imports, which gives the symbol tables for each module
 -- TODO make a decent, cycle proof one
 -- TODO make mapping of import -> FQN
 buildWithImports	:: Map FQN Module -> Map FQN SimpleTable
