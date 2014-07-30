@@ -1,6 +1,6 @@
 module Languate.SymbolTable where
 
-{-- This module implements a symbol table, a map with a fallback parent.
+{-- This module implements a symbol table and type table, a map with a fallback parent and related functions.
 --}
 import StdDef
 import Prelude hiding (lookup)
@@ -16,6 +16,7 @@ import Data.Either
 data SymbolTable a	= Empty
 			| Child {parent:: SymbolTable a, content:: Map Signature a}
 	deriving (Show)
+type SimpleTable	= SymbolTable (DocString, [Clause])
 
 instance Functor SymbolTable where
 	fmap f Empty	= Empty
@@ -32,27 +33,14 @@ filterTable _ Empty	=  Empty
 filterTable f (Child p cont)
 			= Child (filterTable f p) $ Map.filter f cont
 
-data TypeTable		= Empt
-			| TT {par::TypeTable, cont::Map Name [Type]}
-	deriving (Show)
+
 
 setParent		:: SymbolTable a -> SymbolTable a -> SymbolTable a
 setParent p (Child _ cont)
 			= Child p cont
 setParent p (Empty)	= p
 
-
-buildTypeTable		:: SymbolTable a -> TypeTable
-buildTypeTable Empty	=  Empt
-buildTypeTable (Child p cont)
-			=  TT (buildTypeTable p) $ fromList $ merge $ map (\(Signature name types) -> (name, types)) $ keys cont
-
-
-
-type SimpleTable	= SymbolTable (DocString, [Clause])
-
-
-find			:: Name -> SymbolTable a -> Maybe a
+find			:: Name -> SymbolTable a -> Maybe [a]
 find _ Empty		=  Nothing
 find sign (Child p cont)
 			=  let smap	= simpleMap cont in
@@ -61,61 +49,11 @@ find sign (Child p cont)
 				a	-> a
 
 
-findType		:: Name -> TypeTable -> Maybe [Type]
-findType _ Empt		=  Nothing
-findType n (TT p cont)	=  case lookup n cont of
-				Nothing -> findType n p
-				a	-> a
+-- there might be multiple entries for the same name (but with different types); thats why a list in the return
+simpleMap	:: Map Signature a -> Map Name [a]
+simpleMap	=  fromList . merge . map (\(Signature name _, a) -> (name, a)) . toList
 
 
-simpleMap		:: Map Signature a -> Map Name a
-simpleMap		=  fromList . map (\(Signature name _, a) -> (name, a)) . toList
 
 
--- a simple importer without public imports, which gives the symbol tables for each module
--- TODO make a decent, cycle proof one
--- TODO make mapping of import -> FQN
-buildWithImports	:: Map FQN Module -> Map FQN SimpleTable
-buildWithImports mp	=  let simple	= mapWithKey buildLocal mp :: (Map FQN SimpleTable) in
-				mapWithKey (addImports simple) mp
 
-addImports		:: Map FQN SimpleTable -> FQN -> Module -> SimpleTable
-addImports simple fqn modul
-			=  let local	= fromJust $ lookup fqn simple in
-			   let imps	= map impToFQN $ rights $ imports modul in
-			   let impT	= map (\fqn -> fromJust $ lookup fqn simple) imps in
-			   foldr setParent local impT
-
---TODO fix with package manager
-fqpn	= fromJust $ toFQPN "pietervdvn:Data"
-
-impToFQN	:: Import -> FQN
-impToFQN (Import _ names name _)
-		= fromJust $ toFqn' fqpn names name
-
-
--- builds function -> type mapping of locally defined functions.
--- might contain infers
-buildLocal	:: FQN -> Module -> SymbolTable (DocString, [Clause])
-buildLocal fqn mod
-		=  let funcs	= concatMap generate $ statements mod in		-- generates constructor and OO and other functions
-			Child Empty $ fromList $ checkDouble' $ map (genSign fqn) $ concatMap undouble funcs
-
-
-genSign		:: FQN -> Function -> (Signature, (DocString, [Clause]))
-genSign fqn (Function doc [(name,typ)] _ imp)
-		= (Signature name typ, (doc,imp))
-
-undouble	:: Function -> [Function]
-undouble (Function doc nmTypes laws imp)
-		= do	(name, typ)	<- nmTypes
-			return $ Function doc [(name,typ)] laws imp
-
-checkDouble'	:: [(Signature, a)] -> [(Signature, a)]
-checkDouble' ls	=  let (signs, as)	= unzip ls in
-			zip (checkDouble signs) as
-
-checkDouble	:: [Signature] -> [Signature]
-checkDouble signs
-		= if null $ dubbles signs then signs
-			else error $ "Double signatures exist: "++ show (map show $ dubbles signs)

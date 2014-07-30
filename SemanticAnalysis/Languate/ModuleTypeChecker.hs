@@ -4,6 +4,7 @@ import Languate.Signature
 import StdDef
 import Languate.AST
 import Languate.SymbolTable
+import Languate.TypeTable
 import Languate.TypeChecker
 import Languate.Order
 import Prelude hiding (Right, Left)

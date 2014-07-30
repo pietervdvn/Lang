@@ -6,6 +6,7 @@ import Normalizable
 import Languate.TAST
 import Languate.AST
 import Languate.SymbolTable
+import Languate.TypeTable
 import Languate.BuiltIns
 import Languate.Order
 import Languate.TypeBinding

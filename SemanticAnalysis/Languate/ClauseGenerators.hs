@@ -1,4 +1,4 @@
-module Languate.ClauseGenerators (generate, injectClauses) where
+module Languate.ClauseGenerators (generate) where
 
 import StdDef
 import Languate.AST
@@ -14,16 +14,6 @@ Generates the constructors (asADT/fromADT) and tuple-functions, as these can not
 Generate should be called on each statement; it's results should be injected into a typechecked module.
 See the more detailed explanation in FunctionGennerators
 --}
-
-injectClauses	:: Map FQN Module -> Map FQN (SymbolTable [TClause]) -> Map FQN (SymbolTable [TClause])
-injectClauses origs
-		=  Map.map (injectClauses' stms)
-
-injectClauses'	:: [Statement] -> SymbolTable [TClause] -> SymbolTable [TClause]
-injectClauses' stms table
-		=  let clauses	= concatMap generate stms in
-			Child table $ Map.fromList clauses
-
 
 generate	:: Statement -> [(Signature, [TClause])]
 generate (FunctionStm func)

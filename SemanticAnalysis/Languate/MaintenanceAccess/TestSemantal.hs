@@ -10,6 +10,7 @@ import Control.Monad.Reader
 import Languate.File2Package
 import Languate.FQN
 import Languate.SymbolTable
+import Languate.TypeTable
 import Languate.AST
 import Languate.TAST
 import Languate.BuiltIns

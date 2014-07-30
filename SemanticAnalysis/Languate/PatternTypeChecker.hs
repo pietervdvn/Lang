@@ -19,6 +19,7 @@ import Data.Map (member, insert, empty, Map)
 import Languate.AST
 import Languate.TAST
 import Languate.SymbolTable
+import Languate.TypeTable
 import Languate.TypeChecker
 
 import Control.Monad

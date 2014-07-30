@@ -11,6 +11,7 @@ import Languate.AST
 import Languate.TAST
 import Languate.PatternTypeChecker
 import Languate.TypeChecker
+import Languate.TypeTable
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Languate.SymbolTable

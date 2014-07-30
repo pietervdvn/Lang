@@ -1,4 +1,4 @@
-module Languate.File2Package (loadPackage, loadPackage') where
+module Languate.File2Package (loadPackage, loadPackage', import2fqn) where
 
 {--
 
