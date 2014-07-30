@@ -1,18 +1,20 @@
 module Languate.TypeChecker where
 
+import StdDef
+import Normalizable
+
 import Languate.TAST
 import Languate.AST
 import Languate.SymbolTable
 import Languate.BuiltIns
-import StdDef
-import Data.Map (Map, insert, member, keys)
-import qualified Data.Map as M
-import Data.Maybe
 import Languate.Order
-import Control.Monad.Reader
-import Normalizable
 import Languate.TypeBinding
+
+import qualified Data.Map as M
+import Data.Map (Map, insert, member, keys)
+import Data.Maybe
 import Data.List (nub)
+import Control.Monad.Reader
 			
 
 -- rightmost:	a & b & c	=> a & (b & c)	(rightmost, shortest expression get's evaluated first)

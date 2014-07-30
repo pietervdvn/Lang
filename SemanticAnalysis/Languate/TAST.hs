@@ -18,11 +18,11 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 	deriving (Show)
 type TExpression	= TypedExpression
 
--- TODO eval is left out for a later version
 data TPattern	= TAssign Name
-		| TDeconstruct Name [Pattern]
+		| TDeconstruct Name [TPattern]
 		| TMulti [TPattern]
 		| TDontCare
+		| TEval TExpression
 	deriving (Show)
 
 data TClause		= TClause [TPattern] TExpression

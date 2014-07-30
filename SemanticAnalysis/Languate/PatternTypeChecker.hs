@@ -12,20 +12,25 @@ This module (type)checks patterns, and produces a typed closure as byproduct.
 
 import StdDef
 import State
+import Normalizable
+
 import Data.Map (member, insert, empty, Map)
+
 import Languate.AST
 import Languate.TAST
 import Languate.SymbolTable
+import Languate.TypeChecker
+
 import Control.Monad
+import Control.Monad.Reader
 import Data.Maybe
-import Normalizable
 
 
 
 
 type TypedClosure	= Map Name Type
 
-checkPattern	:: TypeTable -> [Pattern] -> [Type] -> ([TPattern], Map Name Type)
+checkPattern	:: Context -> [Pattern] -> [Type] -> ([TPattern], Map Name Type)
 checkPattern tt patterns types
 		= let patterns'	= map normalize $ sanitize (length types) patterns in
 			runstate (checkAll tt patterns' types) empty
@@ -40,14 +45,14 @@ sanitize i (pt:pts)
 		= pt:sanitize (i-1) pts
 
 
-checkAll	:: TypeTable -> [Pattern] -> [Type] -> State TypedClosure [TPattern]
+checkAll	:: Context -> [Pattern] -> [Type] -> State TypedClosure [TPattern]
 checkAll tt pts	tps
 	| length pts == length tps
 		=  zipWithM (checkOne tt) pts tps
 	| otherwise
 		=  error $ "Too much/too little patterns given in comparison with the given types " ++ show pts
 
-checkOne	:: TypeTable -> Pattern -> Type -> State TypedClosure TPattern
+checkOne	:: Context -> Pattern -> Type -> State TypedClosure TPattern
 checkOne _ (Assign name) t
 		= do	st	<- get
 			when (name `member` st) $ error $ "Duplicate name detected in pattern: "++name
@@ -55,8 +60,8 @@ checkOne _ (Assign name) t
 			return $ TAssign name
 checkOne _ (Let _ _) _
 		= todos "Let expressions in patterns are not supported yet"
-checkOne tt (Deconstruct function patterns) t
-		= do	let funcType	= findType function tt
+checkOne ctx (Deconstruct function patterns) t
+		= do	let funcType	= findType function $ typeTable ctx
 			let err		= error $ "Deconstruction function not found (for pattern): "++function
 			let typs	= fromMaybe err funcType
 			let deconstrType	= getDeconstructType t $ map normalize typs
@@ -69,15 +74,17 @@ checkOne tt (Deconstruct function patterns) t
 			-- producedTypes are now the types that the subpatterns should match
 			-- sanitized to remove embedded multidontcares
 			let patterns'	= sanitize (length producedTypes) patterns
-			patterns	<- checkAll tt patterns' producedTypes
+			patterns	<- checkAll ctx patterns' producedTypes
 			return $ TMulti patterns
 checkOne _ (DontCare) _
 		= return TDontCare
-checkOne tt (Multi patterns) t
-		= do	patterns'	<- mapM (flip (checkOne tt) t) patterns
+checkOne ctx (Multi patterns) t
+		= do	patterns'	<- mapM (flip (checkOne ctx) t) patterns
 			return $ TMulti patterns'
-checkOne _ (Eval _) _
-		= todo "Eval in checkPattern"
+checkOne ctx (Eval e) t
+		= do	let texp	= runReader (typeCheck e) ctx
+			when (not $ t `elem` typeOf texp) $ error $ "Patterntypcheck: eval: the expression in the eval-pattern does not have the right type: it is of type "++show (typeOf texp)++" instead of the expected type "++show t
+			return $ TEval texp
 checkOne _ MultiDontCare _
 		= error "Patterns: not sanitized. This is a bug"
 

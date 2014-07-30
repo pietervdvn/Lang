@@ -15,7 +15,7 @@ isJust		: Maybe a -> Bool
 _		= False
 
 -- The 'isNothing' function returns 'True' iff its argument is 'Nothing'.
-isNothign	: Maybe a -> Bool
+isNothing	: Maybe a -> Bool
 Nothing		= True
 _		= False
 

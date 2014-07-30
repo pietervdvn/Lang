@@ -1,17 +1,20 @@
-module Languate.FunctionGenerators where
+module Languate.FunctionGenerators (generate) where
 
 {--
 Some constructs automatically generate functions, e.g. an ADT-definition defines constructors etc...
+These 'extra' statements are generated here. Note that these are the functions are meant to be injected into the module **before** the typecheck. This is because some functions which are defined here (esp constructors) are called upon by the other functions.
+
+It is a sad fact of life that exactly those important constructors **can not** be typechecked (as they use 'asADT', which is why the sister module 'ClauseGenerators' generates these for injection **after** the typecheck. The constructors are removed out of the module on the moment of the typecheck.
+
 --}
 
+import StdDef
 import Languate.AST
 import Languate.Signature
-import StdDef
 import Languate.TAST
-
+import Languate.TypeTools
 
 -- generates all the functions, based on a statement.
--- Note that this function might imply already typechecked functions too, which should be included directly
 generate	:: Statement -> [Function]
 generate (FunctionStm func)
 		= [func]
@@ -22,18 +25,6 @@ generate (SubDefStm subdef)
 generate (ClassDefStm classDef)
 		= todos "ClassDef function generation"
 generate _	= []
-
-
--- generates functions directly for the interpreter, these will mainly be the constructors
-generateConstr	:: Name -> [Name] -> Name -> Int -> [Type] -> (Signature, [TClause])
-generateConstr adtName frees constr int typs
-		= let varNames 	= take (length typs) vars in
-		  let typ	= toCurry typs $ apply adtName frees in
-		  let sign	= Signature constr typ in
-		  let pattern	= map Assign varNames in
-		  let expr	= Seq $ [BuiltIn "asADT", Nat int]++map Call varNames in
-			(sign, todo)
-
 
 
 genADTFuncs	:: ADTDef -> [Function]
@@ -94,19 +85,4 @@ genDetDeconstr adtName frees constr types
 		  let expr	= Seq $ Call "#asTuple":map Call varNames in
 			Function docStr decl [{-no laws-}] [Clause [pattern] expr]
 
-toCurry		:: [Type] -> Type -> Type
-toCurry [] t	=  t
-toCurry types t	=  Curry $ types ++ [t]
 
-apply		:: Name -> [Name] -> Type
-apply t []	=  Normal t
-apply t frees	=  Applied (Normal t) $ map Free frees
-
-nats		= 0:map (+1) nats
-vars		= map (('x':) . show) nats
-
-tuple		:: [Type] -> Type
-tuple ls	=  TupleType ls
-
-mayb		:: Type -> Type
-mayb		=  Applied (Normal "Maybe") . (:[])

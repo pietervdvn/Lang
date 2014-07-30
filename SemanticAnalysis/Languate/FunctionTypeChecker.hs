@@ -27,7 +27,7 @@ checkClause tt prior targetType (Clause patterns expr)
 
 _checkClause	:: TypeTable -> PriorityTable -> Type -> [Pattern] -> Expression -> TClause
 _checkClause tt prior (Curry tps) ptrs expr
-		= let (checkedPtrs, closure)	= checkPattern tt ptrs (init' tps) in
+		= let (checkedPtrs, closure)	= checkPattern (Context tt prior) ptrs (init' tps) in
 		  let tt'	= TT tt $ Map.map (:[]) closure in
 		  let expr'	= precheck tt' $ remNl expr in
 		  let ctx	= Context tt' prior in
@@ -62,5 +62,5 @@ precheck _ e	= e
 doesExist	:: String -> TypeTable -> String
 doesExist str tt
 		= case findType str tt of
-			Nothing	-> error $ "Unkown variable/function: "++show str
+			Nothing	-> error $ "FunctionTypechecker: Unkown variable/function: "++show str++"\n"++show tt
 			_	-> str

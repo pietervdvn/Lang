@@ -26,15 +26,15 @@ In later versions, types will be inferred, allowing implicit typing.
 --}
 
 
-typeCheckPackage	:: Map FQN SimpleTable -> Map FQN (SymbolTable (DocString, [TClause]))
+typeCheckPackage	:: Map FQN SimpleTable -> Map FQN (SymbolTable [TClause])
 typeCheckPackage	=  Map.map $ typeCheckModule priorTable
 
 
 
-typeCheckModule		:: PriorityTable -> SimpleTable ->  SymbolTable (DocString, [TClause])
+typeCheckModule		:: PriorityTable -> SimpleTable ->  SymbolTable [TClause]
 typeCheckModule prior st	
 			=  let tt	= buildTypeTable st in
-				mapWithType (\t -> second $ checkFunction tt prior t) $ filterTable (not . hasSpecialBuiltin . snd) st
+				mapWithType (\t -> checkFunction tt prior t . snd) $ filterTable (not . hasSpecialBuiltin . snd) st
 
 
 checkFunction		:: TypeTable -> PriorityTable -> Type -> [Clause] -> [TClause]
