@@ -11,16 +11,30 @@ import Languate.AST
 import Languate.TAST
 import Languate.FQN
 import Languate.SymbolTable
+import Languate.TypedPackage
 import qualified Languate.FunctionGenerators as FG
 import qualified Languate.ClauseGenerators as CG
-import qualified Languate.ExportBuilder as ExportBuilder
+import Languate.ExportBuilder
 
 import Data.Maybe
 import Data.Map hiding (map, null, lookup, foldr)
 import qualified Data.Map as Map
 
-buildTyped package
-	= todo
+
+-- returns all the data: per module (fqn) a typed symboltable (tClause) for the interpreter; a symboltable with docstrings (for the human using the interpreter), a symboltable with the original clauses (again for the human, for neat prints, and a symboltable which represents where each signature is originally defined -- humans are quite needy, aren't they?)
+-- each symboltable represents **what is visible** within this module, including (cascaded) imports. 
+buildTyped	:: FQPN -> Map FQN Module -> TPackage
+buildTyped fqpn package
+	=   let localBuild	= mapWithKey buildLocal package in
+		-- builds a graph of exports. Each module (reprs. by an fqn) can export arbitrary 'signatures' 
+	    let exports	= buildExports fqpn package in	-- Map FQN [(FQN, Signature)]
+	    	todo
+
+
+buildTModule	:: FQN -> TModule
+buildTModule fqn
+		=  let docstr	= todo in
+			todo
 
 
 -- builds function -> type mapping of locally defined functions (including some for post-typecheck-injection).
@@ -35,22 +49,11 @@ buildLocal fqn mod
 			(Child Empty $ fromList funcs', Child Empty $ fromList clauses)
 
 
--- builds a graph of exports. Each module (reprs. by an fqn) can export arbitrary 'signatures' 
--- args: the raw package, locally declared signatures
-buildExports	:: Map FQN Module -> Map FQN [Signature] -> Map FQN [(FQN,Signature)]
-buildExports	= ExportBuilder.buildExports fqpn
 
--- extreacts the locally declared signatures out of the data vomit of buildLocal
+
+-- extracts the locally declared signatures out of the data vomit of buildLocal
 localDeclared	:: Map FQN (SymbolTable a, b) -> Map FQN [Signature]
 localDeclared 	= Map.map (signatures . fst)
-
-
-
---TODO fix with package manager
-fqpn	= fromJust $ toFQPN "pietervdvn:Data"
-impToFQN	:: Import -> FQN
-impToFQN (Import _ names name _)
-		= fromJust $ toFqn' fqpn names name
 
 
 genSign		:: FQN -> Function -> (Signature, (DocString, [Clause]))
