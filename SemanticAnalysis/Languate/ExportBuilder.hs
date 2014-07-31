@@ -110,7 +110,7 @@ buildReverseImportGraph fqnp
 -- gives a 'FQN is imported by [FQNS]'-relationship
 buildReverseImportGraph':: Map FQN [FQN] -> Map FQN [FQN]
 buildReverseImportGraph' mp
-	= fromList $ merge [ (fqn, fqn') | (fqn, fqns) <- toList mp, fqn' <- fqns]
+	= fromList $ merge [ (fqn', fqn) | (fqn, fqns) <- toList mp, fqn' <- fqns]
 
 
 
@@ -137,7 +137,7 @@ getImports fqn	=  do	impMap	<- fmap imps getContext
 -- gets all the signatures which are currently exported
 getExports	:: FQN -> State St [(FQN, Signature)]
 getExports fqn	=  do	(_,_,exprs)	<- get
-			return $ fromMaybe [] $ Map.lookup fqn exprs
+			return $ findWithDefault [] fqn exprs
 
 setExports	:: FQN -> [(FQN, Signature)] -> State St ()
 setExports fqn exps
@@ -158,7 +158,7 @@ getExports' (fqn, Public, restrictions)
 getInvImports	:: FQN -> State St [FQN]
 getInvImports fqn
 		=  do	invImpMap	<- fmap invImps getContext
-			extract "invImports" fqn invImpMap
+			return $ findWithDefault [] fqn invImpMap
 
 
 getContext	:: State St Context
