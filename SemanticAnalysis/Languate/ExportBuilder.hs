@@ -19,9 +19,19 @@ import Data.Maybe
 import Control.Monad
 import Data.List (sort, nub)
 
-buildExports	:: FQPN -> Map FQN Module -> Map FQN Signature -> Map FQN [(FQN,Signature)]
-buildExports modules localDeclared
-		=  todo 
+import Debug.Trace
+
+buildExports	:: FQPN -> Map FQN Module -> Map FQN [Signature] -> Map FQN [(FQN,Signature)]
+buildExports fqnp modules localDeclared
+		=  let imps	= Map.map (extractImports fqnp) modules in
+		   let invImps	= buildReverseImportGraph fqnp modules in
+		   let ctx	= Context localDeclared imps invImps modules in
+		   let state	= (ctx, keys modules, empty) :: St in
+		   let (_,(_,_,exports))
+				= runstate buildExp state in
+			exports
+
+
 
 type ImportedBy	= Map FQN [FQN]
 type Imports	= Map FQN [(FQN, Visible, Restrict)]
@@ -33,6 +43,9 @@ type Exports	= Map FQN [(FQN, Signature)]
 type St		= (Context, [Todo], Exports)
 -- context: some usefull data; todo=these should still be (re)calculated, exports: what we need
 
+-- ## Main algo
+
+
 -- builds all the exports; uses a state algorithm
 buildExp	:: State St ()
 buildExp	=  do	todo	<- getTodo
@@ -40,6 +53,25 @@ buildExp	=  do	todo	<- getTodo
 				do	let next	= head todo
 					modTodo tail
 					buildExpFor next
+
+
+buildExpFor	:: FQN -> State St ()
+buildExpFor fqn	=  do	local	<- getLocalProduce fqn
+			imports	<- getImports fqn
+			exports	<- mapM getExports' imports
+			-- sorting to normalize
+			let exports'	= sort $ (zip (repeat fqn) local ++ concat exports)	
+			-- we now have the exports of this fqn in the current state!
+			-- if these have changed, we have to re-evaluate the fqns which import this fqn
+			current	<- getExports fqn
+			when (exports' /= current)
+				(do	setExports fqn exports'
+					-- update todolist, all modules which export this might be changed
+					impBy	<- getInvImports fqn
+					modTodo $ nub . sort . (impBy++))
+			buildExp
+
+
 					
 -- ### misc functions
 
@@ -61,10 +93,6 @@ mask' (WhiteList allowed)
 -- ### Building of reverse imports 
 
 
-buildReverseImportGraph	:: FQPN -> Map FQN Module -> Map FQN [FQN]
-buildReverseImportGraph fqnp
-	= buildReverseImportGraph' . importTable fqnp
-
 -- builds a 'FQN does import these [FQN]'-relationship
 importTable		:: FQPN -> Map FQN Module -> Map FQN [FQN]
 importTable fqnp	=  Map.map (extractImports' fqnp)
@@ -74,28 +102,15 @@ extractImports'	fqnp	=  map (\(fqn,_,_) -> fqn) . extractImports fqnp
 extractImports 		:: FQPN -> Module -> [(FQN, Visible, Restrict)]
 extractImports fqnp	= map (\imp@(Import v _ _ r) -> (import2fqn fqnp imp, v, r)) . rights . imports
 
+buildReverseImportGraph	:: FQPN -> Map FQN Module -> Map FQN [FQN]
+buildReverseImportGraph fqnp
+	= buildReverseImportGraph' . importTable fqnp
+
+
 -- gives a 'FQN is imported by [FQNS]'-relationship
 buildReverseImportGraph':: Map FQN [FQN] -> Map FQN [FQN]
 buildReverseImportGraph' mp
 	= fromList $ merge [ (fqn, fqn') | (fqn, fqns) <- toList mp, fqn' <- fqns]
-
-
-
--- ## Main algo
-
-buildExpFor	:: FQN -> State St ()
-buildExpFor fqn	=  do	local	<- getLocalProduce fqn
-			imports	<- getImports fqn
-			exports	<- mapM getExports' imports
-			let exports'	= sort $ concat exports	-- sorting to normalize
-			-- we now have the exports of this fqn in the current state!
-			-- if these have changed, we have to re-evaluate the fqns which import this fqn
-			current	<- getExports fqn
-			when (exports' /= current)
-				(do	setExports fqn exports'
-					-- update todolist, all modules which export this might be changed
-					impBy	<- getInvImports fqn
-					modTodo $ nub . sort . (impBy++))
 
 
 

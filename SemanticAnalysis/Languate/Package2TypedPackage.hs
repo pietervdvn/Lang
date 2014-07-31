@@ -1,4 +1,4 @@
-module Languate.TypedLoader where
+module Languate.Package2TypedPackage where
 
 {--
 Where the action happens!
@@ -17,14 +17,14 @@ import qualified Languate.ExportBuilder as ExportBuilder
 
 import Data.Maybe
 import Data.Map hiding (map, null, lookup, foldr)
-
+import qualified Data.Map as Map
 
 buildTyped package
 	= todo
 
 
--- builds function -> type mapping of locally defined functions.
--- might contain infers
+-- builds function -> type mapping of locally defined functions (including some for post-typecheck-injection).
+-- might contain infers in the types
 buildLocal	:: FQN -> Module -> (SymbolTable (DocString, [Clause]), SymbolTable [TClause])
 buildLocal fqn mod
 		-- generates constructor and OO and other functions
@@ -36,9 +36,13 @@ buildLocal fqn mod
 
 
 -- builds a graph of exports. Each module (reprs. by an fqn) can export arbitrary 'signatures' 
--- buildExports	:: Map FQN Module -> Map FQN [(FQN,Signature)]
-buildExports	=  ExportBuilder.buildExports fqpn
+-- args: the raw package, locally declared signatures
+buildExports	:: Map FQN Module -> Map FQN [Signature] -> Map FQN [(FQN,Signature)]
+buildExports	= ExportBuilder.buildExports fqpn
 
+-- extreacts the locally declared signatures out of the data vomit of buildLocal
+localDeclared	:: Map FQN (SymbolTable a, b) -> Map FQN [Signature]
+localDeclared 	= Map.map (signatures . fst)
 
 
 

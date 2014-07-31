@@ -48,6 +48,11 @@ find sign (Child p cont)
 				Nothing	-> find sign p
 				a	-> a
 
+signatures		:: SymbolTable a -> [Signature]
+signatures Empty	=  []
+signatures (Child p cont)
+			= signatures p ++ keys cont
+
 
 -- there might be multiple entries for the same name (but with different types); thats why a list in the return
 simpleMap	:: Map Signature a -> Map Name [a]
