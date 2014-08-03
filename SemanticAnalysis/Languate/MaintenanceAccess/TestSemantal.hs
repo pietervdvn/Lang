@@ -9,6 +9,7 @@ import Languate.Package2TypedPackage
 import Languate.SymbolTable
 import Languate.ExportBuilder
 import Languate.Signature
+import Languate.AST
 import Data.Maybe
 import Prelude hiding (lookup)
 import Data.Map as Map hiding (map)
@@ -23,8 +24,6 @@ Tests loading, intermodule typechecking, importing, ...
 packageIO	= loadPackage' prelude "../workspace/Data/src/"
 package	= unsafePerformIO $ packageIO
 
-localBuild	= mapWithKey buildLocal package
-
 
 bool	= fqn "Data.Bool"
 functor	= fqn "Data.Functor" 
@@ -34,11 +33,5 @@ bool'	= fromJust $ lookup bool package
 fqn n	= toFQN' $ "pietervdvn:Data:" ++ n
 fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
-testBuildexports	= buildExports fqpn package $ localDeclared localBuild
-
-
-
-t	:: IO [(FQN, Signature)]
 t	= do	package	<- packageIO
-		let exps	= buildExports fqpn package $ localDeclared localBuild
-		return $ fromJust $ lookup bool exps
+		return $ buildTyped fqpn package

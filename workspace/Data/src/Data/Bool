@@ -1,4 +1,4 @@
-Bool {convert}
+Bool
 ---
 The bool type is a type which represents logical values.
 ---
@@ -51,7 +51,3 @@ False	= True
 convert	: Bool -> Nat
 True	= 1
 False	= 0
-
-
-_ private	: Bool -> Nat
-private b	= 0

@@ -25,10 +25,11 @@ import qualified Data.Map as Map
 -- each symboltable represents **what is visible** within this module, including (cascaded) imports. 
 buildTyped	:: FQPN -> Map FQN Module -> TPackage
 buildTyped fqpn package
-	=   let localBuild	= mapWithKey buildLocal package in
+	=   let localBuild	= mapWithKey (buildLocal Public) package in
 		-- builds a graph of exports. Each module (reprs. by an fqn) can export arbitrary 'signatures' 
-	    let exports	= buildExports fqpn package in	-- Map FQN [(FQN, Signature)]
-	    	todo
+	    
+	    let exports	= buildExports fqpn package (localDeclared localBuild) in	-- Map FQN [(FQN, Signature)]
+	    	error $ show $ Map.lookup (toFQN' $ "pietervdvn:Data:Data.Bool") exports
 
 
 buildTModule	:: FQN -> TModule
@@ -37,14 +38,13 @@ buildTModule fqn
 			todo
 
 
--- builds function -> type mapping of locally defined functions (including some for post-typecheck-injection).
--- might contain infers in the types
-buildLocal	:: FQN -> Module -> (SymbolTable (DocString, [Clause]), SymbolTable [TClause])
-buildLocal fqn mod
+-- builds function -> type mapping of locally defined functions (including some for post-typecheck-injection). When visible == Public, only the public functions will be included. When visible == private, all functions are given.
+buildLocal	:: Visible -> FQN -> Module -> (SymbolTable (DocString, [Clause]), SymbolTable [TClause])
+buildLocal visibleNeeded fqn mod
 		-- generates constructor and OO and other functions
 		=  let funcs	= concatMap FG.generate $ statements mod in
 		   -- generate post-typecheck stuff (TClauses)
-		   let funcs'	= checkDouble' $ map (genSign fqn) $ concatMap undouble funcs in
+		   let funcs'	= checkDouble' $ map (genSign fqn) $ Prelude.filter (\f -> visibility f >= visibleNeeded) $ concatMap undouble funcs in
 		   let clauses	= concatMap CG.generate $ statements mod in
 			(Child Empty $ fromList funcs', Child Empty $ fromList clauses)
 

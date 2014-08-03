@@ -26,7 +26,7 @@ pt2mod	=  pt2a h t s convert
 
 convert		:: AST -> Module
 convert ast
-		= toMod ast (Module "" (WhiteList []) [] [])
+		= toMod ast (Module "" (BlackList []) [] [])
 
 
 toMod		:: AST -> Module -> Module

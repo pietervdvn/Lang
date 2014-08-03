@@ -51,7 +51,7 @@ data Statement	= FunctionStm 	Function
 
 -- ## Things about function defitions
 
-data Function	= Function DocString Visible [(Name, Type)] [Law] [Clause]
+data Function	= Function {docstr::DocString, visibility::Visible, signs::[(Name, Type)], laws::[Law], clauses::[Clause]}
 	deriving (Show)
 
 -- (Function docString decls laws clauses)
