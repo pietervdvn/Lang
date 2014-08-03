@@ -7,9 +7,10 @@ import Languate.File2Package
 import Languate.FQN
 import Languate.Package2TypedPackage
 import Languate.SymbolTable
+import Languate.ExportBuilder
 import Data.Maybe
 import Prelude hiding (lookup)
-import Data.Map as Map
+import Data.Map as Map hiding (map)
 
 
 {--
@@ -27,6 +28,6 @@ functor	= fqn "Data.Functor"
 misc	= fqn "ControlFlow"
 bool'	= fromJust $ lookup bool package
 fqn n	= toFQN' $ "pietervdvn:Data:" ++ n
+fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
-
-testBuildexports	= buildExports package $ localDeclared localBuild
+testBuildexports	= buildExports fqpn package $ localDeclared localBuild

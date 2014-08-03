@@ -61,8 +61,8 @@ simpleMap	=  fromList . merge . map (\(Signature name _, a) -> (name, a)) . toLi
 unzipST		:: SymbolTable (a,b)	-> (SymbolTable a, SymbolTable b)
 unzipST Empty	=  (Empty, Empty)
 unzipST (Child p cont)
-		=  let (a,b)	= unzip p in
-		   let (a',b')	= (Map.map fst cont, Map.map snd cont)
+		=  let (a,b)	= unzipST p in
+		   let (a',b')	= (Map.map fst cont, Map.map snd cont) in
 			(Child a a', Child b b')
 
 
