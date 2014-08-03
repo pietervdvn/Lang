@@ -84,7 +84,7 @@ checkOne ctx (Multi patterns) t
 			return $ TMulti patterns'
 checkOne ctx (Eval e) t
 		= do	let texp	= runReader (typeCheck e) ctx
-			when (not $ t `elem` typeOf texp) $ error $ "Patterntypcheck: eval: the expression in the eval-pattern does not have the right type: it is of type "++show (typeOf texp)++" instead of the expected type "++show t
+			unless (t `elem` typeOf texp) $ error $ "Patterntypcheck: eval: the expression in the eval-pattern does not have the right type: it is of type "++show (typeOf texp)++" instead of the expected type "++show t
 			return $ TEval texp
 checkOne _ MultiDontCare _
 		= error "Patterns: not sanitized. This is a bug"

@@ -195,7 +195,7 @@ instance Normalizable Pattern where
 
 np		:: Pattern -> Pattern
 np (Deconstruct nm ptrns)
-		= Deconstruct nm $ filter ((/=) (Multi [])) $ nps ptrns
+		= Deconstruct nm $ filter (Multi [] /=) $ nps ptrns
 np (Multi [p])	= normalize p
 np (Multi pts)	= Multi $ nps pts
 np (Eval e)	= Eval e

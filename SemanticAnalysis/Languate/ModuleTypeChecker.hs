@@ -55,7 +55,7 @@ exprBuiltIn (Seq es)	=  any exprBuiltIn es
 exprBuiltIn (Tuple es)	=  any exprBuiltIn es
 exprBuiltIn (BuiltIn name)
 			= name `elem` ["asADT","fromADT","asTuple","fromTuple"]
-exprBuiltIn (Call c)	= if head c == '#' then error "Still some builtin with a sharp prefix! Call pietervdvn" else False
+exprBuiltIn (Call c)	= head c == '#' && error "Still some builtin with a sharp prefix! Call pietervdvn"
 exprBuiltIn _		= False
 
 

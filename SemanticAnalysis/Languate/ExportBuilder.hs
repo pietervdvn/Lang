@@ -60,7 +60,7 @@ buildExpFor fqn	=  do	local	<- getLocalProduce fqn
 			imports	<- getImports fqn
 			exports	<- mapM getExports' imports
 			-- sorting to normalize
-			let exports'	= sort $ (zip (repeat fqn) local ++ concat exports)	
+			let exports'	= sort (zip (repeat fqn) local ++ concat exports)	
 			-- we now have the exports of this fqn in the current state!
 			-- if these have changed, we have to re-evaluate the fqns which import this fqn
 			current	<- getExports fqn
@@ -78,14 +78,14 @@ buildExpFor fqn	=  do	local	<- getLocalProduce fqn
 mask	::  Restrict -> [Signature] ->[Signature]
 mask (BlackList [])	=  id
 mask (BlackList forbidden)
-	= filter (\(Signature name _) -> not $ name `elem` forbidden)
+	= filter (\(Signature name _) -> name `notElem` forbidden)
 mask (WhiteList allowed)
 	= filter (\(Signature name _) -> name `elem` allowed)
 
 mask'	:: Restrict -> [(FQN, Signature)] -> [(FQN, Signature)]
 mask' (BlackList [])	= id
 mask' (BlackList forbidden)
-			= filter (\(_,Signature name _) -> not $ name `elem` forbidden)
+			= filter (\(_,Signature name _) -> name `notElem` forbidden)
 mask' (WhiteList allowed)
 			= filter (\(_,Signature name _) -> name `elem` allowed)
 

@@ -18,7 +18,7 @@ nats		= 0:map (+1) nats
 vars		= map (('x':) . show) nats
 
 tuple		:: [Type] -> Type
-tuple ls	=  TupleType ls
+tuple		=  TupleType 
 
 mayb		:: Type -> Type
 mayb		=  Applied (Normal "Maybe") . (:[])
