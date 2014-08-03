@@ -61,7 +61,7 @@ genConstrFunct adtName frees constr int typs
 		  let decl	= [(constr, typ)] in
 		  let pattern	= map Assign varNames in
 		  let expr	= Seq $ [BuiltIn "asADT", Nat int]++map Call varNames in
-			Function docStr decl [{-no laws-}] [Clause pattern expr]
+			Function docStr Public decl [{-no laws-}] [Clause pattern expr]
 
 genDeconstr	:: Name -> [Name] -> Name -> Int -> [Type] -> Function
 genDeconstr adtName frees constr int types
@@ -72,7 +72,7 @@ genDeconstr adtName frees constr int types
 		  let pattern	= Deconstruct "#fromADT" $ (Eval $ Nat int):map Assign varNames in
 		  let expr	= Seq [Call "Just", Seq $ BuiltIn "asTuple":map Call varNames] in
 		  let fallThr	= Clause [DontCare] $ Call "Nothing" in
-			Function docStr decl [{-no laws-}] [Clause [pattern] expr, fallThr]
+			Function docStr Public decl [{-no laws-}] [Clause [pattern] expr, fallThr]
 
 -- used for types with only one constructor. adt -> (a,b,c,...)
 genDetDeconstr	:: Name -> [Name] -> Name -> [Type] -> Function
@@ -83,6 +83,6 @@ genDetDeconstr adtName frees constr types
 		  let decl	= [(constr, typ)] in
 		  let pattern	= Deconstruct "#fromADT" $ map Assign varNames in
 		  let expr	= Seq $ Call "#asTuple":map Call varNames in
-			Function docStr decl [{-no laws-}] [Clause [pattern] expr]
+			Function docStr Public decl [{-no laws-}] [Clause [pattern] expr]
 
 

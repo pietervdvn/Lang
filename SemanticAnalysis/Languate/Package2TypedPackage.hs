@@ -57,13 +57,13 @@ localDeclared 	= Map.map (signatures . fst)
 
 
 genSign		:: FQN -> Function -> (Signature, (DocString, [Clause]))
-genSign fqn (Function doc [(name,typ)] _ imp)
+genSign fqn (Function doc v [(name,typ)] _ imp)
 		= (Signature name typ, (doc,imp))
 
 undouble	:: Function -> [Function]
-undouble (Function doc nmTypes laws imp)
+undouble (Function doc v nmTypes laws imp)
 		= do	(name, typ)	<- nmTypes
-			return $ Function doc [(name,typ)] laws imp
+			return $ Function doc v [(name,typ)] laws imp
 
 checkDouble'	:: [(Signature, a)] -> [(Signature, a)]
 checkDouble' ls	=  let (signs, as)	= unzip ls in
