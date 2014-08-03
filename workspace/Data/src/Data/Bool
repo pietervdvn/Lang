@@ -1,4 +1,4 @@
-Bool
+Bool {convert}
 ---
 The bool type is a type which represents logical values.
 ---
@@ -41,8 +41,8 @@ False	= True
 
 -- show to get a String representation
 --- show	: Bool -> String
-True	= "True"
-False	= "False" 
+--True	= "True"
+--False	= "False" 
 ---
 
 -- convert with cast
@@ -52,3 +52,6 @@ convert	: Bool -> Nat
 True	= 1
 False	= 0
 
+
+_ private	: Bool -> Nat
+private b	= 0

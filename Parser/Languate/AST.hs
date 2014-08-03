@@ -51,7 +51,7 @@ data Statement	= FunctionStm 	Function
 
 -- ## Things about function defitions
 
-data Function	= Function DocString [(Name, Type)] [Law] [Clause]
+data Function	= Function DocString Visible [(Name, Type)] [Law] [Clause]
 	deriving (Show)
 
 -- (Function docString decls laws clauses)
@@ -68,7 +68,7 @@ tabs t str
 
 data Visible	= Private	
 		| Public
-	deriving (Show)
+	deriving (Show, Eq, Ord)
 
 
 data Type	= Normal String	-- A normal type, e.g. Bool

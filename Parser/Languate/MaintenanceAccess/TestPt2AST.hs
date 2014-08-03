@@ -36,8 +36,11 @@ Usage:
 tst <function to test, e.g. pt2mod> "rule to parse against, e.g. module" "string to parse" 
 
 --test file does the same, but on a file, with unsafePerformIO
-tf ... ... "file to read"
-
+> tf ... ... "file to read" 
+e.g.
+> tf pt2mod "module" file
+This is tf':
+> tf'	= tf pt2mod "module", what you'll use for a normal, full module
 --}
 
 -- creates a parsetree. Give the rule it should parse against and the string it should parse, you'll get the parsetree
@@ -54,6 +57,7 @@ pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
 
 -- tr rule str	= pt rule str >>= print
 
+tf'		= tf pt2mod "module"
 
 tf		:: (ParseTree -> a) -> Name -> FilePath -> a
 tf convertor rule fp

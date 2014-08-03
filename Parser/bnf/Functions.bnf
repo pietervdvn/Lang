@@ -21,7 +21,7 @@ law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "=" expr
 -- examples are like laws, but simpler. They serve the purpose of showing the reader what a certain expression reduces to
 example		::= ">" expr "=" expr
 
-declaration	::= (localIdent | "\(" op "\)" ) ":" type?
+declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type?
 
 -- OBLIGATED COMMENTS! Yes, each declaration is OBLIGATED to have a docstring!
 -- functions might have multiple types too

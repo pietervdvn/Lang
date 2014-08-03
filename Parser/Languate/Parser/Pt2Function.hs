@@ -32,8 +32,8 @@ pt2func	=  pt2a h (tokenErr modName) s convert
 convert		:: AST -> ([Comment], Function)
 convert ast	= let (Root asts)	= normalize ast in
 		  let commAsts		= filter isComment asts in
-		  let comms		= concatMap (\(Comm c) -> c) commAsts in
-			(init' comms, conv (Root asts) $ Function "" [] [] [])
+		  let comms		= filter (/= "") $ concatMap (\(Comm c) -> c) commAsts in
+			(init' comms, conv (Root asts) $ Function "" Public [] [] [])
 
 conv		:: AST -> Function -> Function
 conv (LineT clause)
@@ -55,7 +55,7 @@ conv (Root asts)
 preComms	:: [AST] -> [Comment]
 preComms	=  init' . concatMap (\(Comm c) -> c) . filter isComment
 
-data AST	= Decl (Name, Type)
+data AST	= Decl (Name, Type, Visible)
 		| LawAst Law
 		| Comm [Comment]
 		| LineT Clause

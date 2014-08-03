@@ -71,20 +71,23 @@ addStms stms mod
 
 
 setDocStr	:: Comment -> Function -> Function
-setDocStr docString (Function _ decls laws clauses)
-		= Function docString decls laws clauses
+setDocStr docString (Function _ v decls laws clauses)
+		= Function docString v decls laws clauses
 
 addClause	:: Clause -> Function -> Function
-addClause clause (Function docString decls laws clauses)
-		= Function docString decls laws $ clause:clauses
+addClause clause (Function docString v decls laws clauses)
+		= Function docString v decls laws $ clause:clauses
 
 addLaw		:: Law -> Function -> Function
-addLaw law (Function docString decls laws clauses)
-		= Function docString decls (law:laws) clauses
+addLaw law (Function docString v decls laws clauses)
+		= Function docString v decls (law:laws) clauses
 
-addDecl		:: (Name,Type) -> Function -> Function
-addDecl decl (Function docString decls laws clauses)
-		= Function docString (decl:decls) laws clauses
+addDecl		:: (Name,Type, Visible) -> Function -> Function
+addDecl (n,t,v) (Function docString visibility decls laws clauses)
+		= Function docString (vAnd v visibility) ((n,t):decls) laws clauses
+			where 	vAnd	:: Visible -> Visible -> Visible
+				vAnd Public Public	= Public
+				vAnd _ _		= Private
 
 setComment	:: Comment -> ADTSum -> ADTSum
 setComment comm (ADTSum nm v _ nmts)

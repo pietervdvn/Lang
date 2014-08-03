@@ -34,7 +34,7 @@ convert ast	=  convErr modName ast
 data AST	= Clss Name Name [Comment] [Law] [(Name,Type,Maybe Comment)]
 		| Body [Law] [(Name,Type,Maybe Comment)]
 		| Ident Name	| LIdent Name
-		| Lw Law	| Decl (Name, Type)
+		| Lw Law	| Decl (Name, Type, Visible)
 		| FreeT [Name]	| Comms [Comment]
 		| ClassT
 		| ColonT
@@ -69,8 +69,9 @@ triage [] _
 		= ([], [])
 triage (Lw law:tail) comm
 		= first (law:) $ triage tail comm
-triage (Decl (n,t):tail) comm
-		= second ((n,t,comm):) $ triage tail comm
+triage (Decl (n,t,v):tail) comm
+	| v == Private	= error "No private functions allowed in classdefs!"
+	| otherwise	= second ((n,t,comm):) $ triage tail comm
 triage (Body laws decls:tail) comm
 		= first (laws++) $ second (decls++) $ triage tail comm
 triage (Comms []:tail) comm
