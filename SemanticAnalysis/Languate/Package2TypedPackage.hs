@@ -118,7 +118,7 @@ checkExportsExist _ (BlackList [])	signs
 			= signs
 checkExportsExist fqn (WhiteList nms) signs
 			= let avail	= map (\(Signature nm _) -> nm) signs in
-				foldr (\nm acc -> check avail nm acc) signs nms
+				foldr (check avail) signs nms
 				where 	check	:: [Name] -> Name -> a -> a
 					check avail name a
 					 | name `elem` avail	= a

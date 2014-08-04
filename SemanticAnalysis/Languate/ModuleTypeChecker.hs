@@ -30,7 +30,7 @@ In later versions, types will be inferred, allowing implicit typing.
 typeCheckModule		:: PriorityTable -> SymbolTable [Clause] ->  SymbolTable [TClause]
 typeCheckModule prior st	
 			=  let tt	= buildTypeTable st in
-				mapWithType (\t -> checkFunction tt prior t) $ filterTable (not . hasSpecialBuiltin) st
+				mapWithType (checkFunction tt prior) $ filterTable (not . hasSpecialBuiltin) st
 
 
 checkFunction		:: TypeTable -> PriorityTable -> Type -> [Clause] -> [TClause]

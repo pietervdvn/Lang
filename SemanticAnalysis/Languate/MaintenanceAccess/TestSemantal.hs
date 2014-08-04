@@ -23,7 +23,7 @@ Tests loading, intermodule typechecking, importing, ...
 
 
 packageIO	= loadPackage' prelude "../workspace/Data/src/"
-package	= unsafePerformIO $ packageIO
+package	= unsafePerformIO packageIO
 
 
 bool	= fqn "Data.Bool"
