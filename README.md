@@ -89,7 +89,7 @@ Loads from file, checks imports and thus loads multiple sources at once. This 'c
 Semantic Analysis
 -----------------
 
-The next step in the compiler pipeline, where typechecking happens
+The next step in the compiler pipeline, where typechecking happens and unclear error messages live.
 
 Interpreter
 -----------
