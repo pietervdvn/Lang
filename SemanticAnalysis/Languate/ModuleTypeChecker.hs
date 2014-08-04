@@ -27,15 +27,10 @@ In later versions, types will be inferred, allowing implicit typing.
 --}
 
 
-typeCheckPackage	:: Map FQN SimpleTable -> Map FQN (SymbolTable [TClause])
-typeCheckPackage	=  Map.map $ typeCheckModule priorTable
-
-
-
-typeCheckModule		:: PriorityTable -> SimpleTable ->  SymbolTable [TClause]
+typeCheckModule		:: PriorityTable -> SymbolTable [Clause] ->  SymbolTable [TClause]
 typeCheckModule prior st	
 			=  let tt	= buildTypeTable st in
-				mapWithType (\t -> checkFunction tt prior t . snd) $ filterTable (not . hasSpecialBuiltin . snd) st
+				mapWithType (\t -> checkFunction tt prior t) $ filterTable (not . hasSpecialBuiltin) st
 
 
 checkFunction		:: TypeTable -> PriorityTable -> Type -> [Clause] -> [TClause]
@@ -67,9 +62,3 @@ ptBuiltIn (Deconstruct _ pts)
 ptBuiltIn (Multi pts)	= any ptBuiltIn pts
 ptBuiltIn (Eval e)	= exprBuiltIn e
 ptBuiltIn _		= False
-
--- default, hardcoded prioritytable
--- TODO
-priorTable	:: PriorityTable
-priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
-

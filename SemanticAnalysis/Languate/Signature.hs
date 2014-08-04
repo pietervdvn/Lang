@@ -10,3 +10,8 @@ import StdDef
 data Signature	= Signature Name Type
 	deriving (Show, Eq, Ord)
 
+
+signature	:: Function -> [Signature]
+signature	=  map (uncurry Signature) . signs
+
+

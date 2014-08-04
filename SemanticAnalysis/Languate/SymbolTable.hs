@@ -16,7 +16,6 @@ import Data.Either
 data SymbolTable a	= Empty
 			| Child {parent:: SymbolTable a, content:: Map Signature a}
 	deriving (Show)
-type SimpleTable	= SymbolTable (DocString, [Clause])
 
 instance Functor SymbolTable where
 	fmap f Empty	= Empty
@@ -33,6 +32,8 @@ filterTable _ Empty	=  Empty
 filterTable f (Child p cont)
 			= Child (filterTable f p) $ Map.filter f cont
 
+stFromList		:: [(Signature,a)] -> SymbolTable a
+stFromList		=  Child Empty . fromList 
 
 
 setParent		:: SymbolTable a -> SymbolTable a -> SymbolTable a
@@ -65,4 +66,9 @@ unzipST (Child p cont)
 		   let (a',b')	= (Map.map fst cont, Map.map snd cont) in
 			(Child a a', Child b b')
 
-
+lookupSt		:: Signature -> SymbolTable a -> Maybe a
+lookupSt _ Empty	= Nothing
+lookupSt sign (Child p cont)
+			= case lookup sign cont of
+				Nothing		-> lookupSt sign p
+				(Just a)	-> Just a

@@ -11,7 +11,8 @@ import Languate.ExportBuilder
 import Languate.Signature
 import Languate.AST
 import Data.Maybe
-import Prelude hiding (lookup)
+import Languate.Order
+import Prelude hiding (lookup, Left, Right)
 import Data.Map as Map hiding (map)
 
 
@@ -34,4 +35,11 @@ fqn n	= toFQN' $ "pietervdvn:Data:" ++ n
 fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
 t	= do	package	<- packageIO
-		return $ buildTyped fqpn package
+		return $ buildTyped fqpn priorTable package
+
+-- default, hardcoded prioritytable
+-- TODO
+priorTable	:: PriorityTable
+priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
+
+

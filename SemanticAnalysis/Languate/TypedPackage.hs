@@ -13,5 +13,5 @@ type TypedPackage	= TPackage
 type TPackage	= Map FQN TModule
 
 
-data TModule	= TModule {typedClauses:: SymbolTable [TClause], docstrings::SymbolTable DocString, functions::SymbolTable [Clause], definedIn::SymbolTable [FQN]}
+data TModule	= TModule {typedClauses:: SymbolTable [TClause], docstrings::SymbolTable DocString, functions::SymbolTable [Clause], definedIn::SymbolTable FQN}
 	deriving (Show)

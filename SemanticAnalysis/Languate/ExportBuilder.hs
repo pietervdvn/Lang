@@ -1,4 +1,4 @@
-module Languate.ExportBuilder (buildExports) where
+module Languate.ExportBuilder (buildExports, mask, mask', extractImports) where
 
 {--
 
@@ -18,19 +18,19 @@ import Data.Either
 import Data.Maybe
 import Control.Monad
 import Data.List (sort, nub)
+import Languate.SymbolTable
 
 import Debug.Trace
 
 buildExports	:: FQPN -> Map FQN Module -> Map FQN [Signature] -> Map FQN [(FQN,Signature)]
-buildExports fqnp modules localDeclared
-		=  let imps	= Map.map (extractImports fqnp) modules in
-		   let invImps	= buildReverseImportGraph fqnp modules in
+buildExports fqpn modules localDeclared
+		=  let imps	= Map.map (extractImports fqpn) modules in
+		   let invImps	= buildReverseImportGraph fqpn modules in
 		   let ctx	= Context localDeclared imps invImps modules in
 		   let state	= (ctx, keys modules, empty) :: St in
 		   let (_,(_,_,exports))
 				= runstate buildExp state in
 			exports
-
 
 
 type ImportedBy	= Map FQN [FQN]
@@ -82,7 +82,7 @@ mask (BlackList forbidden)
 mask (WhiteList allowed)
 	= filter (\(Signature name _) -> name `elem` allowed)
 
-mask'	:: Restrict -> [(FQN, Signature)] -> [(FQN, Signature)]
+mask'	:: Restrict -> [(a, Signature)] -> [(a, Signature)]
 mask' (BlackList [])	= id
 mask' (BlackList forbidden)
 			= filter (\(_,Signature name _) -> name `notElem` forbidden)

@@ -55,7 +55,6 @@ data Function	= Function {docstr::DocString, visibility::Visible, signs::[(Name,
 	deriving (Show)
 
 -- (Function docString decls laws clauses)
-
 data Clause	= Clause [Pattern] Expression
 instance Show Clause where
 	show (Clause patterns expr)	= tabs 3 (unwords $ map show patterns)++"="++show expr
