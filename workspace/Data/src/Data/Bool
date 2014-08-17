@@ -25,10 +25,11 @@ True True	= True
 > False || False		= False
 > False || True || False	= True
 (||)		: Bool -> Bool -> Bool
+or		: Bool -> Bool -> Bool
 False False	= True
 *		= False
 
--- Locical 'not' function (aka invert).
+-- Logical 'not' function (aka invert).
 ~ double not	: b => ! !b = b
 > ! True	= False
 > ! False	= True

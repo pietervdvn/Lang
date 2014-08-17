@@ -57,12 +57,7 @@ data Function	= Function {docstr::DocString, visibility::Visible, signs::[(Name,
 -- (Function docString decls laws clauses)
 data Clause	= Clause [Pattern] Expression
 instance Show Clause where
-	show (Clause patterns expr)	= tabs 3 (unwords $ map show patterns)++"="++show expr
-
-tabs	:: Int -> String -> String
-tabs t str
-	= str ++ replicate ((length str `div` 8) - t) '\t'
-
+	show (Clause patterns expr)	= tabs 2 (unwords $ map show patterns)++"= "++show expr
 
 
 data Visible	= Private	
@@ -105,7 +100,9 @@ traverse f (TupleType ts)
 traverse f t	= f t
 
 instance Show Type where
-	show	= st
+	show t	= case normalize t of
+			(Curry tps) 	-> intercalate " -> " (map st tps)
+			t		-> st t
 
 st		:: Type -> String
 st (Normal str)	=  str
@@ -129,8 +126,18 @@ data Expression	= Nat Int
 		| Operator String
 		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment 
 	deriving (Eq)
+
+instance Normalizable Expression where
+	normalize	= ne
+
+
+ne		:: Expression -> Expression
+ne (Seq [e])	=  e
+ne e		=  e
+
+
 instance Show Expression where
-	show	= se
+	show	= se . normalize
 
 se		:: Expression -> String
 se (Nat i)	= show i
@@ -180,6 +187,8 @@ sp		:: Pattern -> String
 sp (Assign nm)	=  nm
 sp (Let nm expr)
 		=  nm++":=("++show expr++")"
+sp (Deconstruct nm [])
+		= nm
 sp (Deconstruct nm patterns)
 		= "("++nm++" "++ unwords (map show patterns)++")"
 sp (Multi patterns)

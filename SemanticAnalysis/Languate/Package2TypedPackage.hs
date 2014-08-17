@@ -80,7 +80,7 @@ buildLocal	:: Module -> (SymbolTable DocString, SymbolTable [Clause])
 buildLocal mod
 		-- generates constructor and OO and other functions
 		=  let funcs	= concatMap FG.generate $ statements mod in
-		   let funcs'	= map getData funcs :: [(Signature, (DocString, [Clause]))] in
+		   let funcs'	= map getData $ concatMap undouble funcs :: [(Signature, (DocString, [Clause]))] in
 			unzipST $ Child Empty $ fromList funcs'
 
 -- builds all the locally declared signatures.hen visible == Public, only the public functions will be included. When visible == private, all functions are given. (This includes the restrict of the entire module)

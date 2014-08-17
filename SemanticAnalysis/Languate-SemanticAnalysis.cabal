@@ -14,6 +14,6 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     Languate.SymbolTable, Languate.FunctionGenerators, Languate.Signature, Languate.MaintenanceAccess.TestSemantal
-  -- other-modules:       
+  exposed-modules:     Languate.TypedLoader, Languate.TypedPackage, Languate.SymbolTable, Languate.Signature
+  other-modules:       Languate.BuiltIns, Languate.ClauseGenerators, Languate.ExportBuilder, Languate.FunctionGenerators, Languate.FunctionTypeChecker, Languate.MaintenanceAccess.TestSemantal, Languate.MaintenanceAccess.TestTypeCheck, Languate.ModuleTypeChecker, Languate.Order, Languate.Package2TypedPackage, Languate.PatternTypeChecker, Languate.TAST, Languate.TypeBinding, Languate.TypeChecker, Languate.TypeTable, Languate.TypeTools
   build-depends:       base ==4.*, Consumer ==0.1.*, containers ==0.5.*, Parser ==0.1.*, Languate-Loader ==0.1.*, mtl ==2.1.*, Std ==0.1.*

@@ -22,6 +22,7 @@ import Languate.TypeChecker
 import Languate.ClauseGenerators
 import Languate.Order
 import Data.List (intercalate)
+import Languate.TypedLoader (priorTable)
 
 -- the environment (typetable)
 tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> asMaybe nat])

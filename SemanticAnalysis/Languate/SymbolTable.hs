@@ -54,6 +54,12 @@ signatures Empty	=  []
 signatures (Child p cont)
 			= signatures p ++ keys cont
 
+signaturesWithName	:: Name -> SymbolTable a -> [Signature]
+signaturesWithName _ Empty	= []
+signaturesWithName nm (Child p cont)
+			= let current	= Prelude.filter (\(Signature snm _) -> snm == nm) $ keys cont in
+				current ++ signaturesWithName nm p
+
 
 -- there might be multiple entries for the same name (but with different types); thats why a list in the return
 simpleMap	:: Map Signature a -> Map Name [a]

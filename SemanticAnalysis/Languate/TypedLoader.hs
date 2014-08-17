@@ -1,0 +1,36 @@
+module Languate.TypedLoader where
+
+{--
+
+This module calls the loader and semantic analysis to give you what you want for the interpreter.
+
+--}
+
+import Languate.File2Package
+import Languate.FQN
+import Languate.Package2TypedPackage
+import Languate.SymbolTable
+import Languate.Order
+import Languate.TypedPackage
+import Languate.AST
+import Prelude hiding (lookup, Left, Right)
+import Data.Map hiding (map)
+
+
+typedLoad	:: FQN -> FilePath -> IO TypedPackage
+typedLoad fqn@(FQN fqpn _ _) path
+	=	do	package	<- loadPackage' fqn path
+			return $ typeCheck fqpn package
+							
+
+
+typeCheck	:: FQPN -> Map FQN Module -> TypedPackage
+typeCheck fqpn	package
+		= buildTyped fqpn priorTable package
+
+-- default, hardcoded prioritytable
+-- TODO
+priorTable	:: PriorityTable
+priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
+
+

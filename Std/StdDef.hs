@@ -45,3 +45,8 @@ merge []	= []
 merge ((a,b):ls)
 		= let bs	= map snd $ filter ((==) a . fst) ls in
 			(a,b:bs): merge (filter ((/=) a . fst) ls)
+
+-- makes sure the string always takes (at least) 8*t characters
+tabs	:: Int -> String -> String
+tabs t str
+	= str ++ replicate (t - (length str `div` 8)) '\t'

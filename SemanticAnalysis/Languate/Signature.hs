@@ -8,7 +8,14 @@ import Languate.AST
 import StdDef
 
 data Signature	= Signature Name Type
-	deriving (Show, Eq, Ord)
+	deriving (Eq, Ord)
+
+
+instance Show Signature where
+	show (Signature n t)
+	 	= tabs 2 n ++ ": "++ show t
+
+
 
 
 signature	:: Function -> [Signature]

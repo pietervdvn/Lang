@@ -27,6 +27,7 @@ type Context	= (FQN, Map FQN SimpleTable)
 
 
 -- a value is either an expression (with substituted variables!) or an evaluated ADT
+-- this means that **every expression** can be printed!
 data Value	= Expr Expression
 		| Primitive Expression	-- expression as Nat, Int, Float, ...
 		| ADT Int [Value]
@@ -76,7 +77,7 @@ get (fqn, ctx) nm
 
 
 
-
+	
 
 
 tctx		= (toFQN' "pietervdvn:Data:Prelude",t)	-- t from testSemantal
