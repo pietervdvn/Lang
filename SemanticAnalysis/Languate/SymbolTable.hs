@@ -12,6 +12,8 @@ import Languate.FunctionGenerators
 import Languate.FQN
 import Data.Maybe
 import Data.Either
+import Control.Arrow
+import Normalizable
 
 data SymbolTable a	= Empty
 			| Child {parent:: SymbolTable a, content:: Map Signature a}
@@ -78,3 +80,8 @@ lookupSt sign (Child p cont)
 			= case lookup sign cont of
 				Nothing		-> lookupSt sign p
 				(Just a)	-> Just a
+
+normalizeSigns		:: SymbolTable a -> SymbolTable a
+normalizeSigns Empty	= Empty
+normalizeSigns (Child p cont)
+			= Child (normalizeSigns p) $ fromList $ map (first normalize) $ toList cont

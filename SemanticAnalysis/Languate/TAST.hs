@@ -27,3 +27,15 @@ data TPattern	= TAssign Name
 
 data TClause		= TClause [TPattern] TExpression
 	deriving (Show)
+
+
+typeOf		:: TypedExpression -> [Type]
+typeOf (TNat _)	=  [Normal "Nat", Normal "Int"]
+typeOf (TFlt _)
+		=  [Normal "Float"]
+typeOf (TChr _)	=  [Normal "Char"]
+typeOf (TCall tps _)
+		=  tps
+typeOf (TApplication tps _ _)
+		=  tps
+

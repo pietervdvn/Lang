@@ -15,12 +15,13 @@ import Languate.TypedPackage
 import Languate.AST
 import Prelude hiding (lookup, Left, Right)
 import Data.Map hiding (map)
+import Normalizable
 
 
 typedLoad	:: FQN -> FilePath -> IO TypedPackage
 typedLoad fqn@(FQN fqpn _ _) path
 	=	do	package	<- loadPackage' fqn path
-			return $ typeCheck fqpn package
+			return $ normalizePackage $typeCheck fqpn package
 							
 
 

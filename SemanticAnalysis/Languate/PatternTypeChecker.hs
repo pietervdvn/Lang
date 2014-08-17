@@ -76,7 +76,7 @@ checkOne ctx (Deconstruct function patterns) t
 			-- sanitized to remove embedded multidontcares
 			let patterns'	= sanitize (length producedTypes) patterns
 			patterns	<- checkAll ctx patterns' producedTypes
-			return $ TMulti patterns
+			return $ TDeconstruct function patterns
 checkOne _ (DontCare) _
 		= return TDontCare
 checkOne ctx (Multi patterns) t

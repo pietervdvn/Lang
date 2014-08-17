@@ -104,16 +104,6 @@ apply funcTypes argTypess
 			apply' funcTypes argTypes
 
 
-typeOf		:: TypedExpression -> [Type]
-typeOf (TNat _)	=  [Normal "Nat", Normal "Int"]
-typeOf (TFlt _)
-		=  [Normal "Float"]
-typeOf (TChr _)	=  [Normal "Char"]
-typeOf (TCall tps _)
-		=  tps
-typeOf (TApplication tps _ _)
-		=  tps
-
 
 
 -- 0: get's evaluated first
