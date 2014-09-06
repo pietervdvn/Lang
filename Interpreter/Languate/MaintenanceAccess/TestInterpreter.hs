@@ -45,3 +45,6 @@ ctx	= Context package
 
 package		= unsafePerformIO packageIO
 packageIO	= typedLoad prelude "../workspace/Data/src/"
+
+
+testInfo	= putStrLn $ info boolM "&&"
