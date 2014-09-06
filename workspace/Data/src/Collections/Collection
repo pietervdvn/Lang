@@ -87,4 +87,11 @@ union		: c:Collection => Collection a -> c a -> c a
 _ c		= c
 
 
+-- Returns ''True'' iff the collection contains exactly one element
+> containsOne $ empty.add a	= True
+> containsOne $ empty		= False
+containsOne	: Collection a -> Bool
+(deconstruct _ t)	= isEmpty t
+*			= False
+
  

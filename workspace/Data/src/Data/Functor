@@ -11,5 +11,3 @@ class Functor f:
 	~ identity: map id	= id
 	-- map takes a function and applies that function op the value(s) inside the functor 
 	map	: (a -> b) -> f a -> f b
-	
-
