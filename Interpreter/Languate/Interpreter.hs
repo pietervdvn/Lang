@@ -27,12 +27,13 @@ type RC	a	= Reader Context a
 -- reduces the given once as much as possible
 eval	:: Value -> RC [Value]
 eval app@(App ts v [])
-	= return app
+	= return [app]
 eval (App ts vcall@(VCall _ _ _) args)
-	=  do	expanded	<- expand vcall
-		eval $ App ts expanded args
-eval (App ts (Thunk fqn ts clauses) (arg:args))
-	= 
+	=  do	expands	<- expand vcall
+		evals	<- mapM (\expanded -> eval $ App ts expanded args) expands
+		return $ concat evals
+eval (App ts (Thunk fqn thunkts clauses) (arg:args))
+	= todo
 eval v	=  return [v]
 
 
@@ -40,13 +41,24 @@ eval v	=  return [v]
 -- applies the argument to the clause -if possible-
 apply	:: Value -> TClause -> RC (Maybe Value)
 apply v (TClause [] expr)
-	= Nothing
+	= return Nothing
 apply v (TClause (pt:pts) expr)
-	= 
+	= todo
 
-
-matchPattern	:: Value -> TPattern -> RC (Maybe Closure)
-
+-- tries to match a pattern against the given argument. If this is not possible (no pattern match available), you'll receive a nothing. If it worked out, you'll get a binding
+matchPattern	:: FQN -> Value -> TPattern -> RC (Maybe [(Name, Value)])
+matchPattern _ _ TDontCare
+		= return $ Just []
+matchPattern _ _ (TEval _)
+		= todos "Interpreter: TEval pattern/equality"
+matchPattern _ v (TAssign nm)
+		=  return $ Just [(nm, v)]
+matchPattern fqn v (TDeconstruct func pats)
+		= do	let typesValue	= typeOfValue v
+			let types	= typesValue
+			-- for the vcall (function call) we need the signature, thus all possible types
+			let vcall	= VCall fqn types func
+			return Nothing
 
 
 {--

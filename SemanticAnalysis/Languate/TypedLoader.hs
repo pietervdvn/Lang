@@ -26,8 +26,7 @@ typedLoad fqn@(FQN fqpn _ _) path
 
 
 typeCheck	:: FQPN -> Map FQN Module -> TypedPackage
-typeCheck fqpn	package
-		= buildTyped fqpn priorTable package
+typeCheck fqpn	= buildTyped fqpn priorTable
 
 -- default, hardcoded prioritytable
 -- TODO

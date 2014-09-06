@@ -31,7 +31,7 @@ info' tmod sign
 	=  let docstr'	= fromMaybe "-- No docstring found" $ lookupSt sign $ docstrings tmod in
 	   let docstr	= if '\n' `elem` docstr' then "--- "++docstr' ++ " ---" else "-- "++docstr' in
 	   let loc'	= lookupSt sign $ definedIn tmod in
-	   let loc	= (++) "-- Defined in\t" $ show $ fromMaybe (error $ "No location found. This is a bug") $ loc' in
+	   let loc	= (++) "-- Defined in\t" $ show $ fromMaybe (error "No location found. This is a bug") loc' in
 	   let imp	= fromMaybe [] $ lookupSt sign $ functions tmod in
 		loc++"\n"++docstr++"\n"++show sign++"\n"++showClauses imp
 

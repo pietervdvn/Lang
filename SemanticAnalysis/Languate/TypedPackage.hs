@@ -20,7 +20,7 @@ data TModule	= TModule {typedClauses:: SymbolTable [TClause], docstrings::Symbol
 
 
 normalizePackage	:: TPackage -> TPackage
-normalizePackage dict	= M.map normalize dict
+normalizePackage	= M.map normalize
 
 instance Normalizable TModule where
 	normalize (TModule tc docs funcs defin)

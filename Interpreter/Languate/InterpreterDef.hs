@@ -15,8 +15,8 @@ import Languate.FQN
 -- a value represents an evaluated expression or a thunk. These are typed and carry their location, their context in which they should be evaluated
 data Value	= Primitive TExpression		-- primitive value such as nat or float
 		| ADT Type Int String		-- an adt-value/constructor. The string is a print representation
-		| VCall FQN [Type] Name		-- function call
-		| Thunk FQN [Type] [TClause]	--expanded function call, with the actual implementation; bound variables are expanded in this version.
+		| VCall FQN [Type] Name		-- function call, the FQN is the fqn of the context where it is called; types+name = signature (thus types should be the expected function types, e.g. [Int -> Int -> Int, Nat -> Nat -> Nat]
+		| Thunk FQN [Type] [TClause]	-- expanded function call, with the actual implementation; bound variables are expanded in this version.
 		| App [Type] Value [Value]	-- application of the first value with the remaining values
 
 
@@ -40,9 +40,9 @@ sv (Primitive texp)
 sv (VCall _ _ name)
 	= name
 sv (Thunk _ _ clauses)
-	= "(THUNK: " ++ (intercalate " / " $ map show clauses) ++ ")"
+	= "(THUNK: " ++ intercalate " / " (map show clauses) ++ ")"
 sv (App _ v vs)
-	= "(" ++ show v ++ ")" ++ (intercalate " " $ map show vs)
+	= "(" ++ show v ++ ")" ++ (unwords $ map show vs)
 sv (ADT _ _ nm)
 	= nm
 
@@ -50,4 +50,4 @@ sv (ADT _ _ nm)
 sp		:: TExpression -> String
 sp (TNat i)	= show i
 sp (TFlt f)	= show f
-sp (TChr c)	= c:[]
+sp (TChr c)	= [c]
