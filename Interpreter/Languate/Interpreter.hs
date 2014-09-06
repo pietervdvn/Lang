@@ -21,6 +21,7 @@ import Data.Maybe
 
 
 data Context	= Context {world::TypedPackage}
+	deriving (Show)
 type RC	a	= Reader Context a
 
 
@@ -61,6 +62,8 @@ matchPattern fqn v (TDeconstruct func pats)
 			return Nothing
 
 
+
+
 {--
 # expands a VCall into a lambda
 
@@ -74,7 +77,7 @@ Note that expansion is done as lately as possible, to keep printing pretty
 --}
 expand	:: Value -> RC [Value]
 expand (VCall fqn ts name)
-	= do	tmod	<- getModule fqn
+	= do	tmod	<- getModule fqn	-- a reference to implementation is in scope, no need to jump following the imports
 		let imps	= typedClauses tmod
 		let signs	= map (Signature name) ts
 		let err		= error $ "Interpreter error: function "++name++" not found"

@@ -37,6 +37,7 @@ buildTyped fqpn prior package
 	    	Map.map (buildTModule prior funcInfo) scopes
 
 
+-- gets a dict with where all the data lives locally per fqn (funcInfo), and a list of what signatures get imported from where (scope). From this it builds a module (all local stuff + imoprted struff)
 buildTModule	:: PriorityTable -> Map FQN (SymbolTable DocString, SymbolTable [Clause]) 
 		-> [(FQN, Signature)] -> TModule
 buildTModule priorTable funcInfo scope
@@ -44,7 +45,9 @@ buildTModule priorTable funcInfo scope
 			-- if you find something that has the same meaning as 'clauses' and rhymes with 'clauses', please send a pull request
 			-- reverse is added to put the most important signatures (the most local/last imported) last; the 'fromList' in Data.Map will then add those if duplicate entries exist
 		   let (locsT, docsT, clausesT)	= (stFromList locs, stFromList docs, stFromList clauses) in
-		   let tclauses		= typeCheckModule priorTable clausesT in
+		   let tclauses		= typeCheckModule priorTable clausesT :: SymbolTable [TClause] in
+			-- inject clauses for constructors/deconstructors
+		   let tclauses'	=  setParent tclauses $ stFromList $ CG.generate (todo "STMS!") in
 			TModule tclauses docsT clausesT locsT
 			
 
@@ -61,7 +64,7 @@ scopeData funcInfo fqn sign
 			((sign, fqn), (sign, docStr), (sign, clauses))
 
 
--- builds the full scope, thus all fqn signatures which are visible in this fqn
+-- builds the full scope, thus all fqn+signatures which are visible in this fqn (locally declared public and private stuff, and all imported stuff)
 buildScope	:: Map FQN [(FQN, Signature)] -> FQN -> Module -> [(FQN, Signature)]
 buildScope exports fqn@(FQN fqpn _ _) modul
 		= let local	= zip (repeat fqn) $ buildLocalSign Private fqn modul :: [(FQN, Signature)] in
@@ -83,7 +86,8 @@ buildLocal mod
 		   let funcs'	= map getData $ concatMap undouble funcs :: [(Signature, (DocString, [Clause]))] in
 			unzipST $ Child Empty $ fromList funcs'
 
--- builds all the locally declared signatures.hen visible == Public, only the public functions will be included. When visible == private, all functions are given. (This includes the restrict of the entire module)
+{- builds all the locally declared signatures. 
+When visible == Public, only the public functions will be included. When visible == private, all functions are given. (This includes the restrict of the entire module) -}
 buildLocalSign	:: Visible -> FQN -> Module -> [Signature]
 buildLocalSign visibleNeeded fqn mod
 		-- generates constructor and OO and other functions

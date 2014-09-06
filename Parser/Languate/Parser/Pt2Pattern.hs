@@ -178,7 +178,7 @@ convList	:: [AST] -> Maybe AST -> Pattern
 convList [] (Just tail)
 		= convert tail
 convList [ast] Nothing
-		= Deconstruct "getLonely" [convert ast]
+		= Deconstruct "head" [convert ast]
 convList (head:heads) mtail
 		= Deconstruct "unprepend" [convert head, convList heads mtail]
 
@@ -186,7 +186,7 @@ convDict	:: [AST] -> [AST] -> Maybe AST -> Pattern
 convDict [] [] (Just tail)	
 			= convert tail
 convDict [ast] [vast] Nothing
-			= Deconstruct "getLonely" [convert ast, convert vast]
+			= Deconstruct "head" [convert ast, convert vast]
 convDict (key:ktail) (val:vtail) t
 		=  Deconstruct "unprepend" [Deconstruct "id" [convert key, convert val],
 			convDict ktail vtail t]
@@ -194,7 +194,7 @@ convDict (key:ktail) (val:vtail) t
 convSet		:: [AST] -> Maybe AST -> Pattern
 convSet [] (Just tail)	=  convert tail
 convSet [head] Nothing
-		= Deconstruct "getLonely" [convert head]
+		= Deconstruct "head" [convert head]
 convSet (head:headtail) tail
 		=  Deconstruct "unprepend" [convert head, convSet headtail tail]
 

@@ -14,10 +14,10 @@ import Languate.Signature
 import Languate.TAST
 import Languate.TypeTools
 
--- generates all the functions, based on a statement.
-generate	:: Statement -> [Function]
-generate (FunctionStm func)
-		= [func]
+{- generates all the functions, based on a statement. Each generated function is accompanied by the statement that generated it-}
+generate	:: Statement -> [(Statement, Function)]
+generate stm@(FunctionStm func)
+		= [(stm, func)]
 generate (ADTDefStm adt)
 		= genADTFuncs adt
 generate (SubDefStm subdef)
@@ -27,11 +27,11 @@ generate (ClassDefStm classDef)
 generate _	= []
 
 
-genADTFuncs	:: ADTDef -> [Function]
-genADTFuncs (ADTDef name frees _ [sum])
-		= genOneADTSum name frees 0 sum
-genADTFuncs (ADTDef name frees _ sums)
-		= concatMap (uncurry $ genADTSum name frees) $ zip nats sums
+genADTFuncs	:: ADTDef -> [(Statement, Function)]
+genADTFuncs stm@(ADTDef name frees _ [sum])
+		= zip (repeat stm) genOneADTSum name frees 0 sum
+genADTFuncs stm@(ADTDef name frees _ sums)
+		= zip (repeat stm) concatMap (uncurry $ genADTSum name frees) $ zip nats sums
 
 
 -- used for an ADT-definition which has just one sum constructor

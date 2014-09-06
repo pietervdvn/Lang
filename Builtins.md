@@ -7,7 +7,7 @@ Built-in functions (used in desugaring)
     empty	: List a
     prepend	: a -> List a -> List a
     unprepend	: collection : Collection => collection a -> Maybe (a, collection a) -- used in patterns
-    getLonely	: [a] -> Maybe a
+    head	: [a] -> Maybe a
     just	: a -> Maybe a
     toSet	: List a -> Set a
     toDict	: List (a,b)	-> Dict (a,b)

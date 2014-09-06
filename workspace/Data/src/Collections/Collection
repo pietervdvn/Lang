@@ -1,0 +1,90 @@
+Collection
+----------
+
+The root interface in the collection hierarchy. 
+
+A collection represents a group of objects, known as its elements. Some collections allow duplicate elements and others do not. Some are ordered and others unordered.
+
+----------
+
+import Data.Functor
+import Data.Monoid
+
+
+--# Interface definition
+
+class Collection c:
+	-- Creates a new, empty collection
+	> size empty		= 0
+	> empty.contains a	= False
+	empty			: c a
+
+	-- Returns True iff the collection is empty
+	> isEmpty empty = True
+	> c:Collection a => (c.add a).isEmpty = False
+	isEmpty		: c a -> Bool
+
+	-- adds an element to this collection.
+	> empty.add empty	= empty
+	add		: a :> b => a -> c b -> c a
+
+	-- Gives you one element of the collection. When the collection is empty, ''Nothing'' will be returned
+	> head empty	= Nothing
+	> head $ empty.add a	= Just a
+	head		: c a -> a?
+
+	-- Gives you the collection, but without the element returned by head.
+	> tail empty	= empty
+	~ Completeness: c:Collection a=> add (head c) (tail c) = c
+	tail		: c a -> c a
+
+	-- checks wether (or not) something is element of this collection
+	> contains after add guarantee: c:Collection a => (c.add a).contains a = True
+	contains	: a -> c a -> Bool
+
+	-- returns the number of elements in collection.
+	> c:Collection c => isEmpty c == (0 == size c) = True
+	size		: c a -> Nat
+
+-- # Instance declarations
+
+--- Collections have many usefull properties: they are Monoids (allowing a flexible reduce) and functors: mapping stuff is usefull, isn't it? ---
+	
+instance Monoid Collection
+
+neutral	: Collection a
+	= empty
+
+(+)	: Collection c => c -> c -> c
+	: union
+
+
+instance Functor Collection
+
+map	: Collection c => (a -> b) -> c a -> c b
+f (deconstruct h t)
+	= add (f h) $ map f t
+
+
+-- # Utils
+
+-- Some usefull functions to make your life easier!
+
+-- Deconstructs
+deconstruct	: c:Collection => c a -> Maybe (a, c a)
+c		= decon (head c) (tail c)
+
+-- helper function for deconstruct
+_decon		: c:Collection => Maybe a -> c a -> Maybe (a, c a)
+Nothing _	= Nothing
+(Just a) as	= (a, as)
+
+-- Merges two collections. If the right argument is a specific instance (e.g. ''SortedSet''), the result will be a the specific instance too (thus a sortedSet)
+union		: c:Collection => Collection a -> c a -> c a
+> c1,c2:Collection a: (c1.contains a || c2.contains a) == (union c1 c1).contains a = True
+(deconstruct h t) c
+		= union t c.add h
+_ c		= c
+
+
+ 

@@ -14,8 +14,8 @@ import Languate.FQN
 
 -- a value represents an evaluated expression or a thunk. These are typed and carry their location, their context in which they should be evaluated
 data Value	= Primitive TExpression		-- primitive value such as nat or float
-		| ADT Type Int String		-- an adt-value/constructor. The string is a print representation
-		| VCall FQN [Type] Name		-- function call, the FQN is the fqn of the context where it is called; types+name = signature (thus types should be the expected function types, e.g. [Int -> Int -> Int, Nat -> Nat -> Nat]
+		| ADT Type Int String		-- an adt-value/constructor. The string is a print representation (of the constructor)
+		| VCall FQN [Type] Name		-- function call, the FQN is the fqn of the context where it is called; types+name = signature (thus types should be the expected function types, e.g. [Int -> Int -> Int, Nat -> Nat -> Nat]. This does indeed imply that you should know the possible signatures beforehand. You do know these however, as they are calculated in the typechecker.
 		| Thunk FQN [Type] [TClause]	-- expanded function call, with the actual implementation; bound variables are expanded in this version.
 		| App [Type] Value [Value]	-- application of the first value with the remaining values
 

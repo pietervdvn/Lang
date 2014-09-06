@@ -1,28 +1,62 @@
 Maybe
 -----
 The maybe type is widely used in syntac sugar (?) and in pattern matching.
+It represents a computation which may have failed, e.g. ''head ls''. If the list ''ls'' was empty, no head exist and the correct value is ''Nothing''.
+
+This type also plays an important role in pattern matching, as deconstruction is done with a functions which maps on a Maybe.
 -----
 
 import Data.Bool
 
--- The Maybe datatype
-data Maybe a	= Nothing
+-- The Maybe datatype definition.
+data Maybe a	= Nothing	-- Represents the failed value. Always keep nothing as first one in the ADT!
 		| Just a
 
--- The 'isJust' function returns 'True' iff its argument is of the form 'Just _'.
+-- The ''isJust'' function returns ''True'' iff its argument is of the form ''Just _''.
 isJust		: Maybe a -> Bool
 (Just _)	= True
 _		= False
 
--- The 'isNothing' function returns 'True' iff its argument is 'Nothing'.
+-- The ''isNothing'' function returns ''True'' iff its argument is ''Nothing''.
 isNothing	: Maybe a -> Bool
 Nothing		= True
 _		= False
 
--- Unpacks the 'Maybe'. If it is nothing, the default value is used.
+-- Unpacks the ''Maybe''. If it is nothing, the default value is used.
 --~ id: a,x => (Just a) ? x = a
 --> Nothing ? 1	= 1
 -- > (Just 42) ? 1	= 42
 (?)		: a? -> a -> a
 (Just a) _	= a
 _ 	 a	= a
+
+-- Removes all ''Nothing''s out of the list
+justs		: [a?] -> [a]
+[Nothing:as]	= Just as
+[(Just a):as]	= [a]:just as
+
+
+---
+
+# The role of Maybe within the compiler
+
+When a function is deconstructed in a function, e.g. in the and function:
+
+	and		: Bool -> Bool -> Bool
+	True True	= True
+	*		= False
+
+Let us take the first ''True'' pattern. This is internally transformed into a ''Deconstruct "True" [Bool -> Maybe (,)]'' (where ''(,)'' represents a tuple with _no_ internal elements).
+
+Whenever the interpreter wants to do pattern matching, e.g. against a value 'ADTValue 0 "False" []'' (((Here does the "False" represent a print name of the constructor))) it does this by executing the (automatically generated) function. Note that this is exactly the same as a regular functions, allowing your own deconstructor functions.
+
+	True		: Bool -> Maybe (,)
+	#ADTValue 0 "False" 	= ADTValue 0 "Nothing" []
+	#ADTValue 1 "True"	= ADTValue 1 "Just" [TupleValue []]
+
+Thus:
+
+	True (((as deconstructor))) False	= Nothing
+	True (((as deconstructor))) False	= Just (,)
+---
+---

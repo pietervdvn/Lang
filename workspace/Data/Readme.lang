@@ -9,6 +9,17 @@ Implemented datatypes
 =====================
 
 Data implements the following modules:
+
+ - Data: simple datatypes 
+ - * Bool: basic boolean logic
+ - * Functor: the functor datatype, with map
+ - * Maybe: container for computations _which might fail_
+ - Collections: basic datastructures, inspired by the java collections framework
+ - * List
+ - * Set
+ - * Dict (formerly known as 'Map'. This name is however confusing with 'functor.map')
+
+
 ----
 
 import Data.Bool

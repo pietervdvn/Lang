@@ -21,7 +21,7 @@ import Normalizable
 typedLoad	:: FQN -> FilePath -> IO TypedPackage
 typedLoad fqn@(FQN fqpn _ _) path
 	=	do	package	<- loadPackage' fqn path
-			return $ normalizePackage $typeCheck fqpn package
+			return $ normalizePackage $ typeCheck fqpn package
 							
 
 

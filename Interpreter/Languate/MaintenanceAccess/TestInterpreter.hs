@@ -37,6 +37,9 @@ preludeM	= fetch prelude
 
 t	= runReader (expand $ VCall bool [normalize $ Curry [Normal "Bool",Normal "Bool",Normal "Bool"]] "&&") ctx
 
+deconstr	= VCall bool [normalize $ Curry [Normal "Bool",Applied (Normal "Maybe") [(TupleType [])]]] "True"
+
+t'	= runReader (expand deconstr) ctx
 
 ctx	= Context package
 
