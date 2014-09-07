@@ -11,9 +11,9 @@ By adding the associativity, the compiler has a high degree of freedom in optimi
 
 class Monoid m:
 	-- The neutral element
-	~ identity element:	neutral + a	= a
-	~ identity element:	a + neutral	= a
+	~ identity element:	append neutral a	= a
+	~ identity element:	append a neutral	= a
 	neutral	: m
 	-- The addition operator.
-	~ associativity: a,b,c:m => (a + b) + c = a + (b + c)
-	(+)	: m -> m -> m
+	~ associativity: a,b,c:m => append (append a b) c = append a (append b c)
+	append	: m -> m -> m
