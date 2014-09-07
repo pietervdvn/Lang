@@ -38,27 +38,27 @@ buildTyped fqpn prior package
 
 
 -- gets a dict with where all the data lives locally per fqn (funcInfo), and a list of what signatures get imported from where (scope). From this it builds a module (all local stuff + imoprted struff)
-buildTModule	:: PriorityTable -> Map FQN (SymbolTable DocString, SymbolTable [Clause]) 
+buildTModule	:: PriorityTable -> Map FQN (SymbolTable DocString, SymbolTable (Statement,[Clause])) 
 		-> [(FQN, Signature)] -> TModule
 buildTModule priorTable funcInfo scope
 		=  let (locs, docs, clauses)	= unzip3 $ reverse $ map (uncurry $ scopeData funcInfo) scope in
 			-- if you find something that has the same meaning as 'clauses' and rhymes with 'clauses', please send a pull request
 			-- reverse is added to put the most important signatures (the most local/last imported) last; the 'fromList' in Data.Map will then add those if duplicate entries exist
 		   let (locsT, docsT, clausesT)	= (stFromList locs, stFromList docs, stFromList clauses) in
-		   let tclauses		= typeCheckModule priorTable clausesT :: SymbolTable [TClause] in
+		   let tclauses		= typeCheckModule priorTable clausesT :: SymbolTable (Statement,[TClause]) in
 			-- inject clauses for constructors/deconstructors
 		   let tclauses'	=  setParent tclauses $ stFromList $ CG.generate (todo "STMS!") in
-			TModule tclauses docsT clausesT locsT
+			TModule tclauses docsT (map snd clausesT) locsT
 			
 
 
-scopeData	:: Map FQN (SymbolTable DocString, SymbolTable [Clause])
+scopeData	:: Map FQN (SymbolTable DocString, SymbolTable (Statement,[Clause]))
 		->  FQN -> Signature 
-		-> ((Signature, FQN),(Signature, DocString),(Signature, [Clause]))
+		-> ((Signature, FQN),(Signature, DocString),(Signature, (Statement,[Clause])))
 scopeData funcInfo fqn sign
 		= let (docStrST, clausesST)	
 			= findWithDefault 
-			(error $ "bug: Semantal/Package2Typed/scopeData: name not found: "++show fqn) 				fqn funcInfo :: (SymbolTable DocString, SymbolTable [Clause]) in
+			(error $ "bug: Semantal/Package2Typed/scopeData: name not found: "++show fqn) 				fqn funcInfo :: (SymbolTable DocString, SymbolTable (Statement,[Clause])) in
 		  let docStr	= fromMaybe "" $ lookupSt sign docStrST in
 		  let clauses	= fromMaybe (error $ "empty function?! semantal/pack2typedpack/scopeData"++show fqn++" : "++show sign) $ lookupSt sign clausesST in
 			((sign, fqn), (sign, docStr), (sign, clauses))
@@ -79,11 +79,11 @@ extractExports exports (fqn, _, restrict)
 			mask' restrict exps 
 
 -- builds function -> type mapping of locally defined functions. All functions, including private ones, are given.
-buildLocal	:: Module -> (SymbolTable DocString, SymbolTable [Clause])
+buildLocal	:: Module -> (SymbolTable DocString, SymbolTable (Statement,[Clause]))
 buildLocal mod
 		-- generates constructor and OO and other functions
-		=  let funcs	= concatMap FG.generate $ statements mod in
-		   let funcs'	= map getData $ concatMap undouble funcs :: [(Signature, (DocString, [Clause]))] in
+		=  let funcs	= concatMap FG.generate $ statements mod :: [(Statement, Function)] in
+		   let funcs'	= map getData $ concatMap undouble funcs :: [(Signature, (DocString, (Statement,[Clause])))] in
 			unzipST $ Child Empty $ fromList funcs'
 
 {- builds all the locally declared signatures. 
@@ -92,21 +92,20 @@ buildLocalSign	:: Visible -> FQN -> Module -> [Signature]
 buildLocalSign visibleNeeded fqn mod
 		-- generates constructor and OO and other functions
 		=  let funcs	= concatMap FG.generate $ statements mod in
-		   -- generate post-typecheck stuff (TClauses)
 		   let filteredFuncs	= filter ((<=) visibleNeeded . visibility)
-					$ concatMap undouble funcs in
+					$ map snd $ concatMap undouble funcs in
 		   checkDouble  $ mask (exports mod)
 				$ checkExportsExist fqn (exports mod) 
 				$ concatMap signature filteredFuncs
 
-getData		:: Function -> (Signature, (DocString, [Clause]))
-getData (Function doc v [(name,typ)] _ imp)
-		= (Signature name typ, (doc,imp))
+getData		:: (Statement, Function) -> (Signature, (DocString, (Statement,[Clause])))
+getData (s,(Function doc v [(name,typ)] _ imp))
+		= (Signature name typ, (doc,(s,imp)))
 
-undouble	:: Function -> [Function]
-undouble (Function doc v nmTypes laws imp)
+undouble	:: (Statement,Function) -> [(Statement,Function)]
+undouble (s,(Function doc v nmTypes laws imp))
 		= do	(name, typ)	<- nmTypes
-			return $ Function doc v [(name,typ)] laws imp
+			return $ (s,Function doc v [(name,typ)] laws imp)
 
 checkDouble'	:: [(Signature, a)] -> [(Signature, a)]
 checkDouble' ls	=  let (signs, as)	= unzip ls in

@@ -29,9 +29,9 @@ generate _	= []
 
 genADTFuncs	:: ADTDef -> [(Statement, Function)]
 genADTFuncs stm@(ADTDef name frees _ [sum])
-		= zip (repeat stm) genOneADTSum name frees 0 sum
+		= zip (repeat $ ADTDefStm stm) $ genOneADTSum name frees 0 sum
 genADTFuncs stm@(ADTDef name frees _ sums)
-		= zip (repeat stm) concatMap (uncurry $ genADTSum name frees) $ zip nats sums
+		= zip (repeat $ ADTDefStm stm) $ concatMap (uncurry $ genADTSum name frees) $ zip nats sums
 
 
 -- used for an ADT-definition which has just one sum constructor

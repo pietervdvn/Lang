@@ -27,9 +27,11 @@ In later versions, types will be inferred, allowing implicit typing.
 --}
 
 
-typeCheckModule		:: PriorityTable -> SymbolTable [Clause] ->  SymbolTable [TClause]
+typeCheckModule		:: PriorityTable -> SymbolTable (Statement,[Clause]) -> (SymbolTable Statement, SymbolTable [TClause])
 typeCheckModule prior st	
 			=  let tt	= buildTypeTable st in
+				-- some clauses have special builtins which can not be typechecked and should be regenerated after typechecking. It are these statements:
+			   let refusedStms	= filterTable hasSpecialBuiltin st in
 				mapWithType (checkFunction tt prior) $ filterTable (not . hasSpecialBuiltin) st
 
 
