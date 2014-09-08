@@ -29,6 +29,10 @@ mapWithType _ Empty	=  Empty
 mapWithType f (Child p cont)
 			= Child (mapWithType f p) $ Map.mapWithKey (\(Signature _ t) a -> f t a) cont
 
+stToList			:: SymbolTable a -> [a]
+stToList Empty		=  []
+stToList (Child p cont)	=  (map snd $ toList cont) ++ stToList p
+
 filterTable		:: (a -> Bool) -> SymbolTable a -> SymbolTable a
 filterTable _ Empty	=  Empty
 filterTable f (Child p cont)

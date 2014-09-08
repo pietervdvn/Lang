@@ -171,7 +171,7 @@ convert (SetP asts mValAsts mtail)
 convert (ListP asts mtail)
 		= convList asts mtail
 convert (TupleP asts)
-		= Deconstruct "just" $ map convert asts
+		= Deconstruct "Just" $ map convert asts
 convert ast	= convErr "Pt2Pattern" ast
 
 convList	:: [AST] -> Maybe AST -> Pattern
@@ -180,7 +180,7 @@ convList [] (Just tail)
 convList [ast] Nothing
 		= Deconstruct "head" [convert ast]
 convList (head:heads) mtail
-		= Deconstruct "unprepend" [convert head, convList heads mtail]
+		= Deconstruct ":" [convert head, convList heads mtail]
 
 convDict	:: [AST] -> [AST] -> Maybe AST -> Pattern
 convDict [] [] (Just tail)	
@@ -188,7 +188,7 @@ convDict [] [] (Just tail)
 convDict [ast] [vast] Nothing
 			= Deconstruct "head" [convert ast, convert vast]
 convDict (key:ktail) (val:vtail) t
-		=  Deconstruct "unprepend" [Deconstruct "id" [convert key, convert val],
+		=  Deconstruct ":" [Deconstruct "id" [convert key, convert val],
 			convDict ktail vtail t]
 
 convSet		:: [AST] -> Maybe AST -> Pattern
@@ -196,7 +196,7 @@ convSet [] (Just tail)	=  convert tail
 convSet [head] Nothing
 		= Deconstruct "head" [convert head]
 convSet (head:headtail) tail
-		=  Deconstruct "unprepend" [convert head, convSet headtail tail]
+		=  Deconstruct ":" [convert head, convSet headtail tail]
 
 pt2pattern	:: ParseTree -> Pattern
 pt2pattern	=  pt2a h t s convert

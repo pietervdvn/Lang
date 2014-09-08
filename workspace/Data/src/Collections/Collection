@@ -47,18 +47,16 @@ class Collection c:
 --- Collections have many usefull properties: they are Monoids (allowing a flexible reduce) and functors: mapping stuff is usefull, isn't it? ---
 	
 instance Monoid Collection
-
-neutral	: Collection a
+  neutral	: Collection a
 	= empty
 
-(+)	: Collection c => c -> c -> c
-	: union
+  append	: Collection c => c -> c -> c
+	= union
 
 
 instance Functor Collection
-
-map		: Collection c => (a -> b) -> c a -> c b
-f ((:) h t)	= add (f h) $ map f t
+  map		: Collection c => (a -> b) -> c a -> c b
+    f ((:) h t)	= add (f h) $ map f t
 
 
 -- # Utils
@@ -67,42 +65,50 @@ f ((:) h t)	= add (f h) $ map f t
 -- ## Reduce, fold, ...
 
 reduce		: m:Monoid => Collection m -> m
-((:) h t)	= append h (reduce t)
+  ((:) h t)	= append h (reduce t)
 
 
 reduce		: m:Monoid => Collection m -> m -> m
-((:) h t) m	= t.reduce (append (h m))
+  ((:) h t) m	= t.reduce (append (h m))
+
+
+
 
 -- ## Misc tools
 
+-- Converts a collection into any other collection
+convert	: c:Collection a => Collection a -> c a
+c	= union c empty 
 
 -- Deconstructs a collection into its head and tail
 (:)		: c:Collection => c a -> Maybe (a, c a)
-c		= decon (head c) (tail c)
+  c		= decon (head c) (tail c)
 
 -- helper function for (:)
 _decon		: c:Collection => Maybe a -> c a -> Maybe (a, c a)
-Nothing _	= Nothing
-(Just a) as	= (a, as)
+  Nothing _	= Nothing
+  (Just a) as	= (a, as)
 
--- Merges two collections. If the right argument is a specific instance (e.g. ''SortedSet''), the result will be a the specific instance too (thus a sortedSet)
+--- Merges two collections. 
+	If the right argument is a specific instance (e.g. ''SortedSet''), 
+	the result will be a the specific instance too (thus a sortedSet)
 union		: c:Collection => Collection a -> c a -> c a
-> c1,c2:Collection a: (c1.contains a || c2.contains a) == (union c1 c1).contains a = True
-((:) h t) c
+  > c1,c2:Collection a: (c1.contains a || c2.contains a) == (union c1 c1).contains a = True
+  ((:) h t) c
 		= union t c.add h
-_ c		= c
+  _ c		= c
 
 
 -- Returns ''True'' iff the collection contains exactly one element
-> containsOne $ empty.add a	= True
-> containsOne $ empty		= False
+  > containsOne $ empty.add a	= True
+  > containsOne $ empty		= False
 containsOne	: Collection a -> Bool
-((:) _ t)	= isEmpty t
-*			= False
+  ((:) _ t)	= isEmpty t
+  *			= False
 
  
 -- Returns True iff the collection is empty
-> isEmpty empty = True
-> c:Collection a => (c.add a).isEmpty = False
+  > isEmpty empty = True
+  > c:Collection a => (c.add a).isEmpty = False
 isEmpty		: c a -> Bool
-c		= 0 == size c
+  c		= 0 == size c

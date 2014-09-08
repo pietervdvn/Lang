@@ -213,16 +213,18 @@ np pt		= pt
 nps	= map normalize
 
 
-{- Deconstruct "unprepend" 
-unprepend	: {a} -> (a,{a})
-unprepend	: {a --> b} -> ( (a,b), {a --> b} )
-unprepend dict	= ( head dict, tail dict)
+{- Deconstructor of collection is done with (:) 
+(:-	: {a} -> (a,{a})
+(:)	: {a --> b} -> ( (a,b), {a --> b} )
+dict	= ( head dict, tail dict)
+
+This is implemented into the collection framework.
 
 thus, a pattern like
 
 {a --> b, c : tail} gets translated to
-Deconstruct "unprepend" [ Deconstruct "id" [Assign "a", Assign "b"],  Deconstruct "unprepend" [ Deconstruct "id" [Assign "c", Dontcare], Assign "tail"]
-                          ^ splitting of key       ^ key        ^ value ^ deconstruct of tail                                 ^about the value  ^the actual tail, after 2 unprepends
+Deconstruct "(:)" [ Deconstruct "id" [Assign "a", Assign "b"],  Deconstruct "(:)" [ Deconstruct "id" [Assign "c", Dontcare], Assign "tail"]
+                          ^ splitting of key       ^ key        ^ value ^ deconstruct of tail                                 ^about the value  ^the actual tail, after 2 (:)
 
 -}
 

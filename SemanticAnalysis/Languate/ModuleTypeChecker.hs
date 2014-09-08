@@ -31,9 +31,10 @@ typeCheckModule		:: PriorityTable -> SymbolTable (Statement,[Clause]) -> (Symbol
 typeCheckModule prior st	
 			=  let tt	= buildTypeTable st in
 				-- some clauses have special builtins which can not be typechecked and should be regenerated after typechecking. It are these statements:
-			   let refusedStms	= filterTable hasSpecialBuiltin st in
-				mapWithType (checkFunction tt prior) $ filterTable (not . hasSpecialBuiltin) st
-
+			   let refusedStms	= fmap fst $ filterTable (hasSpecialBuiltin . snd) st in
+			   let filteredClauses	= filterTable (not . hasSpecialBuiltin) $ fmap snd st in
+			   let translated	= mapWithType (checkFunction tt prior) filteredClauses in
+			   (refusedStms, translated)
 
 checkFunction		:: TypeTable -> PriorityTable -> Type -> [Clause] -> [TClause]
 checkFunction tt prior t
