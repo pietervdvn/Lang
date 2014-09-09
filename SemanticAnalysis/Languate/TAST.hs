@@ -10,6 +10,7 @@ It is this data-structure that all semantic analysis things use.
 
 import StdDef
 import Languate.AST
+import Languate.Signature	
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
@@ -19,7 +20,7 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 type TExpression	= TypedExpression
 
 data TPattern	= TAssign Name
-		| TDeconstruct Name [TPattern]
+		| TDeconstruct Signature [TPattern]
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression

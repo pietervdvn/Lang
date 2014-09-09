@@ -24,7 +24,7 @@ buildTypeTable (Child p cont)
 			=  TT (buildTypeTable p) $ fromList $ merge $ map (\(Signature name types) -> (name, types)) $ keys cont
 
 
-
+-- The types of the function with given name, closest match first
 findType		:: Name -> TypeTable -> Maybe [Type]
 findType _ Empt		=  Nothing
 findType n (TT p cont)	=  case lookup n cont of

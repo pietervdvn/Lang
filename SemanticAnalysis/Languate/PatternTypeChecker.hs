@@ -22,6 +22,7 @@ import Languate.TAST
 import Languate.SymbolTable
 import Languate.TypeTable
 import Languate.TypeChecker
+import Languate.Signature
 
 import Control.Monad
 import Control.Monad.Reader
@@ -63,21 +64,23 @@ checkOne _ (Assign name) t
 checkOne _ (Let _ _) _
 		= todos "Let expressions in patterns are not supported yet"
 checkOne ctx (Deconstruct function patterns) t
-		= do	let funcType	= findType function $ typeTable ctx
+		= do	let funcType	= findType function $ typeTable ctx	-- the types that the given function might have
 			let err		= error $ "Deconstruction function not found (for pattern): "++function
 			let typs	= fromMaybe err funcType
-			let deconstrType	= getDeconstructType t $ map normalize typs
+			let deconstrType	= filter (validFunctionType (length patterns) t) $ map normalize typs	-- now filtered for a -> Mabye (.,.,.)
 			when (null deconstrType) $ error $ 
 				"The deconstructor function "++function++
 				" does not have the right type, expected function of type "++
 				show (validType t)
 			-- there can only be one function with this signature
-			let [producedTypes]	= deconstrType
+			let [actualFunctionType]	= deconstrType
+			let producedTypes		= returnedType actualFunctionType
 			-- producedTypes are now the types that the subpatterns should match
 			-- sanitized to remove embedded multidontcares
-			let patterns'	= sanitize (length producedTypes) patterns
+			let patterns'	= sanitize (length producedTypes) patterns	-- TODO * will be considered a _ now
 			patterns	<- checkAll ctx patterns' producedTypes
-			return $ TDeconstruct function patterns
+			-- the signature is the signature of the function that is called. The type will thus typically be ''a -> (b,c,d,...)?''
+			return $ TDeconstruct (Signature function actualFunctionType) patterns
 checkOne _ (DontCare) _
 		= return TDontCare
 checkOne ctx (Multi patterns) t
@@ -95,20 +98,18 @@ validType t	=  Curry [t, Applied (Normal "Maybe") [Free "(.,.,..)"]]
 
 
 
--- checks wether or not the type is a valid function type that can deconstruct values in a pattern
--- These functions should take exactly one argument, and return a maybe of zero or more arguments in a tuple.
-getDeconstructType	:: Type -> [Type] -> [[Type]]
-getDeconstructType t 	= mapMaybe (matchingType t)
-
--- converts a valid deconstructor-function into the types it (might) return
-matchingType		:: Type -> Type -> Maybe [Type]
-matchingType firstType (Curry [t, Applied (Normal "Maybe") [ts]])
-	| firstType == t= Just $ case ts of
-					TupleType ts'	-> ts'
-					t		-> [t]
-	| otherwise	= Nothing
-matchingType _	_	= Nothing
+-- converts a valid deconstructor-functiontype into the types it returns (thus the tuple types)
+returnedType		:: Type -> [Type]
+returnedType (Curry [t, Applied (Normal "Maybe") [TupleType ts]])
+			= ts
+returnedType _	= error "Bug: Semantal/PatternTypeChecker/returnedType: no sanitize before returned type; should not happen"
 			
+
+-- returns true if the type is of the form ''a -> (b,c,d,...)?'' with exactly i tuple arguments
+validFunctionType	:: Int -> Type -> Type -> Bool
+validFunctionType i expSource (Curry [actSource, Applied (Normal "Maybe") [TupleType ts]])
+	= expSource == actSource && i == length ts
+validFunctionType _ _ _	= False
 
 
 
