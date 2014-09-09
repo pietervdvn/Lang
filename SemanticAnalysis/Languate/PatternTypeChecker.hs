@@ -4,6 +4,7 @@ module Languate.PatternTypeChecker where
 
 This module (type)checks patterns, and produces a typed closure as byproduct.
 
+Checks and crashes on
 -> Double assignments
 -> Invalid deconstructions
 -> Mulitdontcare gets unpacked
@@ -95,7 +96,7 @@ validType t	=  Curry [t, Applied (Normal "Maybe") [Free "(.,.,..)"]]
 
 
 -- checks wether or not the type is a valid function type that can deconstruct values in a pattern
--- These functions should take exactly one argument, and return a maybe of zero or more arguments.
+-- These functions should take exactly one argument, and return a maybe of zero or more arguments in a tuple.
 getDeconstructType	:: Type -> [Type] -> [[Type]]
 getDeconstructType t 	= mapMaybe (matchingType t)
 

@@ -9,6 +9,7 @@ It takes a map (FQN -> SimpleSymbolTable), where it finds the implementations.
 --}
 
 import StdDef
+import Languate.AST
 import Languate.TAST
 import Languate.TypedPackage
 import Languate.FQN
@@ -18,49 +19,83 @@ import Languate.InterpreterDef
 import Control.Monad.Reader
 import qualified Data.Map as M
 import Data.Maybe
+import Normalizable
+import Languate.PatternTypeChecker (getDeconstructType)
 
+import Languate.Interpreter.Utils
+import Languate.Interpreter.Substitution
 
-data Context	= Context {world::TypedPackage}
-	deriving (Show)
-type RC	a	= Reader Context a
+-- RC = Reader Context; context contains the code world
 
+{-- reduces the given once as much as possible. More or less normalize a, except for the context.
+Postconditions:
+The given values are either 
+-> Primitive
+-> ADT
+-> VCall
+-> Thunk (if a Thunk was passed in)
 
--- reduces the given once as much as possible
+It is never
+-> App
+-> SubstitutionFrontier
+---}
 eval	:: Value -> RC [Value]
 eval app@(App ts v [])
 	= return [app]
 eval (App ts vcall@(VCall _ _ _) args)
 	=  do	expands	<- expand vcall
-		evals	<- mapM (\expanded -> eval $ App ts expanded args) expands
+		evals	<- mapM (eval . flip wrapAsApp args) expands
 		return $ concat evals
-eval (App ts (Thunk fqn thunkts clauses) (arg:args))
-	= todo
-eval v	=  return [v]
+eval (App ts val (arg:args))
+	= do	thunks	<- eval val
+		valss	<- mapM (\thunk -> applyOnThunk thunk arg) thunks
+		todos $ "vals " ++ (show $ concat valss)
+		
 
 
+eval v@(Primitive _)	=  return [v]
+eval v@(ADT _ _ _)	=  return [v]
+eval v@(VCall _ _ _)	=  return [v]
+eval v@(Thunk _ _ _)	=  return [v]
+eval (SubstitutionFrontier v)
+			=  eval v
 
--- applies the argument to the clause -if possible-
-apply	:: Value -> TClause -> RC (Maybe Value)
-apply v (TClause [] expr)
-	= return Nothing
-apply v (TClause (pt:pts) expr)
-	= todo
+applyOnThunk	:: Value -> Value -> RC [Value]
+applyOnThunk (Thunk fqn ts clauses) arg
+	= do	applied <- mapM (apply arg) clauses
+		return $ concat applied
 
--- tries to match a pattern against the given argument. If this is not possible (no pattern match available), you'll receive a nothing. If it worked out, you'll get a binding
-matchPattern	:: FQN -> Value -> TPattern -> RC (Maybe [(Name, Value)])
+-- applies the argument to the clause if possible. If matching failed, an ampty list will be returned.
+apply	:: FQN -> Value -> TClause -> RC [Value]
+apply _ v (TClause [] expr)
+	= return []
+apply fqn v (TClause (pt:pts) expr)
+	= do	bindings	<- matchPattern fqn v pt
+		
+		
+
+{- tries to match a pattern against the given argument. If this is not possible (no pattern match available), you'll receive a nothing.
+Multiple deconstructors might match, this is why a list is returned
+-}
+matchPattern	:: FQN -> Value -> TPattern -> RC [Binding]
 matchPattern _ _ TDontCare
-		= return $ Just []
+		= return []
+matchPattern _ (Primitive (TNat i)) (TEval (TNat j))
+		= return $ if i == j then [[]] else []
 matchPattern _ _ (TEval _)
-		= todos "Interpreter: TEval pattern/equality"
+		= todos "Interpreter: TEval pattern/equality for real types"
 matchPattern _ v (TAssign nm)
-		=  return $ Just [(nm, v)]
+		=  return $ [[(nm, v)]]
 matchPattern fqn v (TDeconstruct func pats)
 		= do	let typesValue	= typeOfValue v
-			let types	= typesValue
+			possibleSignatures	<- mapM (\t -> _searchDF fqn func t (length pats)) typesValue
+			let possibleTypes	= map (\(Signature _ t) -> t) $ concat possibleSignatures 
 			-- for the vcall (function call) we need the signature, thus all possible types
-			let vcall	= VCall fqn types func
-			return Nothing
-
+			thunks	<- expand $ VCall fqn possibleTypes func
+			let apps	= map (flip wrapAsApp [v]) thunks
+			results	<- fmap concat $ mapM eval apps
+			let matches	= filter (not . isNothingV) results
+			return $ error $ ">>> pattern matches from deconstructor: thunks\n" ++ show thunks ++ "\n>>>apps\n" ++ show apps ++ "\n>>>results\n" ++ show results ++ "\n>>>matches\n" ++show matches
 
 
 
@@ -85,10 +120,4 @@ expand (VCall fqn ts name)
 		let thunks	= map (uncurry $ \sign@(Signature _ t) clauses -> Thunk fqn [t] clauses) tclausess
 		return thunks
 
-
-
-getModule	:: FQN -> RC TModule
-getModule fqn	=  do	tpack	<- fmap world $ ask
-			let err	= error $ "Interpreter error: location not known: "++show fqn
-			return $ fromMaybe err $ M.lookup fqn tpack
 

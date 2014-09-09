@@ -30,11 +30,12 @@ _		= False
 (Just a) _	= a
 _ 	 a	= a
 
+---
 -- Removes all ''Nothing''s out of the list
 justs		: [a?] -> [a]
 [Nothing:as]	= Just as
 [(Just a):as]	= [a]:just as
-
+---
 
 ---
 

@@ -16,9 +16,9 @@ import Languate.FQN
 data Value	= Primitive TExpression		-- primitive value such as nat or float
 		| ADT Type Int String		-- an adt-value/constructor. The string is a print representation (of the constructor)
 		| VCall FQN [Type] Name		-- function call, the FQN is the fqn of the context where it is called; types+name = signature (thus types should be the expected function types, e.g. [Int -> Int -> Int, Nat -> Nat -> Nat]. This does indeed imply that you should know the possible signatures beforehand. You do know these however, as they are calculated in the typechecker.
-		| Thunk FQN [Type] [TClause]	-- expanded function call, with the actual implementation; bound variables are expanded in this version.
-		| App [Type] Value [Value]	-- application of the first value with the remaining values
-
+		| Thunk FQN [Type] [TClause]	-- expanded function call, with the actual implementation; bound variables are expanded in this version. The types are the possible types this thunk has.
+		| App [Type] Value [Value]	-- application of the first value with the remaining values. Types are possible return types. E.g. App [Bool -> Bool] (VCall ... "&&" [Bool -> Bool -> Bool]) [ADT Bool 0 "False"]
+		| SubstitutionFrontier Value	-- indicates that this value is already substituted. E.g. (\a b = a + b) (b + b) (x) -> (\b = (_b_ + _b_) + b). The underlined b's should not be substituted further. This is equivalent with the renaming law in lambda calculus
 
 typeOfValue	:: Value -> [Type]
 typeOfValue (Primitive tExpr)
@@ -31,9 +31,6 @@ typeOfValue (ADT t _ _)	= [t]
 
 instance Show Value where
 	show	= sv
-
-
-
 sv	:: Value -> String
 sv (Primitive texp)
 	= sp texp

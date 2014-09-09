@@ -3,6 +3,8 @@ Bool
 The bool type is a type which represents logical values.
 ---
 
+import Prelude
+
 --## Definition
 
 data Bool	= False 
@@ -11,31 +13,31 @@ data Bool	= False
 --## Logical operations
 
 -- Logical 'and'-function. Returns True if, and only if both arguments are True
-~ annihilator for and	: b => False && b	= False
-~ neutral element for and: b => True && b	= b
-> True && True			= True
-> False && True && False	= False
+  ~ annihilator for and	: b => False && b	= False
+  ~ neutral element for and: b => True && b	= b
+  > True && True			= True
+  > False && True && False	= False
 (&&)		: Bool -> Bool -> Bool
-True True	= True
-*		= False
+  True a	= a		-- increases lazyness over True True = True
+  *		= False
 
 -- Logical 'or'-function. Returns False if, and only if both arguments are False
-~ annihilator for or	: b => True || b	= True
-~ neutral element for or: b => False  || b	= b
-> False || False		= False
-> False || True || False	= True
+  ~ annihilator for or	: b => True || b	= True
+  ~ neutral element for or: b => False  || b	= b
+  > False || False		= False
+  > False || True || False	= True
 (||)		: Bool -> Bool -> Bool
 or		: Bool -> Bool -> Bool
-False False	= True
-*		= False
+  False a	= a
+  *		= True
 
 -- Logical 'not' function (aka invert).
-~ double not	: b => ! !b = b
-> ! True	= False
-> ! False	= True
+  ~ double not	: b => ! !b = b
+  > ! True	= False
+  > ! False	= True
 (!)	: Bool -> Bool
-True	= False
-False	= True
+  True	= False
+  False	= True
 
 
 --## Convertion to other types
@@ -47,8 +49,8 @@ False	= True
 ---
 
 -- convert with cast
-> (Nat) True	= 1
-> (Nat) False	= 0
+  > (Nat) True	= 1
+  > (Nat) False	= 0
 convert	: Bool -> Nat
-True	= 1
-False	= 0
+  True	= 1
+  False	= 0

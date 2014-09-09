@@ -23,6 +23,7 @@ data TPattern	= TAssign Name
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression
+		| SubsFrontier TExpression	-- no substitutions in this expression! added for interpreter, will only exist in interpreter
 	deriving (Show)
 
 data TClause		= TClause [TPattern] TExpression

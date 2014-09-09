@@ -10,13 +10,14 @@ It loads and typechecks the Data-package, and interpretes some basic statements.
 import Languate.TypedLoader
 import Data.Maybe
 import Languate.FQN
-import Languate.Tools
+import Languate.Interpreter.Tools
 import Data.Map as Map
 import System.IO.Unsafe
 import Languate.Interpreter
 import Languate.InterpreterDef
 import Control.Monad.Reader
 import Languate.AST
+import Languate.TAST
 import Normalizable
 
 
@@ -35,11 +36,17 @@ preludeM	= fetch prelude
 
 
 
-t	= runReader (expand $ VCall bool [normalize $ Curry [Normal "Bool",Normal "Bool",Normal "Bool"]] "&&") ctx
+t0	= runReader (expand $ VCall bool [normalize $ Curry [Normal "Bool",Normal "Bool",Normal "Bool"]] "&&") ctx
 
 deconstr	= VCall bool [normalize $ Curry [Normal "Bool",Applied (Normal "Maybe") [(TupleType [])]]] "True"
 
-t'	= runReader (expand deconstr) ctx
+constr str
+	= VCall bool [Normal "Bool"] str
+
+t' x	= runReader (expand x) ctx
+
+t	= runReader (matchPattern bool (ADT (Normal "Bool") 0 "FalseADT") (TDeconstruct "True" [])) ctx
+
 
 ctx	= Context package
 
@@ -47,4 +54,4 @@ package		= unsafePerformIO packageIO
 packageIO	= typedLoad prelude "../workspace/Data/src/"
 
 
-testInfo	= putStrLn $ info boolM "&&"
+inf str	= putStrLn $ info boolM str

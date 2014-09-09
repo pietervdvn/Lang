@@ -13,6 +13,7 @@ Built-in functions (used in desugaring)
     toDict	: List (a,b)	-> Dict (a,b)
     toString	: List Char -> String
     convert	: a -> b
+    void	: ()	-- tuple with no elements
     ~		-- cast
     ~~		-- autocast
 
