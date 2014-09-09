@@ -15,6 +15,7 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
 			| TApplication [Type] TypedExpression [TypedExpression]
 			| TCall [Type] Name	
+			| SubsFrontier TExpression	-- no substitutions in this expression! added for interpreter, will only exist in interpreter
 	deriving (Show)
 type TExpression	= TypedExpression
 
@@ -23,7 +24,6 @@ data TPattern	= TAssign Name
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression
-		| SubsFrontier TExpression	-- no substitutions in this expression! added for interpreter, will only exist in interpreter
 	deriving (Show)
 
 data TClause		= TClause [TPattern] TExpression

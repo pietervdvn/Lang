@@ -11,6 +11,7 @@ import Languate.TypedLoader
 import Data.Maybe
 import Languate.FQN
 import Languate.Interpreter.Tools
+import Languate.Interpreter.Utils
 import Data.Map as Map
 import System.IO.Unsafe
 import Languate.Interpreter

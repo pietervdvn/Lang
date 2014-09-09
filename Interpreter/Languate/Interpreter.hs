@@ -62,7 +62,7 @@ eval (SubstitutionFrontier v)
 
 applyOnThunk	:: Value -> Value -> RC [Value]
 applyOnThunk (Thunk fqn ts clauses) arg
-	= do	applied <- mapM (apply arg) clauses
+	= do	applied <- mapM (apply fqn arg) clauses
 		return $ concat applied
 
 -- applies the argument to the clause if possible. If matching failed, an ampty list will be returned.
@@ -71,7 +71,7 @@ apply _ v (TClause [] expr)
 	= return []
 apply fqn v (TClause (pt:pts) expr)
 	= do	bindings	<- matchPattern fqn v pt
-		
+		todos "Apply"
 		
 
 {- tries to match a pattern against the given argument. If this is not possible (no pattern match available), you'll receive a nothing.
