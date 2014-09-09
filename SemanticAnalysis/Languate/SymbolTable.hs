@@ -31,7 +31,7 @@ mapWithType f (Child p cont)
 
 stToList			:: SymbolTable a -> [a]
 stToList Empty		=  []
-stToList (Child p cont)	=  (map snd $ toList cont) ++ stToList p
+stToList (Child p cont)	=  map snd (toList cont) ++ stToList p
 
 filterTable		:: (a -> Bool) -> SymbolTable a -> SymbolTable a
 filterTable _ Empty	=  Empty

@@ -36,8 +36,8 @@ info modul n
 		
 
 _merge		::  [(Signature, String)] -> String
-_merge docs
-		= concat $ Data.List.map (\(Signature _ t, str) -> "\n\n-- ###\t" ++ show t ++ "\n" ++ str) docs
+_merge
+		= concatMap (\(Signature _ t, str) -> "\n\n-- ###\t" ++ show t ++ "\n" ++ str)
 
 info'	:: TModule -> Signature -> String
 info' tmod sign
@@ -45,7 +45,7 @@ info' tmod sign
 	   let docstr'	= fromMaybe "-- No docstring found" $ lookupSt sign $ docstrings tmod in
 	   let docstr	= if '\n' `elem` docstr' then "--- "++docstr' ++ " ---" else "-- "++docstr' in
 	   let loc'	= fromMaybe (error $ "No location found. This is a bug (interpreter/Tools/info)"++show sign) $ lookupSt sign $ definedIn tmod :: FQN in
-	   let loc	= "-- Defined in\t[" ++ (show loc') ++ "]" in
+	   let loc	= "-- Defined in\t[" ++ show loc' ++ "]" in
 	   let imp	= fromMaybe [] $ lookupSt sign $ functions tmod in
 	   let result	= loc++"\n"++docstr++"\n"++show sign++"\n"++showClauses imp in
 	   if found then result else "-- No function found with signature "++show sign

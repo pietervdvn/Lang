@@ -100,13 +100,13 @@ buildLocalSign visibleNeeded fqn mod
 				$ concatMap signature filteredFuncs
 
 getData		:: (Statement, Function) -> (Signature, (DocString, (Statement,[Clause])))
-getData (s,(Function doc v [(name,typ)] _ imp))
+getData (s,Function doc v [(name,typ)] _ imp)
 		= (Signature name typ, (doc,(s,imp)))
 
 undouble	:: (Statement,Function) -> [(Statement,Function)]
-undouble (s,(Function doc v nmTypes laws imp))
+undouble (s,Function doc v nmTypes laws imp)
 		= do	(name, typ)	<- nmTypes
-			return $ (s,Function doc v [(name,typ)] laws imp)
+			return (s,Function doc v [(name,typ)] laws imp)
 
 checkDouble'	:: [(Signature, a)] -> [(Signature, a)]
 checkDouble' ls	=  let (signs, as)	= unzip ls in
