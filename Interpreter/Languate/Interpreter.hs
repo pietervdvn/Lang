@@ -23,7 +23,6 @@ import Normalizable
 import Languate.PatternTypeChecker (getDeconstructType)
 
 import Languate.Interpreter.Utils
-import Languate.Interpreter.Substitution
 
 -- RC = Reader Context; context contains the code world
 
@@ -103,15 +102,16 @@ matchPattern fqn v (TDeconstruct func pats)
 # expands a VCall into a lambda
 
 Only the name is given; this mean we have to figure out what functions we are talking about.
+We first take a look at the bindings. If the name of the VCall lives there, that defenition is used.
 We lookup all matching signatures + where they live, and spit out all matching functions + typesigns as Lambda's.
 
 These are interpreted in a next step with pattern substitution (if they are applied).
 
-Note that expansion is done as lately as possible, to keep printing pretty
+Note that expansion is done as lately as possible, to keep printing pretty.
 
 --}
-expand	:: Value -> RC [Value]
-expand (VCall fqn ts name)
+expand	:: Value -> Binding -> RC [Value]
+expand (VCall fqn ts name) binding
 	= do	tmod	<- getModule fqn	-- a reference to implementation is in scope, no need to jump following the imports
 		let imps	= typedClauses tmod
 		let signs	= map (Signature name) ts

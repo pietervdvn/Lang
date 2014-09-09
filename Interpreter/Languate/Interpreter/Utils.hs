@@ -22,6 +22,7 @@ import qualified Data.Map as M
 data Context	= Context {world::TypedPackage}
 	deriving (Show)
 type RC	a	= Reader Context a
+type Binding	= [(Name, Value)]
 
 
 getModule	:: FQN -> RC TModule
