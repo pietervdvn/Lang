@@ -3,8 +3,6 @@ Bool
 The bool type is a type which represents logical values.
 ---
 
-import Prelude
-
 --## Definition
 
 data Bool	= False 
@@ -54,3 +52,12 @@ or		: Bool -> Bool -> Bool
 convert	: Bool -> Nat
   True	= 1
   False	= 0
+
+
+-- a simple test function
+t	: Bool
+	= id True
+
+
+id	: Bool -> Bool
+a	= a

@@ -55,7 +55,7 @@ genConstrFunct adtName frees constr int typs
 genDeconstr	:: Name -> [Name] -> Name -> Int -> [Type] -> (Signature, [TClause])
 genDeconstr adtName frees constr int types
 		= let varNames 	= take (length types) vars in
-		  let pattern	= TDeconstruct "#fromADT" $ (TEval $ TNat int):map TAssign varNames in
+		  let pattern	= TDeconstruct (Signature "#fromADT" Infer) $ (TEval $ TNat int):map TAssign varNames in
 		  let typ	= Curry $ apply adtName frees:[mayb $ tuple types] in
 		  let args	= zipWith (\t n -> TCall [t] n) types varNames in
 		  let expr	= TApplication [tuple types] (TCall [] "#asTuple") args in
