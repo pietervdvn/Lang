@@ -21,6 +21,7 @@ import Languate.TAST
 import Languate.InterpreterDef
 import Languate.Interpreter.Utils
 import Languate.Signature
+import Languate.SymbolTable
 
 import Data.Char (ord)
 
@@ -51,7 +52,7 @@ match v (TMulti pats)
 		bindings	<- mapM (match v) pats	-- :: [ Maybe Binding]
 		return $ if any isNothing bindings
 				then Nothing 
-				else Just $ mergeBindings $ catMaybes bindings
+				else Just $ catMaybes bindings
 match v TDontCare
 	= return $ Just []
 match v (TEval (TNat i))
@@ -104,8 +105,7 @@ apply clauses args
 			let matching	=  catMaybes bindClauses
 			if null matching then error "No matching clause found"
 			else do	let (binding, TClause [] expr)	= head matching
-				let st	= stFromList binding
-				setBindings st $ evalExpr expr (todo)
+				setBindings binding $ evalExpr expr (todo)
 
 
 -- The type is requested type. If a choice is possible, the given type is used to dispatch a TCall.

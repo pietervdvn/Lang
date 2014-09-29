@@ -13,19 +13,15 @@ import Languate.TAST
 import Languate.SymbolTable
 import Languate.Signature
 import Languate.TypedPackage
-import Data.Map hiding (filter, map)
+import Data.Map hiding (filter, map, lookup)
+import qualified Data.Map as Map
 import Data.Maybe
 import Control.Monad.Reader
 
 
-mergeBindings	:: [ Binding ] -> Binding
-mergeBindings 	=  merge . concatMap unmerge
-
-
-
 -- searches, within the current context the clauses which correspond with given signature
 search	:: Signature -> RC Value
-search sign@(Signature name t)
+search sign@(Signature name _)
 	= do	ftcs		<- searchGlobal sign
 		let foundMod	= fmap Lambda ftcs 
 		local		<- ask' bindings
@@ -51,7 +47,7 @@ ask' f	=  do	r	<- ask
 		return $ f r
 
 -- executes the given reader in the slightly modified reader
-setBindings	:: SymbolTable Value -> RC a -> RC a
+setBindings	:: Binding -> RC a -> RC a
 setBindings bindings r
 		=  do	(Context w c _) 	<- ask
 			return $ runReader r (Context w c bindings)

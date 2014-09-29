@@ -23,14 +23,13 @@ import Control.Monad.Reader
 data Context	= Context { world :: TPackage, country :: FQN, bindings :: Binding}
 type RC	a	= Reader Context a
 
--- one name can be bound to multiple types, by dynamic invoked functions.
-type Binding	= [(Name, [Value])]
+type Binding	= [(Name, Value)]
 
 
 data Value	= ADT Int Type [Value]
-		| Tuple [Value]
+		| TupleVal [Value]
 		| VCall Signature	-- A call to a function. The exact function should be declared using the signature.
-		| Lambda [TClause]	-- Application which failed to evaluate to a simple value
+		| Lambda [Type] Type [TClause]	-- Application which failed to evaluate to a simple value. The [Type] is what is still expected, where as the second lonely type is the returned type with completed evaluation.
 
 
 
@@ -42,5 +41,12 @@ sv (ADT i t vals)
 	= "ADT: "++show i++" <"++show t++"> " ++ show vals
 sv (VCall (Signature name _))
 	= name
-sv (Lambda tClause)
+sv (Lambda _ _ tClause)
 	=  "LAMBDA: " ++ show tClause
+
+typeOfValue		:: Value -> Type
+typeOfValue (ADT _ t _)	= t
+typeOfValue (TupleVal vals)
+			= TupleType $ map typeOfValue vals
+typeOfValue (VCall (Signature _ t))	= t
+typeOfValue (Lambda args ret _)	= Curry $ args++[ret]
