@@ -17,6 +17,10 @@ import Languate.Signature
 import Languate.Interpreter
 import Languate.AST
 import Languate.TAST
+import Languate.Interpreter.Utils
+import Languate.Interpreter.BuiltIns
+import Languate.Interpreter.Application
+import Normalizable
 
 
 fqpn		= fromJust $ toFQPN "pietervdvn:Data"
@@ -26,10 +30,25 @@ bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
 
 tpack	= unsafePerformIO $ typedLoad bool "../workspace/Data/src/"
 
-ctx	= Context tpack bool (Empty)
-
-t	= runReader (evalExpr (TCall [boolT] "t") boolT) ctx
-
-t'	= runReader (evalExpr (TCall [boolT] "False") boolT) ctx
-
+ctx	= Context tpack bool []
 boolT	= Normal "Bool"
+
+r f	= runReader f ctx
+fetch n t
+	= fromJust $ r $ searchGlobal' (Signature n $ normalize t)
+
+idLambda	= fetch "id" $ Curry [boolT, boolT]
+andLambda	= fetch "&&" $ Curry [boolT, boolT, boolT]
+
+trueDec		= fetch "True" $ Curry [boolT, Applied (Normal "Maybe") [TupleType []]]
+trueCon		= fetch "True" $ Curry [boolT]
+falseCon	= fetch "False" $ Curry [boolT]
+
+
+
+t0	= r $ apply idLambda true
+t a b	= r $ multApply [a, b] andLambda
+
+
+true	= ADT 1 boolT []
+false	= ADT 0 boolT []

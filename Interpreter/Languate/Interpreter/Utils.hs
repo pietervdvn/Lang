@@ -19,17 +19,12 @@ import Data.Maybe
 import Control.Monad.Reader
 
 
--- searches, within the current context the clauses which correspond with given signature
-search	:: Signature -> RC Value
-search sign@(Signature name _)
-	= do	ftcs		<- searchGlobal sign
-		let foundMod	= fmap Lambda ftcs 
-		local		<- ask' bindings
-		let foundLocal	= lookup name local
-		let found	= firstJust foundLocal foundMod
-		let err0	= error ("Nothing found with signature " ++ show sign ++ _errStr)
-		return $ fromMaybe err0 found
-	
+
+-- searches a name within the local bindings
+searchLocal	:: Name -> RC (Maybe Value)
+searchLocal nm	=  do	binds	<- ask' bindings
+			return $ lookup nm binds
+
 -- searches within the module (not within the bindings)	
 searchGlobal	:: Signature -> RC (Maybe [TClause])
 searchGlobal sign
@@ -39,6 +34,16 @@ searchGlobal sign
 		let tcs	=  typedClauses $ findWithDefault err fqn w
 		let foundMod	= lookupSt sign tcs 
 		return foundMod
+
+-- searches witing the module (not within the bindings) and wrap it as a lambda
+searchGlobal'	:: Signature -> RC (Maybe Value)
+searchGlobal' sign@(Signature nm t)
+	= do	found	<- searchGlobal sign
+		if isNothing found then return Nothing
+			else do	let (Just clauses)	= found
+				let (argT, retT)	= deCurry t
+				ctx	<- ask
+				return $ Just $ Lambda ctx argT retT clauses
 
 _errStr	= "\nThis is probably an interpreter invocation error, check inputs"
 
@@ -51,6 +56,9 @@ setBindings	:: Binding -> RC a -> RC a
 setBindings bindings r
 		=  do	(Context w c _) 	<- ask
 			return $ runReader r (Context w c bindings)
+
+setContext	:: Context -> RC a -> RC a
+setContext ct r	= return $ runReader r ct
 
 firstJust	:: Maybe a -> Maybe a -> Maybe a
 firstJust (Just a) _	= Just a
@@ -66,5 +74,19 @@ neededArgs possible req
 			else if l == 0 then error $ "No type found which results in a "++show req
 			else error $ "To much types found which result in a "++show req
 
+deCurry		:: Type -> ([Type], Type)
+deCurry (Curry [t])
+		= ([],t)
+deCurry (Curry ts)
+		= (init ts, last ts)
+deCurry t	= ([],t)
+
+
 isCurry (Curry _) 	= True
 isCurry _		= False
+
+
+
+repack	:: (a, Maybe b)	-> Maybe (a, b)
+repack (a, Just b)	= Just (a,b)
+repack _	= Nothing

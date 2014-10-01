@@ -28,8 +28,8 @@ type Binding	= [(Name, Value)]
 
 data Value	= ADT Int Type [Value]
 		| TupleVal [Value]
-		| VCall Signature	-- A call to a function. The exact function should be declared using the signature.
-		| Lambda [Type] Type [TClause]	-- Application which failed to evaluate to a simple value. The [Type] is what is still expected, where as the second lonely type is the returned type with completed evaluation.
+		| VCall Context Signature	-- A call to a function. The exact function should be declared using the signature.
+		| Lambda [Type] Type [(Context, TClause)]	-- Application which failed to evaluate to a simple value. The [Type] is what is still expected, where as the second lonely type is the returned type with completed evaluation. Each clause has his own context, as local bindings might differ from previous data binds
 
 
 
@@ -39,14 +39,16 @@ instance Show Value where
 sv	:: Value -> String
 sv (ADT i t vals)
 	= "ADT: "++show i++" <"++show t++"> " ++ show vals
-sv (VCall (Signature name _))
-	= name
+sv (VCall _ (Signature name _))
+	= "CALL: " ++  show name
 sv (Lambda _ _ tClause)
-	=  "LAMBDA: " ++ show tClause
+	=  "LAMBDA: " ++ (show $ map snd tClause)
+sv (TupleVal vals)
+	= "TUPLE "++ show vals
 
 typeOfValue		:: Value -> Type
 typeOfValue (ADT _ t _)	= t
 typeOfValue (TupleVal vals)
 			= TupleType $ map typeOfValue vals
-typeOfValue (VCall (Signature _ t))	= t
+typeOfValue (VCall _ (Signature _ t))	= t
 typeOfValue (Lambda args ret _)	= Curry $ args++[ret]

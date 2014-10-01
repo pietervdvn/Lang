@@ -13,10 +13,10 @@ data Bool	= False
 -- Logical 'and'-function. Returns True if, and only if both arguments are True
   ~ annihilator for and	: b => False && b	= False
   ~ neutral element for and: b => True && b	= b
-  > True && True			= True
+  > True && True		= True
   > False && True && False	= False
 (&&)		: Bool -> Bool -> Bool
-  True a	= a		-- increases lazyness over True True = True
+  True True	= True
   *		= False
 
 -- Logical 'or'-function. Returns False if, and only if both arguments are False
@@ -26,7 +26,7 @@ data Bool	= False
   > False || True || False	= True
 (||)		: Bool -> Bool -> Bool
 or		: Bool -> Bool -> Bool
-  False a	= a
+  False False	= False
   *		= True
 
 -- Logical 'not' function (aka invert).

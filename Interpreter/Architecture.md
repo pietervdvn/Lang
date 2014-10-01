@@ -15,12 +15,15 @@ These have to be evaluated in their own environment, consisting of:
 
 These context can be built up locally, and then passed on in the reader monad.
 
+Notice that all values are typed
+
 
 Implementation
 --------------
 
 InterpreterDef	: all data and type declarations
-Interpreter	: actual interpreter
+Interpreter	: hub to the actual implementation files.
+Interpreter.Application	: application of an argument against a value.
 Interpreter.Utils	: some usefull functions to use in the interpreter
 
 Interpreter.Tools	: info command, which gives nice docs to print.
