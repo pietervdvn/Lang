@@ -17,12 +17,12 @@ import Languate.AST
 import Data.Maybe
 
 -- match takes a value and a pattern, returning possible a binding (if the value matches)
-match	:: (Value -> Value -> RC Value) -> Value -> TPattern -> RC (Maybe Binding)
-match apply v (TAssign n)	= return $ Just [(n,v)]
-match apply v (TDeconstruct funcSign pats)
-	= deconstr apply v funcSign pats
-match apply v (TMulti pats)
-	= do	bindings	<- mapM (match apply v) pats
+match	:: Funcs -> Value -> TPattern -> RC (Maybe Binding)
+match fs v (TAssign n)	= return $ Just [(n,v)]
+match fs v (TDeconstruct funcSign pats)
+	= deconstr fs v funcSign pats
+match fs v (TMulti pats)
+	= do	bindings	<- mapM (match fs v) pats
 		if any isNothing bindings then return Nothing
 			else return $ Just $ concat $ catMaybes bindings
 
@@ -33,34 +33,34 @@ match apply v (TEval _)
 	= todos "match: TEval for comlex cases"
 
 
-deconstr :: (Value -> Value -> RC Value) -> Value -> Signature -> [TPattern] -> RC (Maybe Binding)
-deconstr apply arg fsign pats
-	= do	result	<- apply' apply fsign arg
+deconstr :: Funcs -> Value -> Signature -> [TPattern] -> RC (Maybe Binding)
+deconstr fs arg fsign pats
+	= do	result	<- apply' (applyFunc fs) fsign arg >>= (evalFunc fs)
 		let extracted	= extractJust result
 		if isNothing extracted then return Nothing
-			else split apply (fromJust extracted) pats
+			else split fs (fromJust extracted) pats
 
 
 -- expects a tuple value to split against the patterns (or a single value)
-split	:: (Value -> Value -> RC Value) -> Value -> [TPattern] -> RC (Maybe Binding)
-split apply (TupleVal vals) pats
-	= do	bindings	<- mapM (\(v,p) -> match apply v p) $ zip vals pats
+split	:: Funcs -> Value -> [TPattern] -> RC (Maybe Binding)
+split fs (TupleVal vals) pats
+	= do	bindings	<- mapM (\(v,p) -> match fs v p) $ zip vals pats
 		if any isNothing bindings then return Nothing
 			else return $ Just $ concat $ catMaybes bindings
-split apply val [pat]
-	= match apply val pat
+split fs val [pat]
+	= match fs val pat
 split _ val pats
 	= error $ "Invalid deconstruct: incorrect number of of returned values vs patterns (vals: "++ show val ++ " pats: " ++ show pats ++ ")"
 
 
 
 -- returns the clauses which have a result. 
-matches	:: (Value -> Value -> RC Value) -> [TClause] -> Value -> RC [(TClause, Binding)]
-matches apply clauses value
-	=  do	binds	<- mapM (\c -> matches' apply c value) clauses
+matches	:: Funcs -> [(Context, TClause)] -> Value -> RC [(TClause, Binding)]
+matches fs clauses value
+	=  do	binds	<- mapM (\(ctx, c) -> setContext ctx $ matches' fs c value) clauses
 		return $ catMaybes binds
 
-matches'	:: (Value -> Value -> RC Value) -> TClause -> Value -> RC (Maybe (TClause, Binding))
+matches'	:: Funcs -> TClause -> Value -> RC (Maybe (TClause, Binding))
 matches' _ (TClause [] _) _
 	= return Nothing
 matches' apply (TClause (p:pts) e) v

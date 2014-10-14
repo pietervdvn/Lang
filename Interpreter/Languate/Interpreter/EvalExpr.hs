@@ -47,7 +47,7 @@ builtinAppl multApply (TCall _ nm) args
 selectT	:: Name -> [Type] -> Type
 selectT n []	= error $ "No possible type for TCall. This is a bug (prob. missing builtin, perhaps "++n++")"
 selectT _ [t]	= t
-selectT _ ts	= trace ("Warning: multiple possible type dispatching. Using "++(show $ head ts)) $ head ts
+selectT _ ts	= head ts
 
 
 isBuiltinTCall	:: TExpression -> Bool

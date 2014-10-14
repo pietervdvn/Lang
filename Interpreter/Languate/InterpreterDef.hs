@@ -21,6 +21,7 @@ import Control.Monad.Reader
 
 -- The context in which an expression can be evaluated.
 data Context	= Context { world :: TPackage, country :: FQN, bindings :: Binding}
+data Funcs	= Funcs {applyFunc :: Value -> Value -> RC Value, evalFunc :: Value -> RC Value}	-- needed for dependency-injection, as haskell does not support cyclic imports
 type RC	a	= Reader Context a
 
 type Binding	= [(Name, Value)]
@@ -41,8 +42,8 @@ sv (ADT i t vals)
 	= "ADT: "++show i++" <"++show t++"> " ++ show vals
 sv (VCall _ (Signature name _))
 	= "CALL: " ++  show name
-sv (Lambda _ _ tClause)
-	=  "LAMBDA: " ++ (show $ map snd tClause)
+sv (Lambda argT retT tClause)
+	=  "LAMBDA: <"++show argT++"> -> <"++show retT++">" ++ (show $ map snd tClause)
 sv (TupleVal vals)
 	= "TUPLE "++ show vals
 
@@ -52,3 +53,12 @@ typeOfValue (TupleVal vals)
 			= TupleType $ map typeOfValue vals
 typeOfValue (VCall _ (Signature _ t))	= t
 typeOfValue (Lambda args ret _)	= Curry $ args++[ret]
+
+setBindings'	:: Binding -> Context -> Context
+setBindings' b (Context w c _)
+		= Context w c b
+
+normalizeLambda	:: Value -> Value
+normalizeLambda (Lambda argTypes (Curry curryTps) clauses)
+	= Lambda (argTypes ++ init' curryTps) (last curryTps) clauses
+normalizeLambda l	= l

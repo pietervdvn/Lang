@@ -19,6 +19,12 @@ import Data.Maybe
 import Control.Monad.Reader
 
 
+-- searches first locally, then globally
+search		:: Signature -> RC (Maybe Value)
+search sign@(Signature name _)
+		= do	local	<- searchLocal name
+			if isJust local then return local
+				else searchGlobal' sign
 
 -- searches a name within the local bindings
 searchLocal	:: Name -> RC (Maybe Value)
@@ -39,11 +45,12 @@ searchGlobal sign
 searchGlobal'	:: Signature -> RC (Maybe Value)
 searchGlobal' sign@(Signature nm t)
 	= do	found	<- searchGlobal sign
+		ctx	<- ask
 		if isNothing found then return Nothing
 			else do	let (Just clauses)	= found
+				let clauses'		= map (\c -> (ctx,c)) clauses
 				let (argT, retT)	= deCurry t
-				ctx	<- ask
-				return $ Just $ Lambda ctx argT retT clauses
+				return $ Just $ Lambda argT retT clauses'
 
 _errStr	= "\nThis is probably an interpreter invocation error, check inputs"
 

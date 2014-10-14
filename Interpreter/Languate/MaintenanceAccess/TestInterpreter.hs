@@ -34,11 +34,13 @@ ctx	= Context tpack bool []
 boolT	= Normal "Bool"
 
 r f	= runReader f ctx
+r' f	= r (f >>= eval)
 fetch n t
 	= fromJust $ r $ searchGlobal' (Signature n $ normalize t)
 
 idLambda	= fetch "id" $ Curry [boolT, boolT]
 andLambda	= fetch "&&" $ Curry [boolT, boolT, boolT]
+orLambda	= fetch "||" $ Curry [boolT, boolT, boolT]
 
 trueDec		= fetch "True" $ Curry [boolT, Applied (Normal "Maybe") [TupleType []]]
 trueCon		= fetch "True" $ Curry [boolT]
@@ -46,8 +48,9 @@ falseCon	= fetch "False" $ Curry [boolT]
 
 
 
-t0	= r $ apply idLambda true
-t a b	= r $ multApply [a, b] andLambda
+t0	= r' $ apply idLambda true
+t a b	= r' $ multApply [a, b] andLambda
+t1 a b	= r' $ multApply [a, b] orLambda
 
 
 true	= ADT 1 boolT []
