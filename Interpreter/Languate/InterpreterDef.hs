@@ -47,6 +47,11 @@ sv (Lambda argT retT tClause)
 sv (TupleVal vals)
 	= "TUPLE "++ show vals
 
+instance Show Context where
+	show	= sc
+
+sc ctx	= "Context: @"++(show $ country ctx)++" ; locally known: "++(show $ map fst $ bindings ctx)
+
 typeOfValue		:: Value -> Type
 typeOfValue (ADT _ t _)	= t
 typeOfValue (TupleVal vals)

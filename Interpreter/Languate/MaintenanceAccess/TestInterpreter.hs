@@ -28,10 +28,11 @@ prelude		= fromJust $ toFqn' fqpn [] "Prelude"
 bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
 
 
-tpack	= unsafePerformIO $ typedLoad bool "../workspace/Data/src/"
+tpack	= unsafePerformIO $ typedLoad prelude "../workspace/Data/src/"
 
-ctx	= Context tpack bool []
+ctx	= Context tpack prelude []
 boolT	= Normal "Bool"
+natT	= Normal "Nat"
 
 r f	= runReader f ctx
 r' f	= r (f >>= eval)
@@ -45,13 +46,22 @@ orLambda	= fetch "||" $ Curry [boolT, boolT, boolT]
 trueDec		= fetch "True" $ Curry [boolT, Applied (Normal "Maybe") [TupleType []]]
 trueCon		= fetch "True" $ Curry [boolT]
 falseCon	= fetch "False" $ Curry [boolT]
-
-
-
+conv		= fetch "convert" $ Curry [boolT, Normal "Nat"]
+ifF		= fetch "if" $ Curry [boolT, Free "a", Free "a", Free "a"]
+	
 t0	= r' $ apply idLambda true
 t a b	= r' $ multApply [a, b] andLambda
 t1 a b	= r' $ multApply [a, b] orLambda
-
+t2 a	= r' $ multApply [a] conv
+t3 b x y
+	= r' $ multApply [b, x, y] ifF
 
 true	= ADT 1 boolT []
 false	= ADT 0 boolT []
+
+
+forty		= ADT 40 boolT []
+fortyOne	= ADT 41 boolT []
+fortyTwo	= ADT 42 boolT []
+
+

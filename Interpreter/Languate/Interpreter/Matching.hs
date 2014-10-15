@@ -15,6 +15,9 @@ import Languate.Signature
 import Languate.TAST
 import Languate.AST
 import Data.Maybe
+import Control.Arrow
+
+import Debug.Trace
 
 -- match takes a value and a pattern, returning possible a binding (if the value matches)
 match	:: Funcs -> Value -> TPattern -> RC (Maybe Binding)
@@ -65,7 +68,8 @@ matches' _ (TClause [] _) _
 	= return Nothing
 matches' apply (TClause (p:pts) e) v
 	=  do	binding	<- match apply v p
-		return $ repack (TClause pts e, binding)
+		curBind	<- ask' bindings
+		return $ fmap (second (++curBind)) $ repack (TClause pts e, binding)
 
 
 

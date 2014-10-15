@@ -28,7 +28,7 @@ eval	:: Value -> RC Value
 eval (VCall ctx sgn)
 	= do	found	<- setContext ctx $ search $ sgn
 		if isJust found then	eval $ fromJust found
-			else error $ "No value found in context for "++ show sgn
+			else error $ "No value found in context for "++ show sgn++show ctx
 eval (Lambda [] rt [(ctx, TClause [] expr@(TApplication [t] (TCall [] "#asADT") args))])
 	= do	(ADT i _ vals)	<- setContext ctx $ evalExpr multApply expr
 		return $ ADT i t vals
