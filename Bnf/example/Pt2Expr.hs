@@ -44,6 +44,6 @@ parseExpr pt    =  do   parsed  <- simpleConvert (const $ const Nothing) t s pt
 			return conved
 
 conv        :: AST -> Expr
-conv (Value i)  = Integer i -- let's i
+conv (Value i)  = Integer i
 conv (Ident nm) = Call nm
 conv (Plus e f) = Add (conv e) (conv f)

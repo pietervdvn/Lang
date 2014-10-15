@@ -161,7 +161,7 @@ Three modifiers can be used when declaring a rule:
 
 * > makes a rule initial, this means that the parser will try to parse this rule as first. It is more of a human indication that it really gets used...
 * _ makes a rule private; this means that when another bnf-file imports this bnf-file, this private rule will not be seen in its scope
-* $ tokenizes a rule. This means that all the contents of the parsetree are concatenated to a single string. Note that white space is still parsed between the two rules. (We still have TODO this)
+* $ tokenizes a rule. This means that all the contents of the parsetree are concatenated to a single string. Note that white space is still parsed between the two rules.
 	Usefull for e.g. localIdent:
 
 	$localIdent	::= "[a..z]" "[a..zA..Z0..9]"*
@@ -189,6 +189,8 @@ Note that
 The actual parsing
 ==================
 
+**This example is worked out completely in ````example````**.
+
 Loading from IO
 ---------------
 
@@ -198,17 +200,22 @@ Loading from file is possible with ````load "file"````, with ````import Bnf````.
 Parsing a simple language
 ------------------------
 
-e.g. You have a straight-line language that consist of assign and print statements (which both work on expressions)
+e.g. You have a straight-line language that consist of assign and print statements (which both work on expressions). It only works with integers, and can only add them.
 
     a := 1+5
-    b := a * 2
-    print a b
+    b := a + 2
+    print a
+    print b
 
 
-You'll have a bnf that describes expressions, and one that describes a statement
+As the syntax is small, this easily fits in one file:
 
-    expr	::= int ("+" expr)? | localIdent
-    statement	::= "print" expr+ | localIdent ":=" expr
+    localIdent	::= "[a..z][a..zA..Z]*"
+    int		::= "[0..9]+"
+
+    expr   		::= (int | localIdent) ( "\+" expr ) ?
+    statement   	::= "print" expr | localIdent ":=" expr
+
 
 Lets parse this!
 
@@ -219,25 +226,28 @@ To parse a simple expression, you define an AST. This AST is an intermediate rep
 
 We do this with two functions: ````t```` (tokenize) converts single tokens of the pt into a token (which is AST too).
 
-	data AST 	= Value Int
-			| Ident Name
-			| Plus AST AST
-			| PlusE AST
-			| PlusT
+    data AST	= Value Int
+		| Ident Name
+		| Plus AST AST
+		| PlusE AST
+		| PlusT
+	deriving (Show)
 
-	t 		:: Name -> String -> AST
-	t _ "*"		=  PlusT
-	t "int" i	= Value $ read i	-- read is a builtin function that parses int
+	t       :: Name -> String -> AST
+	t _ "+"     =  PlusT
+	t "int" i   = Value $ read i    -- read is a builtin function that parses int
 	t "localIdent" name
-			= Ident name
+		= Ident name
 
 The other important function is ````s```` (simplify/sequence). It is called on each node, with the rulename that created the node and what is in that Pt.
 Use it to simplify the node.
 
-	s 		:: Name -> [AST] -> AST
+	s       :: Name -> [AST] -> AST
 	s "expr" [expr1, PlusE expr2]
-			= Plus expr1 expr2
-	s _ [expr]	= expr
+		= Plus expr1 expr2
+	s "expr" [PlusT, expr]
+		= PlusE expr
+	s _ [expr]  = expr
 
 Now we now these two functions, we can convert the parsetree with them:
 	
@@ -255,17 +265,18 @@ The AST is not the data structure that is used for the rest of the compiler pipe
 To convert the AST into the Expr, we'll define a simple recursive function:
 
 	conv		:: AST -> Expr
-	conv (Value i)	= Integer i	-- let's i
+	conv (Value i)	= Integer i
 	conv (Ident nm)	= Call nm
 	conv (Plus e f)	= Add (conv e) (conv f)
 
 Now we can parse an expression!
 
-	parseExpr	:: ParseTree -> Writer Errors Expression
-	parseExpr pt 	=  do	parsed	<- simpleConvert (const $ const Nothing) t s pt
-				let conved	= conv parsed
-				-- eventually, we can check certain properties here and issue a warning/error with tell. See Control.Monad.Writer docs
+	parseExpr  	 :: ParseTree -> Writer Errors Expr
+	parseExpr pt    =  do   parsed  <- simpleConvert (const $ const Nothing) t s pt
+				let conved  = conv parsed
+				    -- eventually, we can check certain properties here and issue a warning/error with tell. See Control.Monad.Writer docs
 				return conved
+
 
 Parsing statements, using hooks
 -------------------------------
@@ -284,31 +295,33 @@ Wouldn't it be nice that, whenever we come accross an expression rule, we parse 
 
 Thats exactly what the hooks are for. Hooks tell the converter "hey, this subtree, parse it with this function".
 
-	h		:: Name -> ParseTree -> Maybe (Writer Errors AST)
-	h "expr" pt	= Just $ parseExpr pt
-	h _ _		= Nothing
+	h       :: Name -> ParseTree -> Maybe (Writer Errors AST)
+	h "expr" pt = Just $ fmap Expr $ parseExpr pt
+	h _ _       = Nothing
 
-	t		:: Name -> String -> AST
-	t _ ":="	=  AssignT
-	t _ "print"	=  PrintT
+	t       :: Name -> String -> AST
+	t _ ":="    =  AssignT
+	t _ "print" =  PrintT
 	t "localIdent" name
-			=  Ident name
+		=  Ident name
 
-	s		:: Name -> [AST] -> AST
-	s "statement" (PrintT:asts)
-			=  Print $ map (\Expr e -> e) asts
+	s       :: Name -> [AST] -> AST
+	s "statement" [PrintT, Expr e]
+		=  Print e
 	s "statement" [Ident nm, AssignT, Expr expr]
-			=  Assign nm expr
+		=  Assign nm expr
+	s _ [ast]
+		= ast
 
 
 Again, we'll need to convert from this messy AST into a specific data type for statements:
 
-	data Statement	= PrintStmt [Expr]
+	data Statement	= PrintStmt Expr
 			| AssignStmt Name Expr
 
 	conv		:: AST -> Statement
-	conv (Print exprs)
-			= PrintStmt exprs
+	conv (Print expr)
+			= PrintStmt expr
 	conv (Assign name expr)
 			= AssignStmt name expr
 
@@ -327,9 +340,22 @@ To run, use:
     -- notice that this parser parses only one statment
     parseLanguage	:: String -> (Statement, Errors)
     parseLanguage str
-		= let parseTree 	= parse world fqn "statement" str in	-- parses the string with the bnfs in world
-    			runWriter $ parseStmt parseTree
+		= let parseTree	= parse world fqn "statement" str in    -- parses the string with the bnfs in world
+	let parseTree'	= either (error $ "No parse result") id $ fromJust parseTree in	-- bit of unpacking
+	fst $ runWriter $ parseStmt parseTree'
 
 Errors is a list of type [Either Warning Error]. Both Warning and Error are tuples that contain all the ruleinfo (parsed according to what rule), position info in string (line + col number) and a textual message of what was expected.
 
+What imports do I need?
+-----------------------
 
+    import StdDef	-- whenever you need 'Name', will be always
+    import Bnf	-- always
+    import Bnf.ParseTree	-- when you will do actual parsing and explicit parse tree manipulation
+    import Bnf.Converter	-- when you need 'simpleConvert' or the 'Error'/'Errors'-data type 
+
+Does the code above work?
+-------------------------
+
+Yes! See it in action in the ````example````-directory! Run ````Main.main```` and enjoy the show!
+Or ````Main.parseTrees```` to see the parsetrees.
