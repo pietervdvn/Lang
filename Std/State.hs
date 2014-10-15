@@ -19,7 +19,7 @@ instance Functor (State s) where
 get	:: State s s -- I'm not a nazi. All correlation with the "SchutzStaffel" is incidental
 get 	=  State (\s -> (s,s))
 
-get'	:: (s -> a) -> State s a	-- this is a coincidence to
+get'	:: (s -> a) -> State s a	-- this is a coincidence too
 get' f	=  do	s	<- get
 		return $ f s
 
