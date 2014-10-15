@@ -324,11 +324,11 @@ Putting it together
 Note that all warnings and errors given by the expression parser, will be included when this monad is ran.
 To run, use:
 
--- notice that this parser parses only one statment
-parseLanguage	:: String -> (Statement, Errors)
-parseLanguage str
+    -- notice that this parser parses only one statment
+    parseLanguage	:: String -> (Statement, Errors)
+    parseLanguage str
 		= let parseTree 	= parse world fqn "statement" str in	-- parses the string with the bnfs in world
-			runWriter $ parseStmt parseTree
+    			runWriter $ parseStmt parseTree
 
 Errors is a list of type [Either Warning Error]. Both Warning and Error are tuples that contain all the ruleinfo (parsed according to what rule), position info in string (line + col number) and a textual message of what was expected.
 
