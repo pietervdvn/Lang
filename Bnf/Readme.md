@@ -109,7 +109,7 @@ sytnax:
 
 Then: the rules. A basic rule will look like this:
 
-	expr	::= int ("+" expr) | "\(" expr "\)" | localIdent
+	expr	::= int ("\+" expr) | "\(" expr "\)" | localIdent	-- do not forget the backslashes in the regexes!
 
 Note that you can use "=" to instead of "::=" (but "::=" is better style).
 Choices can be put on the next line, but *need* a *tab* indentation:
@@ -220,7 +220,7 @@ To parse a simple expression, you define an AST. This AST is an intermediate rep
 We do this with two functions: ````t```` (tokenize) converts single tokens of the pt into a token (which is AST too).
 
 	data AST 	= Value Int
-			| Ident name
+			| Ident Name
 			| Plus AST AST
 			| PlusE AST
 			| PlusT
@@ -257,12 +257,12 @@ To convert the AST into the Expr, we'll define a simple recursive function:
 	conv		:: AST -> Expr
 	conv (Value i)	= Integer i	-- let's i
 	conv (Ident nm)	= Call nm
-	conv (Plus e f)	= Add (conv e) (Conv f)
+	conv (Plus e f)	= Add (conv e) (conv f)
 
 Now we can parse an expression!
 
 	parseExpr	:: ParseTree -> Writer Errors Expression
-	parseExpr pt 	=  do	parsed	<- simpleConvert h t s pt
+	parseExpr pt 	=  do	parsed	<- simpleConvert (const $ const Nothing) t s pt
 				let conved	= conv parsed
 				-- eventually, we can check certain properties here and issue a warning/error with tell. See Control.Monad.Writer docs
 				return conved
@@ -274,7 +274,7 @@ We'll define the statement AST as following:
 	
 	data AST	= Print [Expr]
 			| Assign Name Expr
-			| Expression Expr
+			| Expr Expr
 			| PrintT
 			| AssignT
 			| Ident Name
@@ -282,10 +282,10 @@ We'll define the statement AST as following:
 To parse statements, we'll have to parse expressions. We'd love it to reuse the code to parse an expression, and don't want to clutter the AST-tree of a statement with "low-level" things of the expressions.
 Wouldn't it be nice that, whenever we come accross an expression rule, we parse the expression (and keeps its warnings and errors) and include the expression into the AST, before the tokenizer and sequencer even see the (parts of) its parsetreee?
 
-Thats exactly what the hooks are for. Hooks tell the converter "hey, this subtree, parse it with this functions".
+Thats exactly what the hooks are for. Hooks tell the converter "hey, this subtree, parse it with this function".
 
 	h		:: Name -> ParseTree -> Maybe (Writer Errors AST)
-	h "expr" pt	= Just $ parseExpr
+	h "expr" pt	= Just $ parseExpr pt
 	h _ _		= Nothing
 
 	t		:: Name -> String -> AST
@@ -296,8 +296,8 @@ Thats exactly what the hooks are for. Hooks tell the converter "hey, this subtre
 
 	s		:: Name -> [AST] -> AST
 	s "statement" (PrintT:asts)
-			=  Print $ map (Expr e -> e) asts
-	s "statement" [Ident nm, AssignT, Expression expr]
+			=  Print $ map (\Expr e -> e) asts
+	s "statement" [Ident nm, AssignT, Expr expr]
 			=  Assign nm expr
 
 
@@ -315,7 +315,7 @@ Again, we'll need to convert from this messy AST into a specific data type for s
 To actually parse, we can use
 
 	parseStmt	:: ParseTree -> Writer Errors Statement
-	parseStmt pt	=  do	parsed	<- simpleConver h s t pt
+	parseStmt pt	=  do	parsed	<- simpleConvert h s t pt
 				return $ conv parsed
 
 Putting it together

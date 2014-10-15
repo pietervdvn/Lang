@@ -1,0 +1,12 @@
+Syntax
+
+author		"Pieter Vander Vennet"
+date		[2014, 10, 15, 23, 33, 42]
+desc		"The syntaxis of a simple, straight-line programming languate, as in the example"
+
+localIdent	::= "[a..z][a..zA..Z]*"
+int		::= "[0..9]+"
+
+expr   		::= (int | localIdent) ( "\+" expr ) ?
+statement   	::= "print" expr | localIdent ":=" expr
+
