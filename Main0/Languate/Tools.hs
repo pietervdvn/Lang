@@ -1,4 +1,4 @@
-module Languate.Interpreter.Tools where
+module Languate.Tools where
 
 {--
 
