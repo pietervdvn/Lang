@@ -16,7 +16,7 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
 			| TApplication [Type] TypedExpression [TypedExpression]
 			| TCall [Type] Name	
-	deriving (Show)
+	deriving (Show, Eq)
 type TExpression	= TypedExpression
 
 data TPattern	= TAssign Name
@@ -24,10 +24,10 @@ data TPattern	= TAssign Name
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression
-	deriving (Show)
+	deriving (Show, Eq)
 
 data TClause		= TClause [TPattern] TExpression
-	deriving (Show)
+	deriving (Show, Eq)
 
 
 typeOf		:: TypedExpression -> [Type]

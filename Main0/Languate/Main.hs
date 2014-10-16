@@ -22,22 +22,15 @@ import Control.Exception (catch, SomeException)
 import Data.List (isPrefixOf)
 import Data.Map (findWithDefault)
 
-version	= "0.0.0.0.1"
+import Languate.Pipeline
 
-bnfPath	= "Parser/bnf/Languate"
-project	= "workspace/Data/src/"
-fqpn		= fromJust $ toFQPN "pietervdvn:Data"
-prelude		= fromJust $ toFqn' fqpn [] "Prelude"
-bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
-
-
+version	= "0.0.0.0.2"
 
 
 start	:: IO ()
 start	=  do	welcome
 		putStrLn $ "Loading bnf-files from "++bnfPath
-		bnfs	<- Bnf.load bnfPath
-		pack	<- typedLoad bnfs prelude project
+		(pack, bnfs)	<- doAllStuff
 		putStrLn' "All done!"
 		repl bnfs pack prelude
 

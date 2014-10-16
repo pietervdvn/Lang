@@ -36,7 +36,7 @@ parseTypedExpr	:: World -> TPackage -> FQN -> String -> TExpression
 parseTypedExpr w tpack fqn str
 	 	=  	let expr	= parseExpr w str in
 			let tmod	= findWithDefault errM fqn tpack in
-			_convExpr tmod expr
+			convExpr tmod expr
 			where errM	= error $ "The module "++ show fqn++" was not found in the current index"
 
 parseExpr	:: World -> String -> Expression -- as AST.Expression, untyped
@@ -44,8 +44,8 @@ parseExpr w str	=  let pt = parse w (Bnf.toFQN ["Expressions"]) "expr" str in
 		 	pt2expr $ either (errM str) id $ fromMaybe (errM str) pt
 
 
-_convExpr	:: TModule -> Expression -> TypedExpression
-_convExpr tmod expr	
+convExpr	:: TModule -> Expression -> TypedExpression
+convExpr tmod expr	
 		=  let typeTable	= _constrTypeTable tmod in
 		   let expr'		= precheck typeTable expr in
 			runReader (typeCheck expr') $ Languate.TypeChecker.Context typeTable priorTable

@@ -98,6 +98,10 @@ Interpreter
 
 A simple program which executes 'compiled' programs.
 
+ExampleChecker
+--------------
+
+Goes over all the loaded examples and executes them. Makes a lot of noise if an example is incorrect.
 
 Main<X>
 -------
