@@ -67,7 +67,7 @@ multApply ((ADT i (Normal "Nat") []):args) (VCall _ (Signature "#asADT" _))
 		= return $ ADT i (error $ "What type???") args
 multApply [] f	= eval f
 multApply (arg:args) vcall@(VCall ctx sign)
-		=  setContext ctx $ do	fval	<- apply' apply sign arg
+		=  setContext ctx $ do	fval	<- apply' defaultFunctions sign arg
 					multApply args fval
 multApply (arg:args) f
 		=  do	val	<- apply f arg

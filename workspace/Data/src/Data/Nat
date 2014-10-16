@@ -1,0 +1,7 @@
+Nat
+---
+Operators on Nat
+---
+
+(+)	: Nat -> Nat -> Nat
+a b	= #plus a b

@@ -79,7 +79,9 @@ A bnf lib to load, parse and 'execute' bnf-files. See the readme in the bnf-dir 
 Parser
 ------
 
-Converts Strings into `Languate.AST`-data
+Converts Strings into `Languate.AST`-data. Where the syntax of the language is defined (see ````bnf````) and ~~where unclear error messages live~~ where parse errors without explanation live.
+
+Best help in case of parse error: take the bnf files and have a look where somehwere around it says it doesn't parse.
 
 Loader
 ------

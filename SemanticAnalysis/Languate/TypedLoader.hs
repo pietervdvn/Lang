@@ -31,6 +31,6 @@ typeCheck fqpn	= buildTyped fqpn priorTable
 -- default, hardcoded prioritytable
 -- TODO
 priorTable	:: PriorityTable
-priorTable	= fromList [("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (15, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
+priorTable	= fromList [("&&", (100, Left)), ("||", (99, Left)), ("!", (110, Right)), ("+",(30, Left)),("-",(30, Left)),("*",(20, Left)),("/",(20, Left)),("%",(20, Left)), ("²", (19, Right)), (".",(10,Right)), ("|", (17, Left)), ("$", (100, Left)) ]
 
 

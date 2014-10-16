@@ -1,4 +1,4 @@
-module Languate.FunctionTypeChecker (checkClause, TClause (TClause)) where
+module Languate.FunctionTypeChecker (checkClause, TClause (TClause), precheck) where
 
 {--
 

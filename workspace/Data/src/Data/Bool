@@ -37,7 +37,6 @@ or		: Bool -> Bool -> Bool
   True	= False
   False	= True
 
-
 --## Convertion to other types
 
 -- show to get a String representation

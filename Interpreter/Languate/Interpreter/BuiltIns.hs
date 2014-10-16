@@ -15,21 +15,27 @@ import Languate.Interpreter.Utils
 
 import Data.Maybe
 
+import  Control.Monad.Reader
+
 -- apply with search and builtin dispatching. Gives error if function not found
-apply'	:: (Value -> Value -> RC Value) -> Signature -> Value -> RC Value
-apply' apply (Signature "#fromADT" _) adt@(ADT i _ vals)
+apply'	:: Funcs -> Signature -> Value -> RC Value
+apply' _ (Signature "#fromADT" _) adt@(ADT i _ vals)
 	= do	let vals'	= TupleVal $ (ADT i (Normal "Nat") []):vals
 		return $ ADT 1 (Applied (Normal "Maybe") [typeOfValue vals'] ) [vals']
-apply' apply (Signature "Just" _) arg
+apply' funcs sign@(Signature "#fromADT" _) arg	-- arg is not evaluated yet
+	= do	adt	<- (evalFunc funcs) arg
+		apply' funcs sign adt
+apply' _ (Signature "Just" _) arg
 	= return $ ADT 1 (Applied (Normal "Maybe") [typeOfValue arg]) [arg]
-apply' apply (Signature "Nothing" _) arg
+apply' _ (Signature "Nothing" _) arg
 	= return $ ADT 0 (Applied (Normal "Maybe") [typeOfValue arg]) [arg]
-apply' apply (Signature "#asTuple" _) arg
+apply' _ (Signature "#asTuple" _) arg
 	= return $ TupleVal [arg]
-apply' apply sign arg
+apply' funcs sign arg
 	= do	func	<- searchGlobal' sign
-		let func'	= fromMaybe (error $ "Function not found: "++show sign) func
-		apply func' arg
+		ctx	<- ask
+		let func'	= fromMaybe (error $ "Apply' (builtIns): Function not found: "++show sign++" in "++show ctx) func
+		(applyFunc funcs) func' arg
 
 
 isBuiltin	:: Name -> Bool

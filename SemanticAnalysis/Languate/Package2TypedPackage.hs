@@ -24,7 +24,7 @@ import Data.Map hiding (map, null, lookup, foldr, filter, foldr)
 import qualified Data.Map as Map
 
 
--- returns all the data: per module (fqn) a typed symboltable (tClause) for the interpreter; a symboltable with docstrings (for the human using the interpreter), a symboltable with the original clauses (again for the human, for neat prints, and a symboltable which represents where each signature is originally defined -- humans are quite needy, aren't they?)
+-- returns all the data: per module (fqn) a typed symboltable (tClause) for the interpreter; a symboltable with docstrings (for the human using the interpreter), a symboltable with the original clauses (again for the human, for neat prints), and a symboltable which represents where each signature is originally defined -- humans are quite needy, aren't they?)
 -- each symboltable represents **what is visible** within this module, including (cascaded) imports. 
 buildTyped	:: FQPN -> PriorityTable -> Map FQN Module -> TPackage
 buildTyped fqpn prior package

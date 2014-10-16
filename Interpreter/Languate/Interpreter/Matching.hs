@@ -38,7 +38,7 @@ match apply v (TEval _)
 
 deconstr :: Funcs -> Value -> Signature -> [TPattern] -> RC (Maybe Binding)
 deconstr fs arg fsign pats
-	= do	result	<- apply' (applyFunc fs) fsign arg >>= (evalFunc fs)
+	= do	result	<- apply' fs fsign arg >>= (evalFunc fs)
 		let extracted	= extractJust result
 		if isNothing extracted then return Nothing
 			else split fs (fromJust extracted) pats

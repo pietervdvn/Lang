@@ -6,4 +6,6 @@ Each program imports these by default
 
 public import Data.Maybe
 public import Data.Bool
+public import Data.Nat
 public import ControlFlow
+
