@@ -14,7 +14,9 @@ import Data.Maybe
 import Languate.Order
 import Prelude hiding (lookup, Left, Right)
 import Data.Map as Map hiding (map)
+import System.IO.Unsafe 
 
+import qualified Bnf
 
 {--
 Dev code for semantic analysis.
@@ -22,8 +24,10 @@ Tests loading, intermodule typechecking, importing, ...
 --}
 
 
-packageIO	= loadPackage' prelude "../workspace/Data/src/"
+bnfs	= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
+packageIO	= loadPackage' bnfs prelude "../workspace/Data/src/"
 package	= unsafePerformIO packageIO
+
 
 
 bool	= fqn "Data.Bool"

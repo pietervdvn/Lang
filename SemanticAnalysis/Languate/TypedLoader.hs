@@ -5,7 +5,7 @@ module Languate.TypedLoader where
 This module calls the loader and semantic analysis to give you what you want for the interpreter.
 
 --}
-
+import qualified Bnf
 import Languate.File2Package
 import Languate.FQN
 import Languate.Package2TypedPackage
@@ -18,9 +18,9 @@ import Data.Map hiding (map)
 import Normalizable
 
 
-typedLoad	:: FQN -> FilePath -> IO TypedPackage
-typedLoad fqn@(FQN fqpn _ _) path
-	=	do	package	<- loadPackage' fqn path
+typedLoad	:: Bnf.World -> FQN -> FilePath -> IO TypedPackage
+typedLoad world fqn@(FQN fqpn _ _) path
+	=	do	package	<- loadPackage' world fqn path
 			return $ normalizePackage $ typeCheck fqpn package
 							
 

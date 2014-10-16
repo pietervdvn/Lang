@@ -19,9 +19,9 @@ import System.Directory
 
 
 -- loadpackage, but crashes when imports are not found
-loadPackage'	:: FQN -> FilePath -> IO (Map FQN Module)
-loadPackage' fqn fp
-		= do	(package, notFound)	<- loadPackage fqn fp
+loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN Module)
+loadPackage' world fqn fp
+		= do	(package, notFound)	<- loadPackage world fqn fp
 			unless (null notFound) $ printErr notFound
 			return package
 
@@ -37,10 +37,9 @@ msg		= foldl (\acc (requestor, notF) -> acc++"\n\t"++show notF++" (needed by "++
 Imports of which the file was not found, are the second value in the tuple. It is a list, containing 
 [this module wanted the import, this module was not found]
 -}
-loadPackage	:: FQN -> FilePath -> IO (Map FQN Module,[(FQN,FQN)])
-loadPackage fqn src
+loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN Module,[(FQN,FQN)])
+loadPackage bnfs fqn src
 		=  do	let FQN fqpn _ _	= fqn
-			bnfs	<- loadBnf "../Parser/bnf/Languate.bnf"
 			let ctx	= Context bnfs fqpn [(fqn, fqn)] empty src []
 			(_, ctx)	<- runstateT loadRec ctx
 			let notF	= notFound ctx

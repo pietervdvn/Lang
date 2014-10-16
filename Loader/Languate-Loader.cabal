@@ -16,4 +16,4 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Languate.FQN, Languate.File2Package, Languate.MaintenanceAccess.TestFile2Package
   -- other-modules:       
-  build-depends:       base ==4.*, Consumer ==0.1.*, Bnf ==0.1.*, Parser ==0.1.*, containers ==0.5.*, mtl ==2.1.*, directory ==1.2.*, Std ==0.1.*,
+  build-depends:       base ==4.*, Consumer ==0.1.*, Bnf ==0.1.*, Parser ==0.1.*, containers ==0.5.*, mtl ==2.1.*, directory ==1.2.*, Std ==0.1.*

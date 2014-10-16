@@ -21,13 +21,17 @@ import Languate.Interpreter.BuiltIns
 import Languate.Interpreter.Application
 import Normalizable
 
+import qualified Bnf
+
+bnfs	= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
+
 
 fqpn		= fromJust $ toFQPN "pietervdvn:Data"
 prelude		= fromJust $ toFqn' fqpn [] "Prelude"
 bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
 
 
-tpack	= unsafePerformIO $ typedLoad prelude "../workspace/Data/src/"
+tpack	= unsafePerformIO $ typedLoad bnfs prelude "../workspace/Data/src/"
 
 ctx	= Context tpack prelude []
 boolT	= Normal "Bool"
