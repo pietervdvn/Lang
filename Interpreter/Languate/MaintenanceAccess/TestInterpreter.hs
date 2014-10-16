@@ -14,7 +14,6 @@ import Languate.FQN
 import Languate.InterpreterDef
 import Languate.SymbolTable
 import Languate.Signature
-import Languate.Interpreter
 import Languate.AST
 import Languate.TAST
 import Languate.Interpreter.Utils
