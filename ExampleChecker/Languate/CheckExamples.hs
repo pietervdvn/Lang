@@ -35,7 +35,7 @@ checkModule eval mod
 
 checkModule' eval mod
 		= let msgs	= checkModule eval mod in
-			if null msgs then "" else  "\nIncorrect examples in " ++ moduleName mod++":\n " ++ (intercalate "\n " $ filter ((/=) "") msgs)
+			if null msgs then "" else  "\nChecking examples in " ++ moduleName mod++":\n " ++ (intercalate "\n " $ filter ((/=) "") msgs)
 
 checkModules	:: Eq a => (FQN -> Expression -> a) -> Map FQN Module -> String
 checkModules eval
