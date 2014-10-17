@@ -1,6 +1,6 @@
 Maybe
 -----
-The maybe type is widely used in syntac sugar (?) and in pattern matching.
+The maybe type is widely used in syntac sugar ''?'' and in pattern matching.
 It represents a computation which may have failed, e.g. ''head ls''. If the list ''ls'' was empty, no head exist and the correct value is ''Nothing''.
 
 This type also plays an important role in pattern matching, as deconstruction is done with a functions which maps on a Maybe.
@@ -9,7 +9,7 @@ This type also plays an important role in pattern matching, as deconstruction is
 import Data.Bool
 
 -- The Maybe datatype definition.
-data Maybe a	= Nothing	-- Represents the failed value. Always keep nothing as first one in the ADT!
+data Maybe a	= Nothing	-- Represents the failed value. Always keep ''Nothing'' as first one in the ADT!
 		| Just a
 
 -- The ''isJust'' function returns ''True'' iff its argument is of the form ''Just _''.

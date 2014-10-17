@@ -6,4 +6,4 @@ Each program imports these by default
 
 public import Data.Bool
 public import ControlFlow
-
+public import Data.Maybe
