@@ -23,6 +23,7 @@ import Data.List (isPrefixOf)
 import Data.Map (findWithDefault)
 
 import Languate.Pipeline
+import Data.Time.Clock
 
 version	= "0.0.0.0.2"
 
@@ -71,10 +72,18 @@ printInfo tp fqn name
 
 
 welcome	:: IO ()
-welcome	=  putStrLn $ "\nHello and welcome to the Languate Interpreter Network.\n\n"++
-	"This interpreter is inbound from sector A 'Source Code' to sector C 'Test Lab'\n"++
+welcome	=  do	time	<- getCurrentTime
+		putStrLn $ msg $ show time
+
+msg	:: String -> String
+msg time
+	= "\nGood morning, and welcome to the Languate Interpreter System."++
+		"\nThis automated interpreter is provided for for the security and\n"++
+		"convenience of the Languate Research personnel.\n"++
+		"The time is "++time++", current topside temperature is 91 degrees with an estimated high of 105.\n"++
+		"This interpreter is inbound from Level 3 'Source Code' to sector C 'Test Labs and Control Facilities'.\n\n"++
 	"Please keep in mind that this is but version *"++version++"* beta, and contains many bugs.\nTo keep things balanced, it does not contain many features.\n\nHow to use this?\n----------------\n\n"++
-	"This version is very limited, and will load the 'Data' project in 'workspace' ("++project++"). More precisely, it will load the 'prelude'.\n\nYou can evaluate expressions by typing them; and ask information about functions with --i <functionname>.\n\nDo not expect a lot, espacially clear and descriptive error messages (take little steps).\n\nGood luck!\n\n"
+	"This version is very limited, and will load the 'Data' project in 'workspace' ("++project++"). More precisely, it will load the 'prelude'.\n\nYou can evaluate expressions by typing them; and ask information about functions with --i <functionname>.\n\nDo not expect a lot, espacially clear and descriptive error messages are rare.\n\nTake little steps.\n\nWork safe, work smart.\nNow arriving at at Sector C Test Labs. Have a very safe and productive day."
 
 up	= setCurrentDirectory ".."
 t	= up >> start
