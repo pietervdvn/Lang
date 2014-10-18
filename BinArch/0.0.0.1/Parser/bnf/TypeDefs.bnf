@@ -1,0 +1,175 @@
+TypeDefs
+
+author		"Pieter Vander Vennet"
+date		[2013, 12, 23, 01, 18, 42]
+desc		"The syntaxis of all kind of TypeDefinitions." 
+		
+import Prelude
+import Types
+import Comments
+import Functions
+
+
+ -------------
+ -- ADT DEF --
+ -------------
+
+_idents		::= localIdent+
+_optNamed	::= (idents ":")? type
+_named		::= (idents ":") type
+-- first item is obligatedly named, to disambituate the parser; the first compromise of the language...
+_namedSum	::= named (comma optNamed)*
+
+_$constructor	::= globalIdent
+_types		::= baseType+
+_sum		::= "_"? constructor (namedSum | types)? 
+
+_nlt		::= "\n\t"
+_simpleSums	::= ("\|" sum)+
+-- contains the docstrings above or on the same line
+_commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
+_sums		::= (nlt commentedSum)*
+ prod		::= sum simpleSums? comment? sums
+_freeTypes	::= localIdent*
+-- a comment is obligated, but an error will be given by another fase then the parser
+ data		::= nlcomments? "data" "_"? globalIdent freeTypes "=" prod
+
+ -------------
+ -- SYN DEF --
+ -------------
+
+_typeDef	::= globalIdent freeTypes "=" type
+ synonym	::= "type" typeDef
+
+ -------------
+ -- SUB DEF --
+ -------------
+
+ subtype	::= "subtype" "_"? typeDef
+
+
+ ------------------------
+ -- CLASS+INSTANCE DEF --
+ ------------------------
+
+-- comments are obligated, but it's not the parsers task to generate error messages
+ class		::= nlcomments? "class" globalIdent localIdent ":" classBody
+ classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
+
+ instance	::= "instance" globalIdent baseType
+
+{-
+-- (only comments below this point) --
+
+
+data
+====
+
+data Data a 	= A a | B Int
+--or
+data Record	= Record String Int Bool
+		| Exception String LineNr
+-- want named fields?
+
+data Record	= A i : Int 
+		| B b : Bool, i : Int, path name : Name 
+
+
+record syntax also creates functions to set and modify: (e.g. for the last one:)
+
+seti	: Record -> Int -> Record
+modi	: Record -> Int -> Int -> Record
+
+e.g. 'record.modi (+1)' or (.modi (+1) )
+
+To make a single constructor private, add a _ before the constructor
+
+-- docstring for record
+data Record	= _A i : Int	-- docstring for record a
+		-- alternative docstring location for b
+		| B b : Bool	-- docstring for record b
+		| C	| D	-- docstring for *both* C and D
+(A is private, B is public)
+
+To make all the constructors private, put an underscore before the name
+
+data _Record	= ...
+
+
+Type synonyms and subtypes
+==========================
+
+type Name	= String	-- real synonym, strings can be used as Name
+type Mappable a	= Functor a
+
+subtype CanonicalPath	= FilePath
+
+A subtype establishes a subset relationship. It means that every 'CanonicalPath' is a 'Filepath', but not vice-versa. 
+This means that each 'CanonicalPath-object' can be used in functions with 'FilePath' as argument, but not the other way round.
+To create them, you use the constructor. This constructor has the same name as the subtype (thus 'CanonicalPath'). To keep the
+constructor hidden withing the local module, you add an underscore.
+
+subtype _CanonicalPath	= FilePath
+
+
+Classes
+=======
+
+A typeclass declares a number of functions (without the implementation). When a certain type has all these functions, it is (automatically) part of this typeclass.
+E.g.
+
+class Show show where
+	show	: show -> String
+
+
+Bool implements show, there is *no* need to make it explicit:
+
+show : Bool -> String
+True	= "True"
+False	= "False"
+
+
+class Functor functor where
+	map	: (a -> b) -> functor a -> functor b
+
+Everywhere 'functor' is used, the same subtype will be infered. (functor: Functor =>)
+
+Compare with:
+
+class Collection collection where
+	merge	: Collection a -> collection a -> collection a
+
+which implies that a collection should be able to merge in any other collection; e.g.
+
+merge	: Collection a -> List a -> List a
+merge	= ...
+
+Which feels a bit object-oriented, especially with .-syntax:
+
+list.merge set
+
+
+Default methods can be written as
+
+print	:: Show -> IO ()
+s	=  putStrLn $ show s
+
+
+One can define laws with the class. If the laws are not fullfilled, the type is NOT part of the class.
+
+class Monad a where
+	~ neutral element: return a >>= f 	= f a
+	~ neutral element: m >>= return 	= m
+	return 	:: a -> m a
+	(>>=)	:: Monad m => m a -> (a -> m b) -> m b
+
+Instance
+========
+
+Instance is not obligated. If it is stated, the compiler will check it actually implements all the needed stuff, with the needed laws.
+
+Are types public?
+================		
+
+As soon as a single function is public, all of the types of it's arguments are public too.
+-}

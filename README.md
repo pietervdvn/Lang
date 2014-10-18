@@ -109,6 +109,11 @@ Main<X>
 A working version of an interpreter. X denotes which increment it is.
 
 
+BinArch
+-------
+
+Binary archive, which keeps all versions. 
+
 Experiments
 -----------
 

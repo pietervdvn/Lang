@@ -1,0 +1,18 @@
+package:	Data
+
+-- see documentation for all options (well, this file is the documentation...)
+
+version		: 0.0.1
+
+author		: Pieter Vander Vennet
+--maintainer	: Pieter Vander Vennet
+
+language	: Built-in	-- built in value means that this package is compiled against the built-in types, without prelude
+
+synopsis 	: Basic data types and functions
+description 	: Basic data types and functions, such as Bool, Int, Nat, Maybe, Either, String, ...
+license		: GPL
+
+-- can be imported as Data.Bool
+exposes		: Bool
+

@@ -1,0 +1,26 @@
+Misc
+----
+Some miscallaneous, control flow functions, such as id and const.
+----
+
+import Data.Bool
+
+-- The identity function, returns it's argument
+> id 42		= 42
+~ id: a => id a 	= a
+id	: a -> a
+a	= a
+
+-- The const function, returns it first argument (and ignores the second)
+> const 42 True	= 42
+const	: a -> b -> a
+a _	= a
+
+-- Conditional choice
+> if True 1 2	= 1
+> if False 1 2 	= 2
+if		: Bool -> a -> a -> a
+True  a _	= a
+False _ b	= b 
+
+

@@ -1,0 +1,11 @@
+Eq
+---
+
+
+
+---
+
+class Eq:
+	-- Checks if the two given values are the same
+	(==)	: eq:Eq	=> eq -> eq -> Bool
+	

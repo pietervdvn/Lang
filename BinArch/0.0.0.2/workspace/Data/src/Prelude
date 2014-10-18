@@ -1,0 +1,13 @@
+Prelude
+---
+Contains a lot of usefull functions, types, classes.
+Each program imports these by default
+-------
+
+public import Data.Maybe
+public import Data.Bool
+public import ControlFlow
+
+
+-- docstr
+data TestNoComm	= A | B

@@ -1,0 +1,17 @@
+Resources
+---------
+
+This file states how resoures are available as constants within the repo.
+
+Say you have a language file which localizes some strings to Dutch. You don't want to access these from withing an IO-monad each time.
+That's why you do it here! 
+
+---------
+
+
+-- will be available as Resources.localize : String -> String
+-- IO is read only in this file!
+localize : String -> IO String
+term	= do	locale	<- getLocale
+		readFile "locales/"+locale
+		return $ lookup term

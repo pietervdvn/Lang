@@ -1,0 +1,15 @@
+Imports
+
+author		"Pieter Vander Vennet"
+date		[2014, 06, 12, 19, 27, 42]
+desc		"The syntaxis of imports in Languate"
+
+import Prelude
+import Expressions
+
+id		::= localIdent | globalIdent | "\(" op "\)"
+idSet		::= "\{" id (comma? id)* "\}"
+limiters	::= ("hiding" | "showing") idSet
+import		::= "public"? "import" %((globalIdent dot)* globalIdent) limiters?
+
+_dot		::= %"\."
