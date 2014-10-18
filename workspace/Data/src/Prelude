@@ -1,7 +1,5 @@
 Prelude
 ---
-Prelude
--------
 Contains a lot of usefull functions, types, classes.
 Each program imports these by default
 -------
