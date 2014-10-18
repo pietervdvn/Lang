@@ -49,7 +49,7 @@ desugareList []	=  Call "empty"
 desugareList (exp:exprs)
 		=  Languate.Seq [ Call "prepend", exp , desugareList exprs]
 
-data AST	= FC String	-- A Function Call to a constructor (globalIdent), function (localIdent)
+data AST	= FC String	-- A Function Call to a constructor (globalIdent), function (localIdent) or operator in prefix notation ''(&&)''
 		| Op String	-- A call to an infix op
 		| Chr Char
 		| Str String
@@ -133,6 +133,8 @@ s "simpleExpr" [CstT, Cst typ]
 		= Cst typ
 s "expr" [exp]	= exp
 s "expr" exprs	= Seq exprs
+s "prefixOp" [ParO, Op name, ParC]
+		= FC name
 s _ [expr]  = expr
 s nm exprs	= seqErr "Pt2Expr" nm exprs
 

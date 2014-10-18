@@ -8,6 +8,7 @@ import Comments
 
 $localIdent	::= "[a..z][A..Za..z0..9]*'?"
 $globalIdent	::= "[A..Z][A..Za..z0..9]*"
+$ident		::= globalIdent | localIdent
 
 comma		::= ","
 
@@ -22,5 +23,5 @@ float		::= "[0..9]('?[0..9])*\.[0..9]('?[0..9])*"
 _normalChar	::= "'!['\\]'"
 _escapedChar	::= "'\\[ntr'\\]'"
 _numericChar	::= "'\\" nat "'"
-char		::= normalChar | escapedChar | numericChar 
+char		::= normalChar | escapedChar | numericChar
 string		::= "\"(\\[\\\"]|![\\\"])*\""

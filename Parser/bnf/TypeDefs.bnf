@@ -2,8 +2,8 @@ TypeDefs
 
 author		"Pieter Vander Vennet"
 date		[2013, 12, 23, 01, 18, 42]
-desc		"The syntaxis of all kind of TypeDefinitions." 
-		
+desc		"The syntaxis of all kind of TypeDefinitions."
+
 import Prelude
 import Types
 import Comments
@@ -22,7 +22,7 @@ _namedSum	::= named (comma optNamed)*
 
 _$constructor	::= globalIdent
 _types		::= baseType+
-_sum		::= "_"? constructor (namedSum | types)? 
+_sum		::= "_"? constructor (namedSum | types)?
 
 _nlt		::= "\n\t"
 _simpleSums	::= ("\|" sum)+
@@ -32,7 +32,7 @@ _sums		::= (nlt commentedSum)*
  prod		::= sum simpleSums? comment? sums
 _freeTypes	::= localIdent*
 -- a comment is obligated, but an error will be given by another fase then the parser
- data		::= nlcomments? "data" "_"? globalIdent freeTypes "=" prod
+ data		::= nlcomments ? "data" "_"? globalIdent freeTypes "=" prod
 
  -------------
  -- SYN DEF --
@@ -58,6 +58,10 @@ _typeDef	::= globalIdent freeTypes "=" type
 
  instance	::= "instance" globalIdent baseType
 
+
+
+
+
 {-
 -- (only comments below this point) --
 
@@ -71,8 +75,8 @@ data Record	= Record String Int Bool
 		| Exception String LineNr
 -- want named fields?
 
-data Record	= A i : Int 
-		| B b : Bool, i : Int, path name : Name 
+data Record	= A i : Int
+		| B b : Bool, i : Int, path name : Name
 
 
 record syntax also creates functions to set and modify: (e.g. for the last one:)
@@ -104,7 +108,7 @@ type Mappable a	= Functor a
 
 subtype CanonicalPath	= FilePath
 
-A subtype establishes a subset relationship. It means that every 'CanonicalPath' is a 'Filepath', but not vice-versa. 
+A subtype establishes a subset relationship. It means that every 'CanonicalPath' is a 'Filepath', but not vice-versa.
 This means that each 'CanonicalPath-object' can be used in functions with 'FilePath' as argument, but not the other way round.
 To create them, you use the constructor. This constructor has the same name as the subtype (thus 'CanonicalPath'). To keep the
 constructor hidden withing the local module, you add an underscore.
@@ -151,8 +155,8 @@ list.merge set
 
 Default methods can be written as
 
-print	:: Show -> IO ()
-s	=  putStrLn $ show s
+print	: Show -> IO ()
+s	= putStrLn $ show s
 
 
 One can define laws with the class. If the laws are not fullfilled, the type is NOT part of the class.
@@ -160,8 +164,19 @@ One can define laws with the class. If the laws are not fullfilled, the type is 
 class Monad a where
 	~ neutral element: return a >>= f 	= f a
 	~ neutral element: m >>= return 	= m
-	return 	:: a -> m a
-	(>>=)	:: Monad m => m a -> (a -> m b) -> m b
+	return 	: a -> m a
+	(>>=)	: Monad m => m a -> (a -> m b) -> m b
+
+Extending classes
+-----------------
+
+Sometimes, classes can be extended. For instance, each ''Collection'' should be a ''Functor''.
+
+We express this requirements as
+
+class Collection collection; collection in Functor:
+	...
+
 
 Instance
 ========
@@ -169,7 +184,7 @@ Instance
 Instance is not obligated. If it is stated, the compiler will check it actually implements all the needed stuff, with the needed laws.
 
 Are types public?
-================		
+================
 
 As soon as a single function is public, all of the types of it's arguments are public too.
 -}

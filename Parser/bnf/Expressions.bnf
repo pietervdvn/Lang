@@ -13,6 +13,7 @@ _call		::= localIdent | globalIdent
 
  op		::= ( "(!['~=(,)_\t\n\"a..zA..Z0..9\[\]{} ])(![(,)\t\n\"a..zA..Z0..9 ])*" & ! "--")
 		| "\{\}" | "\[\]" | "\(\)" | "=="
+ prefixOp	::= "\(" op "\)"
 
 _commaSepExprP	::= expr ("," expr)+
 _tuple		::= "\(" commaSepExprP "\)"	-- has to contain a ","
@@ -24,6 +25,6 @@ _arrowTuple	::= expr "-->" expr
 _dictCont	::= arrowTuple ("," arrowTuple)*
 _dict		::= "\{" dictCont "\}"
  -- expression not contains spaces (or containing spaces in () )
- simpleExpr	::= char | string | float | nat | tuple | dict | set | list | "\(" expr "\)" | "~" baseType | "~~" | call | op
+ simpleExpr	::= char | string | float | nat | tuple | dict | set | list | prefixOp | "\(" expr "\)" | "~" baseType | "~~" | call | op
  expr		::= simpleExpr+
 
