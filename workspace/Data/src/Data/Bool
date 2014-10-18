@@ -5,11 +5,12 @@ The bool type is a type which represents logical values.
 
 --## Definition
 
-data Bool	= False 
+data Bool	= False
 		| True
 
 --## Logical operations
 
+@ precedence: (&&) is left, (&&) = (||)
 -- Logical 'and'-function. Returns True if, and only if both arguments are True
   ~ annihilator for and	: b => False && b	= False
   ~ neutral element for and: b => True && b	= b
@@ -21,6 +22,7 @@ data Bool	= False
   True True	= True
   *		= False
 
+@ precedence: (||) is left, (||) = (&&)
 -- Logical 'or'-function. Returns False if, and only if both arguments are False
   ~ annihilator for or	: b => True || b	= True
   ~ neutral element for or: b => False  || b	= b
@@ -31,10 +33,12 @@ or		: Bool -> Bool -> Bool
   False False	= False
   *		= True
 
+@ precedence: (!) is prefix, (!) > (&&)
 -- Logical 'not' function (aka invert).
   ~ double not	: b => ! !b = b
-  > True !	= False
-  > False !	= True
+  > !True	= False
+  > !False	= True
+  > !False && True	= True
 (!)	: Bool -> Bool
   True	= False
   False	= True
@@ -44,7 +48,7 @@ or		: Bool -> Bool -> Bool
 -- show to get a String representation
 --- show	: Bool -> String
 --True	= "True"
---False	= "False" 
+--False	= "False"
 ---
 
 -- convert with cast
@@ -53,12 +57,3 @@ or		: Bool -> Bool -> Bool
 convert	: Bool -> Nat
   True	= 1
   False	= 0
-
-
--- a simple test function
-t	: Bool
-	= id True
-
-
-id	: Bool -> Bool
-a	= a

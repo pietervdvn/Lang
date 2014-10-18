@@ -10,12 +10,13 @@ import Expressions
 import Comments
 public import Patterns
 
-{- lawnames are simple strings which allow spaces. 
+{- lawnames are simple strings which allow spaces.
    Note that these should not be case sensitive when referred to in docs;
    each law has a name which does not have to be unique -}
 _$lawname		::= "[a..zA..Z0..9 ]+"
 _lawDeclaration	::= localIdent ("," localIdent)* (":" type)?
 _lawDeclarations	::= lawDeclaration ("," lawDeclaration)*
+-- TODO convert to ("~" lawname ":" | ">"), remove example rule
 law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "=" expr
 
 -- examples are like laws, but simpler. They serve the purpose of showing the reader what a certain expression reduces to
@@ -47,5 +48,3 @@ return is a defined function
 ~ more types	: b : Bool, n : Int, g,h : Float =>  ...
 
 -}
-
-

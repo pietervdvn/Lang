@@ -32,8 +32,8 @@ info modul n
 		0	-> notFound
 		1	-> unmerged
 		_	-> merged'
-	  
-		
+
+
 
 _merge		::  [(Signature, String)] -> String
 _merge

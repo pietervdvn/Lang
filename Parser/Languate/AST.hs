@@ -46,6 +46,7 @@ data Statement	= FunctionStm 	Function
 		| InstanceStm 	Instance
 		| Comments [Comment]
 		| ExampleStm	Law
+		| AnnotationStm	Annotation
 	deriving (Show)
 
 
@@ -60,7 +61,7 @@ instance Show Clause where
 	show (Clause patterns expr)	= tabs 2 (unwords $ map show patterns)++"= "++show expr
 
 
-data Visible	= Private	
+data Visible	= Private
 		| Public
 	deriving (Show, Eq, Ord)
 
@@ -124,7 +125,7 @@ data Expression	= Nat Int
 		| Cast Type	| AutoCast
 		| Call String
 		| Operator String
-		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment 
+		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment
 	deriving (Eq)
 
 instance Normalizable Expression where
@@ -175,7 +176,7 @@ data Pattern	= Assign Name	-- gives a name to the argument
  				Map/Set/List syntactic sugar is translated into something like this. A constructor works in the opposite way here-}
 		| Deconstruct Name [Pattern]
 		| Multi [Pattern]	-- at-patterns
-		| Eval Expression	-- evaluates an expression, which should equal the argument. Matching against ints is (secretly) done with this. 
+		| Eval Expression	-- evaluates an expression, which should equal the argument. Matching against ints is (secretly) done with this.
 		| DontCare		-- underscore
 
 		| MultiDontCare		-- star
@@ -213,7 +214,7 @@ np pt		= pt
 nps	= map normalize
 
 
-{- Deconstructor of collection is done with (:) 
+{- Deconstructor of collection is done with (:)
 (:-	: {a} -> (a,{a})
 (:)	: {a --> b} -> ( (a,b), {a --> b} )
 dict	= ( head dict, tail dict)
@@ -243,7 +244,7 @@ type DocString	= Comment
 
 -- ## New adts
 
-{- data ADT	= A | B | C 
+{- data ADT	= A | B | C
 
 A single constructor is represented by a single ADTSum-object -}
 data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
@@ -281,4 +282,13 @@ instance Show Instance where
 
 
 
+data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
+		| PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
+	deriving (Show)
 
+data PrecModifier	= PrecLeft | PrecRight | PrecPrefix | PrecPostfix
+	deriving (Show)
+data PrecRelation	= PrecEQ Name Name
+			| PrecLT Name Name
+			| PrecGT Name Name
+	deriving (Show)

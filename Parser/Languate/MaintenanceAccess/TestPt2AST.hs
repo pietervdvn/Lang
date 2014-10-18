@@ -18,6 +18,8 @@ import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2TypeDef
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Statement
+import Languate.Parser.Pt2PrecedenceAnnot
+import Languate.Parser.Pt2Annot
 
 import Languate.Parser.Pt2Languate
 
@@ -33,10 +35,10 @@ This module loads and compiles the bnf's to test them.
 Usage:
 
 -- test
-tst <function to test, e.g. pt2mod> "rule to parse against, e.g. module" "string to parse" 
+tst <function to test, e.g. pt2mod> "rule to parse against, e.g. module" "string to parse"
 
 --test file does the same, but on a file, with unsafePerformIO
-> tf ... ... "file to read" 
+> tf ... ... "file to read"
 e.g.
 > tf pt2mod "module" file
 This is tf':
@@ -68,4 +70,3 @@ tf convertor rule fp
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
 tst			:: (ParseTree -> a) -> Name -> String -> a
 tst convertor rule str	= convertor (unsafePerformIO $ pt rule str)
-

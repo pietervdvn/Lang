@@ -13,8 +13,12 @@ _$right		::= "Right" | "right"
 _$prefix	::= "Prefix" | "prefix"
 _$postfix	::= "PostFix" | "postfix"
 _modifier	::= left | right | prefix | postfix
-_precedenceAnnot	::= "@" "precedence" ":" modifier "," "\(" op "\)"
-_normalAnnotation	::= "@" ident ":" "!\n*"
+_comparator	::= "<" | "=" | ">"
+_parOp		::= "\(" $op "\)"
+_opComparation	::= parOp comparator parOp
+precedenceAnnot	::= "@" "precedence" ":" parOp "is" modifier ","  opComparation ("," opComparation)*
+
+_normalAnnotation	::= "@" ident ":" "!\n{2,}"
 
 annotation		::= precedenceAnnot | normalAnnotation
 
@@ -28,7 +32,7 @@ When an operator is defined, you have the possibility to set it's precedence.
 
 e.g.
 
-	@ precedence : Left, (-) = (+) < (*)
+	@ precedence : Left, (-) = (+), (+) < (*)
 	(+)	: ...
 	...
 

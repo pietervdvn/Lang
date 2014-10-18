@@ -67,7 +67,3 @@ s _ [Comm comms, ast]
 		= Comms comms ast
 s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
-
-
-
-
