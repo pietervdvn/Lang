@@ -111,7 +111,8 @@ p (Call name)	=  do	Module local imported	<- getModule
 				else do	modify $ first $ gotoN name
 					info	<- getInfo
 					lft $ throw $ RuleNotFound info name
-p (Token rule)	= do	inf	<- getInfo
+p (Token rule)	= do	pWs
+			inf	<- getInfo
 			tree	<- p rule
 			return $ T inf $ getContent tree
 p (Rgx regex)	= do	pWs
