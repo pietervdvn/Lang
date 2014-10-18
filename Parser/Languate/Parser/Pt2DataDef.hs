@@ -58,6 +58,10 @@ s _ (Comms comms:DataT:Ident name:FreeTypes frees:tail)
 s _ [Comms comms, DataT, Ident name,EqualT, Prod sums]
 		= Data comms Public name [] sums
 s _ [ast]	= ast
+s "data" (DataT:Ident name:_)
+		= error $ "No comment for data definition "++show name
+s "data" (DataT:PrivT:Ident name:_)
+		= error $ "No comment for data definition "++show name
 s nm asts	= seqErr modName nm asts
 
 pt2freetypes	:: ParseTree -> [Name]

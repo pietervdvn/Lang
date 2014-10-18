@@ -22,16 +22,17 @@ _namedSum	::= named (comma optNamed)*
 
 _$constructor	::= globalIdent
 _types		::= baseType+
- sum		::= "_"? constructor (namedSum | types)? 
+_sum		::= "_"? constructor (namedSum | types)? 
 
 _nlt		::= "\n\t"
 _simpleSums	::= ("\|" sum)+
 -- contains the docstrings above or on the same line
 _commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
 _sums		::= (nlt commentedSum)*
-_prod		::= sum simpleSums? comment? sums
+ prod		::= sum simpleSums? comment? sums
 _freeTypes	::= localIdent*
- data		::= nlcomments "data" "_"? globalIdent freeTypes "=" prod
+-- a comment is obligated, but an error will be given by another fase then the parser
+ data		::= nlcomments? "data" "_"? globalIdent freeTypes "=" prod
 
  -------------
  -- SYN DEF --
@@ -51,13 +52,14 @@ _typeDef	::= globalIdent freeTypes "=" type
  -- CLASS+INSTANCE DEF --
  ------------------------
 
- class		::= nlcomments "class" globalIdent localIdent ":" classBody
+-- comments are obligated, but it's not the parsers task to generate error messages
+ class		::= nlcomments? "class" globalIdent localIdent ":" classBody
  classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
  instance	::= "instance" globalIdent baseType
 
 {-
--- (only comments below this point)
+-- (only comments below this point) --
 
 
 data

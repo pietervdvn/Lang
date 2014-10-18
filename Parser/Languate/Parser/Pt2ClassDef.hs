@@ -56,11 +56,13 @@ t nm cont	=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
-s _ [ast]	= ast
 s "classBody" asts
 		= uncurry Body $ triage asts Nothing
+s _ [ast]	= ast
 s _ [Comms comms, ClassT, Ident name, LIdent lname, ColonT, Body laws decls]
 		= Clss name lname comms laws decls
+s _ (ClassT:Ident name:_)
+		= error $ "No docstring comment with class definition of "++show name
 s nm asts	= seqErr modName nm asts
 
 

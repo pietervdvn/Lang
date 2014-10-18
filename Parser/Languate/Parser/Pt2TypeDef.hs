@@ -11,6 +11,9 @@ import Languate.AST
 {--
 
 This module converts the ParseTree into all other things defined in TypeDefs.bnf: type synonyms, subtypes, class declarations and instances.
+
+For data definition (''data Bool = False | True''), please see Pt2DataDef
+For class (interface) definitions, see Pt2ClassDef
 --}
 
 -- ## GEN (typeExpr)
