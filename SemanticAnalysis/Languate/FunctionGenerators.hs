@@ -28,25 +28,30 @@ generate _	= []
 
 
 genADTFuncs	:: ADTDef -> [(Statement, Function)]
-genADTFuncs stm@(ADTDef name frees _ [sum])
-		= zip (repeat $ ADTDefStm stm) $ genOneADTSum name frees 0 sum
-genADTFuncs stm@(ADTDef name frees _ sums)
-		= zip (repeat $ ADTDefStm stm) $ concatMap (uncurry $ genADTSum name frees) $ zip nats sums
+genADTFuncs stm@(ADTDef name frees docStr [sum])
+		= zip (repeat $ ADTDefStm stm) $ map (injectDocstr docStr) $ genOneADTSum name frees 0 sum
+genADTFuncs stm@(ADTDef name frees docStr sums)
+		= zip (repeat $ ADTDefStm stm) $ map (injectDocstr docStr) $
+			concatMap (uncurry $ genADTSum name frees) $ zip nats sums
 
 
 -- used for an ADT-definition which has just one sum constructor
--- makes: constructor function; deconstructor function to maybe; deconstructor function; named functions for lensing 
+-- makes: constructor function; deconstructor function to maybe; deconstructor function; named functions for lensing
 genOneADTSum	:: Name -> [Name] -> Int -> ADTSum -> [Function]
-genOneADTSum adtName frees index (ADTSum constrName _ _ [])
-		= genConstrDeconstr adtName frees constrName index []
-genOneADTSum adtName frees index (ADTSum constrName _ _ namesTypes)
+genOneADTSum adtName frees index (ADTSum constrName vis maybDocstr [])
+		= let funcs = genConstrDeconstr adtName frees constrName index [] in
+			map (injectVis vis . injectDocstr' maybDocstr) funcs
+genOneADTSum adtName frees index (ADTSum constrName vis maybDocstr namesTypes)
 		= let types = map snd namesTypes in
-			genConstrDeconstr adtName frees constrName index types ++
-			[genDetDeconstr adtName frees constrName types]
+		  let funcs =	genConstrDeconstr adtName frees constrName index types ++
+			[genDetDeconstr adtName frees constrName types] in
+			map (injectVis vis . injectDocstr' maybDocstr) funcs
 
 genADTSum	:: Name -> [Name] -> Int -> ADTSum -> [Function]
-genADTSum adtName frees index (ADTSum constrName _ _ namesTypes)
-		= genConstrDeconstr adtName frees constrName index (map snd namesTypes)
+genADTSum adtName frees index (ADTSum constrName vis maybDocstr namesTypes)
+		= let funcs = genConstrDeconstr adtName frees constrName index (map snd namesTypes) in
+			map (injectVis vis . injectDocstr' maybDocstr) funcs
+
 
 genConstrDeconstr	:: Name -> [Name] -> Name -> Int -> [Type] -> [Function]
 genConstrDeconstr a b c d e
@@ -85,4 +90,14 @@ genDetDeconstr adtName frees constr types
 		  let expr	= Seq $ Call "#asTuple":map Call varNames in
 			Function docStr Public decl [{-no laws-}] [Clause [pattern] expr]
 
+injectVis	:: Visible -> Function -> Function
+injectVis v (Function dstr _ signs laws clauses)
+		= Function dstr v signs laws clauses
 
+injectDocstr'	:: Maybe String -> Function -> Function
+injectDocstr' (Just docStr)	= injectDocstr docStr
+injectDocstr' Nothing		= id
+
+injectDocstr	:: String -> Function -> Function
+injectDocstr docStr (Function dstr vis signs laws clauses)
+		= Function (docStr++"\n"++dstr) vis signs laws clauses
