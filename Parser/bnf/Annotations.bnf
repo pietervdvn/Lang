@@ -41,7 +41,7 @@ This means that ''(+)'' is left associative: ''1 + 2 + 3 = (1 + 2) + 3'' and is 
 Prefix/Postfix
 --------------
 
-Can only be used if the function takes one argument.
+Can only be used if the function takes one argument. Note that prefixes bind right, as ''!!True' = !(!True)', while postfixes bind left, as ''5²² = (5²)²''
 
 More-then-three-argument operators
 ----------------------------------
@@ -56,6 +56,9 @@ Invalid precedence declarations
 	When a operator, say ''<=>'', is already imported and redifined with another signature, no precedence annotation may be added.
 - Precedence annotations should be consistent.
 	''@ precedence : Left, (+) < (*)'' and ''@precedence : Left, (*) < (+)' will generate an error.
+- Things of a same level should have the same associativity
+	(>>=) binds left, (=<<) binds right, and both have the same precedence
+	''a >>= b <<= c'' should this be ''(a >>= b) <<= c'' or ''a >>= (b <<= c)''?
 
 The general Annotation System
 =============================

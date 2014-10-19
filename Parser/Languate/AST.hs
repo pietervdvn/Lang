@@ -284,11 +284,22 @@ instance Show Instance where
 
 data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
 		| PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
-	deriving (Show)
+instance Show Annotation where
+	show (Annotation name str)	= "@ "++name++" : "++str
+	show (PrecAnnot n mod rels)
+		= "@ precedence : "++n++" is "++show mod++", "++(intercalate ", " $ map show rels)
 
 data PrecModifier	= PrecLeft | PrecRight | PrecPrefix | PrecPostfix
-	deriving (Show)
+
+instance Show PrecModifier where
+	show PrecLeft	= "left"
+	show PrecRight	= "right"
+	show PrecPrefix	= "prefix"
+	show PrecPostfix	= "postfix"
+
 data PrecRelation	= PrecEQ Name Name
 			| PrecLT Name Name
-			| PrecGT Name Name
-	deriving (Show)
+
+instance Show PrecRelation where
+	show (PrecEQ o1 o2)	= o1++" = "++o2
+	show (PrecLT o1 o2)	= o1++" <  "++o2

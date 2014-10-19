@@ -66,7 +66,7 @@ s nm asts	= seqErr modName nm asts
 relationToken2AST	:: AST -> Name -> Name -> PrecRelation
 relationToken2AST EqT	=  PrecEQ
 relationToken2AST LTT	=  PrecLT
-relationToken2AST GTT	=  PrecGT
+relationToken2AST GTT	=  flip PrecLT
 
 modToken2AST		:: AST -> PrecModifier
 modToken2AST LeftT	= PrecLeft

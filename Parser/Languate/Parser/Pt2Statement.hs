@@ -8,6 +8,7 @@ import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2TypeDef
 import Languate.Parser.Pt2ClassDef
+import Languate.Parser.Pt2Annot
 import Languate.Parser.Utils
 import Languate.AST
 
@@ -38,6 +39,8 @@ convert (SubTypeDf def)
 		= [SubDefStm def]
 convert (ClassDf def)
 		= [ClassDefStm def]
+convert (Annot annot)
+		= [AnnotationStm annot]
 
 
 data AST	= Func Function
@@ -47,13 +50,15 @@ data AST	= Func Function
 		| Comm [Comment]
 		| SubTypeDf SubDef
 		| ClassDf ClassDef
+		| Annot Annotation
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
 h		=  [ ("nls",Comm . pt2nls),("function", unc Func pt2func)
 		   , ("data",unc ADTDf pt2adtdef), ("synonym", SynDf . pt2syndef)
-		   , ("subtype", SubTypeDf . pt2subdef), ("class", unc ClassDf pt2classDef)]
+		   , ("subtype", SubTypeDf . pt2subdef), ("class", unc ClassDf pt2classDef)
+		   , ("annotation", Annot . pt2annot)]
 
 unc		:: (a -> AST) -> (ParseTree -> ([Comment], a)) -> ParseTree -> AST
 unc constr f pt =  let (comms, a) = f pt in
