@@ -5,6 +5,7 @@ The bool type is a type which represents logical values.
 
 --## Definition
 
+-- The ''Bool'' datatype represents truth values of logic.
 data Bool	= False
 		| True
 
@@ -35,10 +36,10 @@ or		: Bool -> Bool -> Bool
 
 @ precedence: (!) is prefix, (!) > (&&)
 -- Logical 'not' function (aka invert).
-  ~ double not	: b => ! !b = b
+---  ~ double not	: b => ! !b = b
   > !True	= False
   > !False	= True
-  > !False && True	= True
+  > !False && True	= True ---
 (!)	: Bool -> Bool
   True	= False
   False	= True
