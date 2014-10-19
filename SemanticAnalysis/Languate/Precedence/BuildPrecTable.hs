@@ -12,19 +12,26 @@ import Data.Map hiding (union, map)
 import Data.Maybe
 import Prelude hiding (lookup)
 
-classes	:: [PrecRelation] -> [[Name]]
-classes	=  union . catMaybes . map sameClass
+import Debug.Trace
 
-sameClass	:: PrecRelation -> Maybe (Name, Name)
-sameClass (PrecEQ n1 n2)
-	| n1 > n2	= Just (n2, n1)
-	| otherwise	= Just (n1, n2)
-sameClass _	= Nothing
+-- ### Checks
+
+{- checks if a ''(+) < (-)'' relation does not exist if ''(+) = (-)'' is defined somewhere. Thus, if two operators are in the same union, checks no LT-relation exists between them.
+Returns faulty arguments.
+-}
+checkIllegalLT	:: [(Name, Name)] -> Map Name Name -> [(Name,Name)]
+checkIllegalLT ltRels dict
+		=  fst $ runstate (mapM checkIllegalLT' ltRels  >>= return . catMaybes) dict
+
+checkIllegalLT'	:: (Name, Name) -> State (Map Name Name) (Maybe (Name,Name))
+checkIllegalLT' ops@(o1, o2)
+		=  do	r1	<- representative o1
+			r2	<- representative o2
+			return  $ if r1 == r2 then Just ops	-- the returned representatives are the same, meaning o1 and o2 are in the same union; however an o1 < o2 relation exists too. ERROR
+						else Nothing
 
 
-union	:: [(Name, Name)] -> [[Name]]
-union list	= todo
-
+-- ### Union find algorithm
 
 union'	:: [(Name, Name)] -> Map Name Name
 union' tuples
@@ -38,6 +45,7 @@ add (n1,n2)	= do	repres1	<- representative n1
 			let r	= if repres1 < repres2 then repres1 else repres2
 			modify $ insert n1 r
 			modify $ insert n2 r
+			modify $ insert repres1 r
 			modify $ insert repres2 r
 
 

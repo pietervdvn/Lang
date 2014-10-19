@@ -17,3 +17,14 @@ getPrecedenceInfo' _	= Nothing
 
 getPrecedenceInfo	:: Module -> ([(Name, PrecModifier)], [PrecRelation])
 getPrecedenceInfo mod	=  second concat $ unzip $ catMaybes $ map getPrecedenceInfo' $ statements mod
+
+ltRelations	:: [PrecRelation] -> [(Name, Name)]
+ltRelations 	=  map (\(PrecLT o1 o2) -> (o1, o2)) . filter (not . isEqRel)
+
+eqRelations	:: [PrecRelation] -> [(Name,Name)]
+eqRelations	=  map (\(PrecEQ o1 o2) -> (o1,o2)) . filter isEqRel
+
+isEqRel		:: PrecRelation -> Bool
+isEqRel (PrecEQ _ _)
+		= True
+isEqRel	_	= False

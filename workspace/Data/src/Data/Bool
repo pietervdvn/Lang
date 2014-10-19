@@ -34,7 +34,7 @@ or		: Bool -> Bool -> Bool
   False False	= False
   *		= True
 
-@ precedence: (!) is prefix, (!) > (&&)
+@ precedence: (!) is prefix, (!) < (&&)
 -- Logical 'not' function (aka invert).
 ---  ~ double not	: b => ! !b = b
   > !True	= False
