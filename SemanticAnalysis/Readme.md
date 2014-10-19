@@ -20,3 +20,10 @@ Semantic analysis performs some checks as to validate the code:
 	-> Random values in other cases
 
 The type declarations work as some kind of checkpoint. Infers are not supported in this version.
+
+Directory Structure
+===================
+
++ Precedence	: all things related to operator precedence
+	- PrecedenceTable	: data struture definition
+	- Order			: orders expression, writes all infix operator invocations as neat prefix function invocations
