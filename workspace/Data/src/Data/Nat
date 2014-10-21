@@ -3,5 +3,8 @@ Nat
 Operators on Nat
 ---
 
-(+)	: Nat -> Nat -> Nat
-a b	= #plus a b
+@precedence: (+) is Left, (+) = (-), (!) < (+), (+) < (&&)
+@precedence: (-) is Left, (+) = (-)
+@precedence: (*) is Left, (*) < (+)
+@precedence: (/) is Left, (/) = (*)
+@precedence: (%) is Left, (%) = (*)
