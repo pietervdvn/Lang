@@ -34,6 +34,8 @@ checkIllegalLT ltRels dict
 
 
 -- ### Building of actual table
+
+
 buildTable	:: [Name] -> [Name] -> Map Name Name -> (Map Name Int, Map Int [Name])
 buildTable repres allOps unions
 		=  let repres'	= zip repres [1..] in

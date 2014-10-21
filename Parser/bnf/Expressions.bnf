@@ -12,13 +12,13 @@ import Types
 _call		::= localIdent | globalIdent
 
  op		::= ( "(!['~=(,)_\t\n\"a..zA..Z0..9\[\]{} ])(![(,)\t\n\"a..zA..Z0..9 ])*" & ! "--")
-		| "\{\}" | "\[\]" | "\(\)" | "=="
+		| "\{\}" | "\[\]" | "\(\)" | "==" | "-->"
  prefixOp	::= "\(" op "\)"
 
 _commaSepExprP	::= expr ("," expr)+
 _tuple		::= "\(" commaSepExprP "\)"	-- has to contain a ","
 _commaSepExpr	::= expr ("," expr)*		-- can be a single expression too
-_set		::= "\{" commaSepExpr "\}"	
+_set		::= "\{" commaSepExpr "\}"
 _list		::= "\[" commaSepExpr "\]"
 
 _arrowTuple	::= expr "-->" expr
@@ -27,4 +27,3 @@ _dict		::= "\{" dictCont "\}"
  -- expression not contains spaces (or containing spaces in () )
  simpleExpr	::= char | string | float | nat | tuple | dict | set | list | prefixOp | "\(" expr "\)" | "~" baseType | "~~" | call | op
  expr		::= simpleExpr+
-

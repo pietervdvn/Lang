@@ -133,8 +133,17 @@ instance Normalizable Expression where
 
 
 ne		:: Expression -> Expression
-ne (Seq [e])	=  e
+ne (Seq [e])	=  ne e
+ne (Seq exprs)	=  Seq $ nes exprs
+ne (Tuple exprs)=  Tuple $ map ne exprs
 ne e		=  e
+
+nes		:: [Expression] -> [Expression]
+nes		=  filter ((/=) (Seq [])) . map ne
+
+isOperator	:: Expression -> Bool
+isOperator (Operator _)	= True
+isOperator _	= False
 
 
 instance Show Expression where

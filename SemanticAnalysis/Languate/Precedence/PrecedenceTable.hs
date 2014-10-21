@@ -21,11 +21,24 @@ import Control.Arrow
 
 
 type Operator	= Name
-data PrecedenceTable	= PrecedenceTable (Map Operator Int) (Map Int [Operator]) (Map Operator PrecModifier)
+data PrecedenceTable	= PrecedenceTable Int (Map Operator Int) (Map Int [Operator]) (Map Operator PrecModifier)
 
 instance Show PrecedenceTable where
-	show (PrecedenceTable op2i i2op mods)
+	show (PrecedenceTable _ op2i i2op mods)
 		= precTable2md op2i i2op mods
+
+modeOf	:: Int -> PrecedenceTable -> PrecModifier
+modeOf index (PrecedenceTable _ _ i2op mods)
+	= fromJust $ do	repr	<- lookup index i2op
+			lookup (head repr) mods
+
+precedenceOf	:: Expression -> PrecedenceTable -> Int
+precedenceOf expr (PrecedenceTable tot op2i _ _)
+		= if isOperator expr
+			then
+				let (Operator nm)	= expr in
+				fromJust $ lookup nm op2i
+			else	tot+1
 
 
 buildPrecTable modules
@@ -40,7 +53,7 @@ buildPrecTable modules
 		   let partialOrder	= ltGraph $ withRepr equivUnion' ltRels in
 		   let totalOrder	= buildOrdering partialOrder in
 		   let (op2i, i2op)		= second (fmap nub) $ buildTable totalOrder allOps equivUnion' in
-		   	checkNoMix $ PrecedenceTable op2i i2op (fromList nameMod)
+		   	checkNoMix $ PrecedenceTable (length totalOrder) op2i i2op (fromList nameMod)
 
 
 withRepr	:: Map Name Name -> [(Name, Name)] -> [(Name, Name)]
@@ -50,7 +63,7 @@ withRepr unions = map (\(n1,n2) -> (repr n1, repr n2))
 -- checks that a class is consistent, thus that it contains not both left and right operators
 -- checkNoMix	:: PrecedenceTable -> PrecedenceTable
 checkNoMix	:: PrecedenceTable -> PrecedenceTable
-checkNoMix table@(PrecedenceTable _ i2op mods)
+checkNoMix table@(PrecedenceTable _ _ i2op mods)
 		= let voids	= mapWithKey checkClass $ fmap (map (\op -> fromJust $ lookup op mods)) i2op in
 			if and $ map snd $ toList voids then table else error $ "Mixed precedence!"
 			where checkClass i mods	= if 1 == (length $ nub mods) then True else error $ "Precedence table error: mixed associativity in class "++show i++", operators with associativity "++show mods++" exist."
