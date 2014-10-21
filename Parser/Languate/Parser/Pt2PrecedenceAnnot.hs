@@ -28,6 +28,7 @@ data AST	= ParO | ParC
 		| PrecT	| AtT	| CommaT
 		| ColonT
 		| PrecRel PrecRelation
+		| PrecRels [PrecRelation]
 		| PrecAnnotT Annotation
 	deriving (Show)
 
@@ -59,8 +60,12 @@ s _ [Op o1, rel, Op o2]
 s _ [CommaT, ast]
 		= ast
 s _ (AtT:PrecT:ColonT:Op name:ColonT: mod: CommaT:rels)
-		= PrecAnnotT $ PrecAnnot name (modToken2AST mod) $ map (\(PrecRel a) -> a) rels
+		= PrecAnnotT $ PrecAnnot name (modToken2AST mod) $ concatMap unpck rels
+			where 	unpck (PrecRel r)	= [r]
+				unpck (PrecRels rels)	= rels
 s _ [ast]	= ast
+s _ (r1@(PrecRel _):r2@(PrecRel _):rels)
+		= PrecRels $ map (\(PrecRel r) -> r) $ r1:r2:rels
 s nm asts	= seqErr modName nm asts
 
 relationToken2AST	:: AST -> Name -> Name -> PrecRelation

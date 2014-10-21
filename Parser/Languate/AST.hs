@@ -290,6 +290,7 @@ instance Show Annotation where
 		= "@ precedence : "++n++" is "++show mod++", "++(intercalate ", " $ map show rels)
 
 data PrecModifier	= PrecLeft | PrecRight | PrecPrefix | PrecPostfix
+	deriving (Eq)
 
 instance Show PrecModifier where
 	show PrecLeft	= "left"
@@ -301,5 +302,5 @@ data PrecRelation	= PrecEQ Name Name
 			| PrecLT Name Name
 
 instance Show PrecRelation where
-	show (PrecEQ o1 o2)	= o1++" = "++o2
-	show (PrecLT o1 o2)	= o1++" <  "++o2
+	show (PrecEQ o1 o2)	= "(" ++ o1 ++ ") = (" ++ o2 ++ ")"
+	show (PrecLT o1 o2)	= "(" ++ o1 ++ ") < (" ++ o2 ++ ")"

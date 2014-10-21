@@ -32,11 +32,14 @@ When an operator is defined, you have the possibility to set it's precedence.
 
 e.g.
 
-	@ precedence : Left, (-) = (+), (+) < (*)
+	@ precedence : Left, (-) = (+), (*) < (+)
 	(+)	: ...
 	...
 
 This means that ''(+)'' is left associative: ''1 + 2 + 3 = (1 + 2) + 3'' and is executed after (*), thus ''1 + 2 * 3 == 1 + (2*3)''.
+
+''(*) < (+)'' means that  * is executed before +
+
 
 Prefix/Postfix
 --------------
