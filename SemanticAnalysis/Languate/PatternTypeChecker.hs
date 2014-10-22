@@ -23,17 +23,16 @@ import Languate.SymbolTable
 import Languate.TypeTable
 import Languate.TypeChecker
 import Languate.Signature
+import Languate.Precedence.Precedence
 
 import Control.Monad
 import Control.Monad.Reader
 import Data.Maybe
 
 
-
-
 type TypedClosure	= Map Name Type
 
-checkPattern	:: Context -> [Pattern] -> [Type] -> ([TPattern], Map Name Type)
+checkPattern	:: (TypeTable, PrecedenceTable) -> [Pattern] -> [Type] -> ([TPattern], Map Name Type)
 checkPattern tt patterns types
 		= let patterns'	= map normalize $ sanitize (length types) patterns in
 			runstate (checkAll tt patterns' types) empty
@@ -48,14 +47,14 @@ sanitize i (pt:pts)
 		= pt:sanitize (i-1) pts
 
 
-checkAll	:: Context -> [Pattern] -> [Type] -> State TypedClosure [TPattern]
-checkAll tt pts	tps
+checkAll	:: (TypeTable, PrecedenceTable) -> [Pattern] -> [Type] -> State TypedClosure [TPattern]
+checkAll ctx pts	tps
 	| length pts == length tps
-		=  zipWithM (checkOne tt) pts tps
+		=  zipWithM (checkOne ctx) pts tps
 	| otherwise
 		=  error $ "Too much/too little patterns given in comparison with the given types " ++ show pts
 
-checkOne	:: Context -> Pattern -> Type -> State TypedClosure TPattern
+checkOne	:: (TypeTable,PrecedenceTable) -> Pattern -> Type -> State TypedClosure TPattern
 checkOne _ (Assign name) t
 		= do	st	<- get
 			when (name `member` st) $ error $ "Duplicate name detected in pattern: "++name
@@ -64,11 +63,11 @@ checkOne _ (Assign name) t
 checkOne _ (Let _ _) _
 		= todos "Let expressions in patterns are not supported yet"
 checkOne ctx (Deconstruct function patterns) t
-		= do	let funcType	= findType function $ typeTable ctx	-- the types that the given function might have
+		= do	let funcType	= findType function $ fst ctx	-- the types that the given function might have
 			let err		= error $ "Deconstruction function not found (for pattern): "++function
 			let typs	= fromMaybe err funcType
 			let deconstrType	= filter (validFunctionType (length patterns) t) $ map normalize typs	-- now filtered for a -> Mabye (.,.,.)
-			when (null deconstrType) $ error $ 
+			when (null deconstrType) $ error $
 				"The deconstructor function "++function++
 				" does not have the right type, expected function of type "++
 				show (validType t)
@@ -87,7 +86,8 @@ checkOne ctx (Multi patterns) t
 		= do	patterns'	<- mapM (flip (checkOne ctx) t) patterns
 			return $ TMulti patterns'
 checkOne ctx (Eval e) t
-		= do	let texp	= runReader (typeCheck e) ctx
+		= do	let prefExpr	= expr2prefExpr (snd ctx) e
+			let texp	= runReader (typeCheck e) $ fst ctx
 			unless (t `elem` typeOf texp) $ error $ "Patterntypcheck: eval: the expression in the eval-pattern does not have the right type: it is of type "++show (typeOf texp)++" instead of the expected type "++show t
 			return $ TEval texp
 checkOne _ MultiDontCare _
@@ -103,13 +103,10 @@ returnedType		:: Type -> [Type]
 returnedType (Curry [t, Applied (Normal "Maybe") [TupleType ts]])
 			= ts
 returnedType _	= error "Bug: Semantal/PatternTypeChecker/returnedType: no sanitize before returned type; should not happen"
-			
+
 
 -- returns true if the type is of the form ''a -> (b,c,d,...)?'' with exactly i tuple arguments
 validFunctionType	:: Int -> Type -> Type -> Bool
 validFunctionType i expSource (Curry [actSource, Applied (Normal "Maybe") [TupleType ts]])
 	= expSource == actSource && i == length ts
 validFunctionType _ _ _	= False
-
-
-

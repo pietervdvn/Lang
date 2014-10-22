@@ -20,9 +20,7 @@ import Languate.BuiltIns
 import Languate.ModuleTypeChecker
 import Languate.TypeChecker
 import Languate.ClauseGenerators
-import Languate.Order
 import Data.List (intercalate)
-import Languate.TypedLoader (priorTable)
 
 -- the environment (typetable)
 tt	= TT Empt $ fromList $ [("f", [ [nat,nat] --> nat, [nat] --> nat , [nat,nat] --> asMaybe nat])
@@ -65,11 +63,8 @@ tEntity	= Normal "Entity"
 tPoint	= Normal "Point"
 
 
-tctx	= Context tt priorTable
--- type check test
-
 tc	:: Expression -> TypedExpression
-tc expr	= runReader (typeCheck expr) tctx
+tc expr	= runReader (typeCheck expr) tt
 
 
 testExprs	= map Seq [[Call "f", Nat 1, Nat 2]
@@ -95,14 +90,12 @@ testExprs	= map Seq [[Call "f", Nat 1, Nat 2]
 crashinExprs	= map Seq [[Operator "²", Nat 1], [Operator "/", Nat 2]]
 
 
-order expr	=  runReader (asCall expr) priorTable
-
 
 -- typechecks the testepxressions, prints it neatly on the screen
 typeCheckTests		= putStrLn $ unlines $ map (\(e, t) -> show e ++" : "++ show (typeOf t)) $ zip testExprs $ map tc testExprs
 
 
-{--- 
+{---
 
 Point x:Int y:nt
 Entity pos:Point
@@ -112,7 +105,7 @@ p.x.fac =  fac p.x
 
 x	: Point -> Int
 x	: (Int -> Int) -> Point -> Point
-p.x.(+1)	= 
+p.x.(+1)	=
 p.(x.(+1))
 
 
@@ -128,9 +121,8 @@ e.pos.x.+ 4	=			-- create new entity which is 4 to the right
 --}
 
 {-
-TApplication [(Entity -> Int),(Entity -> ((Int -> Int) -> Point))] 
-(TCall [(a -> ((a -> b) -> b)),((a -> b) -> ((b -> c) -> (a -> c)))] ".") 
+TApplication [(Entity -> Int),(Entity -> ((Int -> Int) -> Point))]
+(TCall [(a -> ((a -> b) -> b)),((a -> b) -> ((b -> c) -> (a -> c)))] ".")
 [TCall [(Entity -> Point),(Entity -> ((Point -> Point) -> Entity))] "point",
 TCall [(Point -> Int),(Point -> ((Int -> Int) -> Point))] "x"]
 -}
-

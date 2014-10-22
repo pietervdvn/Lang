@@ -2,7 +2,7 @@ module Languate.FunctionTypeChecker (checkClause, TClause (TClause), precheck) w
 
 {--
 
-This module the function type checker. It tests wether each clause is of the given type. 
+This module the function type checker. It tests wether each clause is of the given type.
 
 --}
 
@@ -15,24 +15,23 @@ import Languate.TypeTable
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Languate.SymbolTable
-import Languate.Order (PriorityTable)
 import Control.Monad.Reader
 import Debug.Trace
+import Languate.Precedence.Precedence
 
 -- checks the clause on missing references. We assume all functions have a known type
-checkClause	:: TypeTable -> PriorityTable -> Type -> Clause -> TClause
+checkClause	:: TypeTable -> PrecedenceTable -> Type -> Clause -> TClause
 checkClause tt prior targetType (Clause patterns expr)
 		= _checkClause tt prior targetType patterns expr
 
 
 
-_checkClause	:: TypeTable -> PriorityTable -> Type -> [Pattern] -> Expression -> TClause
+_checkClause	:: TypeTable -> PrecedenceTable -> Type -> [Pattern] -> Expression -> TClause
 _checkClause tt prior (Curry tps) ptrs expr
-		= let (checkedPtrs, closure)	= checkPattern (Context tt prior) ptrs (init' tps) in
+		= let (checkedPtrs, closure)	= checkPattern (tt, prior) ptrs (init' tps) in
 		  let tt'	= TT tt $ Map.map (:[]) closure in
-		  let expr'	= precheck tt' $ remNl expr in
-		  let ctx	= Context tt' prior in
-		  let texpr	= runReader (typeCheck expr') ctx in
+		  let expr'	= expr2prefExpr prior $ precheck tt' $ remNl expr in
+		  let texpr	= runReader (typeCheck expr') tt in
 		  let texpr'	= checkReturnType (last tps) texpr in
 		  TClause checkedPtrs texpr'
 _checkClause tt prior t ptrs expr

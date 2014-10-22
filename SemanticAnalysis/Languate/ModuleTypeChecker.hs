@@ -6,7 +6,9 @@ import Languate.AST
 import Languate.SymbolTable
 import Languate.TypeTable
 import Languate.TypeChecker
-import Languate.Order
+import Languate.Precedence.Precedence
+
+
 import Prelude hiding (Right, Left)
 import Data.Map (Map, fromList)
 import qualified Data.Map as Map
@@ -27,8 +29,8 @@ In later versions, types will be inferred, allowing implicit typing.
 --}
 
 
-typeCheckModule		:: PriorityTable -> SymbolTable (Statement,[Clause]) -> (SymbolTable Statement, SymbolTable [TClause])
-typeCheckModule prior st	
+typeCheckModule		:: PrecedenceTable -> SymbolTable (Statement,[Clause]) -> (SymbolTable Statement, SymbolTable [TClause])
+typeCheckModule prior st
 			=  let tt	= buildTypeTable st in
 				-- some clauses have special builtins which can not be typechecked and should be regenerated after typechecking. It are these statements:
 			   let refusedStms	= fmap fst $ filterTable (hasSpecialBuiltin . snd) st in
@@ -36,7 +38,7 @@ typeCheckModule prior st
 			   let translated	= mapWithType (checkFunction tt prior) filteredClauses in
 			   (refusedStms, translated)
 
-checkFunction		:: TypeTable -> PriorityTable -> Type -> [Clause] -> [TClause]
+checkFunction		:: TypeTable -> PrecedenceTable -> Type -> [Clause] -> [TClause]
 checkFunction tt prior t
 			=  map $ checkClause tt prior t
 
