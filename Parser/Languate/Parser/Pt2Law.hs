@@ -8,6 +8,7 @@ import Languate.Parser.Pt2Type
 import Languate.Parser.Pt2Expr
 import Languate.AST
 
+import Data.Maybe
 {--
 
 This module converts the ParseTree into a law/example
@@ -15,22 +16,27 @@ This module converts the ParseTree into a law/example
 --}
 
 convert		:: AST -> Law
-convert (SimpleLaw nm declarations e1 e2)
-		= Law nm declarations e1 e2
-convert(BirdExample e1 e2)
-		= Example e1 e2
+convert (DiffLaw nm declarations e1 e2)
+		= Law nm declarations e1 $ toTrue e2
+convert(SimpleLaw nm e1 e2)
+		= Example nm e1 $ toTrue e2
 convert ast	= convErr "Pt2Law" ast
+
+toTrue		:: Maybe Expression -> Expression
+toTrue		=  fromMaybe (Call "True")
 
 
 data AST	= Tilde	| Bird	| Colon	| Equals
 		| ForAll	| Comma
-		| LawName Name	
+		| LawName Name
 		| Ident Name	| Idents [Name]
 		| Type Type
 		| TypeDecl [(Name, Maybe Type)]
 		| Expr Expression
-		| SimpleLaw Name [(Name, Maybe Type)] Expression Expression
-		| BirdExample Expression Expression
+		| RightExpr Expression
+		-- simplelaw: has no declarations, thus easy for the interpreter
+		| DiffLaw (Maybe Name) [(Name, Maybe Type)] Expression (Maybe Expression)
+		| SimpleLaw (Maybe Name) Expression (Maybe Expression)
 	deriving (Show)
 
 
@@ -59,15 +65,25 @@ s "lawDeclarations" asts
 		= mergeTypeDecl asts []
 s "law" [typeDecls, ForAll]
 		= typeDecls
-s "law" [Tilde, LawName name, Colon, TypeDecl decls, Expr e1, Equals, Expr e2]
-		= SimpleLaw name decls e1 e2
-s "law" [Tilde, LawName name, Colon, Expr e1, Equals, Expr e2]
-		= SimpleLaw name [] e1 e2
-s "example" [Bird, Expr e1, Equals, Expr e2]
-		= BirdExample e1 e2
+s "law" (LawName name : TypeDecl decls : Expr e1 :maybeRightExpr)
+		= DiffLaw (Just name) decls e1 $ rightExpr maybeRightExpr
+s "law" (LawName name : Expr e1 : maybeRightExpr)
+		= SimpleLaw (Just name) e1 $ rightExpr maybeRightExpr
+s "law" (Bird : Expr e1 : maybeRightExpr)
+		= SimpleLaw Nothing e1 $ rightExpr maybeRightExpr
+s "law" (Bird : TypeDecl decls : Expr e1 : maybeRightExpr)
+		= DiffLaw Nothing decls e1 $ rightExpr maybeRightExpr
+s "law" [Equals, Expr e]
+		= RightExpr e
+s "law" [Tilde, LawName nm, Colon]
+		= LawName nm
 s _ [ast]  	= ast
 s nm asts	= seqErr "Pt2Law" nm asts
 
+rightExpr	:: [AST] -> Maybe Expression
+rightExpr []	=  Nothing
+rightExpr [RightExpr e]
+		= Just e
 
 makeLawDecl	:: [AST] -> [Name] -> AST
 makeLawDecl [] idents

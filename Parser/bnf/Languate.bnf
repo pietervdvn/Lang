@@ -16,4 +16,4 @@ import Annotations
 
 statement	::= function | data | nls? synonym | nls? subtype | class | annotation | nls
 
-module		::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (example nl)* nls? 
+module		::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (law nl)* nls? 

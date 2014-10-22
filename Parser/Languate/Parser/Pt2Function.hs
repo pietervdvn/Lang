@@ -38,7 +38,7 @@ convert ast	= let (Root asts)	= normalize ast in
 conv		:: AST -> Function -> Function
 conv (LineT clause)
 		= addClause clause
-conv (LawAst law)	
+conv (LawAst law)
 		= addLaw law
 conv (Decl typ)
 		= addDecl typ
@@ -50,7 +50,7 @@ conv (Comm comms)
 		= conv (Comm $ init comms)
 conv (Root asts)
 		= \func -> foldr conv func asts
-	
+
 
 preComms	:: [AST] -> [Comment]
 preComms	=  init' . concatMap (\(Comm c) -> c) . filter isComment
@@ -64,7 +64,7 @@ data AST	= Decl (Name, Type, Visible)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nl", Comm . (:[]) . fromMaybe "" . pt2nl), ("nls", Comm . pt2nls),("law", LawAst . pt2law),("example", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
+h		=  [("nl", Comm . (:[]) . fromMaybe "" . pt2nl), ("nls", Comm . pt2nls),("law", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
 
 s _ [ast]	= ast
 s _ asts	= Root asts
@@ -82,5 +82,3 @@ isComment	:: AST -> Bool
 isComment (Comm _)
 		= True
 isComment _	= False
-
-

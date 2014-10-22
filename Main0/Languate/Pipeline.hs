@@ -8,6 +8,7 @@ This module implements the pipeline, where everythin is loaded step by step from
 
 import Bnf
 import Languate.AST
+import Languate.TAST (typeOf, TypedExpression)
 import Languate.File2Package
 import Languate.FQN
 import Languate.TypedPackage
@@ -39,16 +40,25 @@ doAllStuff	= do	bnfs	<- Bnf.load bnfPath
 			let precTable	= buildPrecTable $ elems package
  			let tpack	= normalizePackage $ typeCheck precTable fqpn package
 			let evalf	= eval' tpack precTable
-			let exampleErrs	= checkModules evalf package
+			let typeOfF	= typeOf' tpack precTable
+			let exampleErrs	= checkModules evalf typeOfF package
 			catch (putStrLn exampleErrs) hndl
 			return (tpack,bnfs,precTable)
 				where 	hndl	:: SomeException -> IO ()
 					hndl msg	= putStrLn $ "Woops! Something went wrong with testing!\n"++show msg
 
 
+typeOf'		:: TPackage -> PrecedenceTable -> FQN -> Expression -> Type
+typeOf' tpack precT fqn expr
+		= let texpr	= typeExpr tpack precT fqn expr in
+		  	head $ typeOf texpr
 
 eval'		:: TPackage -> PrecedenceTable -> FQN -> Expression -> Value
 eval' tpack precT fqn expr
-		= let tmod = fromMaybe (error $ "Module not found: "++show fqn) $  Map.lookup fqn tpack in
-			let texpr	= convExpr tmod $ expr2prefExpr precT expr in
-				runReader (evalExpr multApply texpr) (Context tpack fqn [])
+		= let texpr	= typeExpr tpack precT fqn expr in
+			runReader (evalExpr multApply texpr) (Context tpack fqn [])
+
+typeExpr	:: TPackage -> PrecedenceTable -> FQN -> Expression -> TypedExpression
+typeExpr tpack precT fqn expr
+		=  let tmod = fromMaybe (error $ "Module not found: "++show fqn) $  Map.lookup fqn tpack in
+		   	convExpr tmod $ expr2prefExpr precT expr

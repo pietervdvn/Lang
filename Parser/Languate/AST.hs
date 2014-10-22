@@ -240,8 +240,8 @@ Deconstruct "(:)" [ Deconstruct "id" [Assign "a", Assign "b"],  Deconstruct "(:)
 
 -- ### stuff 'around' function definitions
 
-data Law	= Law Name [(Name, Maybe Type)] Expression Expression
-		| Example Expression Expression
+data Law	= Law (Maybe Name) [(Name, Maybe Type)] Expression Expression
+		| Example (Maybe Name) Expression Expression	-- can be interpreted easily
 	deriving (Show)
 
 type Comment	= String

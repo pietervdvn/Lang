@@ -16,11 +16,18 @@ public import Patterns
 _$lawname		::= "[a..zA..Z0..9 ]+"
 _lawDeclaration	::= localIdent ("," localIdent)* (":" type)?
 _lawDeclarations	::= lawDeclaration ("," lawDeclaration)*
--- TODO convert to ("~" lawname ":" | ">"), remove example rule
-law		::= "~" lawname ":" (lawDeclarations "=>")? expr  "=" expr
 
--- examples are like laws, but simpler. They serve the purpose of showing the reader what a certain expression reduces to
-example		::= ">" expr "=" expr
+{- "=>" can never be parsed as operator. That is why it is will be disambiguated from an expression
+~ name of law: expr = expr
+> expr = expr
+When no right hand expression is found, the expression will be treated as an tautology
+e.g.
+> True
+~ neutral element for or: True || False
+-}
+law		::=  ( "~" lawname ":" | ">") (lawDeclarations "=>")? expr  ("=" expr)?
+
+
 
 declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type?
 
@@ -28,7 +35,7 @@ declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type?
 -- functions might have multiple types too
 _patterns	::= patternRoot*
 clause		::= patterns "=" expr (nltab expr)*
-function	::= nls* ( (law | example) nl)* (declaration nl)+ (clause nl)+
+function	::= nls* (law nl)* (declaration nl)+ (clause nl)+
 
 {-
 law example
