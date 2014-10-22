@@ -28,6 +28,7 @@ import Control.Exception (catch, SomeException)
 
 bnfPath	= "Parser/bnf/Languate"
 project	= "workspace/Data/src/"
+docs	= "workspace/Data/.gen/"
 
 fqpn		= fromJust $ toFQPN "pietervdvn:Data"
 prelude		= fromJust $ toFqn' fqpn [] "Prelude"
@@ -38,6 +39,7 @@ doAllStuff	:: IO (TypedPackage, World, PrecedenceTable)
 doAllStuff	= do	bnfs	<- Bnf.load bnfPath
 			package	<- loadPackage' bnfs prelude project
 			let precTable	= buildPrecTable $ elems package
+			writePrecT precTable
  			let tpack	= normalizePackage $ typeCheck precTable fqpn package
 			let evalf	= eval' tpack precTable
 			let typeOfF	= typeOf' tpack precTable
@@ -62,3 +64,7 @@ typeExpr	:: TPackage -> PrecedenceTable -> FQN -> Expression -> TypedExpression
 typeExpr tpack precT fqn expr
 		=  let tmod = fromMaybe (error $ "Module not found: "++show fqn) $  Map.lookup fqn tpack in
 		   	convExpr tmod $ expr2prefExpr precT expr
+
+writePrecT	:: PrecedenceTable -> IO ()
+writePrecT prcT	=  do 	writeFile (docs ++ "OperatorOverview.md") $ show prcT
+			putStrLn $ "Written operator overview to "++docs

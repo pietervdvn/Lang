@@ -26,7 +26,7 @@ import Data.Map (findWithDefault)
 import Languate.Pipeline
 import Data.Time.Clock
 
-version	= "0.0.0.0.3"
+version	= "0.0.0.0.4"
 
 
 start	:: IO ()
