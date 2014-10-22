@@ -30,8 +30,8 @@ _checkClause	:: TypeTable -> PrecedenceTable -> Type -> [Pattern] -> Expression 
 _checkClause tt prior (Curry tps) ptrs expr
 		= let (checkedPtrs, closure)	= checkPattern (tt, prior) ptrs (init' tps) in
 		  let tt'	= TT tt $ Map.map (:[]) closure in
-		  let expr'	= expr2prefExpr prior $ precheck tt' $ remNl expr in
-		  let texpr	= runReader (typeCheck expr') tt in
+		  let expr'	= precheck tt' $ expr2prefExpr prior $ remNl expr in
+		  let texpr	= runReader (typeCheck expr') tt' in
 		  let texpr'	= checkReturnType (last tps) texpr in
 		  TClause checkedPtrs texpr'
 _checkClause tt prior t ptrs expr

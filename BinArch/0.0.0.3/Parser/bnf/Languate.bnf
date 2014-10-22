@@ -1,0 +1,19 @@
+Languate
+
+author		"Pieter Vander Vennet"
+date		[2014, 5, 29, 21, 48, 42]
+desc		"The syntaxis of the Languate programming language"
+
+import Functions
+import Comments
+import Expressions
+import TypeDefs
+import Imports
+import Annotations
+
+
+{- Where it all begins -}
+
+statement	::= function | data | nls? synonym | nls? subtype | class | annotation | nls
+
+module		::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (example nl)* nls? 

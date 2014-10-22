@@ -1,0 +1,12 @@
+Nat
+---
+Operators on Nat
+---
+
+@precedence: (²) is postfix, (²) < (*)
+@precedence: (³) is postfix, (³) = (²)
+@precedence: (+) is Left, (+) = (-), (!) < (+), (+) < (&&)
+@precedence: (-) is Left, (+) = (-)
+@precedence: (*) is Left, (*) < (+)
+@precedence: (/) is Left, (/) = (*)
+@precedence: (%) is Left, (%) = (*)

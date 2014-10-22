@@ -1,0 +1,39 @@
+Patterns
+
+author		"Pieter Vander Vennet"
+date		[2014, 06, 11, 20, 37, 42]
+desc		"The syntaxis of pattern matching in Languate"
+
+import Prelude
+import Expressions
+
+-- patterns starting with $ are evaluated and should match the argument
+patternRoot	::= "\*" | "_" 
+		| ( "$" simpleExpr | globalIdent | localIdent | nat | dict | list | tuple 	| "\(" pattern "\)" )  (("@" patternRoot)?)
+_$ident		::= localIdent | globalIdent | op
+_deconstructed	::= patternRoot*
+pattern		::= ident deconstructed | "-" nat
+freePattern	::= patternRoot | pattern
+
+{-
+following expressions match a ...
+{a}	-- set with single element 'a' / dict with single key 'a'
+{a:as}	-- set with element 'a'/ dict with key 'a'
+{a --> b : as} -- dict with a key 'a' which dicts on 'b'
+{a --> b}	-- dict with single pair
+{0}		-- set with single element which is 0
+{0 --> a}	-- dict with only key, 0, which dicts on an element 'a'
+{0 --> 1}	-- dict in which the key 0 dicts on zero (no other elements)
+{a --> 0}	-- dict in which some element has value 0. Not efficient, never used
+
+A set can not be differentiated from a dict
+-}
+_dictPart		::= freePattern ("-->" freePattern)?
+_dict		::= "\{" dictPart ("," dictPart)* (":" patternRoot)? "\}"
+
+_list		::= "\[" freePattern ("," freePattern)* (":" freePattern)? "\]"
+
+_tuple		::= "\(" freePattern ("," freePattern)+ "\)"
+
+
+
