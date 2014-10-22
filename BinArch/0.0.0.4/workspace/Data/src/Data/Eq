@@ -1,0 +1,24 @@
+Eq
+---
+Implements the class of types which can be compared for equivalence, together with some default functions.
+---
+
+import Data.Bool
+
+@precedence: (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
+@precedence: (!=) is Left, (!=) = (==)
+---
+When a type is instance of ''Eq'' it means data of this type can be compared for equivalence.
+class Eq eq:
+	-- Checks if the two given values are the same.
+	> !True == False	= True
+	> True == True || False	= False
+	~ operator precedence: a,b,c,d:Bool => a == b && c == d	= (a == b) && (c == d)
+	> a,b:Bool => !a == b	= (!a) == b
+	(==)	: eq is Eq	=> eq -> eq -> Bool
+
+-- The opposite of ''==''.
+~ excluded third : a,b : Eq => a != b	=   ! (a == b)
+(!=)	: eq is Eq => eq -> eq -> Bool
+a b	= ! (a == b)
+---

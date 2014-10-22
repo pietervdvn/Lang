@@ -1,0 +1,60 @@
+Bool
+---
+The bool type is a type which represents logical values.
+---
+
+--## Definition
+
+-- The ''Bool'' datatype represents truth values of logic.
+data Bool	= False
+		| True
+
+--## Logical operations
+
+@ precedence: (&&) is left, (&&) = (||)
+-- Logical 'and'-function. Returns True if, and only if both arguments are True
+  ~ annihilator for and	: b => False && b	= False
+  ~ neutral element for and: b => True && b	= b
+  > True && True		= True
+  > False && True && False	= False
+  > True && True	= True
+  > True && False	= False
+(&&)		: Bool -> Bool -> Bool
+  True True	= True
+  *		= False
+
+@ precedence: (||) is left, (||) = (&&)
+-- Logical 'or'-function. Returns False if, and only if both arguments are False
+  ~ annihilator for or	: b => True || b	= True
+  ~ neutral element for or: b => False  || b	= b
+  > False || False		= False
+  > False || True || False	= True
+(||)		: Bool -> Bool -> Bool
+or		: Bool -> Bool -> Bool
+  False False	= False
+  *		= True
+
+@ precedence: (!) is prefix, (!) < (&&)
+-- Logical 'not' function (aka invert).
+---  ~ double not	: b => ! !b = b
+  > !True	= False
+  > !False	= True
+  > !False && True	= True ---
+(!)	: Bool -> Bool
+  True	= False
+  False	= True
+
+--## Convertion to other types
+
+-- show to get a String representation
+--- show	: Bool -> String
+--True	= "True"
+--False	= "False"
+---
+
+-- convert with cast
+--  > (Nat) True	= 1
+-- > (Nat) False	= 0
+convert	: Bool -> Nat
+  True	= 1
+  False	= 0
