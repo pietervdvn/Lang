@@ -26,7 +26,7 @@ evalExpr _ (TChr c)
 		= return $ ADT (ord c) (Normal "Char") []
 evalExpr apply (TApplication ts expr exprs)
 		= do	args	<- mapM (evalExpr apply) exprs
-			if isBuiltinTCall expr then builtinAppl apply expr args 
+			if isBuiltinTCall expr then builtinAppl apply expr args
 				else do	func	<- evalExpr apply expr
 					apply args func
 -- if the name is locally known, use the local variable; if not convert to a VCall (delegate lookup to semantal)
@@ -35,7 +35,7 @@ evalExpr _ (TCall possTypes name)
 			ctx		<- ask
 			if isJust localVar then return $ fromJust localVar
 				else do	if not $ isBuiltin name then return $ VCall ctx (Signature name $ selectT name possTypes)
-						else return $ VCall ctx (Signature name Infer)
+						 	else return $ VCall ctx (Signature name Infer)
 
 
 builtinAppl	:: ([Value] -> Value -> RC Value) -> TExpression -> [Value] -> RC Value

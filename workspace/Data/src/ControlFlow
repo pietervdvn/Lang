@@ -22,5 +22,3 @@ a _	= a
 if		: Bool -> a -> a -> a
 True  a _	= a
 False _ b	= b 
-
-

@@ -1,7 +1,7 @@
 module Languate.Interpreter.Application where
 
 {-
-Interpreter.Application handles the application of arguments. 
+Interpreter.Application handles the application of arguments.
 Apply takes a value and an argument, and produces a new value, the one representing the result.
 Might give an error
 -}
@@ -48,7 +48,7 @@ apply (TupleVal _) _
 	= error "Application of an argument against a tuple value is not allowed"
 apply vcall@(VCall _ _) _
 	= error $ "all arguments should be passed through 'expand' first. This is a bug (" ++ show vcall++")"
-apply (Lambda [] retTp clauses) arg	= error $ "Application of an argument on a function which doesn't need an extra argument: "++ (show $ map snd clauses)
+apply (Lambda [] retTp clauses) arg	= error $ "Application of an argument on a function which doesn't need an extra argument: "++ (show $ map snd clauses)++"; arg is "++show arg
 apply (Lambda (argTp:argTps) retTp clauses) arg
 	= do	clausesBind'	<- matches defaultFunctions clauses arg	-- returns clauses where the pattern match didn't fail; these clauses need one arg less and carry their context
 		ctx		<- ask

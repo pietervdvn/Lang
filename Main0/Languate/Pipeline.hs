@@ -8,20 +8,22 @@ This module implements the pipeline, where everythin is loaded step by step from
 
 import Bnf
 import Languate.AST
-import Languate.TypedLoader
 import Languate.File2Package
 import Languate.FQN
 import Languate.TypedPackage
+import Languate.TypedLoader
 import Languate.Interpreter.EvalExpr (evalExpr)
 import Languate.Interpreter.Application (multApply)
 import Languate.CheckExamples
 import Languate.InterpreterDef
 import Languate.ReadEvalPrint
+import Languate.Precedence.Precedence
 
 import Data.Maybe
 import Data.Map as Map
 
 import Control.Monad.Reader
+import Control.Exception (catch, SomeException)
 
 bnfPath	= "Parser/bnf/Languate"
 project	= "workspace/Data/src/"
@@ -31,19 +33,22 @@ prelude		= fromJust $ toFqn' fqpn [] "Prelude"
 bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
 
 
-doAllStuff	:: IO (TypedPackage, World)
+doAllStuff	:: IO (TypedPackage, World, PrecedenceTable)
 doAllStuff	= do	bnfs	<- Bnf.load bnfPath
 			package	<- loadPackage' bnfs prelude project
-			
- 			let tpack	= normalizePackage $ typeCheck fqpn package
-			let evalf	= eval' tpack
+			let precTable	= buildPrecTable $ elems package
+ 			let tpack	= normalizePackage $ typeCheck precTable fqpn package
+			let evalf	= eval' tpack precTable
 			let exampleErrs	= checkModules evalf package
-			putStrLn exampleErrs
-			return (tpack,bnfs)
+			catch (putStrLn exampleErrs) hndl
+			return (tpack,bnfs,precTable)
+				where 	hndl	:: SomeException -> IO ()
+					hndl msg	= putStrLn $ "Woops! Something went wrong with testing!\n"++show msg
 
 
-eval'		:: TPackage -> FQN -> Expression -> Value
-eval' tpack fqn expr
+
+eval'		:: TPackage -> PrecedenceTable -> FQN -> Expression -> Value
+eval' tpack precT fqn expr
 		= let tmod = fromMaybe (error $ "Module not found: "++show fqn) $  Map.lookup fqn tpack in
-			let texpr	= convExpr tmod expr in
+			let texpr	= convExpr tmod $ expr2prefExpr precT expr in
 				runReader (evalExpr multApply texpr) (Context tpack fqn [])
