@@ -29,6 +29,8 @@ import Control.Monad
 import Control.Monad.Reader
 import Data.Maybe
 
+import Debug.Trace
+
 
 type TypedClosure	= Map Name Type
 
@@ -67,12 +69,10 @@ checkOne ctx (Deconstruct function patterns) t
 			let err		= error $ "Deconstruction function not found (for pattern): "++function
 			let typs	= fromMaybe err funcType
 			let deconstrType	= filter (validFunctionType (length patterns) t) $ map normalize typs	-- now filtered for a -> Mabye (.,.,.)
-			when (null deconstrType) $ error $
-				"The deconstructor function "++function++
-				" does not have the right type, expected function of type "++
-				show (validType t)
+			let err'	= error $ "The deconstructor function "++function++" does not have the right type, expected function of type "++show (validType t)++", but we only found types "++show typs++"\n"++show ctx
+			let deconstrType' = if (null deconstrType) then err' else deconstrType
 			-- there can only be one function with this signature
-			let [actualFunctionType]	= deconstrType
+			let [actualFunctionType]	= deconstrType'
 			let producedTypes		= returnedType actualFunctionType
 			-- producedTypes are now the types that the subpatterns should match
 			-- sanitized to remove embedded multidontcares
@@ -80,6 +80,8 @@ checkOne ctx (Deconstruct function patterns) t
 			patterns	<- checkAll ctx patterns' producedTypes
 			-- the signature is the signature of the function that is called. The type will thus typically be ''a -> (b,c,d,...)?''
 			return $ TDeconstruct (Signature function actualFunctionType) patterns
+
+
 checkOne _ (DontCare) _
 		= return TDontCare
 checkOne ctx (Multi patterns) t
@@ -100,13 +102,17 @@ validType t	=  Curry [t, Applied (Normal "Maybe") [Free "(.,.,..)"]]
 
 -- converts a valid deconstructor-functiontype into the types it returns (thus the tuple types)
 returnedType		:: Type -> [Type]
-returnedType (Curry [t, Applied (Normal "Maybe") [TupleType ts]])
+returnedType (Curry [_, Applied (Normal "Maybe") [TupleType ts]])
 			= ts
+returnedType (Curry [_, Applied (Normal "Maybe") [t]])
+			= [t]
 returnedType _	= error "Bug: Semantal/PatternTypeChecker/returnedType: no sanitize before returned type; should not happen"
 
-
+-- Curry [Applied (Normal "Wrap") [Free "a"],Applied (Normal "Maybe") [TupleType [Free "a"]]]]),
 -- returns true if the type is of the form ''a -> (b,c,d,...)?'' with exactly i tuple arguments
 validFunctionType	:: Int -> Type -> Type -> Bool
 validFunctionType i expSource (Curry [actSource, Applied (Normal "Maybe") [TupleType ts]])
-	= expSource == actSource && i == length ts
-validFunctionType _ _ _	= False
+	=  i == length ts && normalize expSource == normalize actSource
+validFunctionType i expSource (Curry [actSource, Applied (Normal "Maybe") [_]])
+	=  i == 1 && normalize expSource == normalize actSource
+validFunctionType _ _ t	=  False

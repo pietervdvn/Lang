@@ -85,7 +85,7 @@ genDetDeconstr adtName frees constr types
 		= let varNames 	= take (length types) vars in
 		  let docStr	= "Deterministic deconstructor '"++constr++"' for the ADT '"++adtName++"' which has only one constructor" in
 		  let typ	= Curry $ apply adtName frees:[tuple types] in
-		  let decl	= [(constr, typ)] in
+		  let decl	= [("un"++constr, typ)] in
 		  let pattern	= Deconstruct "#fromADT" $ map Assign varNames in
 		  let expr	= Seq $ BuiltIn "asTuple":map Call varNames in
 			Function docStr Public decl [{-no laws-}] [Clause [pattern] expr]

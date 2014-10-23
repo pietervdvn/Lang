@@ -39,4 +39,5 @@ fqn n	= toFQN' $ "pietervdvn:Data:" ++ n
 fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
 t	= do	package	<- packageIO
-		return $ buildTyped fqpn priorTable package
+		let tpack = buildTyped fqpn priorTable package
+		return tpack
