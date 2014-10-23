@@ -1,0 +1,11 @@
+Wrapper
+---------
+Test module for interpreter, contains a wrapper.
+TODO Scheduled for destruction
+---------
+
+-- A wrapper with only one constructor
+data Wrap a	= Wrap a
+
+unwrap		: Wrap a -> a
+(Wrap a)	= a

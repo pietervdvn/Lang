@@ -87,7 +87,7 @@ genDetDeconstr adtName frees constr types
 		  let typ	= Curry $ apply adtName frees:[tuple types] in
 		  let decl	= [(constr, typ)] in
 		  let pattern	= Deconstruct "#fromADT" $ map Assign varNames in
-		  let expr	= Seq $ Call "#asTuple":map Call varNames in
+		  let expr	= Seq $ BuiltIn "asTuple":map Call varNames in
 			Function docStr Public decl [{-no laws-}] [Clause [pattern] expr]
 
 injectVis	:: Visible -> Function -> Function
