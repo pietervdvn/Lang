@@ -20,7 +20,9 @@ do
 		echo ""
 		echo "cabal install $pack --force"
 		cabal install $pack --force
-		if [[ $? -ne 0 ]]
+		EXITCODE="$?"
+		echo "Exit code $EXITCODE"
+		if [[ $EXITCODE -ne 0 ]]
 		then
 			echo "Installing $pack failed"
 			exit
@@ -33,6 +35,9 @@ done
 cd Main0
 ghc Main.hs
 mv Main ../Main
+rm *.hi
+rm *.o
+rm */*.hi
+rm */*.o
 cd ..
-
 ./Main --no-repl
