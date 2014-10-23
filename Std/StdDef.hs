@@ -1,5 +1,7 @@
 module StdDef where
 
+import Data.Map (Map, insert, adjust, findWithDefault)
+import qualified Data.Map as Map
 type Name 	= String
 type FileName	= String
 type LineNumber = Int
@@ -57,9 +59,12 @@ tabs t str
 
 insertLst	:: Ord k => k -> v -> Map k [v] -> Map k [v]
 insertLst k v dict
-		=  case lookup k dict of
-			Nothing	-> insert k [v] dict
+		=  case Map.lookup k dict of
+			Nothing		-> insert k [v] dict
 			(Just lst)	-> insert k (v:lst) dict
 
-deleteFromLst	:: v -> k -> Map k [v] -> Map k [v]
+deleteFromLst	:: (Ord k, Eq v) => v -> k -> Map k [v] -> Map k [v]
 deleteFromLst n	=  adjust (filter (n /=))
+
+lookupLst	:: Ord k => k -> Map k [v] -> [v]
+lookupLst 	=  findWithDefault []
