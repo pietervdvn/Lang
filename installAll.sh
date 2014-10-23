@@ -33,3 +33,6 @@ done
 cd Main0
 ghc Main.hs
 mv Main ../Main
+cd ..
+
+./Main --no-repl

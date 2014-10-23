@@ -26,6 +26,9 @@ import Data.Map (findWithDefault)
 import Languate.Pipeline
 import Data.Time.Clock
 
+import System.Environment
+import Control.Monad
+
 version	= "0.0.0.0.4"
 
 
@@ -33,8 +36,11 @@ start	:: IO ()
 start	=  do	welcome
 		putStrLn $ "Loading bnf-files from "++bnfPath
 		(pack, bnfs, precT)	<- doAllStuff
-		putStrLn' "All done!"
-		repl bnfs pack precT prelude
+		args	<- getArgs
+		if ("--no-repl" `elem` args) then
+			putStrLn "All done!"
+		else do  putStrLn' "All done!"
+			 repl bnfs pack precT prelude
 
 
 repl	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> IO ()
