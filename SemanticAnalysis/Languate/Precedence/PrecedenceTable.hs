@@ -57,7 +57,7 @@ buildPrecTable modules
 
 
 withRepr	:: Map Name Name -> [(Name, Name)] -> [(Name, Name)]
-withRepr unions = map (\(n1,n2) -> (repr n1, repr n2))
+withRepr unions = map (repr *** repr)
 			where repr n	= fromMaybe (error $ "BUG: The operator in an LT-relation is not defined: "++n) $ lookup n unions
 
 -- checks that a class is consistent, thus that it contains not both left and right operators
@@ -65,8 +65,8 @@ withRepr unions = map (\(n1,n2) -> (repr n1, repr n2))
 checkNoMix	:: PrecedenceTable -> PrecedenceTable
 checkNoMix table@(PrecedenceTable _ _ i2op mods)
 		= let voids	= mapWithKey checkClass $ fmap (map (\op -> fromJust $ lookup op mods)) i2op in
-			if and $ map snd $ toList voids then table else error $ "Mixed precedence!"
-			where checkClass i mods	= if 1 == (length $ nub mods) then True else error $ "Precedence table error: mixed associativity in class "++show i++", operators with associativity "++show mods++" exist."
+			if all snd $ toList voids then table else error "Mixed precedence!"
+			where checkClass i mods	= 1 == length (nub mods) || error ("Precedence table error: mixed associativity in class "++show i++", operators with associativity "++show mods++" exist.")
 
 
 errorMsg	:: [(Name, Name)] -> String

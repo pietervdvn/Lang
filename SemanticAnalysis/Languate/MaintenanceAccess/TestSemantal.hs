@@ -1,8 +1,5 @@
 module Languate.MaintenanceAccess.TestSemantal where
 
-import System.IO.Unsafe
-
-
 import Languate.File2Package
 import Languate.FQN
 import Languate.Package2TypedPackage
@@ -14,6 +11,7 @@ import Languate.Precedence.Precedence
 import Data.Maybe
 import Prelude hiding (lookup, Left, Right)
 import Data.Map as Map hiding (map)
+
 import System.IO.Unsafe
 
 import qualified Bnf

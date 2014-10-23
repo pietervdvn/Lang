@@ -33,9 +33,9 @@ evalExpr apply (TApplication ts expr exprs)
 evalExpr _ (TCall possTypes name)
 		= do	localVar	<- searchLocal name
 			ctx		<- ask
-			if isJust localVar then return $ fromJust localVar
-				else do	if not $ isBuiltin name then return $ VCall ctx (Signature name $ selectT name possTypes)
-						 	else return $ VCall ctx (Signature name Infer)
+			return $ fromMaybe (VCall ctx $ Signature name $
+					if not $ isBuiltin name then selectT name possTypes else Infer)
+				localVar
 
 
 builtinAppl	:: ([Value] -> Value -> RC Value) -> TExpression -> [Value] -> RC Value

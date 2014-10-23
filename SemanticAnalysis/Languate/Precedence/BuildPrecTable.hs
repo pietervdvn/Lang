@@ -72,8 +72,7 @@ removeGroup o (ltRel, revRel)
 			(delete o $ foldr (deleteFromLst o) ltRel toRems, revRel)
 
 deleteFromLst	:: Name -> Name -> Map Name [Name] -> Map Name [Name]
-deleteFromLst op key dict
-		=  adjust (\lst -> filter ((/=) op) lst) key dict
+deleteFromLst n	=  adjust (filter (n /=))
 
 -- searches for entries with empty keys
 emptyKey	:: Map Name [Name] -> [Name]
@@ -137,7 +136,7 @@ representative nm
 			let nmv	= lookup nm dict
 			case nmv of
 				(Just found)	-> collapse nm found
-				(Nothing)	-> do	return nm
+				(Nothing)	-> return nm
 
 
 collapse	:: Name -> Name -> State (Map Name Name) Name

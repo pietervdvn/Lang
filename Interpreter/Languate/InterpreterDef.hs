@@ -48,14 +48,14 @@ sv (ADT i t vals)
 sv (VCall _ (Signature name _))
 	= "CALL: " ++  show name
 sv (Lambda argT retT tClause)
-	=  "LAMBDA: <"++show argT++"> -> <"++show retT++">" ++ (show $ map snd tClause)
+	=  "LAMBDA: <"++show argT++"> -> <"++show retT++">" ++ show (map snd tClause)
 sv (TupleVal vals)
 	= "TUPLE "++ show vals
 
 instance Show Context where
 	show	= sc
 
-sc ctx	= "Context: @"++(show $ country ctx)++" ; locally known: "++(show $ map fst $ bindings ctx)
+sc ctx	= "Context: @"++show (country ctx)++" ; locally known: "++show (map fst $ bindings ctx)
 
 typeOfValue		:: Value -> Type
 typeOfValue (ADT _ t _)	= t

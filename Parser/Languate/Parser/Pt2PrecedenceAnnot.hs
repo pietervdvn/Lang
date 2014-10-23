@@ -37,11 +37,11 @@ t		:: Name -> String -> AST
 t _ "@"		= AtT
 t _ "precedence"
 		= PrecT
-t _ ":"		= ColonT
 t _ ","		= CommaT
 t _ "("		= ParO
 t _ ")"		= ParC
 t "parOp" op	= Op op
+t _ ":"		= ColonT
 t "left" _	= LeftT
 t "right" _	= RightT
 t "prefix" _	= PrefixT

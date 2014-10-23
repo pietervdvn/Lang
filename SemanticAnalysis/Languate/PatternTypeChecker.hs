@@ -70,7 +70,7 @@ checkOne ctx (Deconstruct function patterns) t
 			let typs	= fromMaybe err funcType
 			let deconstrType	= filter (validFunctionType (length patterns) t) $ map normalize typs	-- now filtered for a -> Mabye (.,.,.)
 			let err'	= error $ "The deconstructor function "++function++" does not have the right type, expected function of type "++show (validType t)++", but we only found types "++show typs++"\n"++show ctx
-			let deconstrType' = if (null deconstrType) then err' else deconstrType
+			let deconstrType' = if null deconstrType then err' else deconstrType
 			-- there can only be one function with this signature
 			let [actualFunctionType]	= deconstrType'
 			let producedTypes		= returnedType actualFunctionType

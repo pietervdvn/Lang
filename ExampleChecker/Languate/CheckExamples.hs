@@ -33,7 +33,7 @@ getTypeMsg typeOf e1 e2
 checkExamples	:: (Eq a, Eq t, Show t) => (Expression -> a) -> (Expression -> t) -> [Law] -> [String]
 checkExamples eval typeOf laws
 		= do	Example _ e1 e2 	<- filter isExample laws
-			let checkedEx	= if checkExample eval e1 e2 then return [] else return $ genMsg e1 e2
+			let checkedEx	= return (if checkExample eval e1 e2 then [] else genMsg e1 e2)
 			if checkType typeOf e1 e2 then checkedEx else return $ getTypeMsg typeOf e1 e2
 
 checkModule	:: (Eq a, Eq t, Show t) => (Expression -> a) -> (Expression -> t) ->  Module -> [String]
@@ -43,16 +43,16 @@ checkModule eval typeOf mod
 
 checkModule' eval typeOf mod
 		= let msgs	= checkModule eval typeOf mod in
-			if null msgs then "" else  "\nChecking examples in " ++ moduleName mod++":\n " ++ (intercalate "\n " $ filter ((/=) "") msgs)
+			if null msgs then "" else  "\nChecking examples in " ++ moduleName mod++":\n " ++ intercalate "\n " (filter ("" /=) msgs)
 
 checkModules	:: (Eq a, Eq t, Show t) => (FQN -> Expression -> a) -> (FQN -> Expression -> t) ->  Map FQN Module -> String
 checkModules eval typeOf
-		= concat . map (\(fqn, mod) -> checkModule' (eval fqn) (typeOf fqn) mod) . toList
+		= concatMap (\(fqn, mod) -> checkModule' (eval fqn) (typeOf fqn) mod) . toList
 
 
 
 isExample	:: Law -> Bool
-isExample (Example _ _ _)
+isExample Example{}
 		= True
 isExample _	= False
 

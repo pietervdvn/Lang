@@ -139,7 +139,7 @@ ne (Tuple exprs)=  Tuple $ map ne exprs
 ne e		=  e
 
 nes		:: [Expression] -> [Expression]
-nes		=  filter ((/=) (Seq [])) . map ne
+nes		=  filter (Seq [] /=) . map ne
 
 isOperator	:: Expression -> Bool
 isOperator (Operator _)	= True
@@ -296,7 +296,7 @@ data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in t
 instance Show Annotation where
 	show (Annotation name str)	= "@ "++name++" : "++str
 	show (PrecAnnot n mod rels)
-		= "@ precedence : "++n++" is "++show mod++", "++(intercalate ", " $ map show rels)
+		= "@ precedence : "++n++" is "++show mod++", "++ intercalate ", " (map show rels)
 
 data PrecModifier	= PrecLeft | PrecRight | PrecPrefix | PrecPostfix
 	deriving (Eq)

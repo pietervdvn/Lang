@@ -31,14 +31,14 @@ searchLocal	:: Name -> RC (Maybe Value)
 searchLocal nm	=  do	binds	<- ask' bindings
 			return $ lookup nm binds
 
--- searches within the module (not within the bindings)	
+-- searches within the module (not within the bindings)
 searchGlobal	:: Signature -> RC (Maybe [TClause])
 searchGlobal sign
 	= do	w	<- ask' world
 		fqn	<- ask' country
 		let err	= error ("No module found with name "++show fqn++_errStr)
 		let tcs	=  typedClauses $ findWithDefault err fqn w
-		let foundMod	= lookupSt sign tcs 
+		let foundMod	= lookupSt sign tcs
 		return foundMod
 
 -- searches witing the module (not within the bindings) and wrap it as a lambda
@@ -72,14 +72,14 @@ firstJust (Just a) _	= Just a
 firstJust _ a	= a
 
 -- given: the possible types of an expression, the type this expression should return,
--- e.g. [Bool -> Int -> Bool, Int -> Int -> Int] -> Bool -> [Bool, Int] 
+-- e.g. [Bool -> Int -> Bool, Int -> Int -> Int] -> Bool -> [Bool, Int]
 neededArgs	:: [Type] -> Type -> [Type]
 neededArgs possible req
 		= 	let possibleResults 	= map fst $ filter ((==) req . snd) $ map (\(Curry ts) -> (init ts, last ts)) $ filter isCurry possible in
 			let l = length possibleResults in
 			if l == 1 then head possibleResults
-			else if l == 0 then error $ "No type found which results in a "++show req
-			else error $ "To much types found which result in a "++show req
+			else error $ (if l == 0 then "No type found which results in a "
+						else "To much types found which result in a ")++show req
 
 deCurry		:: Type -> ([Type], Type)
 deCurry (Curry [t])

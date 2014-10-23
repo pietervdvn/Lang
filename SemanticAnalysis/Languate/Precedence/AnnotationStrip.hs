@@ -16,7 +16,7 @@ getPrecedenceInfo' _	= Nothing
 
 
 getPrecedenceInfo	:: Module -> ([(Name, PrecModifier)], [PrecRelation])
-getPrecedenceInfo mod	=  second concat $ unzip $ catMaybes $ map getPrecedenceInfo' $ statements mod
+getPrecedenceInfo mod	=  second concat $ unzip $ mapMaybe getPrecedenceInfo' $ statements mod
 
 ltRelations	:: [PrecRelation] -> [(Name, Name)]
 ltRelations 	=  map (\(PrecLT o1 o2) -> (o1, o2)) . filter (not . isEqRel)

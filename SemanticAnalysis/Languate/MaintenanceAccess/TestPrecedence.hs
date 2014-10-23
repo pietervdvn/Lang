@@ -1,8 +1,5 @@
 module Languate.MaintenanceAccess.TestSemantal where
 
-import System.IO.Unsafe
-
-
 import Languate.File2Package
 import Languate.FQN
 import Languate.Package2TypedPackage
