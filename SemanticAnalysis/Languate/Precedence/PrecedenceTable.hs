@@ -36,8 +36,8 @@ precedenceOf	:: Expression -> PrecedenceTable -> Int
 precedenceOf expr (PrecedenceTable tot op2i _ _)
 		= if isOperator expr
 			then	let (Operator nm)	= expr in
-				fromJust $ lookup nm op2i
-			else	tot+1
+				findWithDefault (tot+1) nm op2i
+			else	tot+2	-- plus 2, because normal expressions have a precedence lower then unknown variables (tot+1)
 
 
 buildPrecTable modules

@@ -58,6 +58,8 @@ reSplitSeq	:: PrecedenceTable -> Int -> [Expression] -> [Expression]
 reSplitSeq pt i []	= []
 reSplitSeq pt i (op@(Operator _):tail)
 		= op:splitSeq pt i tail
+reSplitSeq pt i seq
+		= error $ "Languate/Precedence/Expr2PrefExpr.hs:reSplitSeq: falltrough on "++show seq++" with precedence "++show i
 
 
 bringInPrefix	:: PrecModifier -> [Expression] -> Expression
