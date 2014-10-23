@@ -71,9 +71,6 @@ removeGroup o (ltRel, revRel)
 		= let 	toRems	= fromMaybe [] $ lookup o revRel in
 			(delete o $ foldr (deleteFromLst o) ltRel toRems, revRel)
 
-deleteFromLst	:: Name -> Name -> Map Name [Name] -> Map Name [Name]
-deleteFromLst n	=  adjust (filter (n /=))
-
 -- searches for entries with empty keys
 emptyKey	:: Map Name [Name] -> [Name]
 emptyKey dict	=  map fst $ filter (null . snd) $ toList dict
@@ -103,13 +100,6 @@ collectGT	:: (Name, Name) -> State (Map Name [Name], Map Name [Name]) ()
 collectGT (o1,o2)
 		=  do	modify $ first $ insertLst o1 o2
 			modify $ second $ insertLst o2 o1
-
-
-insertLst	:: Ord k => k -> v -> Map k [v] -> Map k [v]
-insertLst k v dict
-		=  case lookup k dict of
-			Nothing	-> insert k [v] dict
-			(Just lst)	-> insert k (v:lst) dict
 
 -- ### Union find algorithm
 

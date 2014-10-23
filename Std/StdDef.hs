@@ -53,3 +53,13 @@ unmerge 	=  concatMap (\(a,bs) -> [(a,b) | b <- bs])
 tabs	:: Int -> String -> String
 tabs t str
 	= str ++ replicate (t - (length str `div` 8)) '\t'
+
+
+insertLst	:: Ord k => k -> v -> Map k [v] -> Map k [v]
+insertLst k v dict
+		=  case lookup k dict of
+			Nothing	-> insert k [v] dict
+			(Just lst)	-> insert k (v:lst) dict
+
+deleteFromLst	:: v -> k -> Map k [v] -> Map k [v]
+deleteFromLst n	=  adjust (filter (n /=))
