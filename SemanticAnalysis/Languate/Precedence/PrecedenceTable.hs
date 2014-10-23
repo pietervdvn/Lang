@@ -29,14 +29,13 @@ instance Show PrecedenceTable where
 
 modeOf	:: Int -> PrecedenceTable -> PrecModifier
 modeOf index (PrecedenceTable _ _ i2op mods)
-	= fromJust $ do	repr	<- lookup index i2op
-			lookup (head repr) mods
+	= fromMaybe PrecLeft $ do	repr	<- lookup index i2op
+					lookup (head repr) mods
 
 precedenceOf	:: Expression -> PrecedenceTable -> Int
 precedenceOf expr (PrecedenceTable tot op2i _ _)
 		= if isOperator expr
-			then
-				let (Operator nm)	= expr in
+			then	let (Operator nm)	= expr in
 				fromJust $ lookup nm op2i
 			else	tot+1
 

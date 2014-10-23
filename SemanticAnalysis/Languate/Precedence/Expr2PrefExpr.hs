@@ -37,7 +37,7 @@ makePref tb exprs
 
 mp	:: PrecedenceTable -> [Expression] -> Expression
 mp pt@(PrecedenceTable _ op2i i2op modifs) exprs
-	= let index	= minimum $ map (\(Operator k) -> fromJust $ lookup k op2i) $ filter isOperator exprs in		-- minimum index = should be executed as last
+	= let index	= minimum $ map (flip precedenceOf pt) $ filter isOperator exprs in		-- minimum index = should be executed as last
 	  let mode	= modeOf index pt in
 	  let seq	= filter (Seq [] /= ) $ map normalize $ splitSeq pt index exprs in
 		bringInPrefix mode seq
