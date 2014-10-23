@@ -1,7 +1,34 @@
 #! /bin/bash
 
 # installs all subcomponents, in the right order
-cabal install Std/ --force && cabal install Consumer/ --force && cabal install Regex/ --force && cabal install Bnf/ --force && cabal install Parser/ --force && cabal install Loader/ --force && cabal install SemanticAnalysis/ --force && cabal install Interpreter/ --force && cabal install ExampleChecker/ --force
+
+if [ "$1" = "" ]
+then
+	echo "Starting from Std/"
+	START="Std/"
+else
+	START=$1
+fi
+
+FOUND=0
+
+for pack in Std/ Consumer/ Regex/ Bnf/ Parser/ Loader/ SemanticAnalysis/ Interpreter/ ExampleChecker/
+do
+	if [ "$FOUND" -eq 1 -o "$START" = "$pack" ]
+	then
+		FOUND=1
+		echo ""
+		echo "cabal install $pack --force"
+		cabal install $pack --force
+		if [[ $? -ne 0 ]]
+		then
+			echo "Installing $pack failed"
+			exit
+		fi
+	else
+		echo "Skipping $pack"
+	fi
+done
 
 cd Main0
 ghc Main.hs
