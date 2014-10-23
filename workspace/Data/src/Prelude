@@ -9,4 +9,3 @@ public import Data.Bool
 public import Data.Nat
 public import Data.Eq
 public import ControlFlow
-public import Collections.Dict
