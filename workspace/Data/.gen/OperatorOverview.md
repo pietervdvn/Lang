@@ -2,24 +2,26 @@
 
 Precedence | Operators | Associativity
 ---------- | --------- | -------------
-1 | ``&&``, ``||`` | left
-2 | ``==``, ``!=`` | left
-3 | ``+``, ``-`` | left
-4 | ``!`` | prefix
-5 | ``*``, ``/``, ``%`` | left
-6 | ``²``, ``³`` | postfix
+1 | ``:`` | right
+2 | ``&&``, ``||`` | left
+3 | ``==``, ``!=`` | left
+4 | ``+``, ``-`` | left
+5 | ``!`` | prefix
+6 | ``*``, ``/``, ``%`` | left
+7 | ``²``, ``³`` | postfix
 
 Operator | Precedence | Associativity
 -------- | ---------- | -------------
-``!`` | 4 | prefix
-``!=`` | 2 | left
-``%`` | 5 | left
-``&&`` | 1 | left
-``*`` | 5 | left
-``+`` | 3 | left
-``-`` | 3 | left
-``/`` | 5 | left
-``==`` | 2 | left
-``||`` | 1 | left
-``²`` | 6 | postfix
-``³`` | 6 | postfix
+``!`` | 5 | prefix
+``!=`` | 3 | left
+``%`` | 6 | left
+``&&`` | 2 | left
+``*`` | 6 | left
+``+`` | 4 | left
+``-`` | 4 | left
+``/`` | 6 | left
+``:`` | 1 | right
+``==`` | 3 | left
+``||`` | 2 | left
+``²`` | 7 | postfix
+``³`` | 7 | postfix
