@@ -19,3 +19,4 @@ isTypedecl			:: Statement -> Bool
 isTypedecl (ADTDefStm _)	= True
 isTypedecl (SynDefStm _)	= True
 isTypedecl (SubDefStm _)	= True
+isTypedecl (ClassDefStm _)	= True

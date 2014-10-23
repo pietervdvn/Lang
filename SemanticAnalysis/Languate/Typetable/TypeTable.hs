@@ -4,8 +4,9 @@ module Languate.Typechecker.TypeTable where
 
 Everythin we know about every type we know of.
 
-This module implements the datastructure in which one can lookup what supertypes a certain type has.
+The type table keeps track of relations between types.
 
+The supertype keeps track of what type 'implements' what interface
 Supertypes can be achieved by implementing an interface, subtype HTML = String,
 This means that a type can have multiple, unrelated, direct subtypes.
 e.g.
