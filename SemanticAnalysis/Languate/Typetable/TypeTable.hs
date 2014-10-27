@@ -14,11 +14,13 @@ Bool is [Eq, Ord, Monoid, Show, ...]
 -}
 
 import Data.Map
+import Data.Set
 import Languate.AST
 
-data TypeTable	= TypeTable	{ supertypes::Map Type [Type]
-				, synonyms::Map Type Type
-				, classes::[Type]}
+data TypeTable	= TypeTable	{ known		:: Set Type
+				, supertypes	:: Map Type [Type]
+				, synonyms	:: Map Type Type
+				, classes	:: [Type]}
 
 allSuperTypes	:: SuperTypeTable -> Type -> [Type]
 allSuperTypes table typ
