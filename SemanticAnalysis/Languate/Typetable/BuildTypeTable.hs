@@ -1,22 +1,10 @@
-module Languate.Typechecker.BuildSuperTypeTable where
+module Languate.Typechecker.BuildTypeTable where
 
 {--
-This module provides functions to build the supertype table
+This module provides functions to build the type table
 --}
 
-buildSuperTypeTable	:: [Statement] -> SuperTypeTable
+buildTypeTable	:: [Statement] -> TypeTable
 
-
-
-
-
-
-typeDecls	:: [Statement]
-
-
--- tells you wether or not a statement declares a new type, (by introducing a new class, adt or subtype)
-isTypedecl			:: Statement -> Bool
-isTypedecl (ADTDefStm _)	= True
-isTypedecl (SynDefStm _)	= True
-isTypedecl (SubDefStm _)	= True
-isTypedecl (ClassDefStm _)	= True
+btt		:: Statement -> State TypeTable ()
+btt (ADTDefStm )

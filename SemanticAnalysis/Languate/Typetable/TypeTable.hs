@@ -20,7 +20,7 @@ import Languate.AST
 data TypeTable	= TypeTable	{ known		:: Set Type
 				, supertypes	:: Map Type [Type]
 				, synonyms	:: Map Type Type
-				, classes	:: [Type]}
+				, classes	:: [ClassDef]}
 
 allSuperTypes	:: SuperTypeTable -> Type -> [Type]
 allSuperTypes table typ

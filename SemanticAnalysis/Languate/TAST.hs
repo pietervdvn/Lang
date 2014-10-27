@@ -2,7 +2,7 @@ module Languate.TAST where
 
 {--
 
-This module the TypeChecked-AST, the 'simpler' version of Languate.AST.
+This module the TypeChecked-AST, the 'simpler' version of Languate.AST. It is the counterpart of Languate.AST.
 
 In these data structure, all source-code things, docs, ... are stripped of. Only the typed program remains, which will be interpreted later.
 
