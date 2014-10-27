@@ -1,11 +1,8 @@
 module Languate.MaintenanceAccess.TestSemantal where
 
+
 import Languate.File2Package
 import Languate.FQN
-import Languate.Package2TypedPackage
-import Languate.SymbolTable
-import Languate.ExportBuilder
-import Languate.Signature
 import Languate.AST
 import Data.Maybe
 import Data.Map (toList)
