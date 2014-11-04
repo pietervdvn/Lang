@@ -27,11 +27,15 @@ e.g.
 -}
 law		::=  ( "~" lawname ":" | ">") (lawDeclarations "=>")? expr  ("=" expr)?
 
+{-
+example declarations:
+	lookup	: k -> {k --> v} -> v	where k is Ord
+	lookup	: k is Ord => k -> {k --> v} -> v
+	lookup	: (k : Ord) -> {k --> v} -> v
+-}
 
+declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type
 
-declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type?
-
--- OBLIGATED COMMENTS! Yes, each declaration is OBLIGATED to have a docstring!
 -- functions might have multiple types too
 _patterns	::= patternRoot*
 clause		::= patterns "=" expr (nltab expr)*

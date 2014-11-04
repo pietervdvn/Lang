@@ -29,10 +29,23 @@ _simpleSums	::= ("\|" sum)+
 -- contains the docstrings above or on the same line
 _commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
 _sums		::= (nlt commentedSum)*
- prod		::= sum simpleSums? comment? sums
+_prod		::= sum simpleSums? comment? sums
 _freeTypes	::= localIdent*
 -- a comment is obligated, but an error will be given by another fase then the parser
  data		::= nlcomments ? "data" "_"? globalIdent freeTypes "=" prod
+
+{-
+
+data _BTree a where a is Ord
+		= Top a (BTree a) (BTree a)
+		| Nil
+data a is Ord => _BTree a
+		=
+
+data _Btree (a: Ord) (b:[a])
+		= Top
+		| Nil
+-}
 
  -------------
  -- SYN DEF --
@@ -46,7 +59,6 @@ _typeDef	::= globalIdent freeTypes "=" type
  -------------
 
  subtype	::= "subtype" "_"? typeDef
-
 
  ------------------------
  -- CLASS+INSTANCE DEF --

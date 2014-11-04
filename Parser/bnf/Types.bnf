@@ -2,8 +2,8 @@ Types
 
 author		"Pieter Vander Vennet"
 date		[2014, 06, 7, 18, 24, 42]
-desc		"The syntaxis of types in Languate. 
-		Valid types are: 
+desc		"The syntaxis of types in Languate.
+		Valid types are:
 		Int		-- a normal type, defined either as ADT or typeclass
 		Nat		-- idem
 		Int -> Nat	-- a function signature
@@ -15,6 +15,10 @@ desc		"The syntaxis of types in Languate.
 		(a -> b) -> c	-- a function which takes a function
 		{a,b -> c}	=== { a, (b -> c) }
 		Int?		=== Maybe Int
+		a		-- a free variable
+		(a : Ord, Eq)	-- a free variable with constraints, namely that a should be ord and eq
+		(a in Ord)	-- idem
+		(a is Ord, Eq)
 		"
 
 public import Prelude
@@ -24,7 +28,9 @@ public import Prelude
  -----------
 
 _$knownType	::= globalIdent
-_$freeType	::= localIdent
+_$reqSep	::= "in" | "is" | ":"
+_reqs		::= baseType ("," baseType)*
+_freeType	::= (localIdent & !reqSep) (reqSep reqs)?
 _$void		::= "\(\)"
 _$infer		::= "_"		-- compiler should infer which is the type
 _simpleType	::= knownType | freeType | void | infer | "\(" type "\)"
@@ -45,14 +51,6 @@ _curry		::= appliedType ("->" appliedType)+
 
 type		::= curry | appliedType
 
- -----------------------
- -- TYPE REQUIREMENTS --
- -----------------------
-
-_multFree	::= freeType ("," freeType)+
-_isIn		::= freeType ("is" | "in") baseType | multFree ("is" | "in" | "are") baseType
-typeReqs	::= isIn (";" isIn)* "=>"
-
 
 {-
 Type requirements arise when a certain free variable should be of a certain superclass.
@@ -65,7 +63,7 @@ A classic example is:
 Of course, we have to know that we can compare the results which the ''evalF'' gives us.
 We express this constraint as:
 
-	tripleSame	:  a in Eq => a -> a -> a -> Bool
+	tripleSame	:  (a is Eq) -> a -> a -> Bool
 
 Why not write ''tripleSame : Eq -> Eq -> Eq -> Bool''? This expresses that the first, second and third argument should all implement ''==''.
 This does, however, not express that they implement _the same_ ''==''. ''tripleSame True 0 "ABC"''  would be perfectly legal (''Bool'', ''Nat'' and ''String'' all implement ''Eq''),
@@ -74,14 +72,12 @@ but comparing two does not make sense.
 What is valid syntax?
 ---------------------
 
-You can use ''is'', ''are'' or ''in''. These are all syntactically the same.
+You can use '':'', ''is'', ''are'' or ''in''. These are all syntactically the same.
 
 This is because ''a'' **is** an ''Eq''; ''are'' is used for multiple free values. However, from typetheory point of view, a type is nothing more then the set of values that can be returned. (This is, the ''Bool'' set is nothing more then ''{True, False}''). We can say that this set lies **in** the set **Eq**, which contains all values which can be compared.
 
 E.g.:
 
-	advancedStuff	: a is Monoid; a,b are Eq; a in b => a -> a -> b -> b -> Bool
+	advancedStuff	: (a is Monoid, Eq, b) -> a -> (b is Eq) -> b -> Bool
 
 -}
-
-

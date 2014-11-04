@@ -5,6 +5,7 @@ import Normalizable
 import Data.Maybe
 import Bnf.ParseTree
 
+{-
 import Languate.Parser.Pt2Type
 import Languate.Parser.Pt2Expr
 import Languate.Parser.Pt2Comment
@@ -22,8 +23,9 @@ import Languate.Parser.Pt2PrecedenceAnnot
 import Languate.Parser.Pt2Annot
 
 import Languate.Parser.Pt2Languate
-
 import Languate.File2AST
+-}
+
 import System.IO.Unsafe
 import StdDef
 {--
@@ -54,7 +56,7 @@ pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
 					Right pt	-> pt
 					Left exception	-> error $ show exception
 			return pt
-
+{-
 -- ts rule str	=  pt rule str >>= print . simplify
 
 -- tr rule str	= pt rule str >>= print
@@ -70,3 +72,4 @@ tf convertor rule fp
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
 tst			:: (ParseTree -> a) -> Name -> String -> a
 tst convertor rule str	= convertor (unsafePerformIO $ pt rule str)
+-}
