@@ -30,7 +30,7 @@ _simpleSums	::= ("\|" sum)+
 _commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
 _sums		::= (nlt commentedSum)*
 _prod		::= sum simpleSums? comment? sums
-_freeTypes	::= localIdent*
+_freeTypes	::= constrFreeType*
 -- a comment is obligated, but an error will be given by another fase then the parser
  data		::= nlcomments ? "data" "_"? globalIdent freeTypes "=" prod
 
@@ -65,8 +65,9 @@ _typeDef	::= globalIdent freeTypes "=" type
  ------------------------
 
 -- comments are obligated, but it's not the parsers task to generate error messages
- class		::= nlcomments? "class" globalIdent localIdent ":" classBody
- classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
+ class		::= nlcomments? "class" globalIdent freeTypes subclass? ":" classBody
+_subclass	::= ("in" | "is") type
+_classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
  instance	::= "instance" globalIdent baseType
 

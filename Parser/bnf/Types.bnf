@@ -28,12 +28,14 @@ public import Prelude
  -----------
 
 _$knownType	::= globalIdent
-_$reqSep	::= "in" | "is" | ":"
+ $reqSep	::= "in" | "is" | ":"
 _reqs		::= baseType ("," baseType)*
-_freeType	::= (localIdent & !reqSep) (reqSep reqs)?
+ freeType	::= localIdent & !reqSep
+ parFreeType	::= "\(" freeType (reqSep reqs)? "\)"
+ constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
 _$infer		::= "_"		-- compiler should infer which is the type
-_simpleType	::= knownType | freeType | void | infer | "\(" type "\)"
+_simpleType	::= knownType | constrFreeType | void | infer | "\(" type "\)"
 
 
 _commaSepTypes	::= type ( "," type)*
