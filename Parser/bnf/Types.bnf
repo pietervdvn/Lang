@@ -83,5 +83,3 @@ E.g.:
 	advancedStuff	: a is Monoid; a,b are Eq; a in b => a -> a -> b -> b -> Bool
 
 -}
-
-
