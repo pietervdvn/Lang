@@ -106,14 +106,15 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 {-
 > type Name = String.
 > type Set (a in Ord)	= {a}
+  SynDef "Set" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"]
    no obligated docstring for this one! -}
-data SynDef	= SynDef Name [TypeRequirement] Type
+data SynDef	= SynDef Name [Name] Type [TypeRequirement]
 
 {-
 > subtype Name = String -- see bnf for usage
 > subtype TenSet (a in Ord)	= ...
 no obligated docstring for this one! -}
-data SubDef	= SubDef Name [TypeRequirement] Type
+data SubDef	= SubDef Name [Name] Type [TypeRequirement]
 
 -- ## Creating classes and instances
 

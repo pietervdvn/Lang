@@ -33,7 +33,7 @@ convert		:: AST -> ([Comment], Function)
 convert ast	= let (Root asts)	= normalize ast in
 		  let commAsts		= filter isComment asts in
 		  let comms		= filter (/= "") $ concatMap (\(Comm c) -> c) commAsts in
-			(init' comms, conv (Root asts) $ Function "" Public [] [] [])
+			(init' comms, conv (Root asts) $ Function "" Public [] [] [] [])
 
 conv		:: AST -> Function -> Function
 conv (LineT clause)
@@ -55,7 +55,7 @@ conv (Root asts)
 preComms	:: [AST] -> [Comment]
 preComms	=  init' . concatMap (\(Comm c) -> c) . filter isComment
 
-data AST	= Decl (Name, Type, Visible)
+data AST	= Decl (Name, Type, Visible, [TypeRequirement])
 		| LawAst Law
 		| Comm [Comment]
 		| LineT Clause
@@ -64,7 +64,11 @@ data AST	= Decl (Name, Type, Visible)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nl", Comm . (:[]) . fromMaybe "" . pt2nl), ("nls", Comm . pt2nls),("law", LawAst . pt2law),("declaration", Decl . pt2decl), ("clause",LineT . pt2line)]
+h		=  	[ ("nl"		, Comm	 . (:[]) . fromMaybe "" . pt2nl)
+		   	, ("nls"	, Comm   . pt2nls)
+			, ("law"	, LawAst . pt2law)
+			, ("declaration", Decl   . pt2decl)
+			, ("clause"	, LineT  . pt2line)]
 
 s _ [ast]	= ast
 s _ asts	= Root asts

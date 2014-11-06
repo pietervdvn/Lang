@@ -125,9 +125,9 @@ instance Show ClassDef where
 		= "ClassDef "++n ++" "++n ++ "---"++docs++"---"++show laws++show signs
 
 instance Show SubDef where
-	show (SubDef n reqs t)
-		= show n ++concatMap showTypeReq reqs ++ show t
+	show (SubDef n frees t reqs)
+		= show n ++" "++show frees ++" = " ++ show t ++ " where "++concatMap showTypeReq reqs
 
 instance Show SynDef where
-	show (SynDef n treqs t)	-- lookout! the t-reqs might eat you
-		= show "type "++n++concatMap showTypeReq treqs ++ " = "++show t
+	show (SynDef n frees t treqs)	-- lookout! the t-reqs might eat you
+		= show "type "++n++show frees ++ " = "++show t++" where "++concatMap showTypeReq treqs

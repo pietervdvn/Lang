@@ -71,20 +71,20 @@ addStms stms mod
 
 
 setDocStr	:: Comment -> Function -> Function
-setDocStr docString (Function _ v decls laws clauses)
-		= Function docString v decls laws clauses
+setDocStr docString (Function _ v decls reqs laws clauses)
+		= Function docString v decls reqs laws clauses
 
 addClause	:: Clause -> Function -> Function
-addClause clause (Function docString v decls laws clauses)
-		= Function docString v decls laws $ clause:clauses
+addClause clause (Function docString v decls reqs laws clauses)
+		= Function docString v decls reqs laws $ clause:clauses
 
 addLaw		:: Law -> Function -> Function
-addLaw law (Function docString v decls laws clauses)
-		= Function docString v decls (law:laws) clauses
+addLaw law (Function docString v decls reqs laws clauses)
+		= Function docString v decls reqs (law:laws) clauses
 
-addDecl		:: (Name,Type, Visible) -> Function -> Function
-addDecl (n,t,v) (Function docString visibility decls laws clauses)
-		= Function docString (vAnd v visibility) ((n,t):decls) laws clauses
+addDecl		:: (Name,Type, Visible, [TypeRequirement]) -> Function -> Function
+addDecl (n,t,v,reqs') (Function docString visibility decls reqs laws clauses)
+		= Function docString (vAnd v visibility) ((n,t):decls) (reqs' ++ reqs) laws clauses
 			where 	vAnd	:: Visible -> Visible -> Visible
 				vAnd Public Public	= Public
 				vAnd _ _		= Private
@@ -98,5 +98,3 @@ setCommentIf comm sum@(ADTSum _ _ Nothing _)
 		= setComment comm sum
 setCommentIf _ sum
 		= sum
-	
-
