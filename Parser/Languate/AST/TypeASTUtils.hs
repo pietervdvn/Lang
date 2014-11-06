@@ -71,7 +71,7 @@ instance Show Instance where
 	show (Instance name t)	= "instance "++name++" "++show t
 
 instance Show Law where
-	show (Law n defs e1 e2)	= "Law "++show n++" "++show defs++" "++show e1++" "++show e2
+	show (Law n defs reqs e1 e2)	= "Law "++show n++" decl:"++show defs++" reqs:"++show reqs++" "++show e1++" "++show e2
 	show (Example n e1 e2)	= "Law (ex) "++show n++" "++show e1++" "++show e2
 
 instance Show Annotation where

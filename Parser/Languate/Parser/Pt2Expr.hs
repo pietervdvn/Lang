@@ -76,7 +76,11 @@ h		=  	[ ("char",	Chr . parseChar)
 			, ("string", 	Str . parseString)
 			, ("nat",	Nat . parseNat)
 			, ("float",	Flt . parseFloat)
-			, ("baseType", 	Cst . pt2type)]
+			, ("baseType", 	Cst . check . pt2type)]
+
+check	:: (Type, [TypeRequirement]) -> Type
+check (t, [])	= t
+check (t, reqs)	= error $ "Cast may not have type requirements: "++show t++" has requirements "++show reqs
 
 t		:: Name -> String -> AST
 t "localIdent" id	= FC id
@@ -139,6 +143,6 @@ s _ [expr]  = expr
 s nm exprs	= seqErr "Pt2Expr" nm exprs
 
 unpack		:: AST -> [AST]
-unpack (CommaSepExpr asts)	
+unpack (CommaSepExpr asts)
 		= asts
 unpack ast	= [ast]
