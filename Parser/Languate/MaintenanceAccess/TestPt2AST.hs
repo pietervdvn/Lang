@@ -15,10 +15,10 @@ import Languate.Parser.Pt2Pattern
 import Languate.Parser.Pt2Prelude
 import Languate.Parser.Pt2Import
 import Languate.Parser.Pt2DataDefSum
+import Languate.Parser.Pt2DataDefProd
 {-
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2DataDef
-import Languate.Parser.Pt2DataDefProd
 import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2Languate
