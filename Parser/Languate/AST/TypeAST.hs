@@ -119,6 +119,12 @@ data SubDef	= SubDef Name [Name] Type [TypeRequirement]
 -- ## Creating classes and instances
 
 -- Name: name of the new class; second Name: name of it in the functions; [(Name,Type)]: declarations
-data ClassDef	= ClassDef Name Name DocString [Law] [(Name,Type,Maybe Comment)]
+data ClassDef	= ClassDef
+			{ name		:: Name
+			, frees		:: [Name]
+			, reqs		:: [TypeRequirement]
+			, classdocstr 	:: DocString
+			, classlaws	:: [Law]
+			, decls		:: [(Name,Type,Maybe Comment)] }
 
 data Instance	= Instance Name Type

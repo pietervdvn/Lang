@@ -21,8 +21,8 @@ import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2PrecedenceAnnot
 import Languate.Parser.Pt2TypeDef
-{-
 import Languate.Parser.Pt2ClassDef
+{-
 import Languate.Parser.Pt2Languate
 import Languate.Parser.Pt2Statement
 
