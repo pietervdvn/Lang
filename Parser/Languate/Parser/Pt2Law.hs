@@ -31,11 +31,11 @@ data AST	= Tilde	| Bird	| Colon	| Equals
 		| LawName Name
 		| Ident Name	| Idents [Name]
 		| Type Type [TypeRequirement]
-		| TypeDecl [(Name, Maybe Type)] [(Name, Maybe Type)]	-- name:Type; name:TypeRequirement
+		| TypeDecl [(Name, Maybe Type)] [TypeRequirement]	-- name:Type; name:TypeRequirement
 		| Expr Expression
 		| RightExpr Expression
 		-- simplelaw: has no declarations, thus easy for the interpreter
-		| DiffLaw (Maybe Name) [(Name, Maybe Type)] [(Name, Maybe Type)] Expression (Maybe Expression)	-- name; declaration:  name:Type; type constraints: name:TypeRequirement, expr1, expr2
+		| DiffLaw (Maybe Name) [(Name, Maybe Type)] [TypeRequirement] Expression (Maybe Expression)	-- name; declaration:  name:Type; type constraints: name:TypeRequirement, expr1, expr2
 		| SimpleLaw (Maybe Name) Expression (Maybe Expression)
 	deriving (Show)
 
@@ -93,9 +93,9 @@ makeLawDecl (Ident nm:tail) idents
 makeLawDecl (Idents nms:tail) idents
 		= makeLawDecl tail (nms++idents)
 makeLawDecl [Type t reqs] idents
-		= TypeDecl (zip idents (repeat $ Just t)) reqs
+		= TypeDecl (zip idents $ repeat $ Just t) reqs
 
-mergeTypeDecl	:: [AST] -> [(Name, Maybe Type)] -> [(Name, Maybe Type)]-> AST
+mergeTypeDecl	:: [AST] -> [(Name, Maybe Type)] -> [TypeRequirement] -> AST
 mergeTypeDecl [] acc reqsAcc
 		= TypeDecl acc reqsAcc
 mergeTypeDecl (TypeDecl stuff reqs :tail) acc reqsAcc

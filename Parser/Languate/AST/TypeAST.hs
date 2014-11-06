@@ -16,7 +16,7 @@ import StdDef
 -- ## META STUFF
 data Law	= Law 	{ lawName		:: (Maybe Name)
 			, lawDeclarations	:: [(Name, Maybe Type)]
-			, typeReqs		:: [(Name, Maybe Type)]
+			, typeReqs		:: [TypeRequirement]
 			, expr1 		:: Expression
 			, expr2 		:: Expression }
 		| Example (Maybe Name) Expression Expression	-- can be interpreted easily
@@ -71,7 +71,7 @@ data Type	= Normal String	-- A normal type, e.g. Bool
 {- The data structure representing a type requirement of the form "a has a supertype Ord".
 When no special requirement is present, nothing is used.
 -}
-type TypeRequirement	= (Name, Maybe Type)
+type TypeRequirement	= (Name, Type)
 
 
 
@@ -85,9 +85,9 @@ becomes : ADTDef "List" [("a", Nothing)] "Comment about a list" product
 > data NaiveDict a b	= [a,b]
 > data BalancedTreeDict (a in Eq) b	= ...
 becomes
-ADTDef "Dict" [("a",Just "Eq")] "Docstring blabla" product
+ADTDef "Dict" ["k","v"] [("k","Ord")] "Docstring blabla" product
 -}
-data ADTDef	= ADTDef Name [TypeRequirement] DocString [ADTSum]
+data ADTDef	= ADTDef Name [Name] [TypeRequirement] DocString [ADTSum]
 
 
 {-

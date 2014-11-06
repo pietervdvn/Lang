@@ -30,7 +30,7 @@ convert (KnownType id)
 		= noReq $ Normal id
 convert (FreeType id constraints)
 		= let (isTypes, reqs)	= unzip $ map convert constraints in
-			(Free id, concat reqs ++ [(id, Just tp) | tp <- isTypes])
+			(Free id, concat reqs ++ [(id, tp) | tp <- isTypes])
 convert Unknown	= noReq Infer
 convert (AppliedType ast asts)
 		= packReqs (\tps -> Applied (head tps) (tail tps)) (ast:asts)

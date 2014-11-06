@@ -53,14 +53,12 @@ st Infer	= "_"
 
 
 instance Show ADTDef where
-	show (ADTDef name frees docstr sums)
-		= "-- "++docstr++"\ndata "++name++foldr (\f acc -> showTypeReq f++" "++acc) " " frees ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
+	show (ADTDef name frees reqs docstr sums)
+		= "-- "++docstr++"\ndata "++name++" "++show frees++" "++foldr (\f acc -> showTypeReq f++" "++acc) " " reqs ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
 
 showTypeReq	:: TypeRequirement -> String
-showTypeReq (name,Just t)
+showTypeReq (name, t)
 		=  "("++name++" in "++show t++")"
-showTypeReq (name, Nothing)
-		= name
 
 instance Show ADTSum where
 	show (ADTSum nm v (mc) namedArgs )
