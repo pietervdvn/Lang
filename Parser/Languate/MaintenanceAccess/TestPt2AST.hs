@@ -10,22 +10,21 @@ import Languate.Parser.Pt2Expr
 import Languate.Parser.Pt2Annot
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2Law
+import Languate.Parser.Pt2Line
+import Languate.Parser.Pt2Pattern
+import Languate.Parser.Pt2Prelude
+import Languate.Parser.Pt2Import
+import Languate.Parser.Pt2DataDefSum
 {-
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2DataDefProd
-import Languate.Parser.Pt2DataDefSum
 import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2Function
-import Languate.Parser.Pt2Import
 import Languate.Parser.Pt2Languate
-import Languate.Parser.Pt2Line
-import Languate.Parser.Pt2Pattern
 import Languate.Parser.Pt2PrecedenceAnnot
-import Languate.Parser.Pt2Prelude
 import Languate.Parser.Pt2Statement
 import Languate.Parser.Pt2TypeDef
-
 
 import Languate.File2AST
 -}
