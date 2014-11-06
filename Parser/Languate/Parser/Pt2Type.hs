@@ -11,7 +11,7 @@ This module parses Types! YAY
 
 
 data AST	= KnownType String
-		| FreeType String
+		| FreeType String [AST]	-- name + constraints
 		| AppliedType AST [AST]
 		| Tuple [AST]
 		| CurryType [AST]
@@ -20,28 +20,40 @@ data AST	= KnownType String
 		| Comma	| CommaSepTypes [AST]
 		| Arrow	| MultiType [AST]
 		| MaybeT
+		| InT	-- in - token, aka reqSep
+		| Constraint [AST]
 		| Currow	-- Curry arrow
-	deriving (Show)
+	deriving (Show, Eq)
 
-convert		:: AST -> Type
+convert		:: AST -> (Type, [TypeRequirement])
 convert (KnownType id)
-		= Normal id
-convert (FreeType id)
-		= Free id
-convert Unknown	= Infer
+		= noReq $ Normal id
+convert (FreeType id constraints)
+		= let (isTypes, reqs)	= unzip $ map convert constraints in
+			(Free id, concat reqs ++ [(id, Just tp) | tp <- isTypes])
+convert Unknown	= noReq Infer
 convert (AppliedType ast asts)
-		= Applied (convert ast) (map convert asts)
+		= packReqs (\tps -> Applied (head tps) (tail tps)) (ast:asts)
 convert (Tuple asts)
-		= TupleType $ map convert asts
+		=  packReqs TupleType asts
 convert (CurryType asts)
-		= Curry $ map convert asts
+		=  packReqs Curry asts
 convert	ast	=  convErr "Pt2Type" ast
+
+noReq		:: Type -> (Type,[a])
+noReq t		=  (t, [])
+
+packReqs	:: ([Type] -> Type) -> [AST] -> (Type,[TypeRequirement])
+packReqs constr asts
+		=  let (tps, reqs)	= unzip $ map convert asts in
+			(constr tps, concat reqs)
 
 t		:: Name -> String -> AST
 t "knownType" s	= KnownType s
-t "freeType" s	= FreeType s
+t "freeType" s	= FreeType s []
 t "void"  _	= KnownType "Void"
 t "infer" _	= Unknown
+t "reqSep" _	= InT
 t _ "("		= ParO
 t _ ")"		= ParC
 t _ "["		= ParO
@@ -83,13 +95,21 @@ s "appliedType" [typ, MultiType appliedTo]
 		= AppliedType typ appliedTo
 s "appliedType" types
 		= MultiType types
-s "curry" [Currow, typ]	
+s "curry" [Currow, typ]
 		= typ
 s "curry" [typ, MultiType typs]
 		= CurryType $ typ:typs
 s "curry" typs	= MultiType typs
 s "baseType" [ast, MaybeT]
 		= AppliedType (KnownType "Maybe") [ast]
+s "reqs" [Comma, ast]
+		= ast
+s "parFreeType" (InT:constraints)
+		= Constraint $ concatConstraints  constraints
+s "parFreeType" [ParO, FreeType name _, Constraint constraints, ParC]
+		= FreeType name constraints
+s "reqs" constraints
+		= Constraint $ concatConstraints constraints
 s _ [ast]  	= ast
 s nm ast	= seqErr "Pt2Type" nm ast
 
@@ -97,11 +117,19 @@ unpack	:: AST -> [AST]
 unpack (CommaSepTypes asts)	= asts
 unpack ast			= [ast]
 
+concatConstraints	:: [AST] -> [AST]
+concatConstraints (Constraint consts:tail)
+			= consts ++ concatConstraints tail
+concatConstraints (Comma:tail)
+			= concatConstraints tail
+concatConstraints (a:tail)
+			= a:concatConstraints tail
+concatConstraints []	= []
+
 asTuple	:: [AST] -> AST
 asTuple [ast]	= ast
 asTuple asts	= Tuple asts
 
 
-pt2type :: ParseTree -> Type
+pt2type :: ParseTree -> (Type, [TypeRequirement])
 pt2type	= pt2a [] t s convert
-

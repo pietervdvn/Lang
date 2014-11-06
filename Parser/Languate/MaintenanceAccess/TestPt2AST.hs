@@ -5,8 +5,8 @@ import Normalizable
 import Data.Maybe
 import Bnf.ParseTree
 
-{-
 import Languate.Parser.Pt2Type
+{-
 import Languate.Parser.Pt2Expr
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2Pattern
@@ -68,8 +68,8 @@ tf convertor rule fp
 		=  let	str 	= unsafePerformIO $ readFile fp in
 			tst convertor rule str
 
+-}
 
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
 tst			:: (ParseTree -> a) -> Name -> String -> a
 tst convertor rule str	= convertor (unsafePerformIO $ pt rule str)
--}
