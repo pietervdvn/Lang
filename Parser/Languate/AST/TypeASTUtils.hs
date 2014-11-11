@@ -121,8 +121,8 @@ instance Normalizable Expression where
 	normalize	= ne
 
 instance Show ClassDef where
-	show (ClassDef n frees reqs docs laws signs)
-		= "class "++n ++" "++ show frees ++ concatMap showTypeReq reqs ++ "---"++docs++"---"++show laws++show signs
+	show (ClassDef n frees reqs subC docs laws signs)
+		= "class "++n ++" "++ show frees ++" in "++show subC++" "++ concatMap showTypeReq reqs ++ "---"++docs++"---"++show laws++show signs
 
 instance Show SubDef where
 	show (SubDef n frees t reqs)

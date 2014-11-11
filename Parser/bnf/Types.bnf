@@ -29,9 +29,8 @@ public import Prelude
 
 _$knownType	::= globalIdent
  $reqSep	::= "in" | "is" | ":"
-_reqs		::= type ("," type)*
  $freeType	::= localIdent & !reqSep
- parFreeType	::= "\(" freeType (reqSep reqs) "\)"
+ parFreeType	::= "\(" freeType (reqSep commaSepTypes) "\)"
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
 _$infer		::= "_"		-- compiler should infer which is the type

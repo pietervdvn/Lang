@@ -123,8 +123,9 @@ data ClassDef	= ClassDef
 			{ name		:: Name
 			, frees		:: [Name]
 			, reqs		:: [TypeRequirement]
+			, subclassFrom	:: [Type]
 			, classdocstr 	:: DocString
 			, classlaws	:: [Law]
-			, decls		:: [(Name,Type,Maybe Comment)] }
+			, decls		:: [(Name,Type,Maybe Comment, [TypeRequirement])] }
 
 data Instance	= Instance Name Type

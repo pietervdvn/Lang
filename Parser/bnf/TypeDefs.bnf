@@ -66,7 +66,7 @@ _typeDef	::= globalIdent freeTypes "=" type
 
 -- comments are obligated, but it's not the parsers task to generate error messages
  class		::= nlcomments? "class" globalIdent freeTypes subclass? ":" classBody
-_subclass	::= ("in" | "is") type
+_subclass	::= ("in" | "is") type ("," type)*
 _classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
  instance	::= "instance" globalIdent baseType
@@ -138,8 +138,8 @@ Classes
 A typeclass declares a number of functions (without the implementation). When a certain type has all these functions, it is (automatically) part of this typeclass.
 E.g.
 
-class Show show where
-	show	: show -> String
+class Show where
+	show	: Show -> String
 
 
 Bool implements show, there is *no* need to make it explicit:
@@ -149,24 +149,24 @@ True	= "True"
 False	= "False"
 
 
-class Functor functor where
+class Functor a where
 	map	: (a -> b) -> functor a -> functor b
 
-Everywhere 'functor' is used, the same subtype will be infered. (functor: Functor =>)
+Everywhere 'functor' is used, the same subtype will be infered. In class defs, there is no need to explicitly write (functor a:Functor a).
 
 Compare with:
 
-class Collection collection where
-	merge	: Collection a -> collection a -> collection a
+class Collection a where
+	addAll	: Collection a -> collection a -> collection a
 
 which implies that a collection should be able to merge in any other collection; e.g.
 
-merge	: Collection a -> List a -> List a
-merge	= ...
+addAll	: Collection a -> List a -> List a
+addAll	= ...
 
-Which feels a bit object-oriented, especially with .-syntax:
+Which feels quite a bit object-oriented, especially with .-syntax:
 
-list.merge set
+list.addAll set
 
 
 Default methods can be written as
@@ -190,7 +190,7 @@ Sometimes, classes can be extended. For instance, each ''Collection'' should be 
 
 We express this requirements as
 
-class Collection collection; collection in Functor:
+class Collection a in Functor :
 	...
 
 
