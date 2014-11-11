@@ -30,8 +30,6 @@ convert (Clss name frees subs reqs comms laws declarations)
 		=  (init' comms, ClassDef name frees reqs subs (last comms) laws declarations)
 convert ast	=  convErr modName ast
 
-inject		::
-
 
 data AST	= Clss Name [Name] [Type] [TypeRequirement] [Comment] [Law] [(Name, Type, Maybe Comment, [TypeRequirement])] -- ""class Dict (k:Ord) v in Collection v:"" => Clss "Dict" ["k","v"] ["Collection"]
 		| Body [Law] [(Name,Type,Maybe Comment, [TypeRequirement])]
