@@ -56,7 +56,6 @@ pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
 					Right pt	-> pt
 					Left exception	-> error $ show exception
 			return pt
-{-
 -- ts rule str	=  pt rule str >>= print . simplify
 
 -- tr rule str	= pt rule str >>= print
@@ -68,7 +67,6 @@ tf convertor rule fp
 		=  let	str 	= unsafePerformIO $ readFile fp in
 			tst convertor rule str
 
--}
 
 -- generalized test. Give a function which converts a parsetree into something, give a rule, and a string to parse, you'll get the something
 tst			:: (ParseTree -> a) -> Name -> String -> a
