@@ -122,7 +122,7 @@ data SubDef	= SubDef Name [Name] Type [TypeRequirement]
 data ClassDef	= ClassDef
 			{ name		:: Name
 			, frees		:: [Name]
-			, reqs		:: [TypeRequirement]
+			, classReqs	:: [TypeRequirement]
 			, subclassFrom	:: [Type]
 			, classdocstr 	:: DocString
 			, classlaws	:: [Law]

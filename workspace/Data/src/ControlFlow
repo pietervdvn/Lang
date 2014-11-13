@@ -1,6 +1,6 @@
 Misc
 ----
-Some miscallaneous, control flow functions, such as id and const.
+Some miscallaneous, control flow functions, such as id, const, flip, if, ...
 ----
 
 import Data.Bool
@@ -21,4 +21,9 @@ a _	= a
 > if False 1 2 	= 2
 if		: Bool -> a -> a -> a
 True  a _	= a
-False _ b	= b 
+False _ b	= b
+
+
+-- Takes a function with two arguments; returns a function with its arguments inversed
+flip	: (a -> b -> c) -> b -> a -> c
+f b a	= f a b

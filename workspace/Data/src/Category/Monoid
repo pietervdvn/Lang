@@ -1,0 +1,19 @@
+Monoid
+------
+A monoid is an type on which a neutral (identity) element and an _addition_ operator are defined.
+The addition operator should be associative.
+
+By adding the associativity, the compiler has a high degree of freedom in optimizing the order in which the operation is performed. Because all collections are monoids, this means (for example) taking unions can be done in parallel without much ado, with a mapReduce.
+
+------
+
+
+-- A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
+class Monoid:
+	-- The neutral element
+	~ identity element:	append neutral a	= a
+	~ identity element:	append a neutral	= a
+	neutral	: monoid
+	-- The addition operator.
+	~ associativity: a,b,c:Monoid => append (append a b) c = append a (append b c)
+	append	: monoid -> monoid -> monoid

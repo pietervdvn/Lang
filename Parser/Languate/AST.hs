@@ -10,6 +10,10 @@ module Languate.AST
 	, Function (Function), Clause (Clause), Pattern (Assign, Let, Deconstruct, Multi, Eval, DontCare, MultiDontCare)
 	, Module (Module), Imports, Import (Import), Restrict (BlackList, WhiteList)
 	, Statement (FunctionStm, ADTDefStm, SynDefStm, SubDefStm, ClassDefStm, InstanceStm, Comments, ExampleStm, AnnotationStm)
+	, docstr, visibility, signs, reqs, laws, clauses
+	, moduleName, exports, imports, statements, imports'
+	, lawName, lawDeclarations, typeReqs, expr1, expr2
+	, name, frees, classReqs, subclassFrom, classdocstr, classlaws, decls
 	)
 
 

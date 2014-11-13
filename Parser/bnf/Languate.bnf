@@ -14,6 +14,6 @@ import Annotations
 
 {- Where it all begins -}
 
-statement	::= function | data | nls? synonym | nls? subtype | class | annotation | nls
+statement	::= function | data | nls? synonym | nls? subtype | class | nls? instance | annotation | nls
 
 module		::= globalIdent idSet? nl nlcomment (nls? import)* statement* nls? (law nl)* nls? 
