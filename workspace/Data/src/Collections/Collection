@@ -1,0 +1,21 @@
+Collection
+----------
+
+Congratulations, dear explorer.
+You have found the root of all data, the root of each collection.
+
+This module gives the class interface of each collection.
+----------
+
+
+
+-- A collection represents, well, a collection of data. Each set, list, map, bag, ... is instance of this class
+class Collection a:
+	-- Give the first element of the collection
+	head	: collection a -> Maybe (b:a)
+	-- Give the entire collection without the element that head gives
+	tail	: collection a -> collection (b:a)
+	-- empty constructor
+	empty	: collection a
+	-- empty deconstructor
+	emptyDec	: Maybe ()

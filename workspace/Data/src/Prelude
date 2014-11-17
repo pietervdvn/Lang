@@ -4,9 +4,16 @@ Contains a lot of usefull functions, types, classes.
 Each program imports these by default
 -------
 
+public import ControlFlow
+
 public import Data.Maybe
 public import Data.Bool
-public import Data.Nat
-public import Data.Eq
-public import ControlFlow
+
+public import Category.Eq
+public import Category.Monoid
+public import Category.Functor
+
+public import Type.Function
+
 public import Collections.List
+public import Collections.Dict

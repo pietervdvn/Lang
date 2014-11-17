@@ -4,7 +4,13 @@ import Languate.File2Package
 import Languate.FQN
 import Data.Maybe
 
+import Bnf hiding (toFQN)
 
--- t	= loadPackage' tfqn fp -- run with current directory Lang/Loader
+import System.IO.Unsafe
+
+
+tl	= loadPackage' bnfs tfqn fp -- run with current directory Lang/Loader
 tfqn	= fromJust $ toFQN "pietervdvn:Data:Prelude" -- imports Data.Bool and Data.Functor
 fp	= "../workspace/Data/src/"
+
+bnfs	= unsafePerformIO $ load "../Parser/bnf/Languate.bnf"

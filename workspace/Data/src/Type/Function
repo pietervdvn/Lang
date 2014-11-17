@@ -1,0 +1,8 @@
+Function
+--------
+The ''Type.Function'' module contains type synonyms and type functions to do meta stuff.
+--------
+
+
+-- The 'Flip' type takes a type function (''* -> * -> *'') and flips it arguments. This way, for example, it is possible to declare that a ''Dict'' is a ''Set'' in its keys.
+type Flip x b a	= x a b

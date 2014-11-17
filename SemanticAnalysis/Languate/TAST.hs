@@ -13,6 +13,10 @@ It is this data-structure that all semantic analysis things use or build.
 import StdDef
 import Languate.AST
 import Languate.Signature
+import Data.List
+
+data Kind		= NoTypeArgs
+			| KindCurry [Kind] Kind
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
@@ -41,3 +45,8 @@ typeOf (TCall tps _)
 		=  tps
 typeOf (TApplication tps _ _)
 		=  tps
+
+instance Show Kind where
+	show NoTypeArgs	= "*"
+	show (KindCurry args arg)
+			= "(" ++ intercalate " ~> " (map show $ args++[arg]) ++ ")"
