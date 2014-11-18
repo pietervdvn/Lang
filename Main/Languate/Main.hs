@@ -31,11 +31,18 @@ import Control.Monad
 
 version	= "0.0.0.0.4"
 
+infoFlags	= [("version", putStrLn version),("author", putStrLn "Pieter Vander Vennet\nThanks to Ilion Beyst")]
+
 start	:: IO ()
-start	=  do 	args	<- getArgs
-		if "--version" `elem` args then
-			putStrLn version
+start	=  do 	infoPrinted	<- infoOnly
+		if infoPrinted then return ()
 		else	start'
+
+infoOnly	:: IO Bool
+infoOnly	= do 	args	<- getArgs
+			let cond word	= "--" ++ word `elem` args
+			mapM_ (\(word, action) -> when (cond word) action)
+			return $ any (cond word)
 
 start'	:: IO ()
 start'	=  do	welcome
