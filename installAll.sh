@@ -1,4 +1,4 @@
-#! /bin/bash
+﻿#! /bin/bash
 
 # installs all subcomponents, in the right order
 
@@ -30,9 +30,10 @@ do
 	fi
 done
 
-cd Main0
+cd Main
 ghc Main.hs
-mv Main ../Main
+version="$(./Main --version)"
+mv Main ../langc$version
 cd ..
 
-./Main --no-repl
+./langc$version --no-repl
