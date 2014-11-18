@@ -60,4 +60,4 @@ np pt		= pt
 nps	= map normalize
 
 instance Show Function where
-	show f	= "Function: docstr: "++(show $ docstr f)++" visibility: "++(show $ visibility f)++" signs: "++(show $ signs f)++" laws: "++(show $ laws f)++" clauses: "++(show $ clauses f)
+	show f	= "Function: docstr: "++show (docstr f)++" visibility: "++ show (visibility f)++" signs: "++ show (signs f)++" laws: "++show (laws f)++" clauses: "++ show (clauses f)

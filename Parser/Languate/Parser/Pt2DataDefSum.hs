@@ -127,6 +127,6 @@ sn nm asts	= seqErr modNameN nm asts
 concatNamedSum	:: [ASTN] -> ([(Maybe Name, Type)],[TypeRequirement])
 concatNamedSum []
 		= ([],[])
-concatNamedSum ((NamedSum a b):tail)
+concatNamedSum (NamedSum a b:tail)
 		= let (as, bs) = concatNamedSum tail
 			in (a++as,b++bs)

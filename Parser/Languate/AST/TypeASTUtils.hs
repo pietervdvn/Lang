@@ -61,7 +61,7 @@ showTypeReq (name, t)
 		=  "("++name++" in "++show t++")"
 
 instance Show ADTSum where
-	show (ADTSum nm v (mc) namedArgs )
+	show (ADTSum nm v mc namedArgs )
 		= "ADTSum "++nm++" "++show v ++ " " ++ show mc++" "++ show namedArgs
 
 

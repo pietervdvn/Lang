@@ -37,7 +37,7 @@ start	=  do	welcome
 		putStrLn $ "Loading bnf-files from "++bnfPath
 		(pack, bnfs, precT)	<- doAllStuff
 		args	<- getArgs
-		if ("--no-repl" `elem` args) then
+		if "--no-repl" `elem` args then
 			putStrLn "All done!"
 		else do  putStrLn' "All done!"
 			 repl bnfs pack precT prelude

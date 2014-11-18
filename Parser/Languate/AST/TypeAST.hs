@@ -14,7 +14,7 @@ It also contains meta things, as laws, comments, docstrings
 import StdDef
 
 -- ## META STUFF
-data Law	= Law 	{ lawName		:: (Maybe Name)
+data Law	= Law 	{ lawName		:: Maybe Name
 			, lawDeclarations	:: [(Name, Maybe Type)]
 			, typeReqs		:: [TypeRequirement]
 			, expr1 		:: Expression

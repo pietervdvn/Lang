@@ -11,7 +11,7 @@ class Coll coll where
 	getAll	:: coll a -> [a]
 
 instance Coll (Flip Map a) where
-	getAll dict	= keys dict
+	getAll	= keys
 
 
 empt	:: Flip Map Int String
