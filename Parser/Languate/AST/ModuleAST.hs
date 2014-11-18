@@ -29,7 +29,7 @@ imports' 	=  rights . imports
 -- represents an import statement. public - Path - ModuleName- restrictions
 data Import	= Import Visible [Name] Name Restrict
 	deriving (Show)
--- restrict is the blacklist/whitelist of the showing/hiding in an import statement
+-- restrict is the blacklist/whitelist of the showing/hiding in an import statement. Can contain both function/operator names and type names
 data Restrict	= BlackList [Name] | WhiteList [Name]
 	deriving (Show)
 

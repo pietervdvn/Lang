@@ -22,7 +22,8 @@ pt2adtdef	=  pt2a h t s convert
 
 convert		:: AST -> ([Comment], ADTDef)
 convert (Data comms vis name frees sums reqs)
-		=  (init' comms, ADTDef name frees reqs (last comms) sums)
+		=  let edit	= if vis == Private then map (setVisibility vis) else id in
+			(init' comms, ADTDef name frees reqs (last comms) $ edit sums)
 convert ast	=  convErr modName ast
 
 

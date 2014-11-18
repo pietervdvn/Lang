@@ -31,8 +31,16 @@ _commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums 
 _sums		::= (nlt commentedSum)*
 _prod		::= sum simpleSums? comment? sums
 _freeTypes	::= constrFreeType*
--- a comment is obligated, but an error will be given by another fase then the parser
- data		::= nlcomments ? "data" "_"? globalIdent freeTypes "=" prod
+{- a comment is obligated, but an error will be given by another fase then the parser
+Making a data type private has the only result that all it's constructors are private
+
+-- example
+data _ ABC	= AB | BC
+==
+data ABC	= _AB | _BC
+
+-}
+ data		::= nlcomments? "data" "_"? globalIdent freeTypes "=" prod
 
 {-
 
@@ -58,7 +66,7 @@ _typeDef	::= globalIdent freeTypes "=" type
  -- SUB DEF --
  -------------
 
- subtype	::= "subtype" "_"? typeDef
+ subtype	::= "subtype" typeDef
 
  ------------------------
  -- CLASS+INSTANCE DEF --
@@ -203,4 +211,7 @@ Are types public?
 ================
 
 As soon as a single function is public, all of the types of it's arguments are public too.
+To keep a type private, do not export any function which uses this type.
+
+Note that types can be hidden in imports
 -}

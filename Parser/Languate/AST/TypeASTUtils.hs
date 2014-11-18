@@ -64,6 +64,9 @@ instance Show ADTSum where
 	show (ADTSum nm v mc namedArgs )
 		= "ADTSum "++nm++" "++show v ++ " " ++ show mc++" "++ show namedArgs
 
+setVisibility	:: Visible -> ADTSum -> ADTSum
+setVisibility vis (ADTSum nm _ comm args)
+		= ADTSum nm vis comm args
 
 instance Show Instance where
 	show (Instance name t)	= "instance "++name++" "++show t
