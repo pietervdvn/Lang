@@ -17,3 +17,32 @@ class Monoid:
 	-- The addition operator.
 	~ associativity: a,b,c:Monoid => append (append a b) c = append a (append b c)
 	append	: monoid -> monoid -> monoid
+
+
+class Sum:
+	(+)	: monoid -> monoid -> monoid
+	zero	: monoid
+
+class Product
+	(*)	: monoid -> monoid -> monoid
+	one	: monoid
+
+instance Monoid Sum
+
+append	: Sum -> Sum -> Sum
+a b	= a + b
+
+neutral	: Sum
+neutral	= 0
+
+(*)	: Sum -> Nat -> Sum
+_ 0	= neutral
+s i	= s + (s * (i - 1))
+
+instance Monoid Product
+
+append	: Product -> Product -> Product
+a b	= a * b
+
+neutral	: Product
+neutral	= 1

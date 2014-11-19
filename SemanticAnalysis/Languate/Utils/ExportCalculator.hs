@@ -15,8 +15,6 @@ import StdDef (merge, unmerge)
 import Data.Tuple
 import Control.Arrow
 
-import Debug.Trace
-
 {- calculates what properties each node exports, even by reexporting.
 Params:
 - import graph: node n imports all things from the given nodes
@@ -27,8 +25,24 @@ Returns:
 - What properties each node exports
 -}
 calculateExports	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> Map n (Set n) -> (n -> Set prop) -> (prop -> n -> Bool) -> Map n (Set prop)
-calculateExports importGraph exportGraph exps impFilt
+calculateExports importGraph exportGraph exps impFiltcd Do
 			= exported $ snd $ runstate _ce $ ExpS importGraph exportGraph exps impFilt M.empty (S.fromList $ M.keys importGraph)
+
+{- calculateImports gives all things which are visible within n (thus local -private- props and imported props)
+
+-}
+calculateImports	::  (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> Map n (Set prop)
+calculateImports importGraph local exports
+			= fmap (calculateImportsFor importGraph local exports) exports
+
+calculateImportsFor	:: (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
+calculateImportsFor importGraph local exports n
+			=  let	importsFrom	= (??) $ lookup n importGraph
+				imported	= unions $ fmap ((??) . `lookup` exports) importsFrom
+				localDecl	= local n in
+				union localDecl imported
+
+
 
 
 invertDict		:: (Eq b, Ord b, Ord a) => Map a (Set b) -> Map b (Set a)
