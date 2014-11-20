@@ -13,3 +13,11 @@ limiters	::= ("hiding" | "showing") idSet
 import		::= "public"? "import" %((globalIdent dot)* globalIdent) limiters?
 
 _dot		::= %"\."
+
+
+{-
+import A hiding {f,g, Type}
+
+-> Starts with capital letter: we mean a type (and not a constructor)
+
+-}
