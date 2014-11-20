@@ -18,14 +18,16 @@ class Monoid:
 	~ associativity: a,b,c:Monoid => append (append a b) c = append a (append b c)
 	append	: monoid -> monoid -> monoid
 
-
+-- Sum is an instance of monoid, with (+) defined as append
 class Sum:
-	(+)	: monoid -> monoid -> monoid
-	zero	: monoid
+	(+)	: sum -> sum -> sum
+	zero	: sum
 
-class Product
-	(*)	: monoid -> monoid -> monoid
-	one	: monoid
+
+-- Product is an instance of monoid, with (+) defined as append
+class Product:
+	(*)	: product -> product -> product
+	one	: product
 
 instance Monoid Sum
 
