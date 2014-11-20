@@ -17,6 +17,7 @@ import Data.Map
 import Data.Set
 import Languate.AST
 import Languate.TAST
+import Languate.FQN
 
 {-
 The type table contains all known types within a certain module.
@@ -24,7 +25,7 @@ The type table contains all known types within a certain module.
 -}
 
 
-data TypeTable	= TypeTable	{ known		:: Set (Type, Kind, Set TypeRequirement)	-- type requirements are implicit; contains synonyms
+data TypeTable	= TypeTable	{ known		:: Map Name (FQN, Kind, Set TypeRequirement)	-- type requirements are implicit; contains synonyms
 					-- known (Normal Int, NormalType, Private) means that ''int'' does not get exported to modules which import this module
 				, supertypes	:: Map Type (Set Type)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				, synonyms	:: Map Type Type	-- should have the same kind. Acts as an 'equivalence/equality' relation
