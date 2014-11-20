@@ -20,6 +20,7 @@ data Law	= Law 	{ lawName		:: Maybe Name
 			, expr1 		:: Expression
 			, expr2 		:: Expression }
 		| Example (Maybe Name) Expression Expression	-- can be interpreted easily
+	deriving (Ord, Eq)
 
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
@@ -53,8 +54,7 @@ data Expression	= Nat Int
 		| Call String
 		| Operator String
 		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment
-	deriving (Eq)
-
+	deriving (Ord, Eq)
 
 
 -- ## TYPE STUFF
@@ -127,5 +127,6 @@ data ClassDef	= ClassDef
 			, classdocstr 	:: DocString
 			, classlaws	:: [Law]
 			, decls		:: [(Name,Type,Maybe Comment, [TypeRequirement])] }
+	deriving (Ord, Eq)
 
 data Instance	= Instance Name Type
