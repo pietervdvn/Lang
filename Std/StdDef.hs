@@ -1,5 +1,6 @@
 module StdDef where
 
+import Data.Tuple
 import Data.Map (Map, insert, adjust, findWithDefault)
 import qualified Data.Map as Map
 type Name 	= String
@@ -47,6 +48,8 @@ merge []	= []
 merge ((a,b):ls)
 		= let bs	= map snd $ filter ((==) a . fst) ls in
 			(a,b:bs): merge (filter ((/=) a . fst) ls)
+merge'		:: Eq b => [(a,b)] -> [([a],b)]
+merge'		= map swap . merge . map swap
 
 unmerge		:: [(a,[b])] -> [(a,b)]
 unmerge 	=  concatMap (\(a,bs) -> [(a,b) | b <- bs])
@@ -68,3 +71,12 @@ deleteFromLst n	=  adjust (filter (n /=))
 
 lookupLst	:: Ord k => k -> Map k [v] -> [v]
 lookupLst 	=  findWithDefault []
+
+
+lstrip		:: String -> String
+lstrip (' ':str)	= lstrip str
+lstrip s	= s
+
+rstrip	= reverse . lstrip . reverse
+
+strip	= lstrip . rstrip
