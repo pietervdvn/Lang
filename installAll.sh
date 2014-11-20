@@ -1,5 +1,3 @@
-﻿#! /bin/bash
-
 # installs all subcomponents, in the right order
 
 if [ "$1" = "" ]
