@@ -1,4 +1,4 @@
-module Languate.Typechecker.TypeTable where
+module Languate.TypeTable.TypeTable where
 
 {-
 
@@ -16,26 +16,37 @@ Bool is [Eq, Ord, Monoid, Show, ...]
 import Data.Map
 import Data.Set
 import Languate.AST
+import Languate.TAST
 
 {-
 The type table contains all known types within a certain module.
 
 -}
 
--- TODO TODO TODO Type req propagation! e.g. data A (a:X); f : A a -> a; this means that a has the (hidden) type requirement X
 
-data TypeTable	= TypeTable	{ known		:: Set (Type, Kind, Visible)
+data TypeTable	= TypeTable	{ known		:: Set (Type, Kind, Set TypeRequirement)	-- type requirements are implicit; contains synonyms
 					-- known (Normal Int, NormalType, Private) means that ''int'' does not get exported to modules which import this module
-				, supertypes	:: Map Type [Type]	-- should have the same kind. E.g. String in List Char; both are *
-				, synonyms	:: Map Type Type	-- should have the same kind
+				, supertypes	:: Map Type (Set Type)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
+				, synonyms	:: Map Type Type	-- should have the same kind. Acts as an 'equivalence/equality' relation
+				, revSynonyms	:: Map Type (Set Type)	-- inverse relation of synonyms
 				{-
 				Tells what functions should be implemented to be an instance of given superclass
 				In TypeTable and not in instanceConstr: not a class def!
 				-}
 				, instConstr	:: Map Type (ClassDef, Kind)}
+	deriving (Show, Ord, Eq)
 
-allSuperTypes	:: SuperTypeTable -> Type -> [Type]
-allSuperTypes table typ
-		=  do	direct		<- lookupLst table typ
-			indirect	<- allSuperTypes table direct
-			return $ nub $ direct ++ indirect
+{-
+
+Type requirements propagate implicitly.
+E.g:
+
+    data Set (a:Eq) = <details>
+
+    f : Set a -> a -> ...
+
+The type requirement that ''a'' should be in ''Eq'' is known, but should not be stated explicitly.
+
+
+
+-}

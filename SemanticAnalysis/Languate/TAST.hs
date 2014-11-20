@@ -15,8 +15,9 @@ import Languate.AST
 import Languate.Signature
 import Data.List
 
-data Kind		= NoTypeArgs
+data Kind		= Kind Name
 			| KindCurry [Kind] Kind
+	deriving (Ord, Eq)
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [Type] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
@@ -47,6 +48,11 @@ typeOf (TApplication tps _ _)
 		=  tps
 
 instance Show Kind where
-	show NoTypeArgs	= "*"
+	show (Kind nm)	= nm
 	show (KindCurry args arg)
 			= "(" ++ intercalate " ~> " (map show $ args++[arg]) ++ ")"
+
+
+normalKind	:: Kind -> Bool
+normalKind (Kind _)	= True
+normalKind _	= False
