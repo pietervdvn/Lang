@@ -10,7 +10,8 @@ This module parses Types! YAY
 --}
 
 
-data AST	= KnownType String
+data AST	= KnownType [Name] String
+		| Ident Name
 		| FreeType String [AST]	-- name + constraints
 		| AppliedType AST [AST]
 		| Tuple [AST]
@@ -19,15 +20,16 @@ data AST	= KnownType String
 		| ParO	| ParC
 		| Comma	| CommaSepTypes [AST]
 		| Arrow	| MultiType [AST]
-		| MaybeT
+		| MaybeT	| CollectionT	| MoreT
 		| InT	-- in - token, aka reqSep
 		| Constraint [AST]
 		| Currow	-- Curry arrow
+		| DotT
 	deriving (Show, Eq)
 
 convert		:: AST -> (Type, [TypeRequirement])
-convert (KnownType id)
-		= noReq $ Normal id
+convert (KnownType nms id)
+		= noReq $ Normal nms id
 convert (FreeType id constraints)
 		= let (isTypes, reqs)	= unzip $ map convert constraints in
 			(Free id, concat reqs ++ [(id, tp) | tp <- isTypes])
@@ -49,9 +51,10 @@ packReqs constr asts
 			(constr tps, concat reqs)
 
 t		:: Name -> String -> AST
-t "knownType" s	= KnownType s
+t "globalIdent" s
+		= Ident s
 t "freeType" s	= FreeType s []
-t "void"  _	= KnownType "Void"
+t "void"  _	= KnownType [] "Void"
 t "infer" _	= Unknown
 t "reqSep" _	= InT
 t _ "("		= ParO
@@ -64,9 +67,17 @@ t _ ","		= Comma
 t _ "-->"	= Arrow
 t _ "->"	= Currow
 t _ "?"		= MaybeT
+t _ "*"		= CollectionT
+t _ "+"		= MoreT
+t _ "."		= DotT
 t nm cont	= tokenErr "Pt2Type" nm cont
 
 s		:: Name -> [AST] -> AST
+s "knownType" [Ident s, DotT]
+		= Ident s
+s "knownType" idents
+		= let names = concatMap unpackIdents idents in
+			KnownType (init names) (last names)
 s "simpleType" [ParO, typ, ParC]
 		= typ
 s "commaSepTypes" [Comma, typ]
@@ -78,11 +89,11 @@ s "commaSepTypes" [typ, CommaSepTypes typs]
 s "commaSepTypes" typs
 		= CommaSepTypes typs
 s "list" [ParO, cont, ParC]
-		= AppliedType (KnownType "List") [asTuple $ unpack cont]
+		= AppliedType (KnownType [] "List") [asTuple $ unpack cont]
 s "set" [ParO, cont, ParC]
-		= AppliedType (KnownType "Set") [asTuple $ unpack cont]
+		= AppliedType (KnownType [] "Set") [asTuple $ unpack cont]
 s "dict" [ParO, keys, Arrow, vals, ParC]
-		= AppliedType (KnownType "Dict") $ map (asTuple . unpack) [keys, vals]
+		= AppliedType (KnownType [] "Dict") $ map (asTuple . unpack) [keys, vals]
 s "tuple" [Comma, typ]
 		= typ
 s "tuple" [ParO, typ, CommaSepTypes types, ParC]
@@ -101,7 +112,11 @@ s "curry" [typ, MultiType typs]
 		= CurryType $ typ:typs
 s "curry" typs	= MultiType typs
 s "baseType" [ast, MaybeT]
-		= AppliedType (KnownType "Maybe") [ast]
+		= AppliedType (KnownType [] "Maybe") [ast]
+s "baseType" [ast, CollectionT]
+		= AppliedType (KnownType [] "Collection") [ast]
+s "baseType" [ast, MoreT]
+		= AppliedType (KnownType [] "More") [ast]
 s "reqs" [Comma, ast]
 		= ast
 s "parFreeType" (InT:constraints)
@@ -116,6 +131,11 @@ s nm ast	= seqErr "Pt2Type" nm ast
 unpack	:: AST -> [AST]
 unpack (CommaSepTypes asts)	= asts
 unpack ast			= [ast]
+
+unpackIdents	:: AST -> [Name]
+unpackIdents (Ident n)	= [n]
+unpackIdents (KnownType nms n)
+			= nms++[n]
 
 concatConstraints	:: [AST] -> [AST]
 concatConstraints (Constraint consts:tail)

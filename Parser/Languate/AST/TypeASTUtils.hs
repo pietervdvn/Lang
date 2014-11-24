@@ -42,7 +42,8 @@ instance Show Type where
 			t		-> st t
 
 st		:: Type -> String
-st (Normal str)	=  str
+st (Normal nms str)
+		=  intercalate "." (nms ++ [str])
 st (Free str)	=  str
 st (Applied t tps)
 		=  "("++st t ++" "++ unwords (map st tps)++")"

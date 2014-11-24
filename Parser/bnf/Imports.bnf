@@ -10,14 +10,27 @@ import Expressions
 id		::= localIdent | globalIdent | "\(" op "\)"
 idSet		::= "\{" id (comma? id)* "\}"
 limiters	::= ("hiding" | "showing") idSet
-import		::= "public"? "import" %((globalIdent dot)* globalIdent) limiters?
-
-_dot		::= %"\."
+alias		::= "as" globalIdent
+import		::= "public"? "import" %((globalIdent moduleSep)* globalIdent) limiters? alias?
 
 
 {-
 import A hiding {f,g, Type}
 
 -> Starts with capital letter: we mean a type (and not a constructor)
+
+Type resolving
+--------------
+
+Consider ''X.Y.Z'' and ''A.B.C'', both exporting a type ''T''. We can disambiguate with using ''Z.T'' or ''C.T''. If even the module names match, add another one: ''Y.Z.T'' ...
+
+
+pseudonymous imports
+--------------------
+
+import A.B.C as X
+
+means that all functions are added into the name space. To disambiguate functions, use types.
+To disambiguate types, use ''X.Type''. Note that ''C.Type'', ''B.C.Type'' are not usable because of the pseudonym.
 
 -}

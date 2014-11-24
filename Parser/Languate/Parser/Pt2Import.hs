@@ -16,7 +16,7 @@ Declarations may have multiple (explicit) types
 modName	= "Pt2Import"
 
 pt2imp	:: ParseTree -> Import
-pt2imp	=  pt2a h t s convert . cleanAll ["dot"]
+pt2imp	=  pt2a h t s convert . cleanAll ["moduleSep"]
 
 convert		:: AST -> Import
 convert (Root asts)
@@ -25,18 +25,21 @@ convert ast	=  convErr modName ast
 
 
 buildImport	:: [AST] -> Import
-buildImport []	=  Import Private [] "" $ BlackList []
+buildImport []	=  Import Private [] "" Nothing $ BlackList []
 buildImport (PublicT:tail)
-		= let Import _ path name restrict = buildImport tail in
-			Import Public path name restrict
+		= let Import _ path name pseudonym restrict = buildImport tail in
+			Import Public path name pseudonym restrict
 buildImport (ImportT:tail)
 		= buildImport tail
 buildImport (Path p:tail)
-		= let Import public _ _ restrict = buildImport tail in
-			Import public (init' p) (last p) restrict
+		= let Import public _ _ pseudonym restrict = buildImport tail in
+			Import public (init' p) (last p) pseudonym restrict
 buildImport (Restriction r:tail)
-		= let Import public path name _ = buildImport tail in
-			Import public path name r
+		= let Import public path name pseudonym _ = buildImport tail in
+			Import public path name pseudonym r
+buildImport (Alias pseudonym:tail)
+		= let Import public path name _ r = buildImport tail in
+			Import public path name (Just pseudonym) r
 buildImport ast	=  convErr (modName++"-buildImport") $ Root ast
 
 data AST	= ImportT
@@ -44,8 +47,10 @@ data AST	= ImportT
 		| Path [Name]
 		| Restriction Restrict
 		| ParO	| ParC
-		| Dot	| PublicT
+		| PublicT
 		| Root [AST]
+		| AsT
+		| Alias Name
 	deriving (Show)
 
 
@@ -57,6 +62,7 @@ t "globalIdent" id
 		= Ident id
 t _ "("		= ParO
 t _ ")"		= ParC
+t _ "as"	= AsT
 t "import" "import"
 		=  ImportT
 t "import" "public"
@@ -69,6 +75,8 @@ s _ asts@(Ident _:_)
 		= Path $ accPath asts
 s _ asts@(Path _:_)
 		= Path $ accPath asts
+s _ [AsT, Ident nm]
+		= Alias nm
 s _ [ast]	= ast
 s _ asts	= Root asts
 

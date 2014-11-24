@@ -26,8 +26,9 @@ imports'	:: Module -> [Import]
 imports' 	=  rights . imports
 
 
--- represents an import statement. public - Path - ModuleName- restrictions
-data Import	= Import Visible [Name] Name Restrict
+type Pseudonym	= Name
+-- represents an import statement. public - Path - ModuleName - pseudonym = name as which the module has been imported - restrictions
+data Import	= Import Visible [Name] Name (Maybe Pseudonym) Restrict
 	deriving (Show)
 -- restrict is the blacklist/whitelist of the showing/hiding in an import statement. Can contain both function/operator names and type names
 data Restrict	= BlackList [Name] | WhiteList [Name]
@@ -44,3 +45,9 @@ data Statement	= FunctionStm 	Function
 		| ExampleStm	Law
 		| AnnotationStm	Annotation
 	deriving (Show)
+
+isAllowed	:: Restrict -> Name -> Bool
+isAllowed (BlackList items)
+		= not . (`elem` items)
+isAllowed (WhiteList items)
+		= (`elem` items)

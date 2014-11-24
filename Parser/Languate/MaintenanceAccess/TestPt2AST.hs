@@ -28,6 +28,7 @@ import Languate.File2AST
 
 import System.IO.Unsafe
 import StdDef
+import Languate.MaintenanceAccess.TestBNF
 {--
 
 MAINTANCE ACCESS ONLY!
@@ -48,14 +49,9 @@ This is tf':
 --}
 
 -- creates a parsetree. Give the rule it should parse against and the string it should parse, you'll get the parsetree
-pt		:: String -> String -> IO ParseTree
-pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
-			let mpt	= parseFull world (toFQN ["Languate"]) rule str
-			let pt' = fromMaybe (error "Incorrect parse, not even a single character could be parsed!") mpt
-			let pt  = case pt' of
-					Right pt	-> pt
-					Left exception	-> error $ show exception
-			return pt
+-- pt 	:: implemented in TestBNF
+
+
 -- ts rule str	=  pt rule str >>= print . simplify
 
 -- tr rule str	= pt rule str >>= print

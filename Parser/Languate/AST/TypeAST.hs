@@ -60,7 +60,7 @@ data Expression	= Nat Int
 -- ## TYPE STUFF
 
 -- The data structure representing a type in Languate. Probably one of the most important definitions!
-data Type	= Normal String	-- A normal type, e.g. Bool
+data Type	= Normal [Name] String	-- A normal type, e.g. Bool. Extra names are to disambiguate, e.g. Data.Bool vs Postgres.Bool or something (if that actually happens with postgres, i'll kill them)
 		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
 		| Applied Type [Type]
 		| Curry [Type]
