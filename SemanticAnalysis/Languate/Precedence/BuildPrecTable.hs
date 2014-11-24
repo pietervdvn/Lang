@@ -25,6 +25,7 @@ Error msgs are generated somewhere else
 {- checks if a ''(+) < (-)'' relation does not exist if ''(+) = (-)'' is defined somewhere. Thus, if two operators are in the same union, checks no LT-relation exists between them.
 Returns faulty arguments.
 -}
+
 checkIllegalLT	:: [(Name, Name)] -> Map Name Name -> [(Name,Name)]
 checkIllegalLT ltRels dict
 		=  let canons	= map (canonLT dict) ltRels in
@@ -36,6 +37,7 @@ checkIllegalLT ltRels dict
 -- ### Building of actual table
 
 
+-- actual construction of a "PrecedenceTable"-datastructure is done in 'PrecedenceTable.hs'. This here does the heavy lifting.
 buildTable	:: [Name] -> [Name] -> Map Name Name -> (Map Name Int, Map Int [Name])
 buildTable repres allOps unions
 		=  let repres'	= zip repres [1..] in
