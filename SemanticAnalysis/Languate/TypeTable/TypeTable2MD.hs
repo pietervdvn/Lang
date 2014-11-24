@@ -4,6 +4,7 @@ module Languate.TypeTable.TypeTable2MD where
 --}
 
 import Data.Set as S
+import Data.Map as M
 import Data.Map hiding (toList)
 import Data.List hiding (lookup)
 import Data.Maybe
@@ -29,11 +30,11 @@ typeTable2MD fqn tt
 -- generates a nice table of types which are known in the module.
 knownTypes	:: TypeTable -> MarkDown
 knownTypes tt	= (title 2 $ "Known types") ++
-			table ["Type","Typekind","Type Constraints","Synonym for","Supertypes","Comment"] (fmap (knownTypeRow tt) . toList $ known tt)
+			table ["Type","Typekind","Type Constraints","Synonym for","Supertypes","Comment"] (fmap (knownTypeRow tt) . M.toList $ known tt)
 
-knownTypeRow	:: TypeTable -> (Type, Kind, Set TypeRequirement) -> [MarkDown]
-knownTypeRow tt (t, kind, treq)
-		=  [show t, show kind, typeReqs2MD $ S.toList treq,
+knownTypeRow	:: TypeTable -> ((FQN, Type),(Kind, Set TypeRequirement)) -> [MarkDown]
+knownTypeRow tt ((fqn, t),(kind, treq))
+		=  [ (bold $ show t)  ++ code (show fqn) , show kind, typeReqs2MD $ S.toList treq,
 			synonyms2md t tt ++ " " ++ revSynonyms2md t tt,
 			commas . fmap show . S.toList . findWithDefault S.empty t $ supertypes tt,
 			commentFor tt t]

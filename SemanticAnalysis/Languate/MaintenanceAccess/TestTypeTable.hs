@@ -15,15 +15,15 @@ import Languate.FQN
 
 
 tt		= TypeTable knownTypesT superTypesT syns revSyns instConstrT
-t 		= putStrLn $ typeTable2MD fqn tt
+t 		= putStrLn $ typeTable2MD (genFQN "Prelude") tt
 
-knownTypesT	= S.fromList [(Normal "Nat", Kind "*", S.empty)
-			, (Normal "Natural", Kind "*", S.empty)
-			, (Normal "Natur", Kind "*", S.empty)
-			, (Normal "Set", KindCurry [Kind "a"] $ Kind "*", S.fromList [("a", Normal "Eq")])
-			, (Normal "Functor", KindCurry [Kind "*"] $ Kind "*", S.empty)
-			, (Normal "Monoid", Kind "*", S.empty)
-			, (Normal "Eq", Kind "*", S.empty)]
+knownTypesT	= M.fromList [((dataFQN "Nat", Normal "Nat"	),(Kind "*", S.empty))
+			, ((dataFQN "Nat",Normal "Natural"	),( Kind "*", S.empty))
+			, ((dataFQN "Nat",Normal "Natur"		),( Kind "*", S.empty))
+			, ((collectionFQN "Set", Normal "Set"	),( KindCurry [Kind "a"] $ Kind "*", S.fromList [("a", Normal "Eq")]))
+			, ((categoryFQN "Functor", Normal "Functor"	),( KindCurry [Kind "*"] $ Kind "*", S.empty))
+			, ((categoryFQN "Monoid",Normal "Monoid"		),( Kind "*", S.empty))
+			, ((categoryFQN "Eq",Normal "Eq"			),( Kind "*", S.empty))]
 
 superTypesT	= fmap S.fromList $ M.fromList [(Normal "Nat", [Normal "Eq", Normal "Monoid"]), (Normal "Natural", [Normal "Eq", Normal "Monoid"]), (Normal "Set", [Normal "Functor"]),( Applied (Normal "Set") [Normal "a"], [Normal "Eq"])]
 
@@ -35,4 +35,7 @@ eqClassDef	= ClassDef "Eq" [] [] [] "When a type is instance of ''Eq'' it means 
 setClassDef	= ClassDef "Set" ["a"] [("a",Normal "Eq")] [Normal "Collection"] "A set is an unorderd collection" [] [
 			("union", Curry [Applied (Normal "Collection") [Free "a"], Applied (Normal "set") [Free "a"], Applied (Normal "set") [Free "a"]], Just "Adds all element to given set", [("a",Normal "Eq"),("set", Normal "Set")])]
 
-fqn		= fromJust $ toFQN "pietervdvn:Data:Data.Prelude"
+genFQN sub		= fromJust $ toFQN $ "pietervdvn:Data:" ++ sub
+categoryFQN str		= genFQN $ "category." ++ str
+collectionFQN str	= genFQN $ "Collection." ++ str
+dataFQN str		= genFQN $ "Data." ++ str

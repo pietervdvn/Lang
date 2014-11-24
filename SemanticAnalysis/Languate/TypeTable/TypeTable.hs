@@ -13,6 +13,7 @@ e.g.
 Bool is [Eq, Ord, Monoid, Show, ...]
 -}
 
+import StdDef
 import Data.Map
 import Data.Set
 import Languate.AST
@@ -24,9 +25,8 @@ The type table contains all known types within a certain module.
 
 -}
 
-
-data TypeTable	= TypeTable	{ known		:: Map Name (FQN, Kind, Set TypeRequirement)	-- type requirements are implicit; contains synonyms
-					-- known (Normal Int, NormalType, Private) means that ''int'' does not get exported to modules which import this module
+data Duplicate	= Duplicate [FQN]
+data TypeTable	= TypeTable	{ known		:: Map (FQN, Type) (Kind, Set TypeRequirement)	-- type requirements are implicit; contains synonyms
 				, supertypes	:: Map Type (Set Type)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				, synonyms	:: Map Type Type	-- should have the same kind. Acts as an 'equivalence/equality' relation
 				, revSynonyms	:: Map Type (Set Type)	-- inverse relation of synonyms
@@ -36,6 +36,8 @@ data TypeTable	= TypeTable	{ known		:: Map Name (FQN, Kind, Set TypeRequirement)
 				-}
 				, instConstr	:: Map Type (ClassDef, Kind)}
 	deriving (Show, Ord, Eq)
+
+type TypeLookupTable	= Map ([Name], Name) [(FQN, Visible)]	-- mutliple values, multiple possiblities in some cases!
 
 {-
 
