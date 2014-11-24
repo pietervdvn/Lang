@@ -31,7 +31,9 @@ data Expression	= Rgx Regex	-- A simple regex which is parsed and given as token
 		| Seq [Expression] -- parse every rule in sequence
 		| Set [Expression] -- parse each rule once, in any order. E.g. {rule1 | rule2}. Note that, when both rule1 and rule2 would be valid, rule1 is preferred
 		| And Expression [(Expression, Bool)] -- Parse all the rules in (from the same starting point). The first rule is included in the PT if and only if all of the resting rules have a (non empty) result.
-	deriving (Show)
+
+instance Show Expression where
+	show = s
 
 instance Show Module where
 	show = sm
@@ -53,6 +55,7 @@ expand str
 s	:: Expression -> String
 s (Rgx regex)	= " \""++ show regex ++"\""
 s (NWs expr)	= " %" ++ show expr
+s (DeepNWs expr)	= " %%"++show expr
 s (Token expression)	= " $"++s expression
 s (Call name)	= ' ':name
 s (Choice exprs)= " (" ++ sOrred " |" exprs ++" )"
@@ -69,7 +72,7 @@ sAnd	:: String -> [(Expression, Bool)] -> String
 sAnd st	= foldr (\(e,b) acc -> (if b then "!" else "") ++ s e ++ st ++ acc) ""
 
 sOrred	:: String -> [Expression] -> String
-sOrred str exprs 
+sOrred str exprs
 	= foldr (\e acc -> s e ++ str ++ acc) (s $ last exprs) (init exprs)
 
 instance Normalizable Expression where
@@ -84,7 +87,7 @@ n (Star r)	= Star $ n r
 n (More r)	= More $ n r
 n (And r rb)	= case filter (not . isEmpty . fst) $ map (first n) rb of
 			[]	-> n r
-			rest	-> And (n r) rb 
+			rest	-> And (n r) rb
 n (Token r)	= case n r of
 			r'@(Token _)	-> r'
 			r'		-> Token r'
@@ -98,7 +101,7 @@ seqN		:: [Expression] -> ([Expression] -> Expression) -> Expression
 seqN rules constr
 		=  case filter (not . isEmpty) $ map n rules of
 			[r]	-> r
-			rs	-> constr rs 
+			rs	-> constr rs
 
 isEmpty		:: Expression -> Bool
 isEmpty (Choice [])	= True
@@ -111,4 +114,3 @@ isEmpty (More t)	= isEmpty t
 isEmpty (Opt t)		= isEmpty t
 isEmpty (NWs t)		= isEmpty t
 isEmpty _		= False
-
