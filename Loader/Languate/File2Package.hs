@@ -2,7 +2,7 @@ module Languate.File2Package (loadPackage, loadPackage', import2fqn) where
 
 {--
 
-This module loads a module, looks at it's imports and loads unloaded stuff 
+This module loads a module, looks at it's imports and loads unloaded stuff
 
 --}
 import StdDef
@@ -34,7 +34,7 @@ msg		:: [(FQN, FQN)] -> String
 msg		= foldl (\acc (requestor, notF) -> acc++"\n\t"++show notF++" (needed by "++ show requestor++")") " The Following packages where not found:"
 
 {- loads all modules needed for file. FQN is the name of the module that should be loaded, Filepath the path to 'src' in the project.
-Imports of which the file was not found, are the second value in the tuple. It is a list, containing 
+Imports of which the file was not found, are the second value in the tuple. It is a list, containing
 [this module wanted the import, this module was not found]
 -}
 loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN Module,[(FQN,FQN)])
@@ -78,20 +78,20 @@ loadF requestor fqn
 
 -- adds all the imports to the toLoad-list
 addImports	:: FQN -> Module -> StateT Context IO ()
-addImports fqn mdul	
+addImports fqn mdul
 		=  do	fqnp	<- get' fqpn
 			cache	<- get' loaded
 			let fqns 	= map (import2fqn fqnp) $ imports' mdul
 			let fqns'	= zip (repeat fqn) $ filter (`notMember` cache) fqns
 			todolist	<- get' toLoad
 			modify (setToLoad $ fqns' ++ todolist)
-			
-			
-			
+
+
+
 
 import2fqn	:: FQPN -> Import -> FQN
-import2fqn fqpn (Import _ mods mod _w)
-		= fromMaybe (error $ "Invalid import "++show mods ++ show mod) $ toFqn' fqpn mods mod
+import2fqn fqpn (Import _ mods mod _ _)
+		= fromMaybe (error $ "Invalid import format "++show mods ++ show mod) $ toFqn' fqpn mods mod
 
 pop		:: StateT Context IO (FQN, FQN)
 pop		=  do	ls	<- get' toLoad
@@ -111,4 +111,3 @@ setToLoad toLoad (Context bnfs fqpn _ loaded root errs)
 addNotFound	:: FQN -> FQN -> Context -> Context
 addNotFound requestor fqn (Context bnfs fqpn toLoad loaded root errs)
 		= Context bnfs fqpn toLoad loaded root $ (requestor, fqn):errs
-
