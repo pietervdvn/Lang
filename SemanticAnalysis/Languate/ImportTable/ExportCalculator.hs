@@ -3,17 +3,28 @@ module Languate.ImportTable.ExportCalculator where
 {--
 This module implements calculateExports and calculateImports
 --}
-
+import StdDef
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Prelude hiding (lookup)
-import Data.Map (Map, lookup, insert)
+import Data.Map (Map, lookup, insert, findWithDefault, mapWithKey)
 import Data.Set (Set, unions, union)
 import Data.Maybe
 import State
 import StdDef (merge, unmerge)
 import Data.Tuple
 import Control.Arrow
+
+import Languate.World hiding (importGraph)
+import qualified Languate.World as W
+import Languate.FQN
+
+calculateExports'	:: (Ord prop, Eq prop) => World -> (FQN -> Set prop) -> (prop -> FQN -> Bool) -> Map FQN (Set prop)
+calculateExports' w	= let ig	= W.importGraph w in
+ 				calculateExports ig (invertDict ig)
+
+calculateImports'	:: (Ord prop, Eq prop) => World -> (FQN -> Set prop) -> Map FQN (Set prop) -> Map FQN (Set prop)
+calculateImports' w	= calculateImports (W.importGraph w)
 
 {- calculates what properties each node exports, even by reexporting.
 Params:
@@ -25,32 +36,24 @@ Returns:
 - What properties each node exports
 -}
 calculateExports	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> Map n (Set n) -> (n -> Set prop) -> (prop -> n -> Bool) -> Map n (Set prop)
-calculateExports importGraph exportGraph exps impFiltcd Do
+calculateExports importGraph exportGraph exps impFilt
 			= exported $ snd $ runstate _ce $ ExpS importGraph exportGraph exps impFilt M.empty (S.fromList $ M.keys importGraph)
 
 {- calculateImports gives all things which are visible within n (thus local -private- props and imported props)
 
 -}
-calculateImports	::  (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> Map n (Set prop)
+calculateImports	:: (Eq prop, Ord n, Ord prop) => (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> Map n (Set prop)
 calculateImports importGraph local exports
-			= fmap (calculateImportsFor importGraph local exports) exports
+			= mapWithKey (\n _ -> calculateImportsFor importGraph local exports n) exports
 
-calculateImportsFor	:: (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
+calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
 calculateImportsFor importGraph local exports n
-			=  let	importsFrom	= (??) $ lookup n importGraph
-				imported	= unions $ fmap ((??) . `lookup` exports) importsFrom
+			=  let	importsFrom	= S.toList $ (??) $ lookup n importGraph
+				imported	= fmap (\n -> findWithDefault S.empty n exports) importsFrom
 				localDecl	= local n in
-				union localDecl imported
+				union localDecl $ unions imported
 
 
-
-
-invertDict		:: (Eq b, Ord b, Ord a) => Map a (Set b) -> Map b (Set a)
-invertDict		= fmap S.fromList . M.fromList . merge . map swap . unmerge . M.toList . fmap S.toList
-
--- a imports from b, c, d
-exampleImpGraph		= M.fromList $ map (second S.fromList) [("a", ["b","c"]),("b",[]),("c",[]),("d",["a"])]
-exampleExps		= M.fromList $ map (second S.fromList) [("a",[1,2]),("b",[3]), ("c",[4]), ("d", [5])]
 
 
 data ExpS n prop

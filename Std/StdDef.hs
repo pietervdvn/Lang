@@ -3,6 +3,10 @@ module StdDef where
 import Data.Tuple
 import Data.Map (Map, insert, adjust, findWithDefault)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
+import Data.Map (Map)
+import Data.Set (Set)
+
 type Name 	= String
 type FileName	= String
 type LineNumber = Int
@@ -53,6 +57,9 @@ merge'		= map swap . merge . map swap
 
 unmerge		:: [(a,[b])] -> [(a,b)]
 unmerge 	=  concatMap (\(a,bs) -> [(a,b) | b <- bs])
+
+invertDict		:: (Eq b, Ord b, Ord a) => Map a (Set b) -> Map b (Set a)
+invertDict		= fmap Set.fromList . Map.fromList . merge . map swap . unmerge . Map.toList . fmap Set.toList
 
 -- makes sure the string always takes (at least) 8*t characters
 tabs	:: Int -> String -> String

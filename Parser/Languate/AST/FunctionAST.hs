@@ -9,8 +9,7 @@ import Languate.AST.TypeAST
 
 data Function	= Function	{ docstr	:: DocString
 				, visibility	:: Visible
-				, signs		:: [(Name, Type)]
-				, reqs		:: [TypeRequirement]
+				, signs		:: [(Name, Type, [TypeRequirement])]
 				, laws		:: [Law]
 				, clauses	:: [Clause]
 				}

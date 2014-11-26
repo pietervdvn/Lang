@@ -10,20 +10,23 @@ import qualified Bnf
 import Languate.FQN
 import Languate.AST
 import Languate.File2AST
+import Languate.World
 import Data.Map hiding (null, map, filter, foldr, foldl)
 import StateT
 import Control.Monad
 import Control.Monad.Trans
 import Data.Maybe
 import System.Directory
+import Data.Set (Set)
+import qualified Data.Set as S
 
 
 -- loadpackage, but crashes when imports are not found
-loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN Module)
+loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO World
 loadPackage' world fqn fp
 		= do	(package, notFound)	<- loadPackage world fqn fp
 			unless (null notFound) $ printErr notFound
-			return package
+			return $ buildWorld package
 
 printErr	:: [(FQN,FQN)] -> IO ()
 printErr notFound
@@ -37,7 +40,7 @@ msg		= foldl (\acc (requestor, notF) -> acc++"\n\t"++show notF++" (needed by "++
 Imports of which the file was not found, are the second value in the tuple. It is a list, containing
 [this module wanted the import, this module was not found]
 -}
-loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN Module,[(FQN,FQN)])
+loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN (Module, Set FQN),[(FQN,FQN)])
 loadPackage bnfs fqn src
 		=  do	let FQN fqpn _ _	= fqn
 			let ctx	= Context bnfs fqpn [(fqn, fqn)] empty src []
@@ -47,7 +50,7 @@ loadPackage bnfs fqn src
 
 -- left fqn imports the right fqn
 type ToLoad	= [(FQN,FQN)]
-type Loaded	= Map FQN Module
+type Loaded	= Map FQN (Module, Set FQN)
 
 -- not found: requestor -> missing request
 data Context	= Context { bnfs :: Bnf.World, fqpn :: FQPN, toLoad:: ToLoad, loaded:: Loaded, root::FilePath, notFound::[(FQN,FQN)]}
@@ -73,11 +76,11 @@ loadF requestor fqn
 					lift $ putStrLn $ "Loading '"++show fqn++"'"
 					modul	<- lift $ load bnf fp
 					cache	<- get' loaded
-					modify $ setLoaded $ insert fqn modul cache
-					addImports fqn modul
+					imports	<- addImports fqn modul
+					modify $ setLoaded $ insert fqn (modul,imports)  cache
 
--- adds all the imports to the toLoad-list
-addImports	:: FQN -> Module -> StateT Context IO ()
+-- adds all the imports to the toLoad-list. Returns the FQN's which are needed
+addImports	:: FQN -> Module -> StateT Context IO (Set FQN)
 addImports fqn mdul
 		=  do	fqnp	<- get' fqpn
 			cache	<- get' loaded
@@ -85,6 +88,7 @@ addImports fqn mdul
 			let fqns'	= zip (repeat fqn) $ filter (`notMember` cache) fqns
 			todolist	<- get' toLoad
 			modify (setToLoad $ fqns' ++ todolist)
+			return $ S.fromList fqns
 
 
 

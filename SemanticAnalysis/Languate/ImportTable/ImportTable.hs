@@ -14,6 +14,8 @@ import Languate.FQN
 import qualified Data.Set as S
 import Data.Set (Set)
 
+import qualified Languate.ImportTable.ExportCalculator as EC
+
 -- aliasses are indistinguisable here, all are treated as equals. Sometimes multiple imports are possible, then the lookup should be more qualified.
 type ImportTable	= Map ([Name], Name) (Set FQN)
 

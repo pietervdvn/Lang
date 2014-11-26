@@ -71,20 +71,20 @@ addStms stms mod
 
 
 setDocStr	:: Comment -> Function -> Function
-setDocStr docString (Function _ v decls reqs laws clauses)
-		= Function docString v decls reqs laws clauses
+setDocStr docString (Function _ v decls laws clauses)
+		= Function docString v decls laws clauses
 
 addClause	:: Clause -> Function -> Function
-addClause clause (Function docString v decls reqs laws clauses)
-		= Function docString v decls reqs laws $ clause:clauses
+addClause clause (Function docString v decls laws clauses)
+		= Function docString v decls laws $ clause:clauses
 
 addLaw		:: Law -> Function -> Function
-addLaw law (Function docString v decls reqs laws clauses)
-		= Function docString v decls reqs (law:laws) clauses
+addLaw law (Function docString v decls laws clauses)
+		= Function docString v decls (law:laws) clauses
 
 addDecl		:: (Name,Type, Visible, [TypeRequirement]) -> Function -> Function
-addDecl (n,t,v,reqs') (Function docString visibility decls reqs laws clauses)
-		= Function docString (vAnd v visibility) ((n,t):decls) (reqs' ++ reqs) laws clauses
+addDecl (n,t,v,reqs) (Function docString visibility decls laws clauses)
+		= Function docString (vAnd v visibility) ((n,t, reqs):decls) laws clauses
 			where 	vAnd	:: Visible -> Visible -> Visible
 				vAnd Public Public	= Public
 				vAnd _ _		= Private

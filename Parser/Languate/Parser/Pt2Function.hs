@@ -33,7 +33,7 @@ convert		:: AST -> ([Comment], Function)
 convert ast	= let (Root asts)	= normalize ast in
 		  let commAsts		= filter isComment asts in
 		  let comms		= filter (/= "") $ concatMap (\(Comm c) -> c) commAsts in
-			(init' comms, conv (Root asts) $ Function "" Public [] [] [] [])
+			(init' comms, conv (Root asts) $ Function "" Public [] [] [])
 
 conv		:: AST -> Function -> Function
 conv (LineT clause)

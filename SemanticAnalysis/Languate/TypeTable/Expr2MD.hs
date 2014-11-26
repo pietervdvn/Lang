@@ -5,6 +5,7 @@ module Languate.TypeTable.Expr2MD where
 import StdDef
 import MarkDown
 import Languate.AST
+import Languate.TAST
 
 expr2md	:: Expression -> MarkDown
 expr2md e	= code $ show e
@@ -34,11 +35,8 @@ decl2MD (n, Nothing)	= code $ commas $ reverse n
 decl2MD (n, Just t)	= code $ commas (reverse n) ++ " : "++show t
 
 
+typeReqs2MD	:: [TypeRequirement] -> MarkDown
 typeReqs2MD	= (++ " ") . commas . fmap showTypeReq
 
-
-bool	= Normal "Bool"
-tl1	= Law (Just "operator precedence") [("d",Just bool),("c",Just bool),("b",Just bool),("a",Just bool)] [] (Call "True") (Call "True")
--- (a == b && c == d) ((a == b) && (c == d))
-tl2	= Law Nothing [("b",Nothing),("a",Just bool)] [("a", Normal "Eq")] (Call "True") (Call "True")
--- (! a == b) ((! a) == b)][("==",eq -> (eq -> Bool),Nothing,[])]
+rtypeReqs2MD	:: [RTypeReq] -> MarkDown
+rtypeReqs2MD	= (++ " ") . commas . fmap showRTypeReq

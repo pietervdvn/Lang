@@ -7,7 +7,6 @@ By adding the associativity, the compiler has a high degree of freedom in optimi
 
 ------
 
-
 -- A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
 class Monoid:
 	-- The neutral element
@@ -17,6 +16,7 @@ class Monoid:
 	-- The addition operator.
 	~ associativity: a,b,c:Monoid => append (append a b) c = append a (append b c)
 	append	: monoid -> monoid -> monoid
+
 
 -- Sum is an instance of monoid, with (+) defined as append
 class Sum:

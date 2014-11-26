@@ -1,4 +1,4 @@
-module Languate.MaintenanceAccess.TestSemantal where
+module Languate.MaintenanceAccess.TestPrecedence where
 
 
 import Languate.File2Package

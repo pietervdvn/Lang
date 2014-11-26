@@ -32,21 +32,21 @@ knownTypes	:: TypeTable -> MarkDown
 knownTypes tt	= (title 2 $ "Known types") ++
 			table ["Type","Typekind","Type Constraints","Synonym for","Supertypes","Comment"] (fmap (knownTypeRow tt) . M.toList $ known tt)
 
-knownTypeRow	:: TypeTable -> ((FQN, Type),(Kind, Set TypeRequirement)) -> [MarkDown]
-knownTypeRow tt ((fqn, t),(kind, treq))
-		=  [ (bold $ show t)  ++ code (show fqn) , show kind, typeReqs2MD $ S.toList treq,
+knownTypeRow	:: TypeTable -> (RType,(Kind, Set RTypeReq)) -> [MarkDown]
+knownTypeRow tt (t@(RNormal fqn nm),(kind, treq))
+		=  [ (bold nm)  ++ code (show fqn) , show kind, rtypeReqs2MD $ S.toList treq,
 			synonyms2md t tt ++ " " ++ revSynonyms2md t tt,
-			commas . fmap show . S.toList . findWithDefault S.empty t $ supertypes tt,
+			commas . fmap (st True) . S.toList . findWithDefault S.empty t $ supertypes tt,
 			commentFor tt t]
 
-synonyms2md	:: Type -> TypeTable -> MarkDown
-synonyms2md t	=  fromMaybe "" . fmap show . lookup t . synonyms
+synonyms2md	:: RType -> TypeTable -> MarkDown
+synonyms2md t	=  fromMaybe "" . fmap (st True) . lookup t . synonyms
 
-revSynonyms2md	:: Type -> TypeTable -> MarkDown
+revSynonyms2md	:: RType -> TypeTable -> MarkDown
 revSynonyms2md t
-		=  commas . fmap (ital . show) . S.toList . findWithDefault S.empty t . revSynonyms
+		=  commas . fmap (ital . (st True)) . S.toList . findWithDefault S.empty t . revSynonyms
 
-commentFor	:: TypeTable -> Type -> MarkDown
+commentFor	:: TypeTable -> RType -> MarkDown
 commentFor tt t	=  let classes = instConstr tt in
 		   fromMaybe "" $ fmap ((++) (ital "(Class)") . recode . classdocstr . fst) $ lookup t classes
 
@@ -55,10 +55,10 @@ classesOverview	:: TypeTable -> MarkDown
 classesOverview tt	=  title 2 "Classes overview" ++ concatMap (flip classOverview tt) (keys $ instConstr tt)
 
 -- assumes the given type is a class
-classOverview	:: Type -> TypeTable -> MarkDown
+classOverview	:: RType -> TypeTable -> MarkDown
 classOverview t tt
 		=  let (classdef, kind)	= findWithDefault (error "You passed a non-class thing into classOverview. Greets from TypeTable2MD") t $ instConstr tt in
-			title 3 (show t)
+			title 3 (st True t)
 			++ classInfo classdef t
 			++ parag ("Kind: " `when` bold (if normalKind kind then "" else show kind))
 			++ parag (recode $ classdocstr classdef)

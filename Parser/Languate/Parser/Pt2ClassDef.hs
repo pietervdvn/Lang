@@ -12,6 +12,8 @@ import Languate.Parser.Pt2Type
 import Languate.AST
 import Control.Arrow
 
+import Data.Char
+
 {--
 
 This module converts the ParseTree into a class def and Instance.
@@ -27,8 +29,13 @@ pt2classDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
 
 convert		:: AST -> ([Comment], ClassDef)
 convert (Clss name frees subs reqs comms laws declarations)
-		=  (init' comms, ClassDef name frees reqs subs (last comms) laws declarations)
+		=  (init' comms, ClassDef name frees reqs subs (last comms) laws $ injectTypeReq name declarations)
 convert ast	=  convErr modName ast
+
+injectTypeReq	:: Name -> [(Name, Type, Maybe Comment, [TypeRequirement])] -> [(Name, Type, Maybe Comment, [TypeRequirement])]
+injectTypeReq (n:nm) decls
+		= let	typeReq	= nub [(toLower n : nm, Normal [] $ n:nm), (map toLower (n:nm), Normal [] $ n:nm)]	in
+			map (\(n,t,mc, treqs) -> (n,t,mc, typeReq ++ treqs)) decls
 
 
 data AST	= Clss Name [Name] [Type] [TypeRequirement] [Comment] [Law] [(Name, Type, Maybe Comment, [TypeRequirement])] -- ""class Dict (k:Ord) v in Collection v:"" => Clss "Dict" ["k","v"] ["Collection"]

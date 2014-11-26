@@ -1,0 +1,6 @@
+Void
+----
+Void represents nothing
+----
+
+data Void	= Void

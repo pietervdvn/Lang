@@ -12,8 +12,9 @@ It is this data-structure that all semantic analysis things use or build.
 
 import StdDef
 import Languate.AST
-import Languate.Signature
 import Data.List
+import Normalizable
+import Languate.FQN
 
 data Kind		= Kind Name
 			| KindCurry [Kind] Kind
@@ -24,9 +25,10 @@ data ResolvedType	= RNormal FQN Name
 			| RFree String
 			| RApplied RType [RType]
 			| RCurry [RType]
-			| RTuple RType [RType]
-			| RInfer
+			| RTuple [RType]
+	deriving (Eq, Ord)
 type RType		= ResolvedType
+type RTypeReq		= (Name, ResolvedType)
 
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
@@ -52,6 +54,25 @@ data Signature	= Signature Name RType
 
 -------------------- Only utils, instance declaration and boring stuff below -------------------------------------
 
+instance Show ResolvedType where
+	show	= st False
+
+st		:: Bool -> RType -> String
+st short (RNormal fqn str)
+		=  (if short then "" else show fqn++ "." ) ++ str
+st short (RFree str)
+		=  str
+st short (RApplied t tps)
+		=  "(" ++ st short t ++" "++ unwords (map (st short) tps)++")"
+st short (RCurry tps)
+		=  "(" ++ intercalate " -> " (map (st short) tps)++")"
+st short (RTuple tps)
+		=  "(" ++ intercalate ", " (map (st short) tps) ++")"
+
+
+showRTypeReq	:: RTypeReq -> String
+showRTypeReq (name, rtype)
+		=  name++":" ++ st True rtype
 
 instance Show Signature where
 	show (Signature n t)
@@ -61,21 +82,39 @@ instance Normalizable Signature where
 	normalize (Signature n t)
 		= Signature n $ normalize t
 
+instance Normalizable ResolvedType where
+	normalize	= nt
 
-signature	:: Function -> [Signature]
-signature	=  map (uncurry Signature) . signs
+nt	:: ResolvedType -> ResolvedType
+nt (RApplied t [])	= nt t
+nt (RApplied t [t'])	= RApplied (nt t) [nt t']
+-- all applied types are written as ( (State Int) Bool) to make biding easier
+-- > deriveBindings (m a) (State Int Bool) = [ (m, State Int), (a, Bool)
+nt (RApplied t ts)	= RApplied (nt $ RApplied t $ init ts) [nt $ last ts]
+nt (RCurry [t])		= nt t
+nt (RCurry ts)		= RCurry [nt $ head ts, nt $ RCurry $ tail ts ]
+nt (RTuple [t])		= nt t
+nt (RTuple ts)		= RTuple $ map nt ts
+nt t			= t
 
 
 
-typeOf		:: TypedExpression -> [Type]
-typeOf (TNat _)	=  [Normal "Nat", Normal "Int"]
+
+typeOf		:: TypedExpression -> [RType]
+typeOf (TNat _)	=  [nat, int]
 typeOf (TFlt _)
-		=  [Normal "Float"]
-typeOf (TChr _)	=  [Normal "Char"]
+		=  [float]
+typeOf (TChr _)	=  [RNormal (toFQN' "pietervdvn:Data:Data.Char") "Char"]
 typeOf (TCall tps _)
 		=  tps
 typeOf (TApplication tps _ _)
 		=  tps
+
+nat	= num "Nat"
+int	= num "Int"
+float	= num "Float"
+
+num str	= RNormal (toFQN' $ "pietervdvn:Data:Num."++str) str
 
 instance Show Kind where
 	show (Kind nm)	= nm
