@@ -27,7 +27,8 @@ public import Prelude
  -- TYPES --
  -----------
 
-_knownType	::= %((globalIdent moduleSep)* globalIdent)
+$typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
+_knownType	::= %((globalIdent moduleSep)* typeIdent)
  $reqSep	::= "in" | "is" | ":"
  $freeType	::= localIdent & !reqSep
  parFreeType	::= "\(" freeType (reqSep commaSepTypes) "\)"
