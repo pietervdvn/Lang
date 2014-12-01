@@ -26,7 +26,7 @@ import Languate.ImportTable.ExportCalculator
 import Debug.Trace
 
 
--- buildTypeLookupTable	:: World -> Map FQN TypeLookupTable
+buildTypeLookupTable	:: World -> Map FQN TypeLookupTable
 buildTypeLookupTable world
 	= let 	locally	= mapWithKey (\fqn mod -> injectSet fqn $ locallyDeclared mod) $ modules world
 		err n	= error $ "Building type lookup table: fqn not found: " ++ show n

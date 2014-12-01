@@ -1,4 +1,4 @@
-module Languate.AST.FunctionASTUtils where
+module Languate.AST.FunctionASTUtils (show, isNl, remNl) where
 
 {--
 

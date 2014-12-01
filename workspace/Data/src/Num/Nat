@@ -3,9 +3,6 @@ Nat
 Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
 ---
 
-import Data.Builtins
-
-
 -- The root of numbers
    type IntInf		= Builins.Int
 subtype IntInf'		= _ IntInf

@@ -17,3 +17,5 @@ public import Type.Function
 
 public import Collections.List
 public import Collections.Dict
+
+public import Num.Nat

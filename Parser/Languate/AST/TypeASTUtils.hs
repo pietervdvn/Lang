@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility) where
 
 {--
 This module implements utilities for type asts
