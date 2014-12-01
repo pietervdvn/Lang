@@ -1,0 +1,41 @@
+Nat
+---
+Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
+---
+
+import Data.Builtins
+
+
+-- The root of numbers
+   type IntInf		= #Int
+subtype IntInf'		= _ IntInf	-- No zero
+subtype Int		= _ IntInf	-- No Inf
+subtype Int'		= _ IntInf' & Int	-- No Inf, no zero
+
+subtype NatInf		= _ IntInf
+subtype NatInf'		= _ NatInf
+subtype Nat		= _ NatInf
+subtype Nat'		= _ NatInf' & Nat
+
+-- Adds one to a number. A natural number is guaranteed not to be zero.
+succ	: Nat 		-> Nat'
+succ	: NatInf 	-> NatInf'
+succ	: Int 		-> Int
+succ	: IntInf 	-> IntInf
+n	= #succ n
+
+abs	: Int 		-> Nat
+abs	: Int' 		-> Nat'
+abs	: IntInf 	-> NatInf
+abs	: IntInf' 	-> NatInf'
+i	= #abs
+
+(+)	: Nat -> Nat 	-> Nat
+(+)	: Nat -> Nat' 	-> Nat'
+(+)	: Nat' -> Nat 	-> Nat'
+(+)	: NatInf -> Nat	-> NatInf
+(+)	: Nat -> NatInf	-> NatInf
+(+)	: Int -> Int	-> Int
+(+)	: IntInf -> Int	-> IntInf
+(+)	: Int -> IntInf	-> IntInf
+i j	= #plus i j
