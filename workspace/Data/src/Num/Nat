@@ -7,17 +7,18 @@ import Data.Builtins
 
 
 -- The root of numbers
-   type IntInf		= #Int
-subtype IntInf'		= _ IntInf	-- No zero
-subtype Int		= _ IntInf	-- No Inf
+   type IntInf		= Builins.Int
+subtype IntInf'		= _ IntInf
+subtype Int		= _ IntInf
 subtype Int'		= _ IntInf' & Int	-- No Inf, no zero
+
 
 subtype NatInf		= _ IntInf
 subtype NatInf'		= _ NatInf
-subtype Nat		= _ NatInf
 subtype Nat'		= _ NatInf' & Nat
+subtype Nat		= _ NatInf
 
--- Adds one to a number. A natural number is guaranteed not to be zero.
+-- Adds one to a number. A natural number + 1 is guaranteed not to be zero.
 succ	: Nat 		-> Nat'
 succ	: NatInf 	-> NatInf'
 succ	: Int 		-> Int
@@ -33,9 +34,7 @@ i	= #abs
 (+)	: Nat -> Nat 	-> Nat
 (+)	: Nat -> Nat' 	-> Nat'
 (+)	: Nat' -> Nat 	-> Nat'
-(+)	: NatInf -> Nat	-> NatInf
-(+)	: Nat -> NatInf	-> NatInf
+(+)	: NatInf -> NatInf -> NatInf
 (+)	: Int -> Int	-> Int
-(+)	: IntInf -> Int	-> IntInf
-(+)	: Int -> IntInf	-> IntInf
+(+)	: IntInf -> IntInf	-> IntInf
 i j	= #plus i j
