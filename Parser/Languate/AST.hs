@@ -1,20 +1,9 @@
 module Languate.AST
-	(Law (Law, Example), Comment, DocString, Annotation (Annotation, PrecAnnot)
-	, PrecModifier (PrecLeft , PrecRight , PrecPrefix , PrecPostfix)
-	, PrecRelation (PrecEQ, PrecLT)
-	, Visible (Private, Public)
-	, Expression (Nat, Flt, Chr, Seq, Tuple, BuiltIn, Cast, AutoCast, Call, Operator, ExpNl)
-	, Type (Normal, Free, Applied, Curry, TupleType, Infer)
-	, TypeRequirement, ADTDef (ADTDef), ADTSum (ADTSum), SynDef (SynDef), SubDef (SubDef)
-	, ClassDef (ClassDef), Instance (Instance)
-	, Function (Function), Clause (Clause), Pattern (Assign, Let, Deconstruct, Multi, Eval, DontCare, MultiDontCare)
-	, Module (Module), Imports, Import (Import), Restrict (BlackList, WhiteList), Pseudonym
-	, Statement (FunctionStm, ADTDefStm, SynDefStm, SubDefStm, ClassDefStm, InstanceStm, Comments, ExampleStm, AnnotationStm)
-	, docstr, visibility, signs, laws, clauses, setVisibility, isOperator, showTypeReq
-	, moduleName, exports, imports, statements, imports'
-	, lawName, lawDeclarations, typeReqs, expr1, expr2
-	, name, frees, classReqs, subclassFrom, classdocstr, classlaws, decls
-	, isAllowed
+	( module Languate.AST.FunctionAST
+	, module Languate.AST.FunctionASTUtils
+	, module Languate.AST.ModuleAST
+	, module Languate.AST.TypeAST
+	, module Languate.AST.TypeASTUtils
 	)
 
 

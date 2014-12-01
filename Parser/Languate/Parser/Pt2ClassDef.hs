@@ -13,7 +13,7 @@ import Languate.AST
 import Control.Arrow
 
 import Data.Char
-
+import Data.List (nub)
 {--
 
 This module converts the ParseTree into a class def and Instance.
@@ -62,7 +62,7 @@ h		= 	[ ("nlcomments"	, Comms . pt2nlcomments)
 			, ("freeTypes"	, uncurry FreeT . pt2freetypes)]
 
 t		:: Name -> String -> AST
-t "globalIdent" n
+t "typeIdent" n
 		=  Ident n
 t _ ":"		=  ColonT
 t _ "class"	=  ClassT
@@ -140,7 +140,7 @@ check (t,[])	=  t
 check (t,reqs)	= error $ "Type requirements are not allowed in instance declarations: "++show t++" "++show reqs
 
 ti		:: Name -> String -> ASTi
-ti "globalIdent" n
+ti "typeIdent" n
 		=  IIdent n
 ti _ "instance"	=  InstanceT
 ti nm cont	=  tokenErr (modName++"i") nm cont

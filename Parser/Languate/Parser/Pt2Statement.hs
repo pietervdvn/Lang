@@ -7,6 +7,7 @@ import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2TypeDef
+import Languate.Parser.Pt2SubTypeDef
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Annot
 import Languate.Parser.Utils

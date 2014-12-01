@@ -42,6 +42,8 @@ h		=  [("nlcomments", Comms . pt2nlcomments),("prod", uncurry Prod . pt2prod),("
 t		:: Name -> String -> AST
 t "globalIdent" id
 		=  Ident id
+t "typeIdent" id
+		=  Ident id
 t "localIdent" id
 		=  FreeTypes [id] []
 t _ "data"	=  DataT
