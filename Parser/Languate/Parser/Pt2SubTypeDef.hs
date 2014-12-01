@@ -57,8 +57,8 @@ s r (Type t tr:tail)
 s r (SubTypeT:Ident nm:EqualT:tail)
 		= s r (SubTypeT:Ident nm:FreeTypes [] []:EqualT:tail)
 s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:PrivT:tail)
-		= let SubDefT (SubDef nm _ frees ts trs) = s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:tail) in
-			SubDefT $ SubDef nm Private frees ts trs
+		= let SubDefT (SubDef nm' _ frees' ts' trs') = s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:tail) in
+			SubDefT $ SubDef nm' Private frees' ts' trs'
 s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:Type t tr0:[])
 		= s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:Type t tr0:TypeTail [] []:[])
 s _ (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:Type t tr0:TypeTail ts trs:[])
