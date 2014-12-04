@@ -81,6 +81,7 @@ E.g.:
 
 	advancedStuff	: (a is Monoid, Eq, b) -> a -> (b is Eq) -> b -> Bool
 
+<<<<<<< HEAD
 Resolving types within other modules
 ------------------------------------
 
@@ -89,4 +90,6 @@ When there is confusion, e.g. both module A and B export a (different) type ''X'
 If there is still confusion, use one more package. E.g. module X.Y.A.B.C and Z.W.A.B.C both export ''T'', differentiate by typing ''Y.A.B.C.T'' and ''W.A.B.C.T''
 
 
+=======
+>>>>>>> master
 -}

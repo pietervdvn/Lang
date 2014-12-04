@@ -13,7 +13,7 @@ import Languate.AST
 import Control.Arrow
 
 import Data.Char
-
+import Data.List(nub)
 {--
 
 This module converts the ParseTree into a class def and Instance.
@@ -65,7 +65,8 @@ t		:: Name -> String -> AST
 t "globalIdent" n
 		=  Ident n
 t _ ":"		=  ColonT
-t _ "class"	=  ClassT
+t _ "cat"	=  ClassT
+t _ "category" = ClassT
 t "subclass" "in"
 		= SubClassT
 t "subclass" "is"
@@ -83,13 +84,13 @@ s "subclass" [CommaT, Type t reqs]
 		= SubClassOf [t] reqs
 s "subclass" []	= SubClassOf [] []
 s _ [ast]	= ast
-s _ [Comms comms, ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', ColonT, Body laws decls]
+s _ [Comms comms, ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', Body laws decls]
 		= Clss name freeNames subs (reqs++reqs') comms laws decls
-s _ [Comms comms, ClassT, Ident name, FreeT names reqs, ColonT, Body laws decls]
+s _ [Comms comms, ClassT, Ident name, FreeT names reqs,  Body laws decls]
 		= Clss name names [] reqs comms laws decls
-s _ [Comms comms, ClassT, Ident name, SubClassOf subs reqs, ColonT, Body laws decls]
+s _ [Comms comms, ClassT, Ident name, SubClassOf subs reqs, Body laws decls]
 		= Clss name [] subs reqs comms laws decls
-s _ [Comms comms, ClassT, Ident name, ColonT, Body laws decls]
+s _ [Comms comms, ClassT, Ident name, Body laws decls]
 		= Clss name [] [] [] comms laws decls
 s _ (ClassT:Ident name:_)
 		= error $ "No docstring comment with class definition of "++show name

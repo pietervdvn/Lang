@@ -21,8 +21,8 @@ _commaSepExpr	::= expr ("," expr)*		-- can be a single expression too
 _set		::= "\{" commaSepExpr "\}"
 _list		::= "\[" commaSepExpr "\]"
 
-_arrowTuple	::= expr "-->" expr
-_dictCont	::= arrowTuple ("," arrowTuple)*
+_dictDef	::= expr "-->" expr
+_dictCont	::= dictDef ("," dictDef)*
 _dict		::= "\{" dictCont "\}"
  -- expression not contains spaces (or containing spaces in () )
  simpleExpr	::= char | string | float | nat | tuple | dict | set | list | prefixOp | "\(" expr "\)" | "~" baseType | "~~" | call | op

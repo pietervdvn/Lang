@@ -31,6 +31,7 @@ import Control.Monad
 
 version	= "0.0.0.0.4"
 
+<<<<<<< HEAD:Main/Languate/Main.hs
 infoFlags	= [("version", putStrLn version),("author", putStrLn "Pieter Vander Vennet\nThanks to Ilion Beyst")]
 
 start	:: IO ()
@@ -50,9 +51,20 @@ start'	=  do	welcome
 		(pack, bnfs, precT)	<- doAllStuff
 		args	<- getArgs
 		if "--no-repl" `elem` args then
+=======
+start	:: IO ()
+start	=  do	welcome
+		args	<- getArgs
+		let noFlag	= filter (not . isPrefixOf "-") args
+		let toLoad	= toFQN $ "pietervdvn:Data:" ++ (if null noFlag then "Prelude" else head noFlag)
+		let toLoad'	= fromMaybe (error $ "Could not parse module to load: "++head noFlag) toLoad
+		putStrLn $ "Loading bnf-files from "++bnfPath
+		(pack, bnfs, precT)	<- doAllStuff toLoad'
+		if ("--no-repl" `elem` args) then
+>>>>>>> master:Main0/Languate/Main.hs
 			putStrLn "All done!"
-		else do  putStrLn' "All done!"
-			 repl bnfs pack precT prelude
+		else do  putStrLn $ "Loaded "++show toLoad'++" for the interactive session"
+			 repl bnfs pack precT toLoad'
 
 
 repl	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> IO ()
@@ -72,6 +84,8 @@ repl' w tp precT fqn line
 	| "--p" `isPrefixOf` line
 			= do 	print $ parseExpr w precT $ drop 4 line
 				repl w tp precT fqn
+	| "--r"	 == line
+			= start
 	| otherwise	= do	rep w tp precT fqn line
 				repl w tp precT fqn
 

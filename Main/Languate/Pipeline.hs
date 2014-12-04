@@ -31,13 +31,14 @@ project	= "workspace/Data/src/"
 docs	= "workspace/Data/.gen/"
 
 fqpn		= fromJust $ toFQPN "pietervdvn:Data"
-prelude		= fromJust $ toFqn' fqpn [] "Prelude"
+-- prelude		= fromJust $ toFqn' fqpn [] "Prelude"
 bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
 
 
-doAllStuff	:: IO (TypedPackage, World, PrecedenceTable)
-doAllStuff	= do	bnfs	<- Bnf.load bnfPath
-			package	<- loadPackage' bnfs prelude project
+
+doAllStuff	:: FQN -> IO (TypedPackage, World, PrecedenceTable)
+doAllStuff fqn	= do	bnfs	<- Bnf.load bnfPath
+			package	<- loadPackage' bnfs fqn project
 			let precTable	= buildPrecTable $ elems package
 			writePrecT precTable
  			let tpack	= normalizePackage $ typeCheck precTable fqpn package

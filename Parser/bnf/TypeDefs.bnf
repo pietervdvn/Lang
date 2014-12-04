@@ -73,7 +73,7 @@ _typeDef	::= globalIdent freeTypes "=" type
  ------------------------
 
 -- comments are obligated, but it's not the parsers task to generate error messages
- class		::= nlcomments? "class" globalIdent freeTypes subclass? ":" classBody
+ class		::= nlcomments? ("category"|"cat") globalIdent freeTypes subclass? classBody
 _subclass	::= ("in" | "is") type ("," type)*
 _classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 

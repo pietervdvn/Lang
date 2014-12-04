@@ -114,7 +114,7 @@ s "commaSepExprP" [expr, CommaSepExpr exprs]
 s "commaSepExprP" exprs
 		= CommaSepExpr exprs
 
-s "arrowTuple" [expKey, DictArrow, expValue]
+s "dictDef" [expKey, DictArrow, expValue]
 		= Tuple [expKey, expValue]
 s "dictCont" [Comma, arrTuple]
 		= arrTuple
