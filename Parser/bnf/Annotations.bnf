@@ -15,6 +15,7 @@ _$postfix	::= "PostFix" | "postfix"
 _modifier	::= left | right | prefix | postfix
 _comparator	::= "<" | "=" | ">"
 _parOp		::= "\(" $op "\)"
+_opComparation ::= parOp comparator parOp
 
 precedenceAnnot	::="precedence" "of" parOp "is" modifier ","  opComparation ("," opComparation)*
 
