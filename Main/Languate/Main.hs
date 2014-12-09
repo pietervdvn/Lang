@@ -31,10 +31,6 @@ import Control.Monad
 
 version	= "0.0.0.0.4"
 
-<<<<<<< HEAD
-<<<<<<< HEAD:Main/Languate/Main.hs
-=======
->>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
 infoFlags	= [("version", putStrLn version),("author", putStrLn "Pieter Vander Vennet\nThanks to Ilion Beyst")]
 
 start	:: IO ()
@@ -54,24 +50,6 @@ start'	=  do	welcome
 		(pack, bnfs, precT)	<- doAllStuff
 		args	<- getArgs
 		if "--no-repl" `elem` args then
-<<<<<<< HEAD
-=======
-start	:: IO ()
-start	=  do	welcome
-		args	<- getArgs
-		let noFlag	= filter (not . isPrefixOf "-") args
-		let toLoad	= toFQN $ "pietervdvn:Data:" ++ (if null noFlag then "Prelude" else head noFlag)
-		let toLoad'	= fromMaybe (error $ "Could not parse module to load: "++head noFlag) toLoad
-		putStrLn $ "Loading bnf-files from "++bnfPath
-		(pack, bnfs, precT)	<- doAllStuff toLoad'
-		if ("--no-repl" `elem` args) then
->>>>>>> master:Main0/Languate/Main.hs
-			putStrLn "All done!"
-		else do  putStrLn $ "Loaded "++show toLoad'++" for the interactive session"
-			 repl bnfs pack precT toLoad'
-
-=======
->>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
 
 repl	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> IO ()
 repl w tp precT fqn

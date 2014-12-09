@@ -27,9 +27,13 @@ import Languate.Parser.Pt2Languate
 import Languate.Parser.Pt2SubTypeDef
 import Languate.File2AST
 
+import Languate.Parser.Pt2SubTypeDef
+import Languate.File2AST
+
 import System.IO.Unsafe
 import StdDef
 import Languate.MaintenanceAccess.TestBNF
+import Languate.AST
 {--
 
 MAINTANCE ACCESS ONLY!

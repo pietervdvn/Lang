@@ -42,3 +42,14 @@ pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
 					Right pt	-> pt
 					Left exception	-> error $ show exception
 			return pt
+
+cachedpt		:: String -> String -> IO ParseTree
+cachedpt rule str =  do	let mpt	= parseFull world (toFQN ["Languate"]) rule str
+			let pt' = fromMaybe (error "Incorrect parse, not even a single character could be parsed!") mpt
+			let pt  = case pt' of
+					Right pt	-> pt
+					Left exception	-> error $ show exception
+			return pt
+
+
+world	= unsafePerformIO $ Bnf.load "bnf/Languate"
