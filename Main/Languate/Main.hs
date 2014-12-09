@@ -50,10 +50,6 @@ start'	=  do	welcome
 		(pack, bnfs, precT)	<- doAllStuff
 		args	<- getArgs
 		if "--no-repl" `elem` args then
-			putStrLn "All done!"
-		else do  putStrLn' "All done!"
-			 repl bnfs pack precT prelude
-
 
 repl	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> IO ()
 repl w tp precT fqn
@@ -72,6 +68,8 @@ repl' w tp precT fqn line
 	| "--p" `isPrefixOf` line
 			= do 	print $ parseExpr w precT $ drop 4 line
 				repl w tp precT fqn
+	| "--r"	 == line
+			= start
 	| otherwise	= do	rep w tp precT fqn line
 				repl w tp precT fqn
 

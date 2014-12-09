@@ -82,6 +82,7 @@ E.g.:
 
 	advancedStuff	: (a is Monoid, Eq, b) -> a -> (b is Eq) -> b -> Bool
 
+
 Resolving types within other modules
 ------------------------------------
 
