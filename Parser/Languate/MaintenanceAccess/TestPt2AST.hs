@@ -24,6 +24,7 @@ import Languate.Parser.Pt2TypeDef
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Statement
 import Languate.Parser.Pt2Languate
+import Languate.Parser.Pt2SubTypeDef
 import Languate.File2AST
 
 import System.IO.Unsafe

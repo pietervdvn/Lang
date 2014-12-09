@@ -13,6 +13,8 @@ synopsis 	: Basic data types and functions
 description 	: Basic data types and functions, such as Bool, Int, Nat, Maybe, Either, String, ...
 license		: GPL
 
+build-depends	: pietervdvn:Builins
+
+prelude		: Builtins
 -- can be imported as Data.Bool
 exposes		: Bool
-

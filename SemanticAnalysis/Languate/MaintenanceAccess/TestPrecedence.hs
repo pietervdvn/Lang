@@ -4,6 +4,7 @@ module Languate.MaintenanceAccess.TestPrecedence where
 import Languate.File2Package
 import Languate.FQN
 import Languate.AST
+import Languate.World
 import Data.Maybe
 import Data.Map (toList)
 import qualified Data.Map as Map
@@ -38,8 +39,8 @@ fqn n	= toFQN' $ "pietervdvn:Data:" ++ n
 fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
 t	= do	package	<- packageIO
-		let mods	= map snd $ toList package
-		print $ Map.lookup dict package
+		let mods	= map snd $ toList $ modules package
+		print $ Map.lookup dict $ modules package
 		let precTable	= buildPrecTable mods
 		print precTable
 		print $ expr2prefExpr precTable expr

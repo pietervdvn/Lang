@@ -53,6 +53,7 @@ packReqs constr asts
 t		:: Name -> String -> AST
 t "globalIdent" s
 		= Ident s
+t "typeIdent" s	= Ident s
 t "freeType" s	= FreeType s []
 t "void"  _	= KnownType [] "Void"
 t "infer" _	= Unknown

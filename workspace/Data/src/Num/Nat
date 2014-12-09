@@ -1,0 +1,39 @@
+Nat
+---
+Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
+---
+
+-- The root of numbers
+   type IntInf		= Builins.Int
+subtype IntInf'		= _ IntInf
+subtype Int		= _ IntInf
+subtype Int'		= _ IntInf' & Int	-- No Inf, no zero
+
+
+subtype NatInf		= _ IntInf
+subtype NatInf'		= _ NatInf
+subtype Nat'		= _ NatInf' & Nat
+subtype Nat		= _ NatInf
+
+-- Adds one to a number. A natural number + 1 is guaranteed not to be zero.
+succ	: Nat 		-> Nat'
+succ	: NatInf 	-> NatInf'
+succ	: Int 		-> Int
+succ	: IntInf 	-> IntInf
+n	= #succ n
+
+abs	: Int 		-> Nat
+abs	: Int' 		-> Nat'
+abs	: IntInf 	-> NatInf
+abs	: IntInf' 	-> NatInf'
+i	= #abs
+
+-- -- (+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
+
+(+)	: IntInf -> IntInf	-> IntInf	: Associative IntInf, Commutative IntInf
+(+)	: Nat -> Nat 	-> Nat
+(+)	: Nat -> Nat' 	-> Nat'
+(+)	: Nat' -> Nat 	-> Nat'
+(+)	: NatInf -> NatInf -> NatInf
+(+)	: Int -> Int	-> Int
+i j	= #plus i j

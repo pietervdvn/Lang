@@ -40,7 +40,7 @@ data _ ABC	= AB | BC
 data ABC	= _AB | _BC
 
 -}
- data		::= nlcomments? "data" "_"? globalIdent freeTypes "=" prod
+ data		::= nlcomments? "data" "_"? typeIdent freeTypes "=" prod
 
 {-
 
@@ -59,25 +59,29 @@ data _Btree (a: Ord) (b:[a])
  -- SYN DEF --
  -------------
 
-_typeDef	::= globalIdent freeTypes "=" type
+_typeDef	::= typeIdent freeTypes "=" type
  synonym	::= "type" typeDef
 
  -------------
  -- SUB DEF --
  -------------
 
- subtype	::= "subtype" typeDef
+ subtype	::= "subtype" typeIdent freeTypes "=" "_"? type ("\&" type)*
 
  ------------------------
  -- CLASS+INSTANCE DEF --
  ------------------------
 
 -- comments are obligated, but it's not the parsers task to generate error messages
+<<<<<<< HEAD
  class		::= nlcomments? ("category"|"cat") globalIdent freeTypes subclass? classBody
+=======
+ class		::= nlcomments? "class" typeIdent freeTypes subclass? ":" classBody
+>>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
 _subclass	::= ("in" | "is") type ("," type)*
 _classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
- instance	::= "instance" globalIdent baseType
+ instance	::= "instance" typeIdent baseType
 
 
 
@@ -137,8 +141,13 @@ To create them, you use the constructor. This constructor has the same name as t
 constructor hidden withing the local module, you add an underscore.
 
 
-subtype _CanonicalPath	= FilePath
+subtype CanonicalPath	= _FilePath
 
+Note that something can be a subtype of multiple classes.
+
+subtype Int'	= Int & IntInf'
+
+This implies, if i is in Int', i is in Int AND i is in IntInf'. This means that this i can be used in both functions. It also implies a common ancestor exists. (Which always does, the Universal type)
 
 Classes
 =======

@@ -1,4 +1,4 @@
-module Languate.Parser.Pt2TypeDef (pt2syndef,pt2subdef) where
+module Languate.Parser.Pt2TypeDef (pt2syndef) where
 
 import StdDef
 import Bnf.ParseTree
@@ -14,6 +14,7 @@ This module converts the ParseTree into all other things defined in TypeDefs.bnf
 
 For data definition (''data Bool = False | True''), please see Pt2DataDef
 For class (interface) definitions, see Pt2ClassDef
+For subtypes, see pt2subtypedef
 --}
 
 -- ## GEN (typeExpr)
@@ -41,10 +42,8 @@ data AST	= Ident Name
 h		:: [(Name, ParseTree -> AST)]
 h		=  [("freeTypes",uncurry FreeTypes . pt2freetypes),("type", uncurry Type . pt2type)]
 
-gh constr	= [("typeDef", constr . pt2gendef)]
-
 t		:: Name -> String -> AST
-t "globalIdent" id
+t "typeIdent" id
 		=  Ident id
 t _ "="		=  EqualT
 t nm cont	=  tokenErr modName nm cont
@@ -56,13 +55,12 @@ s _ [Ident id,FreeTypes frees reqs,EqualT,Type t reqs']
 s _ [Ident id,EqualT,Type t reqs]
 		= Stuff id [] t reqs
 s _ [ast]	= ast
-s nm asts	= seqErr modName
- nm asts
+s nm asts	= seqErr modName nm asts
 
 -- ## SYN DEF
 
 pt2syndef	:: ParseTree -> SynDef
-pt2syndef	=  pt2a (gh Syn) tsyn ssyn convSyn
+pt2syndef	=  pt2a [("typeDef", Syn . pt2gendef)] tsyn ssyn convSyn
 
 data ASTSyn	= TypeT
 		| Syn (Name,[Name],Type, [TypeRequirement])
@@ -75,21 +73,3 @@ ssyn _ [TypeT, syn]
 
 convSyn (Syn (nm, frees,t, reqs))
 		= SynDef nm frees t reqs
-
-
--- ## SUB DEF
-
-pt2subdef	:: ParseTree -> SubDef
-pt2subdef	=  pt2a (gh Sub) tsub ssub convsub
-
-data ASTsub	= SubTypeT
-		| Sub (Name,[Name],Type, [TypeRequirement])
-
-tsub		:: Name -> String -> ASTsub
-tsub _ "subtype"	=  SubTypeT
-
-ssub _ [SubTypeT, sub]
-		= sub
-
-convsub (Sub (nm, frees,t, reqs))
-		= SubDef nm frees t reqs

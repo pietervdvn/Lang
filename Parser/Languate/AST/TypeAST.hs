@@ -111,10 +111,14 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 data SynDef	= SynDef Name [Name] Type [TypeRequirement]
 
 {-
+Data type representing a subtype declaration, e.g.
+> subtype Nat	= Int
+Might have multiple supertypes
+> subtype Nat'	= NatInf & Nat
 > subtype Name = String -- see bnf for usage
 > subtype TenSet (a in Ord)	= ...
 no obligated docstring for this one! -}
-data SubDef	= SubDef Name [Name] Type [TypeRequirement]
+data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement]
 
 -- ## Creating classes and instances
 

@@ -27,7 +27,8 @@ public import Prelude
  -- TYPES --
  -----------
 
-_knownType	::= %((globalIdent moduleSep)* globalIdent)
+$typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
+ knownType	::= %((globalIdent moduleSep)* typeIdent)
  $reqSep	::= "in" | "is" | ":"
  $freeType	::= localIdent & !reqSep
  parFreeType	::= "\(" freeType (reqSep commaSepTypes) "\)"
@@ -82,6 +83,10 @@ E.g.:
 	advancedStuff	: (a is Monoid, Eq, b) -> a -> (b is Eq) -> b -> Bool
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
 Resolving types within other modules
 ------------------------------------
 
@@ -90,6 +95,9 @@ When there is confusion, e.g. both module A and B export a (different) type ''X'
 If there is still confusion, use one more package. E.g. module X.Y.A.B.C and Z.W.A.B.C both export ''T'', differentiate by typing ''Y.A.B.C.T'' and ''W.A.B.C.T''
 
 
+<<<<<<< HEAD
 =======
 >>>>>>> master
+=======
+>>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
 -}

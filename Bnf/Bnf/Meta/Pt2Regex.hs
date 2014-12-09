@@ -35,9 +35,10 @@ data AST	= Sequence [AST]
 		| Comma
 	deriving (Show)
 
+
 parseRegex	:: ParseTree -> Writer Errors R.Regex
 parseRegex pt	= do	conved	<- simpleConvert (\_ _ -> Nothing) t s pt
-			return $ normalize $ conv conved	
+			return $ normalize $ conv conved
 
 conv		:: AST -> R.Regex
 conv (FixedChar c)	= R.Fixed c
@@ -52,6 +53,7 @@ conv (Times i j ast)	= R.BetweenTimes i j $ conv ast
 conv (MinTimes i ast)	= R.MinTimes i $ conv ast
 conv (Sequence asts)	= R.Seq $ map conv asts
 conv (SubR ast)		= R.Seq [conv ast]
+conv ast		= error $ "BNF-lib error: conv fallthrough in pt2regex: "++show ast++", probably caused by a malformed regex, such as an unescaped "++show ast
 
 t	:: Name -> String -> AST
 
@@ -108,9 +110,9 @@ s "pass3" [ast]		= ast
 s "pass3" [ast, Star]	= MinTimes 0 ast
 s "pass3" [ast, Plus]	= MinTimes 1 ast
 s "pass3" [ast, Quest]	= Times 0 1 ast
-s "pass3" [ast, TimesToken i j]	
+s "pass3" [ast, TimesToken i j]
 			= Times i j ast
-s "pass3" [ast, MinTimesToken i]	
+s "pass3" [ast, MinTimesToken i]
 			= MinTimes i ast
 s "times" [AccO, Comma, AccC]
 			= MinTimesToken 0
@@ -132,5 +134,3 @@ s _ [ast]		= ast
 
 
 s name ast	= error $ "Sequence fallthrough for "++name++ " with asts "++ show ast
-
-

@@ -9,7 +9,7 @@ import Comments
 
 import Types
 
-_call		::= localIdent | globalIdent
+ call		::= localIdent | globalIdent
 
  op		::= ( "(!['~=(,)_\t\n\"a..zA..Z0..9\[\]{} ])(![(,)\t\n\"a..zA..Z0..9 ])*" & ! "--")
 		| "\{\}" | "\[\]" | "\(\)" | "=="

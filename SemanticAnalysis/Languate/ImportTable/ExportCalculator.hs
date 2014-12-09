@@ -70,10 +70,10 @@ _ce		:: (Eq prop, Ord n, Ord prop) => St n prop ()
 _ce		=  do 	done	<- fmap not stillWork
 			if done then
 				return ()
-			else do	(Just n)	<- pop
-				possiblyChanged	<- rework n
-				mapM_ push $ S.toList possiblyChanged
-				_ce
+				else do	(Just n)	<- pop
+					possiblyChanged	<- rework n
+					mapM_ push $ S.toList possiblyChanged
+					_ce
 
 -- reworks node n. Recalculates what node n would export. If the exports of node n have changed -> update it -> say which nodes should be reworked later
 rework		:: (Ord n, Eq prop, Ord prop) => n -> St n prop (Set n)
@@ -88,7 +88,7 @@ rework n	=  do	localExps	<- getf exps n
 			let currNexps	= (??) $ lookup n currentExps
 			if currNexps == exported then
 				return S.empty	-- no new exports -> no new work!
-			else	setExports exported n
+				else	setExports exported n
 
 
 setExports	:: Ord n => Set prop -> n -> St n prop (Set n)

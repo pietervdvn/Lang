@@ -33,6 +33,7 @@ done
 cd Main
 ghc Main.hs
 <<<<<<< HEAD
+<<<<<<< HEAD
 version="$(./Main --version)"
 mv Main ../langc$version
 cd ..
@@ -44,12 +45,26 @@ then
 	echo "Installing Main failed"
 	exit
 fi
+=======
+>>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
 
-mv Main ../Main
+version="$(./Main --version)"
+mv Main ../langc$version
 rm *.hi
 rm *.o
 rm */*.hi
 rm */*.o
 cd ..
+<<<<<<< HEAD
 ./Main --no-repl
 >>>>>>> master
+=======
+
+./langc$version --no-repl
+
+if [[ $? -ne 0]]
+then
+	echo "Installing Main failed"
+	exit
+fi
+>>>>>>> 3a30b8de27c48b17b6a419b76bfd0b22a7b23eac
