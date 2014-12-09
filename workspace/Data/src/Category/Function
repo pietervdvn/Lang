@@ -5,8 +5,14 @@ Function-categories contains classes which functions can be, such as Associative
 
 import Category.Mappable
 
+---
+An associative function is a function for which you can swap the arguments, and get the same function.
+---
 cat Associative a	in a -> a -> a
 	> f:Associative a, a,b,c:a => f a (f b c) = f (f a b) c
 
+---
+A commutative function
+---
 cat Commutative a	in a -> a -> a
 	> f:Commutative a, a,b:a => f a b = f b a
