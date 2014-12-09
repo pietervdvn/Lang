@@ -36,21 +36,22 @@ buildTypeLookupTable world
 		exports	= calculateExports' world localFor isPublic
 		known	= calculateImports' world localFor exports
 		kys	= keys $ modules world in
-		M.fromList $ zip kys $ map (buildTLT isPublic known) $ kys
+		M.fromList $ zip kys $ map (buildTLT (todos "Aliasses for imports" <error<><)isPublic known) $ kys
 
-buildTLT	:: ((FQN,Name) -> FQN -> Bool) -> Map FQN (Set (FQN, Name)) -> FQN -> Map ([Name], Name) [(FQN, Visible)]
-buildTLT isPublic known fqn
+buildTLT	:: Map FQN Name -> ((FQN,Name) -> FQN -> Bool) -> Map FQN (Set (FQN, Name)) -> FQN -> Map ([Name], Name) [(FQN, Visible)]
+buildTLT aliasses isPublic known fqn
 		= let	isPublic' n	= if isPublic (fqn,n) fqn then Public else Private
 			known' 		= findWithDefault (S.empty) fqn known
-			names2TypeDict		= (map (\(fqn', simpleName) -> (namesFor fqn' simpleName,(fqn', isPublic' simpleName)) ) $ S.toList known') :: [( [([Name],Name)] , (FQN, Visible))]
+			names2TypeDict		= (map (\(fqn', simpleName) -> (namesFor aliasses fqn' simpleName,(fqn', isPublic' simpleName)) ) $ S.toList known') :: [( [([Name],Name)] , (FQN, Visible))]
 			tlt	= merge $ map swap $ unmerge $ map swap names2TypeDict in
 			M.fromList tlt
 
 
 
-namesFor	:: FQN -> Name -> [([Name], Name)]
-namesFor fqn nm
-		= [ (prefixPath,nm) | prefixPath <- tails $ modulePath fqn]
+-- first arg: table of aliasses. E.g. Data.Bool as B -> {Data.Bool -> B}. Not in DB: no alias (or not imported)
+namesFor	:: Map FQN Name -> FQN -> Name -> [([Name], Name)]
+namesFor aliasses fqn nm
+		= [ (prefixPath,nm) | prefixPath <- tails $ fromMaybe (modulePath fqn) $ fmap (:[]) $ M.lookup fqn aliasses ]
 
 
 
@@ -67,7 +68,7 @@ declaredType (ADTDefStm (ADTDef name _ _ _ _))
 		= Just name
 declaredType (SynDefStm (SynDef name _ _ _))
 		= Just name
-declaredType (SubDefStm (SubDef name _ _ _ ))
+declaredType (SubDefStm (SubDef name _ _ _ _ ))
 		= Just name
 declaredType (ClassDefStm classDef)
 		= Just $ name classDef

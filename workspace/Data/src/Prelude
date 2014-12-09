@@ -11,7 +11,7 @@ public import Data.Bool
 
 public import Category.Eq
 public import Category.Monoid
-public import Category.Functor
+public import Category.Functor as F
 
 public import Type.Function
 
@@ -19,3 +19,6 @@ public import Collections.List
 public import Collections.Dict
 
 public import Num.Nat
+
+_f	: Bool
+	= True

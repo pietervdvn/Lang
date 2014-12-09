@@ -15,7 +15,6 @@ library
     exposed: True
     buildable: True
     other-modules: Languate.ImportTable.ExportCalculator
-                   Languate.ImportTable.ImportTable
                    Languate.MaintenanceAccess.TestBuildTypeLookupTable
                    Languate.MaintenanceAccess.TestPrecedence
                    Languate.MaintenanceAccess.TestTypeTable2MD

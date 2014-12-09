@@ -25,6 +25,7 @@ package		= unsafePerformIO packageIO
 
 
 t	= buildTypeLookupTable package
+pre	= fromJust $ lookup preludeFQN t
 
 
 

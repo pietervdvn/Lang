@@ -40,7 +40,7 @@ msg		= foldl (\acc (requestor, notF) -> acc++"\n\t"++show notF++" (needed by "++
 Imports of which the file was not found, are the second value in the tuple. It is a list, containing
 [this module wanted the import, this module was not found]
 -}
-loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN (Module, Set FQN),[(FQN,FQN)])
+loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN (Module, Set (FQN, Import)),[(FQN,FQN)])
 loadPackage bnfs fqn src
 		=  do	let FQN fqpn _ _	= fqn
 			let ctx	= Context bnfs fqpn [(fqn, fqn)] empty src []
@@ -50,7 +50,7 @@ loadPackage bnfs fqn src
 
 -- left fqn imports the right fqn
 type ToLoad	= [(FQN,FQN)]
-type Loaded	= Map FQN (Module, Set FQN)
+type Loaded	= Map FQN (Module, Set (FQN, Import))
 
 -- not found: requestor -> missing request
 data Context	= Context { bnfs :: Bnf.World, fqpn :: FQPN, toLoad:: ToLoad, loaded:: Loaded, root::FilePath, notFound::[(FQN,FQN)]}
@@ -80,12 +80,12 @@ loadF requestor fqn
 					modify $ setLoaded $ insert fqn (modul,imports)  cache
 
 -- adds all the imports to the toLoad-list. Returns the FQN's which are needed
-addImports	:: FQN -> Module -> StateT Context IO (Set FQN)
+addImports	:: FQN -> Module -> StateT Context IO (Set (FQN,Import))
 addImports fqn mdul
 		=  do	fqnp	<- get' fqpn
 			cache	<- get' loaded
 			let fqns 	= map (import2fqn fqnp) $ imports' mdul
-			let fqns'	= zip (repeat fqn) $ filter (`notMember` cache) fqns
+			let fqns'	= zip (repeat fqn) $ filter (`notMember` cache) $ fmap fst fqns
 			todolist	<- get' toLoad
 			modify (setToLoad $ fqns' ++ todolist)
 			return $ S.fromList fqns
@@ -93,9 +93,9 @@ addImports fqn mdul
 
 
 
-import2fqn	:: FQPN -> Import -> FQN
-import2fqn fqpn (Import _ mods mod _ _)
-		= fromMaybe (error $ "Invalid import format "++show mods ++ show mod) $ toFqn' fqpn mods mod
+import2fqn	:: FQPN -> Import -> (FQN, Import)
+import2fqn fqpn imp@(Import _ mods mod _ _)
+		= (fromMaybe (error $ "Invalid import format "++show mods ++ show mod) $ toFqn' fqpn mods mod, imp)
 
 pop		:: StateT Context IO (FQN, FQN)
 pop		=  do	ls	<- get' toLoad

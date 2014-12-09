@@ -29,10 +29,10 @@ imports' 	=  rights . imports
 type Pseudonym	= Name
 -- represents an import statement. public - Path - ModuleName - pseudonym = name as which the module has been imported - restrictions
 data Import	= Import Visible [Name] Name (Maybe Pseudonym) Restrict
-	deriving (Show)
+	deriving (Show, Ord, Eq)
 -- restrict is the blacklist/whitelist of the showing/hiding in an import statement. Can contain both function/operator names and type names
 data Restrict	= BlackList [Name] | WhiteList [Name]
-	deriving (Show)
+	deriving (Show, Ord, Eq)
 
 
 data Statement	= FunctionStm 	Function
