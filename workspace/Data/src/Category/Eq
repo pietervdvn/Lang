@@ -5,11 +5,11 @@ Implements the category of types which can be compared for equivalence, together
 
 import Data.Bool
 
-@precedence: (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
-@precedence: (!=) is Left, (!=) = (==)
+precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
+precedence of (!=) is Left, (!=) = (==)
 
 -- When a type is instance of ''Eq'' it means data of this type can be compared for equivalence.
-class Eq:
+cat Eq
 	-- Checks if the two given values are the same.
 	> !True == False	= True
 	> True == True || False	= False

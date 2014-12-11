@@ -8,7 +8,7 @@ import Prelude
 import Expressions
 
 -- patterns starting with $ are evaluated and should match the argument
-patternRoot	::= "\*" | "_" 
+patternRoot	::= "\*" | "_"
 		| ( "$" simpleExpr | globalIdent | localIdent | nat | dict | list | tuple 	| "\(" pattern "\)" )  (("@" patternRoot)?)
 _$ident		::= localIdent | globalIdent | op
 _deconstructed	::= patternRoot*
@@ -34,6 +34,3 @@ _dict		::= "\{" dictPart ("," dictPart)* (":" patternRoot)? "\}"
 _list		::= "\[" freePattern ("," freePattern)* (":" freePattern)? "\]"
 
 _tuple		::= "\(" freePattern ("," freePattern)+ "\)"
-
-
-

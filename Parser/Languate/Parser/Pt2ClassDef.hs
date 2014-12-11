@@ -65,6 +65,8 @@ h		= 	[ ("nlcomments"	, Comms . pt2nlcomments)
 t		:: Name -> String -> AST
 t "typeIdent" n
 		=  Ident n
+t "globalIdent" n
+		=  Ident n
 t _ ":"		=  ColonT
 t _ "cat"	=  ClassT
 t _ "category" = ClassT

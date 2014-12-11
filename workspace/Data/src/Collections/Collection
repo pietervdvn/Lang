@@ -11,7 +11,7 @@ import Category.Monoid
 import Category.Function
 
 -- A collection represents, well, a collection of data. Each set, list, map, bag, ... is instance of this class
-class Collection a:
+cat Collection a
 	-- Give the first element of the collection
 	head	: collection a -> (b:a)?
 	-- Give the entire collection without the element that head gives
@@ -26,12 +26,12 @@ class Collection a:
 	isEmpty	: collection -> Bool
 
 
+reduce	: Associative a -> a+ -> a
+f (singleton a)	= a
+f (unpack a as)	= f a $ reduce f as
+
+---
 reduce	: (m:Monoid)* -> m
 |isEmpty	= neutral
 (m:ms)	= append m $ reduce ms
-
-reduce	: Associative a -> a+ -> a
-reduce f (singleton a)
-	= a
-reduce f (a:as)
-	= f a $ reduce f as
+---

@@ -8,7 +8,7 @@ By adding the associativity, the compiler has a high degree of freedom in optimi
 ------
 
 -- A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
-class Monoid:
+cat Monoid
 	-- The neutral element
 	~ identity element:	append neutral a	= a
 	~ identity element:	append a neutral	= a
@@ -19,13 +19,13 @@ class Monoid:
 
 
 -- Sum is an instance of monoid, with (+) defined as append
-class Sum:
+cat Sum
 	(+)	: sum -> sum -> sum
 	zero	: sum
 
 
 -- Product is an instance of monoid, with (+) defined as append
-class Product:
+cat Product
 	(*)	: product -> product -> product
 	one	: product
 

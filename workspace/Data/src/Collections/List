@@ -4,9 +4,8 @@ A simple list class implementation
 ----
 
 import Data.Maybe
-
 -- The class which defines a list
-class List a:
+cat List a in Collection a
 	-- Returns the first element of the list. The element returned is of the type 'a', but might be a subclass of element 'a' too.
 	head	: [a] -> (b:a)
 	-- Returns the given list without the first element. The returned elements might be a subtype of the given list.
@@ -16,6 +15,7 @@ class List a:
 instance Monoid [a]
 
 instance Functor [a]
+
 
 map	: (a -> b) -> [a] -> [b]
 f empty	= []

@@ -3,4 +3,5 @@ Void
 Void represents nothing
 ----
 
+-- The data type representing nothing, aka ''()''
 data Void	= Void

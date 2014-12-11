@@ -11,7 +11,7 @@ data Bool	= False
 
 --## Logical operations
 
-@ precedence of (&&) is left, (&&) = (||)
+precedence of (&&) is left, (&&) = (||)
 -- Logical 'and'-function. Returns True if, and only if both arguments are True
   ~ annihilator for and	: b => False && b	= False
   ~ neutral element for and: b => True && b	= b
@@ -23,7 +23,7 @@ data Bool	= False
   True True	= True
   *		= False
 
-@ precedence: (||) is left, (||) = (&&)
+precedence of (||) is left, (||) = (&&)
 -- Logical 'or'-function. Returns False if, and only if both arguments are False
   ~ annihilator for or	: b => True || b	= True
   ~ neutral element for or: b => False  || b	= b
@@ -34,7 +34,7 @@ or		: Bool -> Bool -> Bool
   False False	= False
   *		= True
 
-@ precedence: (!) is prefix, (!) < (&&)
+precedence of (!) is prefix, (!) < (&&)
 -- Logical 'not' function (aka invert).
 ---  ~ double not	: b => ! !b = b
   > !True	= False

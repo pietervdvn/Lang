@@ -10,6 +10,8 @@ import Languate.AST
 {--
 
 This module converts the ParseTree into an annotation.
+
+Precedence annotations are handled in Pt2PrecedenceAnnot
 --}
 
 modName	= "Pt2Annot"

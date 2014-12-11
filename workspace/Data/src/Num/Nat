@@ -28,9 +28,9 @@ abs	: IntInf 	-> NatInf
 abs	: IntInf' 	-> NatInf'
 i	= #abs
 
--- -- (+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
 
-(+)	: IntInf -> IntInf	-> IntInf	: Associative IntInf, Commutative IntInf
+-- (+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
+(+)	: IntInf -> IntInf	-> IntInf
 (+)	: Nat -> Nat 	-> Nat
 (+)	: Nat -> Nat' 	-> Nat'
 (+)	: Nat' -> Nat 	-> Nat'

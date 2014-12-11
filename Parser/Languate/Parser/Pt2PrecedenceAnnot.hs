@@ -26,7 +26,7 @@ data AST	= ParO | ParC
 		| PrefixT	| PostfixT
 		| LTT	| EqT	| GTT
 		| PrecT	| AtT	| CommaT
-		| ColonT
+		| ColonT	| OfT
 		| PrecRel PrecRelation
 		| PrecRels [PrecRelation]
 		| PrecAnnotT Annotation
@@ -37,6 +37,7 @@ t		:: Name -> String -> AST
 t _ "@"		= AtT
 t _ "precedence"
 		= PrecT
+t _ "of"	= OfT
 t _ ","		= CommaT
 t _ "("		= ParO
 t _ ")"		= ParC
@@ -59,7 +60,7 @@ s _ [Op o1, rel, Op o2]
 		= PrecRel $ relationToken2AST rel o1 o2
 s _ [CommaT, ast]
 		= ast
-s _ (AtT:PrecT:ColonT:Op name:ColonT: mod: CommaT:rels)
+s _ (PrecT:OfT:Op name:ColonT: mod: CommaT:rels)
 		= PrecAnnotT $ PrecAnnot name (modToken2AST mod) $ concatMap unpck rels
 			where 	unpck (PrecRel r)	= [r]
 				unpck (PrecRels rels)	= rels
