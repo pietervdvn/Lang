@@ -60,7 +60,7 @@ data Expression	= Nat Int
 -- ## TYPE STUFF
 
 -- The data structure representing a type in Languate. Probably one of the most important definitions!
-data Type	= Normal [Name] String	-- A normal type, e.g. Bool. Extra names are to disambiguate, e.g. Data.Bool vs Postgres.Bool or something (if that actually happens with postgres, i'll kill them)
+data Type	= Normal [Name] Name	-- A normal type, e.g. Bool. Extra names are to disambiguate, e.g. Data.Bool vs Postgres.Bool or something (if that actually happens with postgres, i'll kill them)
 		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
 		| Applied Type [Type]
 		| Curry [Type]
@@ -105,8 +105,8 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 
 {-
 > type Name = String.
-> type Set (a in Ord)	= {a}
-  SynDef "Set" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"]
+> type SortedSet (a:Ord)	= {a}
+  SynDef "SortedSet" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"]
    no obligated docstring for this one! -}
 data SynDef	= SynDef Name [Name] Type [TypeRequirement]
 
