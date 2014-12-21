@@ -10,6 +10,7 @@ import System.IO.Unsafe
 
 
 tl	= loadPackage' bnfs tfqn fp -- run with current directory Lang/Loader
+tl'	= unsafePerformIO tl
 tfqn	= fromJust $ toFQN "pietervdvn:Data:Prelude" -- imports Data.Bool and Data.Functor
 fp	= "../workspace/Data/src/"
 
