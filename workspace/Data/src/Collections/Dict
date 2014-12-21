@@ -4,7 +4,7 @@ Implements the typeclass for a dictionary and additional functions.
 ----
 
 import Category.Eq
-import Category.Functor
+import Category.Mappable
 import Category.Monoid
 
 -- A ''Dict'' (dictionary) is any type that maps a certain key onto a certain value.

@@ -16,8 +16,20 @@ import Data.List
 import Normalizable
 import Languate.FQN
 
+{- Each type has a kind. You can think of those as the 'type of the type'
+E.g. a 'Maybe' is always in function of a second argument, e.g. 'Maybe Int' or 'Maybe String'.
+'String' and ''Functor Int'' have a kind ''a'' (no arguments), whereas ''Functor'' has a kind ''a -> b''
+Type requirements are **not** stored into the kind, these are checked seperatly.
+
+e.g.
+type True a b	= a	:: a ~> b ~> a
+type False a b	= b	:: a ~> b ~> b
+type And b1 b2 a b = b2 (b1 a b) b
+			:: (a1 ~> b1 ~> c) ~> (c ~> b ~> d) ~> d
+
+-}
 data Kind		= Kind Name
-			| KindCurry [Kind] Kind
+			| KindCurry Kind Kind -- Kind curry: Dict (a:Eq) b :: a ~> (b ~> *)
 	deriving (Ord, Eq)
 
 -- resoved type -- each type known where it is defined
@@ -125,3 +137,12 @@ instance Show Kind where
 normalKind	:: Kind -> Bool
 normalKind (Kind _)	= True
 normalKind _	= False
+
+
+-- simple conversion, only use for type declarations. E.g. '''data Bool = ...''' in module '''Data.Bool''': '''asRType (FQN ["Data"] "Bool")(Normal "Bool") '''
+asRType	:: FQN -> Type -> RType
+asRType fqn (Normal [] nm)
+	= RNormal fqn nm
+
+asRType'	:: FQN -> Name -> RType
+asRType' fqn nm	= RNormal fqn nm
