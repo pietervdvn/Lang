@@ -23,17 +23,20 @@ bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
 package		= unsafePerformIO packageIO
 
+t	= buildTLTs package
 
-t	= buildTypeLookupTable package
+preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
+
+{-
 pre	= fromJust $ lookup preludeFQN t
+preludeMod	= fromJust $ lookup preludeFQN $ modules package
 
 
 
 monoidFQN	= toFQN' "pietervdvn:Data:Category.Monoid"
 monoidMod	= fromJust $ lookup monoidFQN $ modules package
-preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
-preludeMod	= fromJust $ lookup preludeFQN $ modules package
-
 
 --testRes	nms nm
 --	= resolveType (nms, nm) $ fromJust $ lookup preludeFQN t
+
+--}

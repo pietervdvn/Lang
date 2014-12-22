@@ -31,7 +31,7 @@ Params:
 - import graph: node n imports all things from the given nodes
 - export graph: inverse relation, node n is imported by given set
 - local exports: function which gives, for a node, what properties it exports
-- filter: for a given property, does this node re-export this property?
+- filter: for a given property, does this node re-export this property? The 'passed in n' will be a directly imported node, not one further away.
 Returns:
 - What properties each node exports
 -}

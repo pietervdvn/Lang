@@ -38,6 +38,7 @@ data TypeTable	= TypeTable	{ known		:: Map RType (Kind, Set RTypeReq )	-- type r
 				, instConstr	:: Map RType (ClassDef, Kind)}
 	deriving (Show, Ord, Eq)
 
+-- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) [(FQN, Visible)]	-- mutliple values, multiple possiblities in some cases!
 
 resolveType	:: ([Name], Name) -> TypeLookupTable -> (FQN, Visible)
@@ -50,24 +51,8 @@ resolveType k@(mods,t) tlt
 			else if length tps == 1	then head tps else ambigErr
 
 
-stlt		:: TypeLookupTable -> String
-stlt dict	=  intercalate "; " $  fmap sitem $ M.toList dict
+showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict
 
 sitem (k, possib)	= spth k ++ " --> {"++intercalate ", " (fmap shwFQN possib)  ++ "}"
 shwFQN (fqn, _)	= intercalate "." $ modulePath fqn
 spth (nms, nm)	= intercalate "." $ nms ++ [nm]
-
-
-{-
-
-Type requirements propagate implicitly.
-E.g:
-
-    data Set (a:Eq) = <details>
-
-    f : Set a -> a -> ...
-
-The type requirement that ''a'' should be in ''Eq'' is known, but should not be stated explicitly.
-
-
--}

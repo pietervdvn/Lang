@@ -29,10 +29,6 @@ asNonDeterministicAT	=  Data.Map.map unpack
 				where 	unpack (Right fqn)	= [fqn]
 					unpack (Left fqns)	= fqns
 
--- The names a certain FQN is known as
-reversedAT		:: AliasTable -> Map FQN [Name]
-reversedAT		=  foldr (\(path, fqns) ->  ) empty . toList
-
 buildAliasTables	:: Map FQN (Set (FQN, Import)) -> Map FQN AliasTable
 buildAliasTables	=  Data.Map.map buildAliasTable
 

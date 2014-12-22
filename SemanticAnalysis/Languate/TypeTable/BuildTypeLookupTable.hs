@@ -4,7 +4,8 @@ module Languate.TypeTable.BuildTypeLookupTable where
 This module provides functions to
 	-> Calculate what types are declared in a module
 	-> What types are public in a module
-	-> builds the type lookup table for a given set of modules
+	-> Get the aliastable
+	-> For Module M, expand the aliastable
  -}
 
 import qualified Data.Map as M
@@ -26,37 +27,28 @@ import Languate.ImportTable.ExportCalculator
 import Debug.Trace
 
 
-buildTypeLookupTable	:: World -> Map FQN TypeLookupTable
-buildTypeLookupTable world
-	= let 	locally	= mapWithKey (\fqn mod -> injectSet fqn $ locallyDeclared mod) $ modules world
-		err n	= error $ "Building type lookup table: fqn not found: " ++ show n
-		localFor n	= findWithDefault (err n) n locally
-		publicly	= fmap isPublicType $ modules world
-		isPublic t n	= (findWithDefault (err n) n publicly) t
-		exports	= calculateExports' world localFor isPublic
-		known	= calculateImports' world localFor exports
-		kys	= keys $ modules world in
-		M.fromList $ zip kys $ map (buildTLT (todos "Aliasses for imports" <error<><)isPublic known) $ kys
 
-buildTLT	:: Map FQN Name -> ((FQN,Name) -> FQN -> Bool) -> Map FQN (Set (FQN, Name)) -> FQN -> Map ([Name], Name) [(FQN, Visible)]
-buildTLT aliasses isPublic known fqn
-		= let	isPublic' n	= if isPublic (fqn,n) fqn then Public else Private
-			known' 		= findWithDefault (S.empty) fqn known
-			names2TypeDict		= (map (\(fqn', simpleName) -> (namesFor aliasses fqn' simpleName,(fqn', isPublic' simpleName)) ) $ S.toList known') :: [( [([Name],Name)] , (FQN, Visible))]
-			tlt	= merge $ map swap $ unmerge $ map swap names2TypeDict in
-			M.fromList tlt
+--buildTLTs	:: World -> Map FQN TypeLookupTable
+buildTLTs world	=  let	modules	= Languate.World.modules world
+			injectSet a	= S.map (\b -> (a,b))				-- small helper function
+			locally = mapWithKey (\fqn mod -> injectSet fqn $ locallyDeclared mod) modules	-- {FQN -> What types are declared here}
+			err fqn = error $ "Building type lookup table: fqn not found: " ++ show fqn
+			localFor fqn = findWithDefault (err fqn) fqn locally		-- function to ask: what types are declared in this fqn
+			publicly = M.fromList $ fmap (\fqn -> (fqn, isPublicType' world fqn)) $ keys modules	:: Map FQN ((FQN, Name) -> Bool)
+			isPublic t fqn = (findWithDefault (err fqn) fqn publicly) t	-- function to ask: what types are public/exported from this fqn
+			exports = calculateExports' world localFor isPublic in		-- {FQN (1) -> {FQN (2) -> Name (3)}}: This fqn (1) exports these type(names) (3), which are originally declared on location (2). E.g. {"Prelude" --> {"Data.Bool" --> "Bool", "Num.Nat" --> "Nat", "Num.Nat" --> "Nat'", ...}, ...}
+			exports	-- M.map (buildTLT exports) $ aliasTables world
 
 
+{- builds a TLT for a certain module. The alias table is taken, and the fqn's expanded into the known types for the module.
+args:
+ - Local module info
+ - Exports: {FQN --> {FQN --> Name}}
+-}
+buildTLT	:: Map FQN (Map FQN Name) -> AliasTable -> TypeLookupTable
+buildTLT at exports
+		= todo
 
--- first arg: table of aliasses. E.g. Data.Bool as B -> {Data.Bool -> B}. Not in DB: no alias (or not imported)
-namesFor	:: Map FQN Name -> FQN -> Name -> [([Name], Name)]
-namesFor aliasses fqn nm
-		= [ (prefixPath,nm) | prefixPath <- tails $ fromMaybe (modulePath fqn) $ fmap (:[]) $ M.lookup fqn aliasses ]
-
-
-
-injectSet	:: (Ord a, Ord b) => a -> Set b -> Set (a,b)
-injectSet a	=  S.map (\b -> (a,b))
 
 -- pass 1
 locallyDeclared	:: Module -> Set Name
@@ -75,12 +67,24 @@ declaredType (ClassDefStm classDef)
 declaredType _	= Nothing
 
 -- pass 1.5
--- a type is public if no public function uses this type
-isPublicType	:: Module -> (FQN, Name) -> Bool
-isPublicType mod (_, name)
+
+isPublicType'	:: World -> FQN -> (FQN, Name) -> Bool
+isPublicType' w fqn
+		=  let	err 	= error $ "Building type lookup table: fqn not found: "++show fqn
+			fwd	= findWithDefault err fqn
+			modul	= fwd $ modules w
+			imps	= fwd $ importGraph' w in
+			isPublicType imps modul
+
+-- a type is public if 1) at least one public function uses this type or 2) the import was public, thus the given FQN was imported publicly
+isPublicType	:: Map FQN Import -> Module -> (FQN, Name) -> Bool
+isPublicType imps mod (fqn, name)
 		= let	publicFuncs	= publicFunctions (exports mod) (statements mod)
-			publicTypes	= S.fromList $ concatMap usedTypes $ concatMap allTypes publicFuncs in
-			name `S.member` publicTypes
+			publicTypes	= S.fromList $ concatMap usedTypes $ concatMap allTypes publicFuncs
+			publicFQN	= (\(Import vis _ _ _ _) -> vis == Public) $ findWithDefault (Import Private todo todo todo todo) fqn imps in
+			publicFQN || name `S.member` publicTypes
+
+
 
 publicFunctions	:: Restrict -> [Statement] -> [(Name, Type, [TypeRequirement])]
 publicFunctions restrict stms
@@ -97,7 +101,7 @@ _unpackF (ClassDefStm cd)
 		= fmap (\(nm,t,_,tr) -> (nm,t,tr)) $ decls cd
 _unpackF _	= []
 
--- types which are locally declared (for usage analysis.) Module.TYpe is thus never really needed
+-- calculates which types are used in the type. This way we know what types are used and might be public
 usedTypes	:: Type -> [Name]
 usedTypes (Normal [] n)
 		= [n]

@@ -130,8 +130,8 @@ num str	= RNormal (toFQN' $ "pietervdvn:Data:Num."++str) str
 
 instance Show Kind where
 	show (Kind nm)	= nm
-	show (KindCurry args arg)
-			= "(" ++ intercalate " ~> " (map show $ args++[arg]) ++ ")"
+	show (KindCurry arg0 arg1)
+			= "(" ++ show arg0 ++ " ~> " ++ show arg1 ++ ")"
 
 
 normalKind	:: Kind -> Bool
