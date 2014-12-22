@@ -7,7 +7,8 @@ This module builds the type table for the given module. This is done in several 
 Building of the TYPE LOOKUP TABLE
 =================================
 
--> we build an import table (which states what modules are imported with which aliases) (ImportTable/ImportTable.hs)
+-> we build an import table (which states what modules are imported with which aliases)
+	-> This is done by the loader and saved in the World data structure
 -> pass 1 : we build a simple set with what locally declared types (correctness doesn't matter)
 	-> we check what types are public (according to the functions)
 -> we calculate the export and imports for each module (exportCalculator)

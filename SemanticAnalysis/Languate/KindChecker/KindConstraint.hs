@@ -9,3 +9,4 @@ import Languate.TAST
 -- represents a kindconstraint, e.g. Maybe has the same kind as Functor, RSA has the same kind as PubPrivAlg, applied to two args, ...
 data KindConstraint	= HasKind RType Kind
 			| HasSameKindAs RType RType
+			| HasAppliedKind RType RType [RType]

@@ -14,6 +14,9 @@ import Data.Maybe
 import Languate.FQN
 
 
+
+-- test statically
+
 tt		= TypeTable knownTypesT superTypesT syns revSyns instConstrT
 t 		= putStrLn $ typeTable2MD (genFQN "Prelude") tt
 
@@ -21,8 +24,8 @@ knownTypesT	= M.fromList
 			[ ( nat		,(Kind "*", S.empty))
 			, ( natur	,( Kind "*", S.empty))
 			, ( natural	,( Kind "*", S.empty))
-			, ( set		,( KindCurry [Kind "a"] $ Kind "*", S.fromList [("a", eq)]))
-			, ( functor	,( KindCurry [Kind "*"] $ Kind "*", S.empty))
+			, ( set		,( KindCurry (Kind "a") $ Kind "*", S.fromList [("a", eq)]))
+			, ( functor	,( KindCurry (Kind "*") $ Kind "*", S.empty))
 			, ( monoid	,( Kind "*", S.empty))
 			, ( eq		,( Kind "*", S.empty))]
 
@@ -42,7 +45,7 @@ superTypesT	= fmap S.fromList $ M.fromList
 
 syns	= M.fromList [( natural, nat),(natur, nat)]
 revSyns	= fmap S.fromList $ M.fromList $ merge $ fmap swap $ M.toList syns
-instConstrT	= M.fromList [(eq, (eqClassDef, Kind "*")), (set, (setClassDef, KindCurry [Kind "a"] $ Kind "*"))]
+instConstrT	= M.fromList [(eq, (eqClassDef, Kind "*")), (set, (setClassDef, KindCurry (Kind "a") $ Kind "*"))]
 eqClassDef	= ClassDef "Eq" [] [] [] "When a type is instance of ''Eq'' it means data of this type can be compared for equivalence." [Example (Just "equiv") (Seq [Call "True", Operator "==", Call "True"]) (Call "True") ] [("==", Curry [Free "eq", Free "eq", Free "eq"], Just "Compare two values", [("eq",Normal [] "Eq")])]
 
 setClassDef	= ClassDef "Set" ["a"] [("a",Normal [] "Eq")] [Normal [] "Collection"] "A set is an unorderd collection" [] [
