@@ -34,7 +34,7 @@ done
 
 cd Main0
 ghc Main.hs
-if [[ $? -ne 0]]
+if [[ $? -ne 0 ]]
 then
 	echo "Installing Main failed"
 	exit
