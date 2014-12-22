@@ -1,4 +1,4 @@
-module Languate.TypeChecker.KindConstructor where
+module Languate.KindChecker.ConstructKindConstraints where
 {--
 This module implements the functions which calculate what kind a declaration has.
 
@@ -16,7 +16,6 @@ kindConstraintIn fqn (ADTDefStm (ADTDef nm frees reqs _ _))
 kindConstraintIn fqn (SynDefStm (SynDef name frees typ))
 			= Just $ HasSameKindAs
 kindConstraintIn _	= Nothing
-
 
 _buildCurry	:: [Name] -> Kind
 _buildCurry []	=  Kind "*"

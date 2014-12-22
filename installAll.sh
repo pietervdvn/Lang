@@ -31,7 +31,10 @@ do
 done
 
 cd Main
-ghc Main.hs
+if [[ ghc Main.hs ]]; then
+	echo "Installing Main failed"
+	exit
+fi
 
 version="$(./Main --version)"
 mv Main ../langc$version
