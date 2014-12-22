@@ -11,7 +11,7 @@ public import Data.Bool
 
 public import Category.Eq
 public import Category.Monoid
-public import Category.Mappable as M
+public import Category.Mappable
 
 public import Type.Function
 

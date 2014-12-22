@@ -14,7 +14,7 @@ import Data.Set hiding (map, filter)
 import Data.Map hiding (map, filter)
 import Data.Maybe
 import Data.Tuple
-import Control.Arrow (first)
+import Control.Arrow (first, second)
 import Data.List
 import Languate.AST
 import StdDef
@@ -26,7 +26,7 @@ import Languate.ImportTable.ExportCalculator
 
 import Debug.Trace
 
-
+type Exports	= Map FQN (Set (FQN, Name))
 
 --buildTLTs	:: World -> Map FQN TypeLookupTable
 buildTLTs world	=  let	modules	= Languate.World.modules world
@@ -37,18 +37,31 @@ buildTLTs world	=  let	modules	= Languate.World.modules world
 			publicly = M.fromList $ fmap (\fqn -> (fqn, isPublicType' world fqn)) $ keys modules	:: Map FQN ((FQN, Name) -> Bool)
 			isPublic t fqn = (findWithDefault (err fqn) fqn publicly) t	-- function to ask: what types are public/exported from this fqn
 			exports = calculateExports' world localFor isPublic in		-- {FQN (1) -> {FQN (2) -> Name (3)}}: This fqn (1) exports these type(names) (3), which are originally declared on location (2). E.g. {"Prelude" --> {"Data.Bool" --> "Bool", "Num.Nat" --> "Nat", "Num.Nat" --> "Nat'", ...}, ...}
-			exports	-- M.map (buildTLT exports) $ aliasTables world
+			M.map (buildTLT exports) $ aliasTables world
 
 
 {- builds a TLT for a certain module. The alias table is taken, and the fqn's expanded into the known types for the module.
 args:
+ - Exports: {FQN (1) --> {FQN (2), Name (3)}}: This module imports these modules (FQN 1), which exports types given in (3) and were defined in (2)
  - Local module info
- - Exports: {FQN --> {FQN --> Name}}
 -}
-buildTLT	:: Map FQN (Map FQN Name) -> AliasTable -> TypeLookupTable
-buildTLT at exports
-		= todo
+buildTLT	:: Exports -> AliasTable -> TypeLookupTable
+buildTLT exports aliasTable
+		= let 	at	= M.toList $ asNonDeterministicAT aliasTable :: [([Name], [FQN])]
+			expanded	= fmap (uncurry $ expand exports) $ unmerge at
+			emptyExpands	= fmap (emptyListExpand exports) $ keys exports
+			all		= fmap (second nub)$ merge $ concat $ expanded ++ emptyExpands	:: [(([Name], Name), [FQN])] in
+			M.fromList all
 
+-- expands one entry in the alias table. The fqn is the imported module, the path what that module is known as. Gives you "path, name" --> defined in
+expand	:: Exports -> [Name] -> FQN -> [(([Name], Name), FQN)]
+expand exps path fqn
+	= let	tps	= S.toList $ findWithDefault S.empty fqn exps	:: [(FQN, Name)] in
+		[((path, name), declaredIn) | (declaredIn, name) <- tps]
+
+emptyListExpand	:: Exports -> FQN -> [(([Name], Name), FQN)]
+emptyListExpand	exps
+		= expand exps []
 
 -- pass 1
 locallyDeclared	:: Module -> Set Name

@@ -69,6 +69,14 @@ setVisibility	:: Visible -> ADTSum -> ADTSum
 setVisibility vis (ADTSum nm _ comm args)
 		= ADTSum nm vis comm args
 
+visible2bool	:: Visible -> Bool
+visible2bool Public	= True
+visible2bool Private	= False
+
+bool2visible	:: Bool -> Visible
+bool2visible True	= Public
+bool2visible False	= Private
+
 instance Show Instance where
 	show (Instance name t)	= "instance "++name++" "++show t
 

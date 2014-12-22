@@ -39,14 +39,14 @@ data TypeTable	= TypeTable	{ known		:: Map RType (Kind, Set RTypeReq )	-- type r
 	deriving (Show, Ord, Eq)
 
 -- basically the same as the aliastable, but with types.
-type TypeLookupTable	= Map ([Name], Name) [(FQN, Visible)]	-- mutliple values, multiple possiblities in some cases!
+type TypeLookupTable	= Map ([Name], Name) [FQN]	-- mutliple values, multiple possiblities in some cases!
 
-resolveType	:: ([Name], Name) -> TypeLookupTable -> (FQN, Visible)
+resolveType	:: ([Name], Name) -> TypeLookupTable -> FQN
 resolveType k@(mods,t) tlt
 	= let 	repr		= intercalate "." $ mods ++ [t]
 		notFoundErr	= error $ "Type error: the following type is not declared or imported: " ++ repr
 		tps	= findWithDefault notFoundErr k tlt
-		ambigErr	= error $ "Type error: the type "++ repr ++ " can both resolve to: "++ show (fmap fst tps) in
+		ambigErr	= error $ "Type error: the type "++ repr ++ " can both resolve to: "++ show tps in
 		if Prelude.null tps	then notFoundErr
 			else if length tps == 1	then head tps else ambigErr
 
