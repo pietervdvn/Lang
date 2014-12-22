@@ -58,8 +58,11 @@ merge'		= map swap . merge . map swap
 unmerge		:: [(a,[b])] -> [(a,b)]
 unmerge 	=  concatMap (\(a,bs) -> [(a,b) | b <- bs])
 
-invertDict		:: (Eq b, Ord b, Ord a) => Map a (Set b) -> Map b (Set a)
-invertDict		= fmap Set.fromList . Map.fromList . merge . map swap . unmerge . Map.toList . fmap Set.toList
+invertDict	:: (Eq b, Ord b, Ord a) => Map a (Set b) -> Map b (Set a)
+invertDict	= fmap Set.fromList . Map.fromList . merge . map swap . unmerge . Map.toList . fmap Set.toList
+
+invertDict'	:: (Ord a, Ord b, Eq b) => Map a b -> Map [b] a
+invertDict'	=  Map.fromList . map swap . merge . Map.toList
 
 -- makes sure the string always takes (at least) 8*t characters
 tabs	:: Int -> String -> String

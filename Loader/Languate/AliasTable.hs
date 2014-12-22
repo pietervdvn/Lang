@@ -1,4 +1,4 @@
-module Languate.AliasTable (AliasTable, buildAliasTable, buildAliasTables) where
+module Languate.AliasTable (AliasTable, buildAliasTable, buildAliasTables, asNonDeterministicAT) where
 
 {--
 Functions for calculating the alias table, given the import set
@@ -23,6 +23,15 @@ When imports conflict, e.g. "import Package1.Data.Map" and "import Package2.Data
 In other words, a left when the name resolution is ambigous, a right when just a single FQN matches the name
 -}
 type AliasTable	= Map [Name] (Either [FQN] FQN)
+
+asNonDeterministicAT	:: AliasTable -> Map [Name] [FQN]
+asNonDeterministicAT	=  Data.Map.map unpack
+				where 	unpack (Right fqn)	= [fqn]
+					unpack (Left fqns)	= fqns
+
+-- The names a certain FQN is known as
+reversedAT		:: AliasTable -> Map FQN [Name]
+reversedAT		=  foldr (\(path, fqns) ->  ) empty . toList
 
 buildAliasTables	:: Map FQN (Set (FQN, Import)) -> Map FQN AliasTable
 buildAliasTables	=  Data.Map.map buildAliasTable
