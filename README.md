@@ -42,6 +42,13 @@ Clone the repo and install all
     cd Lang
     ./installAll
 
+Play around by starting the interpreter:
+    ./Main
+    
+You will now get a lot of text (with some instructions). Try out boolean operators:
+    True && False
+    !False
+
 
 If you want to use the BNF-lib to  parse another languate, see the readme in bnf which contains a complete tutorial.
 
