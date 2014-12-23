@@ -120,6 +120,8 @@ s "baseType" [ast, MoreT]
 		= AppliedType (KnownType [] "More") [ast]
 s "reqs" [Comma, ast]
 		= ast
+s "parFreeType" [InT, CommaSepTypes tps]
+		= Constraint tps
 s "parFreeType" (InT:constraints)
 		= Constraint $ concatConstraints  constraints
 s "parFreeType" [ParO, FreeType name _, Constraint constraints, ParC]
