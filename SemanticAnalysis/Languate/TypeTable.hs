@@ -1,4 +1,4 @@
-module Languate.TypeTable.TypeTable where
+module Languate.TypeTable where
 
 {-
 
@@ -43,7 +43,7 @@ type TypeLookupTable	= Map ([Name], Name) [FQN]	-- mutliple values, multiple pos
 
 resolveType	:: TypeLookupTable -> Type -> RType
 resolveType tlt (Normal path name)
-		= RNormal (resolveType' (path, name) tlt) name
+		= RNormal (_resolveType' tlt (path, name)) name
 resolveType tlt (Free nm)
 		= RFree nm
 resolveType tlt (Applied t tps)
@@ -55,10 +55,13 @@ resolveType tlt (TupleType tps)
 
 
 
+resolveType'	:: TypeLookupTable -> Name -> RType
+resolveType' tlt n
+		=
 
 
-resolveType'	:: ([Name], Name) -> TypeLookupTable -> FQN
-resolveType' k@(mods,t) tlt
+_resolveType'	:: TypeLookupTable -> ([Name], Name) -> FQN
+_resolveType' tlt k@(mods,t)
 	= let 	repr		= intercalate "." $ mods ++ [t]
 		notFoundErr	= error $ "Type error: the following type is not declared or imported: " ++ repr
 		tps	= findWithDefault notFoundErr k tlt

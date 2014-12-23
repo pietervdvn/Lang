@@ -8,7 +8,7 @@ import Data.Tuple
 import Languate.AST
 import Languate.TAST
 
-import Languate.TypeTable.TypeTable
+import Languate.TypeTable
 import Languate.TypeTable.TypeTable2MD
 import Data.Maybe
 import Languate.FQN

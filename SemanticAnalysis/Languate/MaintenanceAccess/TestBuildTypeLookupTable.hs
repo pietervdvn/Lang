@@ -12,7 +12,7 @@ import Data.Map
 import Prelude hiding (lookup)
 
 import Languate.TypeTable.BuildTypeLookupTable
-import Languate.TypeTable.TypeTable
+import Languate.TypeTable
 
 {--
 Dev code for semantic analysis.

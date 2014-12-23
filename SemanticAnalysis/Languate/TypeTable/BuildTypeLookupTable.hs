@@ -21,7 +21,7 @@ import StdDef
 
 import Languate.World
 import Languate.FQN
-import Languate.TypeTable.TypeTable
+import Languate.TypeTable
 import Languate.ImportTable.ExportCalculator
 
 import Debug.Trace

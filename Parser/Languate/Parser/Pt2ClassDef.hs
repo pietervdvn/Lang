@@ -125,33 +125,32 @@ pt2instance	=  pt2a hi ti si convi
 
 
 convi		:: ASTi -> Instance
-convi (Inst name t)
-		=  Instance name t
+convi (Inst name t reqs)
+		=  Instance name t reqs
 convi ast	=  convErr modName ast
 
 
-data ASTi	= Inst Name Type
-		| IIdent Name	| Typei Type
+data ASTi	= Inst Type Type [TypeRequirement]
+		| IIdent Type	| Typei Type [(TypeRequirement)]
 		| InstanceT
 	deriving (Show)
 
 
 hi		:: [(Name, ParseTree -> ASTi)]
-hi		=  [("baseType", Typei . check . pt2type)]
+	-- basetype: the type which gets instantiated; knownType: the type which is the supertype of basetype
+hi		=  [("baseType", uncurry Typei . pt2type), ("knownType", IIdent . fst . pt2type)]
 
 check		:: (Type, [TypeRequirement]) -> Type
 check (t,[])	=  t
 check (t,reqs)	= error $ "Type requirements are not allowed in instance declarations: "++show t++" "++show reqs
 
 ti		:: Name -> String -> ASTi
-ti "typeIdent" n
-		=  IIdent n
 ti _ "instance"	=  InstanceT
 ti nm cont	=  tokenErr (modName++"i") nm cont
 
 
 si		:: Name -> [ASTi] -> ASTi
-si _ [InstanceT, IIdent name, Typei t]
-		= Inst name t
+si _ [InstanceT, IIdent id, Typei t tr]
+		= Inst id t tr
 si _ [ast]	= ast
 si nm asts	= seqErr modName nm asts

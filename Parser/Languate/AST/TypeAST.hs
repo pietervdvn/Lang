@@ -133,4 +133,4 @@ data ClassDef	= ClassDef
 			, decls		:: [(Name,Type,Maybe Comment, [TypeRequirement])] }
 	deriving (Ord, Eq)
 
-data Instance	= Instance Name Type
+data Instance	= Instance Type Type [TypeRequirement]

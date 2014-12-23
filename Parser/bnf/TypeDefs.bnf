@@ -77,7 +77,9 @@ _typeDef	::= typeIdent freeTypes "=" type
 _subclass	  ::= ("in" | "is") type ("," type)*
 _classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
- instance	::= "instance" typeIdent baseType
+ -- ''instance Show (Set (a:Show))'',
+ -- TODO will become instance ''Set (a:Show) is Show'' when Tleilaxu comes around. Change baseType to type!
+ instance	::= "instance" knownType baseType
 
 
 

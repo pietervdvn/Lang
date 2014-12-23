@@ -78,7 +78,7 @@ bool2visible True	= Public
 bool2visible False	= Private
 
 instance Show Instance where
-	show (Instance name t)	= "instance "++name++" "++show t
+	show (Instance id t reqs)	= "instance "++ show t ++ " "++show reqs ++" is "++show id
 
 instance Show Law where
 	show (Law n defs reqs e1 e2)	= "Law "++show n++" decl:"++show defs++" reqs:"++show reqs++" "++show e1++" "++show e2

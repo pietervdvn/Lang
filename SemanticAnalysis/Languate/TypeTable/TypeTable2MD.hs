@@ -10,7 +10,7 @@ import Data.List hiding (lookup)
 import Data.Maybe
 import Prelude hiding (lookup)
 import MarkDown
-import Languate.TypeTable.TypeTable
+import Languate.TypeTable
 import Languate.TypeTable.Expr2MD
 import Languate.AST
 import Languate.TAST

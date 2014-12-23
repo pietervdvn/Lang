@@ -6,9 +6,11 @@ Implements the typeclass for a dictionary and additional functions.
 import Category.Eq
 import Category.Mappable
 import Category.Monoid
+import Collection.Set
+
 
 -- A ''Dict'' (dictionary) is any type that maps a certain key onto a certain value.
-cat Dict (k:Eq) v
+cat Dict (k:Eq) v is Set k
 	empty	: dict k v
 	insert	: k -> v -> dict k v -> dict k v
 	lookup	: k -> dict k v -> v

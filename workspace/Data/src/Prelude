@@ -15,7 +15,8 @@ public import Category.Mappable
 
 public import Type.Function
 
-public import Collections.List
-public import Collections.Dict
+public import Collection.Collection
+public import Collection.List
+public import Collection.Dict
 
 public import Num.Nat

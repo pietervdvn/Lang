@@ -16,21 +16,24 @@ import Data.List
 import Normalizable
 import Languate.FQN
 
+import Data.Map
+
 {- Each type has a kind. You can think of those as the 'type of the type'
 E.g. a 'Maybe' is always in function of a second argument, e.g. 'Maybe Int' or 'Maybe String'.
 'String' and ''Functor Int'' have a kind ''a'' (no arguments), whereas ''Functor'' has a kind ''a -> b''
 Type requirements are **not** stored into the kind, these are checked seperatly.
 
 e.g.
-type True a b	= a	:: a ~> b ~> a
-type False a b	= b	:: a ~> b ~> b
+type True a b	= a	:: * ~> * ~> *
+type False a b	= b	:: * ~> * ~> *
 type And b1 b2 a b = b2 (b1 a b) b
-			:: (a1 ~> b1 ~> c) ~> (c ~> b ~> d) ~> d
+			:: (* ~> * ~> *) ~> (* ~> * ~> *) ~> *
 
 -}
-data Kind		= Kind Name
-			| KindCurry Kind Kind -- Kind curry: Dict (a:Eq) b :: a ~> (b ~> *)
+data Kind		= Kind
+			| KindCurry Kind Kind -- Kind curry: Dict a b :: a ~> (b ~> *)
 	deriving (Ord, Eq)
+
 
 -- resoved type -- each type known where it is defined
 data ResolvedType	= RNormal FQN Name
@@ -75,11 +78,11 @@ st short (RNormal fqn str)
 st short (RFree str)
 		=  str
 st short (RApplied t tps)
-		=  "(" ++ st short t ++" "++ unwords (map (st short) tps)++")"
+		=  "(" ++ st short t ++" "++ unwords (fmap (st short) tps)++")"
 st short (RCurry tps)
-		=  "(" ++ intercalate " -> " (map (st short) tps)++")"
+		=  "(" ++ intercalate " -> " (fmap (st short) tps)++")"
 st short (RTuple tps)
-		=  "(" ++ intercalate ", " (map (st short) tps) ++")"
+		=  "(" ++ intercalate ", " (fmap (st short) tps) ++")"
 
 
 showRTypeReq	:: RTypeReq -> String
@@ -106,7 +109,7 @@ nt (RApplied t ts)	= RApplied (nt $ RApplied t $ init ts) [nt $ last ts]
 nt (RCurry [t])		= nt t
 nt (RCurry ts)		= RCurry [nt $ head ts, nt $ RCurry $ tail ts ]
 nt (RTuple [t])		= nt t
-nt (RTuple ts)		= RTuple $ map nt ts
+nt (RTuple ts)		= RTuple $ fmap nt ts
 nt t			= t
 
 
@@ -129,13 +132,13 @@ float	= num "Float"
 num str	= RNormal (toFQN' $ "pietervdvn:Data:Num."++str) str
 
 instance Show Kind where
-	show (Kind nm)	= nm
+	show Kind	= "*"
 	show (KindCurry arg0 arg1)
 			= "(" ++ show arg0 ++ " ~> " ++ show arg1 ++ ")"
 
 
 normalKind	:: Kind -> Bool
-normalKind (Kind _)	= True
+normalKind Kind	= True
 normalKind _	= False
 
 

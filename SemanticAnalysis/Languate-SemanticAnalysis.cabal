@@ -1,28 +1,11 @@
-name: Languate-SemanticAnalysis
-version: 0.1.0.0
-cabal-version: >=1.8
-build-type: Simple
-maintainer: pietervdvn@gmail.com
-category: Language
-author: pietervdvn
-data-dir: ""
+name:                Languate-SemanticAnalysis
+version:             0.1.0.0
+author:              Pietervdvn
+category:            Language
+build-type:          Simple
+cabal-version:       >=1.8
 
 library
-    build-depends: base ==4.*, Consumer ==0.1.*, containers ==0.5.*,
-                   Parser ==0.1.*, Languate-Loader ==0.1.*, mtl ==2.1.*, Std ==0.1.*,
-                   Bnf ==0.1.*
-    exposed-modules: Languate.TAST
-    exposed: True
-    buildable: True
-    other-modules: Languate.ImportTable.ExportCalculator
-                   Languate.MaintenanceAccess.TestBuildTypeLookupTable
-                   Languate.MaintenanceAccess.TestPrecedence
-                   Languate.MaintenanceAccess.TestTypeTable2MD
-                   Languate.Precedence.AnnotationStrip
-                   Languate.Precedence.BuildPrecTable
-                   Languate.Precedence.Expr2PrefExpr Languate.Precedence.Precedence
-                   Languate.Precedence.PrecedenceTable
-                   Languate.Precedence.PrecTable2MD
-                   Languate.TypeTable.BuildTypeLookupTable
-                   Languate.TypeTable.BuildTypeTable Languate.TypeTable.Expr2MD
-                   Languate.TypeTable.TypeTable2MD Languate.TypeTable.TypeTable
+  exposed-modules: Languate.TAST, Languate.TypeTable
+  other-modules: Languate.MaintenanceAccess.TestPrecedence, Languate.MaintenanceAccess.TestKindChecker, Languate.MaintenanceAccess.TestBuildTypeLookupTable, Languate.MaintenanceAccess.TestTypeTable2MD, Languate.TypeTable.TypeTable2MD, Languate.TypeTable.BuildTypeTable, Languate.TypeTable.BuildTypeLookupTable, Languate.TypeTable.Expr2MD, Languate.Precedence.BuildPrecTable, Languate.Precedence.PrecTable2MD, Languate.Precedence.Precedence, Languate.Precedence.PrecedenceTable, Languate.Precedence.AnnotationStrip, Languate.Precedence.Expr2PrefExpr, Languate.KindChecker.ConstructKindConstraints, Languate.KindChecker.KindConstraint, Languate.ImportTable.ExportCalculator
+  build-depends:       base ==4.*, Std ==0.1.*, Parser ==0.1.*, Consumer ==0.1.*, Languate-Loader ==0.1.*, containers ==0.5.*, Bnf ==0.1.*, mtl ==2.1.*
