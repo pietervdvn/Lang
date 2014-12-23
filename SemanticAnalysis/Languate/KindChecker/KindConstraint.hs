@@ -10,12 +10,6 @@ import Languate.TAST
 data UnresolvedKind	= UKind	-- normal, simple kind
 			| UKindCurry UnresolvedKind UnresolvedKind	-- normal, simple kindcurry
 			| SameAs RType	-- means that the kind of rtype should be used
-{- the kind is what rest if the right (argument) gets applied. E.g.
-	Set (Set (a:Eq))
-RestWhenApplied (SameAs "Set") $ RestWhenApplied (SameAs "Set")
-
- -}
-			| RestWhenApplied UnresolvedKind UnresolvedKind
 	deriving (Show, Eq)
 
 

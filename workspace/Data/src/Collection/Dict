@@ -17,6 +17,6 @@ cat Dict (k:Eq) v is Set k
 	head	: dict k v -> (k,v)
 	tail	: dict k v -> dict k v
 
-instance Functor (Dict k)
+instance Mappable (Dict k)
 
 instance Monoid (Dict k v)

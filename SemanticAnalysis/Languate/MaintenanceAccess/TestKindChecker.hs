@@ -37,12 +37,14 @@ tlts		= buildTLTs package
 t' fqn		= concat $ runReader (mapM kindConstraintIn (statements $ modul fqn)) (info fqn)
 
 t1		= t' boolFQN
-t		= t' dictFQN
+t2		= t' dictFQN
+t		= t' typeFunc
 
 boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"
 colFQN	= toFQN' "pietervdvn:Data:Collection.Collection"
 eqFQN	= toFQN' "pietervdvn:Data:Category.Eq"
 dictFQN	= toFQN' "pietervdvn:Data:Collection.Dict"
+typeFunc	= toFQN' "pietervdvn:Data:Type.Function"
 maybeFQN	= toFQN' "pietervdvn:Data:Data.Maybe"
 natFQN	= toFQN' "pietervdvn:Data:Num.Nat"
 

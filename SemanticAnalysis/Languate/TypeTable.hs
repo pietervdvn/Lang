@@ -55,9 +55,9 @@ resolveType tlt (TupleType tps)
 
 
 
-resolveType'	:: TypeLookupTable -> Name -> RType
-resolveType' tlt n
-		=
+resolveType'	:: TypeLookupTable -> ([Name], Name) -> RType
+resolveType' tlt (path, name)
+		= RNormal (_resolveType' tlt (path, name)) name
 
 
 _resolveType'	:: TypeLookupTable -> ([Name], Name) -> FQN
