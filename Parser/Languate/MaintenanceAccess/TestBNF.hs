@@ -36,20 +36,18 @@ This is tf':
 -- creates a parsetree. Give the rule it should parse against and the string it should parse, you'll get the parsetree
 pt		:: String -> String -> IO ParseTree
 pt rule str	=  do	world	<- Bnf.load "bnf/Languate"
-			let mpt	= parseFull world (toFQN ["Languate"]) rule str
+			pt' world rule str
+
+pt'		:: World -> String -> String -> IO ParseTree
+pt' world rule str
+		=  do	let mpt	= parseFull world (toFQN ["Languate"]) rule str
 			let pt' = fromMaybe (error "Incorrect parse, not even a single character could be parsed!") mpt
 			let pt  = case pt' of
 					Right pt	-> pt
 					Left exception	-> error $ show exception
 			return pt
 
-cachedpt		:: String -> String -> IO ParseTree
-cachedpt rule str =  do	let mpt	= parseFull world (toFQN ["Languate"]) rule str
-			let pt' = fromMaybe (error "Incorrect parse, not even a single character could be parsed!") mpt
-			let pt  = case pt' of
-					Right pt	-> pt
-					Left exception	-> error $ show exception
-			return pt
+cachedpt	= pt' world
 
 
 world	= unsafePerformIO $ Bnf.load "bnf/Languate"

@@ -147,5 +147,6 @@ asRType	:: FQN -> Type -> RType
 asRType fqn (Normal [] nm)
 	= RNormal fqn nm
 
+-- TODO
 asRType'	:: FQN -> Name -> RType
-asRType' fqn nm	= RNormal fqn nm
+asRType'	= RNormal

@@ -1,10 +1,4 @@
-module Languate.AST
-	( module Languate.AST.FunctionAST
-	, module Languate.AST.FunctionASTUtils
-	, module Languate.AST.ModuleAST
-	, module Languate.AST.TypeAST
-	, module Languate.AST.TypeASTUtils
-	)
+module Languate.AST (module AST)
 
 
 
@@ -28,8 +22,8 @@ The structures here include comments (except those within expressions); the data
 
 --}
 
-import Languate.AST.FunctionAST
-import Languate.AST.FunctionASTUtils
-import Languate.AST.ModuleAST
-import Languate.AST.TypeAST
-import Languate.AST.TypeASTUtils
+import Languate.AST.FunctionAST as AST
+import Languate.AST.FunctionASTUtils as AST
+import Languate.AST.ModuleAST as AST
+import Languate.AST.TypeAST as AST
+import Languate.AST.TypeASTUtils as AST

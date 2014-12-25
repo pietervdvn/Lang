@@ -4,7 +4,6 @@ import Data.Tuple
 import Data.Map (Map, insert, adjust, findWithDefault)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Data.Map (Map)
 import Data.Set (Set)
 
 type Name 	= String

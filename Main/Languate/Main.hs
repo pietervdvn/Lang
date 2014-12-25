@@ -35,8 +35,7 @@ infoFlags	= [("version", putStrLn version),("author", putStrLn "Pieter Vander Ve
 
 start	:: IO ()
 start	=  do 	infoPrinted	<- infoOnly
-		if infoPrinted then return ()
-		else	start'
+		unless infoPrinted start'
 
 infoOnly	:: IO Bool
 infoOnly	= do 	args	<- getArgs
@@ -49,7 +48,7 @@ start'	=  do	welcome
 		putStrLn $ "Loading bnf-files from "++bnfPath
 		(pack, bnfs, precT)	<- doAllStuff
 		args	<- getArgs
-		if "--no-repl" `elem` args then
+		unless ("--no-repl" `elem` args) repl
 
 repl	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> IO ()
 repl w tp precT fqn

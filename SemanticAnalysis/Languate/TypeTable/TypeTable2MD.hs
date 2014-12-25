@@ -29,30 +29,30 @@ typeTable2MD fqn tt
 
 -- generates a nice table of types which are known in the module.
 knownTypes	:: TypeTable -> MarkDown
-knownTypes tt	= (title 2 $ "Known types") ++
+knownTypes tt	= title 2 "Known types" ++
 			table ["Type","Typekind","Type Constraints","Synonym for","Supertypes","Comment"] (fmap (knownTypeRow tt) . M.toList $ known tt)
 
 knownTypeRow	:: TypeTable -> (RType,(Kind, Set RTypeReq)) -> [MarkDown]
 knownTypeRow tt (t@(RNormal fqn nm),(kind, treq))
-		=  [ (bold nm)  ++ code (show fqn) , show kind, rtypeReqs2MD $ S.toList treq,
+		=  [ bold nm ++ code (show fqn) , show kind, rtypeReqs2MD $ S.toList treq,
 			synonyms2md t tt ++ " " ++ revSynonyms2md t tt,
 			commas . fmap (st True) . S.toList . findWithDefault S.empty t $ supertypes tt,
 			commentFor tt t]
 
 synonyms2md	:: RType -> TypeTable -> MarkDown
-synonyms2md t	=  fromMaybe "" . fmap (st True) . lookup t . synonyms
+synonyms2md t	=  maybe "" (st True) . lookup t . synonyms
 
 revSynonyms2md	:: RType -> TypeTable -> MarkDown
 revSynonyms2md t
-		=  commas . fmap (ital . (st True)) . S.toList . findWithDefault S.empty t . revSynonyms
+		=  commas . fmap (ital . st True) . S.toList . findWithDefault S.empty t . revSynonyms
 
 commentFor	:: TypeTable -> RType -> MarkDown
 commentFor tt t	=  let classes = instConstr tt in
-		   fromMaybe "" $ fmap ((++) (ital "(Class)") . recode . classdocstr . fst) $ lookup t classes
+		   maybe "" ((++) (ital "(Class)") . recode . classdocstr . fst) $ lookup t classes
 
 
 classesOverview	:: TypeTable -> MarkDown
-classesOverview tt	=  title 2 "Classes overview" ++ concatMap (flip classOverview tt) (keys $ instConstr tt)
+classesOverview tt	=  title 2 "Classes overview" ++ concatMap (`classOverview` tt) (keys $ instConstr tt)
 
 -- assumes the given type is a class
 classOverview	:: RType -> TypeTable -> MarkDown
@@ -68,7 +68,7 @@ classOverview t tt
 
 classInfo classdef t
 		= let 	withFrees	= " " `when` unwords (frees classdef)
-			superClass	= " in " `when` (commas $ fmap show $ subclassFrom classdef)
+			superClass	= " in " `when` commas (fmap show $ subclassFrom classdef)
 			typeReqs	= " where " `when` commas (fmap showTypeReq $ classReqs classdef) in
 			parag (bold $ show t `when` (withFrees ++ superClass ++ typeReqs))
 

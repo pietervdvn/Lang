@@ -33,7 +33,7 @@ op2md mods op i	=  [sOp op, show i, precOf mods op]
 
 precOf	:: Map Name PrecModifier -> Name -> String
 precOf mods op
-	=  fromMaybe "left (default)" . fmap show $ lookup op mods
+	=  maybe "left (default)" show $ lookup op mods
 
 sOp	:: Name -> String
 sOp op	=  "``"++op++"``"

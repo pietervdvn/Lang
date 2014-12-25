@@ -95,13 +95,13 @@ publicLocallyDeclared w fqn
 			localDeclared	= locallyDeclared w fqn
 			publicTypes	= functions Public  mod >>= allTypes >>= usedTypes
 			privateTypes	= functions Private mod >>= allTypes >>= usedTypes
-			isPublic nm	= nm `elem` publicTypes || not (nm `elem` privateTypes)  in
+			isPublic nm	= nm `elem` publicTypes || nm `notElem` privateTypes  in
 				S.filter isPublic localDeclared
 
 
 locallyDeclared	:: World -> FQN -> Set Name
 locallyDeclared	w fqn
-		=  S.fromList $ catMaybes $ map declaredType $ statements $ fwd "modules" fqn $ modules w
+		=  S.fromList $ Data.Maybe.mapMaybe declaredType $ statements $ fwd "modules" fqn $ modules w
 
 declaredType	:: Statement -> Maybe Name
 declaredType (ADTDefStm (ADTDef name _ _ _ _))
@@ -144,7 +144,7 @@ reexportType w curMod (impFrom, (_,typeName))
 
 allTypes	:: (Name, Type, [TypeRequirement]) -> [Type]
 allTypes (_,t,treqs)
-		= [t] ++ map snd treqs
+		= t : map snd treqs
 
 err str fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn++" within "++str++" table"
 fwd str fqn	= findWithDefault (err str fqn) fqn

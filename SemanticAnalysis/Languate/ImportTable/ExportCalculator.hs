@@ -11,9 +11,9 @@ import Data.Map (Map, lookup, insert, findWithDefault, mapWithKey)
 import Data.Set (Set, unions, union)
 import Data.Maybe
 import State
-import StdDef (merge, unmerge)
 import Data.Tuple
 import Control.Arrow
+import Control.Monad
 
 import Languate.World hiding (importGraph)
 import qualified Languate.World as W
@@ -42,12 +42,12 @@ calculateExports importGraph exportGraph exps impFilt
 {- calculateImports gives all things which are visible within n (thus local -private- props and imported props)
 
 -}
-calculateImports	:: (Eq prop, Ord n, Ord prop) => (Map n (Set n)) -> (n -> Set prop) -> Map n (Set (prop,n)) -> Map n (Set (prop,n))
+calculateImports	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> (n -> Set prop) -> Map n (Set (prop,n)) -> Map n (Set (prop,n))
 calculateImports importGraph local exports
 			= let	local' n	= S.map (\p -> (p,n)) $ local n	in
 				mapWithKey (\n _ -> calculateImportsFor importGraph local' exports n) exports
 
-calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => (Map n (Set n)) -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
+calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
 calculateImportsFor importGraph local exports n
 			=  let	importsFrom	= S.toList $ (??) $ lookup n importGraph
 				imported	= fmap (\n -> findWithDefault S.empty n exports) importsFrom
@@ -69,12 +69,11 @@ type St n prop a	= State (ExpS n prop) a
 
 _ce		:: (Eq prop, Ord n, Ord prop) => St n prop ()
 _ce		=  do 	done	<- fmap not stillWork
-			if done then
-				return ()
-				else do	(Just n)	<- pop
-					possiblyChanged	<- rework n
-					mapM_ push $ S.toList possiblyChanged
-					_ce
+			unless done $
+			    do	(Just n)	<- pop
+				possiblyChanged	<- rework n
+				mapM_ push $ S.toList possiblyChanged
+				_ce
 
 -- reworks node n. Recalculates what node n would export. If the exports of node n have changed -> update it -> say which nodes should be reworked later
 rework		:: (Ord n, Eq prop, Ord prop) => n -> St n prop (Set n)
@@ -86,7 +85,7 @@ rework n	=  do	-- The nodes which n imports
 			curExps	<- get' exported
 			-- what each node exports for the moment and is visible in n	:: Set (n, Set prop)
 			let impProps	= S.map (\n -> (n, lookup' n curExps)) imps
-			let impProps'	= setUnions $ S.map (\(n, props) -> changeSet n props) impProps	-- :: Set  (prop, n)
+			let impProps'	= setUnions $ S.map (uncurry changeSet) impProps	-- :: Set  (prop, n)
 			-- filter function. Decides wether a imported property passes or not
 			filtr		<- get' expFilter |> (\filtr  -> filtr n .swap)	-- :: (n,prop) -> Bool
 			-- All currently reexported stuff!
@@ -94,7 +93,7 @@ rework n	=  do	-- The nodes which n imports
 			let reexported'	= S.map fst reexported		-- properties only, used for 'are we done' comparison
 			localExported	<- get' exps |> (\f -> f n)		-- Set prop
 			addExports n $ union reexported $ injectSet n localExported	-- add all the stuff!
-			let newExports	= union localExported reexported'
+			let newExports	= localExported `union` reexported'
 			let oldExports	= S.map fst $lookup' n curExps
 			if newExports == oldExports then return S.empty	-- no changes! hooray
 				else get' exportGraph |> lookup' n	-- Some new properties are reexported. We have to rework these nodes later
@@ -125,7 +124,7 @@ setExported	:: Map n (Set (prop,n)) -> ExpS n prop -> ExpS n prop
 setExported exported (ExpS importGraph expGraph exps reExpFilter _ wl)
 		=  ExpS importGraph expGraph exps reExpFilter exported wl
 
-getf		:: (s -> (a -> b)) -> a -> State s b
+getf		:: (s -> a -> b) -> a -> State s b
 getf sf	a	=  do	f	<- get' sf
 			return $ f a
 
@@ -136,10 +135,10 @@ addExports n s
 			modify $ setExported merged
 
 setUnions	:: (Ord a) => Set (Set a) -> Set a
-setUnions sets	=  S.foldl (\acc set -> S.union set acc) S.empty sets
+setUnions	=  S.foldr S.union S.empty
 
 (??)		:: Maybe (Set a) -> Set a
-(??) m		=  fromMaybe S.empty m
+(??)		=  fromMaybe S.empty
 
 lookup'		:: (Ord k) => k -> Map k (Set v) -> Set v
 lookup' k dict	=  (??) $ lookup k dict

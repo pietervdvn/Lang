@@ -34,15 +34,15 @@ buildAliasLookupTables	=  Data.Map.map buildAliasLookupTable
 
 -- builds the alias table for a single module
 buildAliasLookupTable	:: Set (FQN, Import) -> AliasLookupTable
-buildAliasLookupTable imps
-		= S.foldr (uncurry addImport) empty imps
+buildAliasLookupTable
+		= S.foldr (uncurry addImport) empty
 
 
 addImport	:: FQN -> Import -> AliasLookupTable -> AliasLookupTable
 addImport fqn (Import _ _ _ (Just alias) _) table
 		= insertTable [alias] fqn table
 addImport fqn (Import _ nms nm Nothing _) table
-		= foldr (flip insertTable fqn) table $ init $ tails (nms ++ [nm])
+		= foldr (`insertTable` fqn) table $ init $ tails (nms ++ [nm])
 
 
 insertTable	:: [Name] -> FQN -> AliasLookupTable -> AliasLookupTable

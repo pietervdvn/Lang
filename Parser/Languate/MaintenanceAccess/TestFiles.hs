@@ -23,7 +23,7 @@ import Data.Set hiding (map, filter)
 pfs'	= pfs "../workspace/Data/src"
 
 pfs		:: FilePath -> IO ()
-pfs fp		= do	print $ "Loaded bnfs: " ++ (show $ length $ show world)
+pfs fp		= do	print $ "Loaded bnfs: " ++ show (length $ show world)
 			files	<- allFiles fp
 			mapM_ pf $ toList files
 
@@ -32,7 +32,7 @@ allFiles fp0	=  do	let fp = if last fp0 == '/' then init fp0 else fp0
 			found	<- getDirectoryContents' fp
 			let found'	= map (\n -> fp ++ "/" ++ n) found
 			files	<- filterM (fmap not . doesDirectoryExist) found'
-			dirs	<- filterM (doesDirectoryExist) found'
+			dirs	<- filterM doesDirectoryExist found'
 			recFiles	<- mapM allFiles dirs
 			return $ unions (fromList files:recFiles)
 

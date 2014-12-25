@@ -131,7 +131,7 @@ convi ast	=  convErr modName ast
 
 
 data ASTi	= Inst Type Type [TypeRequirement]
-		| IIdent Type	| Typei Type [(TypeRequirement)]
+		| IIdent Type	| Typei Type [TypeRequirement]
 		| InstanceT
 	deriving (Show)
 
