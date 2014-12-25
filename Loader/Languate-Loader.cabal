@@ -15,5 +15,5 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     Languate.FQN, Languate.File2Package, Languate.World
-  other-modules:       Languate.MaintenanceAccess.TestFile2Package, Languate.AliasTable
+  other-modules:       Languate.MaintenanceAccess.TestFile2Package, Languate.AliasLookupTable, Languate.AliasTable
   build-depends:       base ==4.*, Consumer ==0.1.*, Bnf ==0.1.*, Parser ==0.1.*, containers ==0.5.*, mtl ==2.1.*, directory ==1.2.*, Std ==0.1.*

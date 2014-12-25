@@ -41,10 +41,32 @@ buildTLTs world	=  let	modules	= Languate.World.modules world
 
 {- builds a TLT for a certain module.
 
-This is done by taking all
+Type resolving is done against the module it was declared in (and empty).
+
+import Data.Bool showing (Bool)
+import Data.StrictList (StrictList, List)
+-- List is declared in Data.List
+import Idiots.TheirList (TheirList, List)
+-- List is declared in Idiots.List
+
+Valid:
+Bool, Bool.Bool, Data.Bool.Bool
+StrictList, StrictList.StrictList, Data.StrictList.StrictList
+StrictList.List
+Idiots.List.List
+Data.List.List
+
+invalid:
+List.List, List : ambiguous to both idiots and data.
+
+The package is named Idiots, as EVERYONE SHOULD ALWAYS USE STANDARD LISTS FOR CONSISTENCY AND CODE REUSABILITY!
 
 -}
-buildTLT	:: FQN -> TypeLookupTable
+buildTLT	:: Map FQN {-Module we are interested in-} (Set ((Name, FQN) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
+			-> FQN {-What we have to build TLT for-}
+			-> TypeLookupTable
+buildTLT imps mod
+	= let	declared	= fwd mod imps in
 
 
 -- A type is publicly declared if: 1) at least one public function uses it or 2) not a single private function uses it. (e.g. declaration without usage in the module)
@@ -76,6 +98,10 @@ declaredType _	= Nothing
 
 {-
 Should we reexport the given type?
+
+A type is reexported if: it is publicly imported.
+No code for locally declared stuff, done in publicLocallyDeclared
+
 args:
 - FQN1 : the current node we are at
 - (FQN	: The node which (directly) imports the type
@@ -87,16 +113,13 @@ reexportType	:: World -> FQN -> (FQN, (FQN, Name)) -> Bool
 reexportType w curMod (impFrom, (_,typeName))
 		= let	-- current module
 			modul	= fwd curMod $ modules w
-			-- publicly used typenames. If publicly used: reexp;
-			publicTypes	= functions Public modul >>= allTypes  >>= usedTypes
-			publiclyUsed	= typeName `elem` publicTypes
 			-- imported nodes
 			imps	= fwd curMod $ importGraph' w
 			-- Import statement through which the type got imported. If public: reexp
 			err0	= error $ "Compiler bug: semantal/BuildTLT: we got an import here without import statement! "++show impFrom++" supposedly imported by "++show curMod
 			(Import vis _ _ _ restrict)	= findWithDefault err0 impFrom imps
 			exportAllowed	= vis == Public && isAllowed restrict typeName		in
-			exportAllowed || publiclyUsed
+			exportAllowed
 
 
 
