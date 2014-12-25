@@ -1,4 +1,4 @@
-module Languate.World (World, modules, importGraph', importGraph, aliasLookupTables, buildWorld, module Languate.AliasLookupTable)where
+module Languate.World (World, modules, importGraph', importGraph, aliasTables, aliasLookupTables, buildWorld, module Languate.AliasLookupTable, module Languate.AliasTable)where
 
 {--
 This module provides the ''context''-datatype, which contains all commonly needed data of the currently compiling program.

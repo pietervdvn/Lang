@@ -22,12 +22,13 @@ E.g. "import Data.Bool" will be saved as {Data.Bool -> ["Data","Bool"]}
 type AliasTable	= Map FQN [Name]
 
 buildAliasTables	:: Map FQN (Set (FQN, Import)) -> Map FQN AliasTable
-buildAliasTables	=  Data.Map.map buildAliasTable
+buildAliasTables	=  mapWithKey buildAliasTable
 
 -- builds the alias table for a single module
-buildAliasTable	:: Set (FQN, Import) -> AliasTable
-buildAliasTable imps
-		= S.foldr (uncurry addImport) empty imps
+buildAliasTable	:: FQN -> Set (FQN, Import) -> AliasTable
+buildAliasTable self imps
+		= let 	imported = S.foldr (uncurry addImport) empty imps in
+			insert self (modulePath self) imported
 
 
 addImport	:: FQN -> Import -> AliasTable -> AliasTable

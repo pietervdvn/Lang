@@ -37,11 +37,11 @@ buildTLTs world	=  let	modules	= Languate.World.modules world
 			locDecl		= injectSetFunc $ locallyDeclared world
 			exports = calculateExports' world pubLocDecl (reexportType world)
 			imports = calculateImports' world locDecl exports					in
-			mapWithKey (buildTLT imports) $ aliasTables world
+			mapWithKey (buildTLT  world imports) $ aliasTables world
 
 {- builds a TLT for a certain module.
 
-Type resolving is done against the module it was declared in (and empty).
+Type resolving is done against the module it was declared in (and no explicit module).
 
 import Data.Bool showing (Bool)
 import Data.StrictList (StrictList, List)
@@ -62,17 +62,36 @@ List.List, List : ambiguous to both idiots and data.
 The package is named Idiots, as EVERYONE SHOULD ALWAYS USE STANDARD LISTS FOR CONSISTENCY AND CODE REUSABILITY!
 
 -}
-buildTLT	:: Map FQN {-Module we are interested in-} (Set ((Name, FQN) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
+buildTLT	:: World -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
 			-> FQN {-What we have to build TLT for-}
+			-> AliasTable
 			-> TypeLookupTable
-buildTLT imps mod
-	= let	declared	= fwd mod imps in
+buildTLT world imps mod at
+	= let	declared	= S.map fst $ findWithDefault S.empty mod imps	:: Set (FQN, Name) {-Name, declared in -}
+		localDecl	= locallyDeclared world mod	:: Set Name {- The locally declared types -}
+		locDeclDict	= S.toList $ S.map (\nm -> (([], nm), mod)) localDecl	in
+		addAll locDeclDict $ S.foldl (addLookupEntry at) M.empty declared
+
+
+addLookupEntry	:: AliasTable -> TypeLookupTable -> (FQN, Name) -> TypeLookupTable
+addLookupEntry at tlt (declaredIn, name)
+		= addAll [((p, name), declaredIn) | p <- tails $ fwd "at" declaredIn at] tlt
+
+
+addAll		:: (Ord k, Ord v) => [(k,v)] -> Map k (Set v) -> Map k (Set v)
+addAll pairs dict
+		= Prelude.foldr addOne dict pairs
+
+
+addOne		:: (Ord k, Ord v) => (k,v) -> Map k (Set v) -> Map k (Set v)
+addOne (k,v) dict
+		= M.insert k (S.insert v $ findWithDefault S.empty k dict) dict
 
 
 -- A type is publicly declared if: 1) at least one public function uses it or 2) not a single private function uses it. (e.g. declaration without usage in the module)
 publicLocallyDeclared	:: World -> FQN -> Set Name
 publicLocallyDeclared w fqn
-		= let	mod 		= fwd fqn $ modules w
+		= let	mod 		= fwd "modules" fqn $ modules w
 			localDeclared	= locallyDeclared w fqn
 			publicTypes	= functions Public  mod >>= allTypes >>= usedTypes
 			privateTypes	= functions Private mod >>= allTypes >>= usedTypes
@@ -82,7 +101,7 @@ publicLocallyDeclared w fqn
 
 locallyDeclared	:: World -> FQN -> Set Name
 locallyDeclared	w fqn
-		=  S.fromList $ catMaybes $ map declaredType $ statements $ fwd fqn $ modules w
+		=  S.fromList $ catMaybes $ map declaredType $ statements $ fwd "modules" fqn $ modules w
 
 declaredType	:: Statement -> Maybe Name
 declaredType (ADTDefStm (ADTDef name _ _ _ _))
@@ -112,9 +131,9 @@ A type is publicly REexported if: 1) at least one public function uses it or 2) 
 reexportType	:: World -> FQN -> (FQN, (FQN, Name)) -> Bool
 reexportType w curMod (impFrom, (_,typeName))
 		= let	-- current module
-			modul	= fwd curMod $ modules w
+			modul	= fwd "modules" curMod $ modules w
 			-- imported nodes
-			imps	= fwd curMod $ importGraph' w
+			imps	= fwd "IG" curMod $ importGraph' w
 			-- Import statement through which the type got imported. If public: reexp
 			err0	= error $ "Compiler bug: semantal/BuildTLT: we got an import here without import statement! "++show impFrom++" supposedly imported by "++show curMod
 			(Import vis _ _ _ restrict)	= findWithDefault err0 impFrom imps
@@ -127,5 +146,5 @@ allTypes	:: (Name, Type, [TypeRequirement]) -> [Type]
 allTypes (_,t,treqs)
 		= [t] ++ map snd treqs
 
-err fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn
-fwd fqn	= findWithDefault (err fqn) fqn
+err str fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn++" within "++str++" table"
+fwd str fqn	= findWithDefault (err str fqn) fqn

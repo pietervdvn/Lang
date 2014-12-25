@@ -39,7 +39,7 @@ data TypeTable	= TypeTable	{ known		:: Map RType (Kind, Set RTypeReq )	-- type r
 	deriving (Show, Ord, Eq)
 
 -- basically the same as the aliastable, but with types.
-type TypeLookupTable	= Map ([Name], Name) [FQN]	-- mutliple values, multiple possiblities in some cases!
+type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
 
 resolveType	:: TypeLookupTable -> Type -> RType
 resolveType tlt (Normal path name)
@@ -66,8 +66,8 @@ _resolveType' tlt k@(mods,t)
 		notFoundErr	= error $ "Type error: the following type is not declared or imported: " ++ repr
 		tps	= findWithDefault notFoundErr k tlt
 		ambigErr	= error $ "Type error: the type "++ repr ++ " can both resolve to: "++ show tps in
-		if Prelude.null tps	then notFoundErr
-			else if length tps == 1	then head tps else ambigErr
+		if S.null tps	then notFoundErr
+			else if S.size tps == 1	then S.findMin tps else ambigErr
 
 
 showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict
