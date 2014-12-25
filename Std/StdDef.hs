@@ -90,3 +90,6 @@ lstrip s	= s
 rstrip	= reverse . lstrip . reverse
 
 strip	= lstrip . rstrip
+
+(|>)	:: (Functor f)	=> f a -> (a -> b) -> f b
+(|>)	= flip fmap

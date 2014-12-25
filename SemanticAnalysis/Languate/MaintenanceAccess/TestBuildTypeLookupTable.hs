@@ -23,12 +23,16 @@ bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
 package		= unsafePerformIO packageIO
 
-t	= buildTLTs package
+tlts	= buildTLTs package
 
 preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
+boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"
+
+pre	= fromJust $ lookup preludeFQN tlts
+bl	= fromJust $ lookup boolFQN tlts
+
 
 {-
-pre	= fromJust $ lookup preludeFQN t
 preludeMod	= fromJust $ lookup preludeFQN $ modules package
 
 

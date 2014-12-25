@@ -51,3 +51,23 @@ isAllowed (BlackList items)
 		= not . (`elem` items)
 isAllowed (WhiteList items)
 		= (`elem` items)
+
+-- function declarations in module, which are public/private
+functions	:: Visible -> Module -> [(Name, Type, [TypeRequirement])]
+functions mode mod
+		= let 	restrict	= exports mod
+			stms	= statements mod in
+		  _censor ((mode == Public) ==) restrict $ concatMap _unpackF stms
+
+_censor		:: (Bool -> Bool) -> Restrict -> [(Name, Type, [TypeRequirement])] -> [(Name, Type, [TypeRequirement])]
+_censor inv restrict
+		= filter (\(nm,_,_) -> inv $ isAllowed restrict nm)
+
+
+
+_unpackF	:: Statement -> [(Name,Type, [TypeRequirement])]
+_unpackF (FunctionStm f)
+		= signs f
+_unpackF (ClassDefStm cd)
+		= fmap (\(nm,t,_,tr) -> (nm,t,tr)) $ decls cd
+_unpackF _	= []

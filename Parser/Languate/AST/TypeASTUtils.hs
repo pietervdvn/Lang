@@ -1,8 +1,9 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes) where
 
 {--
 This module implements utilities for type asts
 --}
+import StdDef
 
 import Normalizable
 import Data.List (intercalate)
@@ -52,6 +53,17 @@ st (TupleType tps)
 		=  "(" ++ intercalate ", " (map st tps) ++")"
 st Infer	= "_"
 
+-- calculates which types are used in the type. This way we know what types are used and might be public
+usedTypes	:: Type -> [Name]
+usedTypes (Normal [] n)
+		= [n]
+usedTypes (Applied t ts)
+		= usedTypes t ++ concatMap usedTypes ts
+usedTypes (Curry ts)
+		= concatMap usedTypes ts
+usedTypes (TupleType ts)
+		= concatMap usedTypes ts
+usedTypes _	= []
 
 instance Show ADTDef where
 	show (ADTDef name frees reqs docstr sums)
