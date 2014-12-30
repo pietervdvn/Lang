@@ -32,5 +32,9 @@ modify f= do	s	<- get
 		put $ f s
 		return ()
 
+embed	:: (s -> a) -> State s a
+embed f	=  do	s	<- get
+		return $ f s
+
 runstate		:: State s r -> s -> (r,s)
 runstate (State f)	=  f

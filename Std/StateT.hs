@@ -62,14 +62,3 @@ put s	=  StateT $ \ _ -> return ((),s)
 modify	:: (Monad m) => (s -> s) -> StateT s m ()
 modify f	= do	cur	<- get
 			put $ f cur
-
-
-{-
-If state == 0: fail (and become Nothing)
-Else: return the state
-
--}
-a	:: StateT Int Maybe Int
-a	=  do	i	<- get
-		if i == 0 then lift Nothing
-			else return i
