@@ -1,0 +1,7 @@
+Builtins
+--------
+Stub, filled in by compiler.
+--------
+
+-- A int!
+data BIInt = Zero | Succ Int | Prev Int | Inf

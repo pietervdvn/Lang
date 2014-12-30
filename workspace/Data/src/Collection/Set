@@ -3,6 +3,8 @@ Set
 Declaration and utils of Set, an unorderd colletion.
 ---
 
+import Category.Eq
+
 -- A set is a unordered collection, where each element is saved exactly once
 cat Set (a:Eq)
 	head	: Set a -> (b:a)

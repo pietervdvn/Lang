@@ -3,6 +3,10 @@ List
 A simple list class implementation
 ----
 
+import Collection.Collection
+import Category.Monoid
+import Category.Mappable
+
 import Data.Maybe
 -- The class which defines a list
 cat List a in Collection a
@@ -14,7 +18,7 @@ cat List a in Collection a
 
 instance Monoid [a]
 
-instance Functor [a]
+instance Mappable [a]
 
 
 map	: (a -> b) -> [a] -> [b]
