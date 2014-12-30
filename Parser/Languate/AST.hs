@@ -25,5 +25,6 @@ The structures here include comments (except those within expressions); the data
 import Languate.AST.FunctionAST as AST
 import Languate.AST.FunctionASTUtils as AST
 import Languate.AST.ModuleAST as AST
+import Languate.AST.ModuleASTUtils as AST
 import Languate.AST.TypeAST as AST
 import Languate.AST.TypeASTUtils as AST

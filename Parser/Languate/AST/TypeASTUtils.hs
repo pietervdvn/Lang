@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes, setComment, setCommentIf) where
 
 {--
 This module implements utilities for type asts
@@ -155,3 +155,14 @@ instance Show SubDef where
 instance Show SynDef where
 	show (SynDef n frees t treqs)	-- lookout! the t-reqs might eat you
 		= show "type "++n++show frees ++ " = "++show t++" where "++concatMap showTypeReq treqs
+
+
+setComment	:: Comment -> ADTSum -> ADTSum
+setComment comm (ADTSum nm v _ nmts)
+		=  ADTSum nm v (Just comm) nmts
+
+setCommentIf	:: Comment -> ADTSum -> ADTSum
+setCommentIf comm sum@(ADTSum _ _ Nothing _)
+		= setComment comm sum
+setCommentIf _ sum
+		= sum

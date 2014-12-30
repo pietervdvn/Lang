@@ -16,7 +16,7 @@ import ConsumerL hiding (embed)
 import StdDef
 import Parser
 import StateT
-import Regex	
+import Regex
 import Normalizable
 {--
 
@@ -27,14 +27,14 @@ type Context	= (World, Module, FQN, Name)
 
 data Exception	= RuleNotFound RuleInfo Name
 		| NoFullParse RuleInfo
+		| NoParse
 
 instance Show Exception where
 	show (RuleNotFound (modul, _, _) name)	= "The rule "++name++" wasn't found in module '"++show modul++"'"
 	show (NoFullParse inf)		= "We couldn't parse the full string, we were at "++show inf
 
-
 data Pr	a	= P (Parser Exception a)
-data Mode	= EatWS 	
+data Mode	= EatWS
 		| LeaveWS	| LeaveOnce
 		| DeepLeaveWS	-- not influenced by calls
 	deriving (Eq)
@@ -159,7 +159,7 @@ pWs		:: St ()
 pWs		=  do	(ctx,mode)	<- get
 			when (mode == EatWS) $ void $ lft $ longest $ match ws
 			when (mode == LeaveOnce) $ put (ctx, EatWS)
-				
+
 
 _seq		:: [ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo
@@ -216,7 +216,7 @@ getModule	=  do	((_, m, _, _),_)	<- get
 			return m
 
 
-goto	:: FQN -> Context -> Context	
+goto	:: FQN -> Context -> Context
 goto country (world, _, _, _)
 	= if country `member` world then
 		(world, fromJust $ lookup country world, country, error "Uh oh, should not happen. No rulename is set.")

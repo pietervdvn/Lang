@@ -21,3 +21,5 @@ data FQN	= FQN [PName] MName
 
 instance Show FQN where
 	show (FQN path mn) 	= foldr (\p acc -> p++"."++acc) mn path
+
+toPath (FQN path nm)	= path++[nm]

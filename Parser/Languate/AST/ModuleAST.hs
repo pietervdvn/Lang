@@ -14,16 +14,25 @@ import Languate.AST.FunctionASTUtils
 
 import Data.Either (rights)
 
-data Module	= Module {moduleName::Name, exports::Restrict, imports::Imports, statements::[Statement]}
+type Line	= Int
+type Column	= Int
+type Coor	= (Line, Column)
+data Module	= Module {moduleName::Name, exports::Restrict, imports::Imports, statements'::[(Statement, Coor)]}
 	deriving (Show)
+
+
+statements	= map fst . statements'
 
 -- ## Stuf about imports
 
 -- for comments hovering around imports
-type Imports	= [Either Comment Import]
+type Imports	= [Either Comment (Import, Coor)]
+
+imports''	:: Module -> [(Import, Coor)]
+imports'' 	=  rights . imports
 
 imports'	:: Module -> [Import]
-imports' 	=  rights . imports
+imports'	=  map fst . imports''
 
 
 type Pseudonym	= Name

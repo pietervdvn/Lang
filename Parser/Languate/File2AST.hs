@@ -2,7 +2,7 @@ module Languate.File2AST (loadBnf, parse, load,load') where
 
 {--
 
-This module loads a module from file and makes an AST-module of it. 
+This module loads a module from file and makes an AST-module of it.
 
 --}
 
@@ -20,7 +20,7 @@ loadBnf		=  Bnf.load
 parse	:: Bnf.World -> FilePath -> String -> Module
 parse world path str
 		=  let mpt	= Bnf.parseFull world (Bnf.toFQN ["Languate"]) "module" $ str++"\n" in
-		   let pt' = fromMaybe (error errMsg) mpt in
+		   let pt' = fromMaybe (error $ path++": "++ errMsg) mpt in
 		   case pt' of
 					Right pt	-> pt2mod pt
 					Left exception	-> error $ path++": "++show exception
