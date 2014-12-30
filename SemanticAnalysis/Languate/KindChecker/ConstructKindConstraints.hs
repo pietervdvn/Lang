@@ -13,12 +13,26 @@ import Languate.AST
 import Languate.FQN
 import Languate.TypeTable
 
+import Languate.World
+import Data.Map (mapWithKey, findWithDefault, Map)
+
 import Control.Monad.Reader
 import Control.Arrow
 
 import Data.Maybe
 
 import Debug.Trace
+
+
+buildKindConstraintTable	:: Map FQN TypeLookupTable -> World -> Map FQN [KindConstraint]
+buildKindConstraintTable tlts w
+	= 	let lookup' fqn	= findWithDefault (error $ "Bug: Type lookup table not found: (constructKindConstraints)"++show fqn) fqn	in
+		mapWithKey (\fqn -> kindConstraints (lookup' fqn tlts) fqn) $ modules w
+
+kindConstraints	::  TypeLookupTable -> FQN -> Module -> [KindConstraint]
+kindConstraints tlt fqn modul
+		= concat $ runReader (mapM kindConstraintIn (statements modul)) (Info fqn tlt)
+
 
 data Info	= Info {fqn :: FQN, tlt :: TypeLookupTable}
 type RI a	= Reader Info a
@@ -42,9 +56,9 @@ kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs))
 			constraints <- subtypeConstraints subT frees superTypes
 			return $ baseConstrs ++ constraints
 kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
-		= do	baseConstrs	<- baseTypeConstr nm frees reqs
-			synonym		<- resolve sameAs
+		= do	synonym		<- resolve sameAs
 			baseType	<- resolve' nm
+			baseConstrs	<- baseTypeConstr nm frees reqs
 			let base	= RApplied baseType $ map RFree frees
 			let same	= HaveSameKind base synonym
 			return $ same:baseConstrs

@@ -27,7 +27,8 @@ The type table contains all known types within a certain module.
 -}
 
 data Duplicate	= Duplicate [FQN]
-data TypeTable	= TypeTable	{ known		:: Map RType (Kind, Set RTypeReq )	-- type requirements are implicit; contains synonyms
+data TypeTable	= TypeTable	{ kinds		:: Map RType Kind
+				, typeReqs	:: Map (RType, Int) (Set RType)	-- type requirements are implicit; contains synonyms
 				, supertypes	:: Map RType (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				, synonyms	:: Map RType RType	-- should have the same kind. Acts as an 'equivalence/equality' relation
 				, revSynonyms	:: Map RType (Set RType)	-- inverse relation of synonyms

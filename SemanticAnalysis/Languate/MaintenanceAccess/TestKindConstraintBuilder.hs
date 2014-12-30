@@ -1,4 +1,4 @@
-module Languate.MaintenanceAccess.TestKindChecker where
+module Languate.MaintenanceAccess.TestKindConstraintBuilder where
 
 {--
 
@@ -19,8 +19,9 @@ import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
 --
 
-import Languate.KindChecker.ConstructKindConstraints
 import Languate.AST
+import Languate.KindChecker.ConstructKindConstraints
+import Languate.KindChecker.Solver
 
 import Control.Monad.Reader
 
@@ -29,16 +30,10 @@ bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
 package		= unsafePerformIO packageIO
 tlts		= buildTLTs package
-
-
+kctable		= buildKindConstraintTable tlts package
 
 -- build constraints for a simple adt: bool
-
-t' fqn		= concat $ runReader (mapM kindConstraintIn (statements $ modul fqn)) (info fqn)
-
-t1		= t' boolFQN
-t2		= t' dictFQN
-t		= t' typeFunc
+t	= solve kctable
 
 boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"
 colFQN	= toFQN' "pietervdvn:Data:Collection.Collection"
@@ -47,6 +42,7 @@ dictFQN	= toFQN' "pietervdvn:Data:Collection.Dict"
 typeFunc	= toFQN' "pietervdvn:Data:Type.Function"
 maybeFQN	= toFQN' "pietervdvn:Data:Data.Maybe"
 natFQN	= toFQN' "pietervdvn:Data:Num.Nat"
+preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
 
 
 fetch fqn		= fromMaybe (error $ "Fetching "++show fqn) . lookup fqn

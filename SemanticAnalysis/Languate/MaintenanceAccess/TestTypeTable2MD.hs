@@ -4,6 +4,8 @@ module Languate.MaintenanceAccess.TestTypeTable2MD where
 import StdDef
 import qualified Data.Map as M
 import qualified Data.Set as S
+import Data.Set (Set)
+import Data.Map (Map)
 import Data.Tuple
 import Languate.AST
 import Languate.TAST
@@ -17,17 +19,27 @@ import Languate.FQN
 
 -- test statically
 
-tt		= TypeTable knownTypesT superTypesT syns revSyns instConstrT
+tt		= TypeTable (M.map fst knownTypesT) knownTypeReqs superTypesT syns revSyns instConstrT
 t 		= putStrLn $ typeTable2MD (genFQN "Prelude") tt
 
+knownTypeReqs	:: Map (RType, Int) (S.Set RType)
+knownTypeReqs	= M.unions $ M.elems $ M.mapWithKey buildMap $ M.map snd knownTypesT
+
+buildMap	:: RType -> [(Int, RType)] -> Map (RType, Int) (Set RType)
+buildMap nm ls	=  let ireqs = map (\(i,reqs) -> ((nm, i), S.fromList reqs)) $ merge ls in
+			M.fromList ireqs
+
 knownTypesT	= M.fromList
-			[ ( nat		,(Kind, S.empty))
-			, ( natur	,(Kind, S.empty))
-			, ( natural	,(Kind, S.empty))
-			, ( set		,(KindCurry Kind Kind, S.fromList [("a", eq)]))
-			, ( functor	,(KindCurry Kind Kind, S.empty))
-			, ( monoid	,(Kind, S.empty))
-			, ( eq		,(Kind, S.empty))]
+			[ ( nat		,(Kind, none))
+			, ( natur	,(Kind, none))
+			, ( natural	,(Kind, none))
+			, ( set		,(KindCurry Kind Kind, [(0,eq)]))
+			, ( functor	,(KindCurry Kind Kind, none))
+			, ( monoid	,(Kind, none))
+			, ( eq		,(Kind, none))]
+		where none	= []
+
+
 
 natur	= RNormal (dataFQN "Nat") "Natural"
 natural	= RNormal (dataFQN "Nat") "Natur"

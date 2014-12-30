@@ -12,9 +12,10 @@ import Prelude hiding (lookup)
 import MarkDown
 import Languate.TypeTable
 import Languate.TypeTable.Expr2MD
-import Languate.AST
+import Languate.AST hiding (typeReqs)
 import Languate.TAST
 import StdDef
+import Data.Char (chr )
 
 
 import Languate.FQN
@@ -30,11 +31,15 @@ typeTable2MD fqn tt
 -- generates a nice table of types which are known in the module.
 knownTypes	:: TypeTable -> MarkDown
 knownTypes tt	= title 2 "Known types" ++
-			table ["Type","Typekind","Type Constraints","Synonym for","Supertypes","Comment"] (fmap (knownTypeRow tt) . M.toList $ known tt)
+			table ["Type","Typekind","Type Constraints","Synonym for","Supertypes","Comment"] (fmap (knownTypeRow tt) . M.keys $ kinds tt)
 
-knownTypeRow	:: TypeTable -> (RType,(Kind, Set RTypeReq)) -> [MarkDown]
-knownTypeRow tt (t@(RNormal fqn nm),(kind, treq))
-		=  [ bold nm ++ code (show fqn) , show kind, rtypeReqs2MD $ S.toList treq,
+knownTypeRow	:: TypeTable -> RType -> [MarkDown]
+knownTypeRow tt t@(RNormal fqn nm)
+		=  let  fetch k dict	= findWithDefault (error $ "Type not found: "++show k) k $ dict tt
+			kind	= fetch t kinds
+			lookup' k dict	= findWithDefault S.empty k $ dict tt
+			treqs	= Prelude.map (\i -> ([chr $ 97 + i] , S.toList $ lookup' (t,i) typeReqs)) [0..numberOfKindArgs kind - 1] in
+			[ bold nm ++ code (show fqn) , show kind, rtypeReqs2MD treqs,
 			synonyms2md t tt ++ " " ++ revSynonyms2md t tt,
 			commas . fmap (st True) . S.toList . findWithDefault S.empty t $ supertypes tt,
 			commentFor tt t]
@@ -52,7 +57,7 @@ commentFor tt t	=  let classes = instConstr tt in
 
 
 classesOverview	:: TypeTable -> MarkDown
-classesOverview tt	=  title 2 "Classes overview" ++ concatMap (`classOverview` tt) (keys $ instConstr tt)
+classesOverview tt	=  title 2 "Categories overview" ++ concatMap (`classOverview` tt) (keys $ instConstr tt)
 
 -- assumes the given type is a class
 classOverview	:: RType -> TypeTable -> MarkDown

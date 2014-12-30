@@ -87,7 +87,11 @@ st short (RTuple tps)
 
 showRTypeReq	:: RTypeReq -> String
 showRTypeReq (name, rtype)
-		=  name++":" ++ st True rtype
+		=  showRTypeReq' (name, [rtype])
+
+showRTypeReq'	:: (Name, [RType]) -> String
+showRTypeReq' (nm, subs)
+		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
 
 instance Show Signature where
 	show (Signature n t)
@@ -141,12 +145,11 @@ normalKind	:: Kind -> Bool
 normalKind Kind	= True
 normalKind _	= False
 
-
+numberOfKindArgs	:: Kind -> Int
+numberOfKindArgs Kind	= 0
+numberOfKindArgs (KindCurry _ k)
+			= 1 + numberOfKindArgs k
 -- simple conversion, only use for type declarations. E.g. '''data Bool = ...''' in module '''Data.Bool''': '''asRType (FQN ["Data"] "Bool")(Normal "Bool") '''
 asRType	:: FQN -> Type -> RType
 asRType fqn (Normal [] nm)
 	= RNormal fqn nm
-
--- TODO
-asRType'	:: FQN -> Name -> RType
-asRType'	= RNormal

@@ -12,6 +12,7 @@ import Data.Map
 import Prelude hiding (lookup)
 
 import Languate.TypeTable.BuildTypeLookupTable
+import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable
 
 {--
@@ -24,6 +25,8 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude") "../workspace/D
 package		= unsafePerformIO packageIO
 
 tlts	= buildTLTs package
+
+treqt	= buildRequirementTables tlts package
 
 preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
 boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"

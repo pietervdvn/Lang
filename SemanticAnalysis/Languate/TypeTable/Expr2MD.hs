@@ -38,5 +38,5 @@ decl2MD (n, Just t)	= code $ commas (reverse n) ++ " : "++show t
 typeReqs2MD	:: [TypeRequirement] -> MarkDown
 typeReqs2MD	= (++ " ") . commas . fmap showTypeReq
 
-rtypeReqs2MD	:: [RTypeReq] -> MarkDown
-rtypeReqs2MD	= (++ " ") . commas . fmap showRTypeReq
+rtypeReqs2MD	:: [(Name, [RType])] -> MarkDown
+rtypeReqs2MD	= (++ " ") . commas . fmap showRTypeReq'
