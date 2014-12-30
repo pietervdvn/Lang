@@ -27,16 +27,15 @@ The type table contains all known types within a certain module.
 -}
 
 data Duplicate	= Duplicate [FQN]
-data TypeTable	= TypeTable	{ kinds		:: Map RType Kind
-				, typeReqs	:: Map (RType, Int) (Set RType)	-- type requirements are implicit; contains synonyms
+type TypeID	= (FQN, Name)
+data TypeTable	= TypeTable	{ kinds		:: Map TypeID Kind
+				, typeReqs	:: Map (TypeID, Int) (Set RType)	-- type requirements are implicit; contains synonyms
 				, supertypes	:: Map RType (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
-				, synonyms	:: Map RType RType	-- should have the same kind. Acts as an 'equivalence/equality' relation
-				, revSynonyms	:: Map RType (Set RType)	-- inverse relation of synonyms
 				{-
 				Tells what functions should be implemented to be an instance of given superclass
 				In TypeTable and not in instanceConstr: not a class def!
 				-}
-				, instConstr	:: Map RType (ClassDef, Kind)}
+				, instConstr	:: Map TypeID (ClassDef, Kind)}
 	deriving (Show, Ord, Eq)
 
 -- basically the same as the aliastable, but with types.

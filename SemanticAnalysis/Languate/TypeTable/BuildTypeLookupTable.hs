@@ -26,6 +26,20 @@ import Languate.ImportTable.ExportCalculator
 
 import Debug.Trace
 
+
+{-
+Building of a type lookup table:
+
+
+-> we build a simple set with what locally declared types (correctness doesn't matter)
+	-> we filter what types are public (according to the functions)
+-> we calculate the export and imports for each module (exportCalculator)
+-> We build the ''TypeLookupTable''
+	-> We can resolve type calls of give an error when ambiguity arises
+	-> All this information condenses into the 'TypeLookupTable'
+-}
+
+
 -- {FQN (1) --> {FQN (2) --> Name (3)}}: This fqn (1) exports these type(names) (3), which are originally declared on location (2). E.g. {"Prelude" --> {"Data.Bool" --> "Bool", "Num.Nat" --> "Nat", "Num.Nat" --> "Nat'", ...}, ...}
 type Exports	= Map FQN (Map FQN (FQN, Name))
 

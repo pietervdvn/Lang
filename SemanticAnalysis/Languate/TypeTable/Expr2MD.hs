@@ -6,6 +6,7 @@ import StdDef
 import MarkDown
 import Languate.AST
 import Languate.TAST
+import Languate.FQN
 
 expr2md	:: Expression -> MarkDown
 expr2md e	= code $ show e
@@ -40,3 +41,7 @@ typeReqs2MD	= (++ " ") . commas . fmap showTypeReq
 
 rtypeReqs2MD	:: [(Name, [RType])] -> MarkDown
 rtypeReqs2MD	= (++ " ") . commas . fmap showRTypeReq'
+
+showTypeId	:: (FQN, Name) -> MarkDown
+showTypeId (fqn, n)
+		= show fqn ++ "." ++ n

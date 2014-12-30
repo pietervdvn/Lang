@@ -19,7 +19,7 @@ import Languate.World
 import Control.Arrow
 
 
-type RequirementTable	= Map (FQN, Name, Int) (Set RType)
+type RequirementTable	= Map (TypeID, Int) (Set RType)
 {- The type requirement table is the table which keeps track of what frees should be instances of what.
 
 E.g.
@@ -33,15 +33,15 @@ Mentally keeping track of where each requirement comes from is not user-friendly
 buildRequirementTables	:: Map FQN TypeLookupTable -> World -> Map FQN RequirementTable
 buildRequirementTables tlts w
 			= let	mods	= modules w
-				lookup' fqn	= findWithDefault (error $ "No tlt for FQN "++show fqn) fqn tlts in
+				lookup' fqn	= findWithDefault (error $ "Bug: No tlt for FQN "++show fqn) fqn tlts in
 				mapWithKey (\fqn mod -> buildRequirementTable (lookup' fqn) (statements mod)) mods
 
-buildRequirementTable	:: TypeLookupTable -> [Statement] -> Map (FQN, Name, Int) (Set RType)
+buildRequirementTable	:: TypeLookupTable -> [Statement] -> Map (TypeID, Int) (Set RType)
 buildRequirementTable tlt stmts
 		= M.unions $ map (M.fromList . requirementsIn tlt) stmts
 
 
-requirementsIn	:: TypeLookupTable -> Statement -> [((FQN, Name, Int), Set RType)]
+requirementsIn	:: TypeLookupTable -> Statement -> [((TypeID, Int), Set RType)]
 requirementsIn tlt (ADTDefStm (ADTDef name frees reqs _ _))
 		=  buildReqs tlt name frees reqs
 
@@ -54,15 +54,13 @@ requirementsIn tlt (ClassDefStm classDef)
 requirementsIn _ _
 		= []
 
-buildReqs	:: TypeLookupTable -> Name -> [Name] -> [TypeRequirement] -> [((FQN, Name, Int), Set RType)]
+buildReqs	:: TypeLookupTable -> Name -> [Name] -> [TypeRequirement] -> [((TypeID, Int), Set RType)]
 buildReqs tlt name frees reqs
 		= let 	fqn	= _resolveType' tlt ([], name)
-			reqTables = zip [0..] $ map (reqTable tlt reqs) frees in
-			map (\(id,(i, tps)) -> ((fqn,name,i), tps)) $ unmerge [(id, reqTables)]
+			typeid	= (fqn, name)
+			reqTables = zip [0..] $ map (reqTable tlt reqs) frees :: [(Int, Set RType)] in
+			map (\(argIndex, tps) -> ((typeid,argIndex), tps)) reqTables
 
-
-freeTable	:: [Name] -> [(Name, Int)]
-freeTable	=  flip zip [0..]
 
 reqTable	:: TypeLookupTable -> [TypeRequirement] -> Name -> Set RType
 reqTable tlt reqs nm

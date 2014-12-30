@@ -15,6 +15,8 @@ import Languate.TypeTable.TypeTable2MD
 import Data.Maybe
 import Languate.FQN
 
+import Control.Arrow
+
 
 
 -- test statically
@@ -41,18 +43,21 @@ knownTypesT	= M.fromList
 
 
 
-natur	= RNormal (dataFQN "Nat") "Natural"
-natural	= RNormal (dataFQN "Nat") "Natur"
+natur	= (dataFQN "Nat", "Natural")
+natural	= (dataFQN "Nat", "Natur")
 set	= genType collectionFQN "Set"
 functor	= genType categoryFQN "Functor"
 monoid	= genType categoryFQN "Monoid"
 eq	= genType categoryFQN "Eq"
 
-superTypesT	= fmap S.fromList $ M.fromList
+superTypesT	= fmap S.fromList $ M.fromList $ map (second rt)
 			[ (nat, [eq, monoid])
-			, (natural, [eq, monoid])
-			, (set, [functor])
-			, (RApplied set [RFree "a"], [eq])]
+			, (rt natural, [eq, monoid])
+			, (rt set, [functor])
+			, (RApplied (rt set) [RFree "a"], [eq])]
+
+
+rt (fqn,n)	= RNormal fqn n
 
 
 syns	= M.fromList [( natural, nat),(natur, nat)]
@@ -69,4 +74,4 @@ collectionFQN str	= genFQN $ "Collection." ++ str
 dataFQN str		= genFQN $ "Data." ++ str
 numFQN str		= genFQN $ "Num." ++ str
 
-genType fqnGen nm	= RNormal (fqnGen nm) nm
+genType fqnGen nm	= (fqnGen nm, nm)

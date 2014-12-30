@@ -7,26 +7,10 @@ This module builds the type table for the given module. This is done in several 
 Building of the TYPE LOOKUP TABLE
 =================================
 
--> we build an import table (which states what modules are imported with which aliases)
-	-> This is done by the loader and saved in the World data structure
--> pass 1 : we build a simple set with what locally declared types (correctness doesn't matter)
-	-> we check what types are public (according to the functions)
--> we calculate the export and imports for each module (exportCalculator)
--> Let's build the ''TypeLookupTable''
-	-> We can resolve type calls of give an error when ambiguity arises
-	-> All this information condenses into the 'TypeLookupTable'
-
-
+We build the Type Lookup Tables for each module (to resolve types)
 We now have a clear sight which module can view what types, and where this type was originally implemented.
 
-
-ACTUAL TYPE TABLE
-=================
-
--> Then, we build the class, synonym, instance and subtype defs per module
-	-> Error on cycles in the class defs
-
--> We can now cherrypick the implementation details to build the type table
+Then, we build the type requirements table.
 
 
 ------
@@ -41,3 +25,19 @@ subtype defs for predicates
 Type Requirements are passed when needed and implicit
 
 --}
+
+
+import StdDef
+
+import Languate.FQN
+import Languate.World
+import Languate.TypeTable
+import Languate.TypeTable.BuildRequirementTable
+
+import Data.Map
+import Data.Map as M
+
+buildTypeTable	:: Map FQN TypeLookupTable -> World -> TypeTable
+buildTypeTable tlts w
+		= let	typeReqs	= M.unions $ M.elems $ buildRequirementTables tlts w in
+			TypeTable (todos "Kinds") typeReqs (todos "supertypes") (todos "instConstr")
