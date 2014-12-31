@@ -20,6 +20,16 @@ import Languate.KindChecker.KindConstraint
 
 type KindLookupTable	= Map (FQN, Name) Kind
 
+{-
+
+Solves the type constraints.
+We make a few assumptions:
+
+Type requirements are all given withing the constraints. This means we have free kind arguments, but means that "have same kind as" is really the same kind, and a (*) can not be expanded into (* -> *)
+
+
+-}
+
 
 solve	:: Map FQN [KindConstraint] -> Map (FQN, Name) Kind
 solve d	=  let	constraints	= concat $ elems d

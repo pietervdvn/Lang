@@ -1,8 +1,10 @@
-module Languate.Checks where
+module Languate.Checks.Checks0 where
 
 {--
 
 This module implements all kind of usefull checks!
+
+These checks only depend on the TYPE LOOKUP TABLE as context
 
 --}
 

@@ -28,8 +28,11 @@ The type table contains all known types within a certain module.
 
 data Duplicate	= Duplicate [FQN]
 type TypeID	= (FQN, Name)
+
+type TypeReqTable	= Map (TypeID, Int) (Set RType)
+type KindLookupTable	= Map TypeID Kind
 data TypeTable	= TypeTable	{ kinds		:: Map TypeID Kind
-				, typeReqs	:: Map (TypeID, Int) (Set RType)	-- type requirements are implicit; contains synonyms
+				, typeReqs	:: TypeReqTable			-- type requirements are explicit for new type declarations; contains synonyms
 				, supertypes	:: Map RType (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				{-
 				Tells what functions should be implemented to be an instance of given superclass
@@ -72,6 +75,28 @@ _resolveType' tlt k@(mods,t)
 safeResolveType	:: TypeLookupTable -> ([Name], Name) -> Maybe [FQN]
 safeResolveType tlt k@(mods, t)
 	= M.lookup k tlt |> S.toList
+
+
+-- simple kind application. kindOf Functor = "* ~> *", kindOf (Functor a) = "*". No recursive checks: e.g. kindOf Functor (Monad) = "*", the fact that monad is not applied enough does not matter
+kindOf		:: KindLookupTable -> RType -> Maybe Kind
+kindOf klt (RNormal fqn nm)
+		=  M.lookup (fqn, nm) klt
+kindOf klt applied@(RApplied rtype rts)
+		= do	baseKind	<- kindOf klt rtype
+			simpleKindApply applied baseKind
+kindOf _ _	= Just Kind
+
+
+
+simpleKindApply	:: RType -> Kind -> Maybe Kind
+simpleKindApply (RApplied rtype []) kind
+		= Just kind
+simpleKindApply (RApplied _ _) Kind
+		= Nothing	-- over application
+simpleKindApply (RApplied rtype (rt:rts)) (KindCurry _ rest)
+		= simpleKindApply (RApplied rtype rts) rest
+simpleKindApply _ _
+		= Nothing
 
 
 showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict

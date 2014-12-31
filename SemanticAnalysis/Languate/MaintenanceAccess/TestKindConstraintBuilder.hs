@@ -33,7 +33,11 @@ tlts		= buildTLTs package
 kctable		= buildKindConstraintTable tlts package
 
 -- build constraints for a simple adt: bool
-t	= solve kctable
+t	= do	package <- packageIO
+		let kctable		= buildKindConstraintTable tlts package
+		print kctable
+		putStrLn "\n\n---\n\n"
+		return $ solve kctable
 
 boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"
 colFQN	= toFQN' "pietervdvn:Data:Collection.Collection"

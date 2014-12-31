@@ -91,7 +91,7 @@ buildCurry' (n:nms) reqs
 	= do	(tail, constrs)	<- buildCurry' nms reqs
 		let reqs'	= merge reqs
 		let found	= fromMaybe [] $ lookup n reqs'
-		return $ if null found then (UKindCurry UKind tail, [])
+		return $ if null found then (UKindCurry UKind tail, constrs)
 				else (UKindCurry (SameAs $ head found) tail, constrs ++ zipWith HaveSameKind found (tail' found) )
 
 

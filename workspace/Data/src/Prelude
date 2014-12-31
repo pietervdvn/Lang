@@ -1,22 +1,9 @@
 Prelude
 ---
-Contains a lot of usefull functions, types, classes.
-Each program imports these by default
+Some type functions, to test the kind constructor
 -------
 
-public import Data.Bool
-
-public import Data.Maybe
-public import ControlFlow
-
-public import Category.Eq
-public import Category.Monoid
-public import Category.Mappable
-
-public import Type.Function
-
-public import Collection.Collection
-public import Collection.List
-public import Collection.Dict
-
-public import Num.Nat
+-- a
+data A b c	= A
+-- b
+data B (a:A String String)	= B a
