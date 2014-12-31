@@ -16,6 +16,7 @@ import Languate.Precedence.Expr2PrefExpr
 import System.IO.Unsafe
 
 import qualified Bnf
+import Exceptions
 
 {--
 Dev code for semantic analysis.
@@ -23,10 +24,9 @@ Tests loading, intermodule typechecking, importing, ...
 --}
 
 
-bnfs	= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
-packageIO	= loadPackage' bnfs prelude "../workspace/Data/src/"
-package	= unsafePerformIO packageIO
-
+bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
+packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude") "../workspace/Data/src/"
+package		= unsafePerformIO packageIO
 
 
 bool	= fqn "Data.Bool"
@@ -40,8 +40,7 @@ fqpn	= fromJust $ toFQPN "pietervdvn:Data"
 
 t	= do	package	<- packageIO
 		let mods	= map snd $ toList $ modules package
-		print $ Map.lookup dict $ modules package
-		let precTable	= buildPrecTable mods
+		precTable	<- runExceptionsIO' $ buildPrecTable package
 		print precTable
 		print $ expr2prefExpr precTable expr
 		print $ expr2prefExpr precTable expr0

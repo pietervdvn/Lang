@@ -1,10 +1,9 @@
 module Languate.Precedence.PrecTable2MD where
 
 {--
-
 This module implements the conversion from a precedence table into a markdown,. This document contains an overview for the precedence classes.
-
 --}
+
 import StdDef
 import MarkDown
 import Languate.AST

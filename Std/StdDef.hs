@@ -92,3 +92,12 @@ strip	= lstrip . rstrip
 
 (|>)	:: (Functor f)	=> f a -> (a -> b) -> f b
 (|>)	= flip fmap
+
+
+indent	:: String -> String
+indent str
+	= str >>= (\c -> if c == '\n' then "\n   " else [c])
+
+indent'	:: String -> String -> String
+indent' msg str
+	= msg ++ "\n" ++ indent str
