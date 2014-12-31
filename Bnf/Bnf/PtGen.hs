@@ -18,6 +18,8 @@ import Parser
 import StateT
 import Regex
 import Normalizable
+
+import Debug.Trace
 {--
 
 This module implements a parser, which parses text using a given rule.
@@ -37,7 +39,7 @@ data Pr	a	= P (Parser Exception a)
 data Mode	= EatWS
 		| LeaveWS	| LeaveOnce
 		| DeepLeaveWS	-- not influenced by calls
-	deriving (Eq)
+	deriving (Eq,Show)
 
 weaken		:: Mode -> Mode
 weaken LeaveWS	=  LeaveOnce
@@ -98,6 +100,7 @@ p (Call name)	=  do	Module local imported	<- getModule
 				s <- get
 				modify $ first $ gotoN name
 				modify $ second weaken
+				pWs
 				pt	<- p (fromJust $ lookup name local)
 				put s
 				return pt
@@ -111,12 +114,12 @@ p (Call name)	=  do	Module local imported	<- getModule
 				else do	modify $ first $ gotoN name
 					info	<- getInfo
 					lft $ throw $ RuleNotFound info name
-p (Token rule)	= do	inf	<- getInfo
-			pWs
+p (Token rule)	= do	pWs
+			inf	<- getInfo
 			tree	<- p rule
 			return $ T inf $ getContent tree
-p (Rgx regex)	= do	inf 	<- getInfo
-			pWs
+p (Rgx regex)	= do	pWs
+			inf 	<- getInfo
 			tk	<- lft $ longest $ match regex
 			return $ T inf tk
 p (Choice [])
@@ -139,7 +142,7 @@ p (And toP conditions)
 			r	<- p toP
 			if and conds then return r else lft abort
 p (NWs expr)	= putMode LeaveWS expr
-p (DeepNWs expr)= putMode DeepLeaveWS expr
+p (DeepNWs expr)= putMode DeepLeaveWS expr	-- only used in meta, not accessible from the outside
 
 -- sets the whitespace-eatmode to the provided mode, parses expression in this mode, restores the original mode.
 putMode		:: Mode -> Expression -> St ParseTree
@@ -149,6 +152,9 @@ putMode m expr	= do	pWs
 			pt		<- p expr
 			modify $ second $ const mode
 			return pt
+
+getMode		:: St Mode
+getMode		= get |> snd
 
 
 -- parses whitespace if eatWS is activi
