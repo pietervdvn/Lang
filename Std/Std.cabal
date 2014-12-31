@@ -9,5 +9,5 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     StateT, StdDef, State, MarkDown
+  exposed-modules:     StateT, StdDef, State, MarkDown, Exceptions
   build-depends:       base ==4.*, mtl ==2.1.*
