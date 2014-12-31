@@ -40,7 +40,7 @@ validateModule tlt fqn@(FQN _ _ (ModName name)) mod
 
 validateStm'	:: TypeLookupTable -> (Statement, Coor) -> Check
 validateStm' tlt (stm,(l,c))
-		=  stack' (("\nOn line "++show (l-2)++":\n")++) $ validateStm tlt stm
+		=  stack' (("\nOn line "++show l ++":\n")++) $ validateStm tlt stm
 
 
 validateStm	:: TypeLookupTable -> Statement -> Check
