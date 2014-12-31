@@ -25,8 +25,8 @@ h/hooks:
 
 -}
 
-type Warning	= (RuleInfo, String)
-type Error	= (RuleInfo, String)
+type Warning	= (NodeInfo, String)
+type Error	= (NodeInfo, String)
 
 type Errors	= [Either Warning Error]
 
@@ -78,11 +78,11 @@ doHook (Just hook) _
 	= hook
 doHook Nothing cpt	= cpt
 
-takeMsg	:: RuleInfo -> (Message, cpt) -> Writer Errors cpt
+takeMsg	:: NodeInfo -> (Message, cpt) -> Writer Errors cpt
 takeMsg	_ (Nothing, cpt)	= return cpt
 takeMsg inf (Just msg, cpt)
 		= do	addMsg inf msg
 			return cpt
-addMsg	:: RuleInfo -> Either WarningMsg ErrorMsg -> Writer Errors ()
+addMsg	:: NodeInfo -> Either WarningMsg ErrorMsg -> Writer Errors ()
 addMsg inf (Left warning)	= tell [Left (inf, warning)]
 addMsg inf (Right error)	= tell [Right (inf, error)]

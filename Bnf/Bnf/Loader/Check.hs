@@ -35,7 +35,7 @@ There are quite some hoops to jump through
 
 -- performs all needed checks, throws an error if something is wrong with a descriptive error message
 check'	:: Map FQN Exports -> FilePath -> IOModule -> Module -> Module
-check' context path iom m	
+check' context path iom m
 	=  case check context path iom m of
 		(m,[])		-> m
 		(m,errors)	-> error $ show errors
@@ -66,7 +66,7 @@ checkFileName fqn@(FQN dirs name) path
 		let real	= dropFileName path
 		let correct	= and $ zipWith (==) (reverse expected) (reverse real)
 		unless correct	$ addErr fqn (0,0) "FileName" $ "The filepath "++show real ++" does not match the expected filepath "++show expected
-		
+
 
 -- Checks all the import stuff!
 checkImports	:: Map FQN Exports -> IOModule -> Writer Errors ()
@@ -74,7 +74,7 @@ checkImports context iom@(IOM fqn _ imports _)
 		= do	checkAmbigueImports context iom
 			checkStatedExists context fqn imports
 			checkDoubleImports fqn imports
-			
+
 
 -- 3) checks wether everything stated in black/whitelists does exist within the module
 checkStatedExists	:: Map FQN Exports -> FQN -> [IOImport] -> Writer Errors ()
@@ -114,7 +114,7 @@ ambigueImports all
 		=  let realAmb	= amb $ concatMap snd all in
 		   let dict	= map swap $ expand $ map (fmap (map fst)) all :: [(Name, IOImport)] in
 		   let cleaned	= filter ((`elem` realAmb) . fst) dict in
-		   deexpand cleaned 
+		   deexpand cleaned
 
 
 -- real dubble names
@@ -125,7 +125,7 @@ amb		=  dubbles . map fst . nub
 expand		:: [(a,[b])] -> [(a,b)]
 expand ls	=  do	(a, bs)	<- ls
 			b	<- bs
-			return (a,b)	
+			return (a,b)
 
 
 deexpand	:: Eq a => [(a,b)] -> [(a,[b])]
@@ -143,7 +143,7 @@ checkDoubleImports fqn imps
 			unless (null duplicates) $ addWarn fqn (snd $ all !! 1) "Duplicate imports" $
 				"Some imports are done multiple times: "  ++
 				foldr (\(fqn, _) acc -> show fqn ++ " is imported on "++ show (map snd $ filter ((==) fqn . fst) all) ++ acc) "" duplicates
-			
+
 
 -- 7
 checkDoubleDefines	:: IOModule -> Writer Errors ()
@@ -196,7 +196,7 @@ warn		:: FQN -> Position -> Name -> String -> Error
 warn fqn pos name msg
 		= (rinfo fqn pos name, msg)
 
-rinfo			:: FQN -> Position -> Name -> RuleInfo
+rinfo			:: FQN -> Position -> Name -> NodeInfo
 rinfo fqn pos name	= (fqn, name, coor pos)
 
 coor			:: Position -> Coor

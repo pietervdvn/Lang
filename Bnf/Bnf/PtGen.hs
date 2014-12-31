@@ -25,8 +25,8 @@ This module implements a parser, which parses text using a given rule.
 
 type Context	= (World, Module, FQN, Name)
 
-data Exception	= RuleNotFound RuleInfo Name
-		| NoFullParse RuleInfo
+data Exception	= RuleNotFound NodeInfo Name
+		| NoFullParse NodeInfo
 		| NoParse
 
 instance Show Exception where
@@ -111,12 +111,12 @@ p (Call name)	=  do	Module local imported	<- getModule
 				else do	modify $ first $ gotoN name
 					info	<- getInfo
 					lft $ throw $ RuleNotFound info name
-p (Token rule)	= do	pWs
-			inf	<- getInfo
+p (Token rule)	= do	inf	<- getInfo
+			pWs
 			tree	<- p rule
 			return $ T inf $ getContent tree
-p (Rgx regex)	= do	pWs
-			inf 	<- getInfo
+p (Rgx regex)	= do	inf 	<- getInfo
+			pWs
 			tk	<- lft $ longest $ match regex
 			return $ T inf tk
 p (Choice [])
@@ -125,15 +125,12 @@ p (Choice (r:rs))
 		=  embed (p r) >>: p (Choice rs)
 p (Opt rule)	=  p rule >>: (do	i <- getInfo
 					return $ S i [] )
-p (Star rule)	=  do	pts	<- pStar rule
-			_seq pts
-p (More rule)	=  do	head	<- p rule
-			tail	<- pStar rule
-			_seq $ head:tail
-p (Seq rules)	=  do	pts	<- mapM p rules
-			_seq pts
-p (Set [rule])	= do	r	<- p rule
-			_seq [r]
+p (Star rule)	= _seq' $ pStar rule
+p (More rule)	= _seq' $ do	pt	<- p rule
+				pts	<- pStar rule
+				return $ pt:pts
+p (Seq rules)	= _seq $ map p rules
+p (Set [rule])	= _seq [p rule]
 p (Set rules)	= do	(head, rest)	<- pOne rules
 			S i tail	<- p (Set rest)
 			return $ S i (head:tail)
@@ -161,13 +158,18 @@ pWs		=  do	(ctx,mode)	<- get
 			when (mode == LeaveOnce) $ put (ctx, EatWS)
 
 
-_seq		:: [ParseTree] -> St ParseTree
+_seq		:: [St ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo
-			return $ S i rules
+			pts	<- mapM id rules
+			return $ S i pts
+
+_seq'		:: St [ParseTree] -> St ParseTree
+_seq' rules	=  do	i <- getInfo
+			pts	<- rules
+			return $ S i pts
 
 embed		:: St ParseTree -> St ParseTree
-embed st	=  do	pt	<- st
-			_seq [pt]
+embed st	=  _seq [st]
 
 pStar		:: Expression -> St [ParseTree]
 pStar rule	=  do	head	<- p rule
@@ -200,7 +202,7 @@ pOne (r:rs)	=  do	pt <- p r
 pref		:: Pr a -> Pr a -> Pr a
 pref a b	=  liftP ((>:) (unliftP a) (unliftP b))
 
-getInfo		:: St RuleInfo
+getInfo		:: St NodeInfo
 getInfo		=  do	coor	<- lft getCoor
 			((_,_, fqn, name),_)	<- get
 			return (fqn, name, coor)
@@ -208,8 +210,8 @@ getInfo		=  do	coor	<- lft getCoor
 
 getCoor		:: Parser Exception Coor
 getCoor		=  do	ind	<- index
-			(line, col) <- position
-			return (ind, line, ind - col)	-- the minus is to compensate the behaviour of the newline counter
+			(line, lineStartInd) <- position		-- position counts in (seen "\n"s, total characters parsed (including "\n"))
+			return (ind, line, ind - lineStartInd)	-- we want: total seen, line nr, line starts at. As lineStartInd counts including "\n", we subtract the number of seen "\n"
 
 getModule	:: St Module
 getModule	=  do	((_, m, _, _),_)	<- get

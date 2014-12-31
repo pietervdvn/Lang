@@ -137,6 +137,7 @@ opt cns			=  (cns >> continue) >: continue
 index			:: Eq i => Consumer i e Int
 index			=  Consumer $ \ st@(_, _, i, _) -> (st, Res i)
 
+-- returns a position, which is composed out of "lineNumber, line started at this chars"
 position		:: Eq i => Consumer i e Position
 position		=  Consumer $ \ st@(_, _, _, i) -> (st, Res i)
 
@@ -166,9 +167,9 @@ emulate consumer	=  do	state	<- state
 next			:: Eq i => Consumer i e i
 next			=  Consumer tk
 				where 	tk 		:: Eq i =>  State i -> (State i, Outcome e i)
-					tk ([],i, ind, pos)	=  (([],i ,ind, pos), Nope)
-					tk (i:is, j, ind, pos@(line, _))
-								 =((is,j, ind+1, if i == j then (line+1, ind) else pos), Res i)
+					tk ([],i, ind, pos)	=  (([],i ,ind, pos), Nope)	-- we are done
+					tk (i:is, j, ind, pos@(line, _))	-- count newlines
+								 =((is,j, ind+1, if i == j then (line+1, ind+1) else pos), Res i)
 
 full			:: Eq i => Consumer i e a -> Consumer i e a
 full cns		=  do	a <- cns

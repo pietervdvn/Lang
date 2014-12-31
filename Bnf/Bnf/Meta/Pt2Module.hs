@@ -28,7 +28,7 @@ conv (Module fqn metas imports rules)
 			return $ IOM fqn metas imports rules
 
 checkMeta	:: FQN -> [IOMeta] -> Writer Errors ()
-checkMeta fqn metas	
+checkMeta fqn metas
 	=  do	let names	= map (\(n, _, _) -> n) metas
 		let notFound	= filter (not . flip elem names) ["author","desc","date"]
 		err (metaNotFound fqn) notFound
@@ -45,7 +45,7 @@ checkMeta fqn metas
 				)
 
 checkDatum	:: Position -> FQN -> [Either Int String] -> Writer Errors ()
-checkDatum (l,c) fqn time	
+checkDatum (l,c) fqn time
 		=  do	let areLeft	= map isLeft time
 			unless (and areLeft) $ tellErr (fqn, "meta:datetype", (0,l,c))
 				"Expected a list of ints for the date metainfo"
@@ -83,7 +83,7 @@ metaDouble fqn infs name
 		= let (l,c) = fromJust $ lookup name infs in
 			((fqn, "meta:double", (0,l,c)), "Metainfo with name '"++name++"' already defined")
 
-tellErr		:: RuleInfo -> String -> Writer Errors ()
+tellErr		:: NodeInfo -> String -> Writer Errors ()
 tellErr inf msg	=  tell [Right (inf, msg)]
 
 data AST	= Module FQN [IOMeta] [IOImport] [IORule]
@@ -139,4 +139,3 @@ unpckImp	:: [AST] -> [IOImport] -> AST
 unpckImp [] acc	=  Import acc
 unpckImp (Import ioi:rs) acc
 		=  unpckImp rs (ioi++acc)
-

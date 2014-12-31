@@ -18,12 +18,12 @@ type Column 	= Int
 -- a Coor represents info about the position (char in stream), line nr (how many lines have been passed) and column (the char line)
 type Coor 	= (Pos, Line, Column)
 
--- info about a rule: what name it has, and what file it has been defined in
-type RuleInfo	= (FQN, Name, Coor)
+-- info about a node: what name it has, and what file it has been defined in
+type NodeInfo	= (FQN, Name, Coor)
 
-data ParseTree	= T RuleInfo String
-		| S RuleInfo [ParseTree]
- 		
+data ParseTree	= T NodeInfo String
+		| S NodeInfo [ParseTree]
+
 
 getContent	:: ParseTree -> String
 getContent (T _ str)	= str
@@ -36,10 +36,14 @@ getLength (S _ pts)	= foldl (\ acc pt -> acc + getLength pt) 0 pts
 
 -- parseLength >= length, actually parsed chars
 getParseLength		:: ParseTree -> Int
-getParseLength pt	=  let lst = getLast pt in
-			   let (_,_,(pos,_,_)) = getInf lst in
-				pos + getLength lst
+getParseLength pt	=  let 	(pos,_,_) = getEndCoor pt in
+				pos
 
+-- gives the coordinate of the last parsed char
+getEndCoor		:: ParseTree -> Coor
+getEndCoor (T (_,_,(p,l,c)) str)
+			= (p + length str, l, c + length str)
+getEndCoor seq		= getEndCoor $ getLast seq
 
 instance Normalizable ParseTree where
 	normalize	= n
@@ -48,7 +52,7 @@ n	:: ParseTree -> ParseTree
 n t@(T{})	= t
 n (S i rs)	= S i $ filter (not . _isEmpty) $ map normalize rs
 
-getName		:: RuleInfo -> Name
+getName		:: NodeInfo -> Name
 getName (_,name,_)	= name
 
 -- gets the position of the leftmost token
@@ -56,7 +60,7 @@ getPosition	:: ParseTree -> Position
 getPosition pt	=  let (_,_,(_,l,c))	= getInf $ getFirst pt in
 			(l,c)
 
-getInf		:: ParseTree -> RuleInfo
+getInf		:: ParseTree -> NodeInfo
 getInf (T inf _)	= inf
 getInf (S inf _)	= inf
 
@@ -113,11 +117,11 @@ sind		=  flip replicate ' '
 fill		:: Int -> String -> String
 fill i str	=  replicate (i-length str) ' ' ++ str
 
-showInf		:: RuleInfo -> String
+showInf		:: NodeInfo -> String
 showInf ri@(_,_,coor)	= showRI ri ++" "++ showCoor coor ++":    "
 
 
-showRI		:: RuleInfo -> String
+showRI		:: NodeInfo -> String
 showRI (fqn, rule, _)
 		=  show fqn++"."++rule
 

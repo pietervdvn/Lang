@@ -16,7 +16,7 @@ parseRule	:: ParseTree -> Writer Errors IORule
 parseRule pt	=  do	conved	<- simpleConvert h t s pt
 			conv (getInf $ getFirst pt) conved
 
-conv		:: RuleInfo -> AST -> Writer Errors IORule
+conv		:: NodeInfo -> AST -> Writer Errors IORule
 conv inf (Modded (Modifiers init priv token) ast)
 		= do	IORule name expr _ _ pos	<- conv inf ast
 			when (init && priv) $ tell [_initialNotPublWarn inf]
@@ -76,7 +76,7 @@ s "modifier" (TokenMod:rest)
 
 s _ [item]	= item
 s "rule" (mods@Modifiers{}:rest)
-		= Modded mods $ s "rule" rest 
+		= Modded mods $ s "rule" rest
 s "rule" [Ident name, AssignT, Expr expr]
 		= Rule name expr
 s nm items	=  error $ "Seq fallthrough for "++nm++" with "++show items
