@@ -45,14 +45,13 @@ calculateExports importGraph exportGraph exps impFilt
 calculateImports	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> (n -> Set prop) -> Map n (Set (prop,n)) -> Map n (Set (prop,n))
 calculateImports importGraph local exports
 			= let	local' n	= S.map (\p -> (p,n)) $ local n	in
-				mapWithKey (\n _ -> calculateImportsFor importGraph local' exports n) exports
+				mapWithKey (\n impsFrom -> calculateImportsFor impsFrom local' exports n) importGraph
 
-calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
-calculateImportsFor importGraph local exports n
-			=  let	importsFrom	= S.toList $ (??) $ lookup n importGraph
-				imported	= fmap (\n -> findWithDefault S.empty n exports) importsFrom
-				localDecl	= local n in
-				union localDecl $ unions imported
+calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => Set n -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
+calculateImportsFor importsFrom local exports n
+			=  let	imported	= fmap (\n -> lookup' n exports) $ S.toList importsFrom
+				localDecls	= local n in
+				union localDecls $ unions imported
 
 
 
