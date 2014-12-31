@@ -127,12 +127,13 @@ throwAwayResult		:: Consumer i e a -> Consumer i e ()
 throwAwayResult cns	=  do	cns
 				continue
 
-opt			:: Eq i => Consumer i e a -> Consumer i e ()				
+opt			:: Eq i => Consumer i e a -> Consumer i e ()
 opt cns			=  (cns >> continue) >: continue
 
 index			:: Eq i => Consumer i e Int
 index			=  Consumer $ \ st@(_, _, i, _) -> (st, Res i)
 
+-- returns a position, which is composed out of "lineNumber, line started at this chars"
 position		:: Eq i => Consumer i e Position
 position		=  Consumer $ \ st@(_, _, _, i) -> (st, Res i)
 
@@ -162,9 +163,9 @@ emulate consumer	=  do	state	<- state
 next			:: Eq i => Consumer i e i
 next			=  Consumer tk
 				where 	tk 		:: Eq i =>  State i -> (State i, Outcome e i)
-					tk ([],i, ind, pos)	=  (([],i ,ind, pos), Nope)
-					tk (i:is, j, ind, pos@(line, _))	
-								 =((is,j, ind+1, if i == j then (line+1, ind) else pos), Res i)
+					tk ([],i, ind, pos)	=  (([],i ,ind, pos), Nope)	-- we are done
+					tk (i:is, j, ind, pos@(line, _))	-- count newlines
+								 =((is,j, ind+1, if i == j then (line+1, ind+1) else pos), Res i)
 
 full			:: Eq i => Consumer i e a -> Consumer i e a
 full cns		=  do	a <- cns
@@ -173,16 +174,16 @@ full cns		=  do	a <- cns
 					else abort
 {- Keeps all 'i' in the queue that satisfy the given condition.-}
 filter			:: (i -> Bool) -> Consumer i e ()
-filter cond		=  Consumer $ \ (is, i, ind, pos) -> ((Prelude.filter cond is,i, ind, pos), Res () ) 
+filter cond		=  Consumer $ \ (is, i, ind, pos) -> ((Prelude.filter cond is,i, ind, pos), Res () )
 
 {-| Returns the first parser, if this one has a result or throws an exception|-}
 (>:)			:: Eq i => Consumer i e a -> Consumer i e a -> Consumer i e a
-(>:) cns backup		=  Consumer $ \ st -> pref (run cns st) backup st 
+(>:) cns backup		=  Consumer $ \ st -> pref (run cns st) backup st
 				where 	pref		:: Result i e a -> Consumer i e a -> State i -> Result i e a
 					pref (st, Res res) _ _		=  (st, Res res)
 					pref (st, Exc e)    _ _		=  (st, Exc e)
 					pref (_, Nope)      b st	=  run b st
-						
+
 (>:>)			:: Eq i => [Consumer i e a] -> Consumer i e a
 (>:>) []		=  error "For >:>, an empty list is not allowed"
 (>:>) (r:rs)		=  foldl (>:) r rs
