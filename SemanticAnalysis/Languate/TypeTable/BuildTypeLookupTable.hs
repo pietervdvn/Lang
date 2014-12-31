@@ -43,7 +43,7 @@ Building of a type lookup table:
 -- {FQN (1) --> {FQN (2) --> Name (3)}}: This fqn (1) exports these type(names) (3), which are originally declared on location (2). E.g. {"Prelude" --> {"Data.Bool" --> "Bool", "Num.Nat" --> "Nat", "Num.Nat" --> "Nat'", ...}, ...}
 type Exports	= Map FQN (Map FQN (FQN, Name))
 
---buildTLTs	:: World -> Map FQN TypeLookupTable
+buildTLTs	:: World -> Map FQN TypeLookupTable
 buildTLTs world	=  let	modules	= Languate.World.modules world
 			injectSet a	= S.map (\b -> (a,b))
 			injectSetFunc f fqn	= injectSet fqn $ f fqn
