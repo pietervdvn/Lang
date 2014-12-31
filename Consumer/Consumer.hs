@@ -63,6 +63,10 @@ unpack' res		=  _unpck $ getOutcome res
 					_unpck Nope	= error "No result"
 					_unpck (Exc _)	= error "Exception which does not instantiate show"
 
+unpackMaybe		:: Result i e a -> Maybe a
+unpackMaybe (_, Res a)	= Just a
+unpackMaybe _		= Nothing
+
 
 instance Monad (Consumer i e) where
 	return a	= Consumer $ \ st -> (st, Res a)
@@ -127,7 +131,7 @@ throwAwayResult		:: Consumer i e a -> Consumer i e ()
 throwAwayResult cns	=  do	cns
 				continue
 
-opt			:: Eq i => Consumer i e a -> Consumer i e ()				
+opt			:: Eq i => Consumer i e a -> Consumer i e ()
 opt cns			=  (cns >> continue) >: continue
 
 index			:: Eq i => Consumer i e Int
@@ -163,7 +167,7 @@ next			:: Eq i => Consumer i e i
 next			=  Consumer tk
 				where 	tk 		:: Eq i =>  State i -> (State i, Outcome e i)
 					tk ([],i, ind, pos)	=  (([],i ,ind, pos), Nope)
-					tk (i:is, j, ind, pos@(line, _))	
+					tk (i:is, j, ind, pos@(line, _))
 								 =((is,j, ind+1, if i == j then (line+1, ind) else pos), Res i)
 
 full			:: Eq i => Consumer i e a -> Consumer i e a
@@ -173,16 +177,16 @@ full cns		=  do	a <- cns
 					else abort
 {- Keeps all 'i' in the queue that satisfy the given condition.-}
 filter			:: (i -> Bool) -> Consumer i e ()
-filter cond		=  Consumer $ \ (is, i, ind, pos) -> ((Prelude.filter cond is,i, ind, pos), Res () ) 
+filter cond		=  Consumer $ \ (is, i, ind, pos) -> ((Prelude.filter cond is,i, ind, pos), Res () )
 
 {-| Returns the first parser, if this one has a result or throws an exception|-}
 (>:)			:: Eq i => Consumer i e a -> Consumer i e a -> Consumer i e a
-(>:) cns backup		=  Consumer $ \ st -> pref (run cns st) backup st 
+(>:) cns backup		=  Consumer $ \ st -> pref (run cns st) backup st
 				where 	pref		:: Result i e a -> Consumer i e a -> State i -> Result i e a
 					pref (st, Res res) _ _		=  (st, Res res)
 					pref (st, Exc e)    _ _		=  (st, Exc e)
 					pref (_, Nope)      b st	=  run b st
-						
+
 (>:>)			:: Eq i => [Consumer i e a] -> Consumer i e a
 (>:>) []		=  error "For >:>, an empty list is not allowed"
 (>:>) (r:rs)		=  foldl (>:) r rs

@@ -7,6 +7,8 @@ By adding the associativity, the compiler has a high degree of freedom in optimi
 
 ------
 
+import Num.Nat
+
 -- A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
 cat Monoid
 	-- The neutral element

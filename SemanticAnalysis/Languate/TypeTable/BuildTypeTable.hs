@@ -28,16 +28,20 @@ Type Requirements are passed when needed and implicit
 
 
 import StdDef
-
+import Exceptions
 import Languate.FQN
 import Languate.World
 import Languate.TypeTable
 import Languate.TypeTable.BuildRequirementTable
+import Languate.TypeTable.BuildTypeLookupTable
+import Languate.Checks
 
 import Data.Map
 import Data.Map as M
 
-buildTypeTable	:: Map FQN TypeLookupTable -> World -> TypeTable
-buildTypeTable tlts w
-		= let	typeReqs	= M.unions $ M.elems $ buildRequirementTables tlts w in
-			TypeTable (todos "Kinds") typeReqs (todos "supertypes") (todos "instConstr")
+buildTypeTable	:: World -> Exceptions' String (Map FQN TypeLookupTable, TypeTable)
+buildTypeTable w
+		= do	let tlts	=  buildTLTs w
+			validateWorld tlts w
+			typeReqs	<- buildRequirementTables tlts w |> M.elems |> M.unions
+			return $ ( tlts , TypeTable (todos "Kinds") typeReqs (todos "supertypes") (todos "instConstr") )

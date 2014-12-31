@@ -9,8 +9,7 @@ import Debug.Trace
 import StdDef
 
 runExceptions	:: Exceptions w e a -> ([w], [e], Either e a)
-runExceptions (Halt ws es e)		= (ws, es, Left e)
-runExceptions (Exceptions ws es a)	= (ws, es, Right a)
+runExceptions (Exceptions ws es ea)	= (ws, es, ea)
 
 
 runExceptionsIO	:: (Show w, Show e) => Exceptions w e a -> IO a
@@ -50,18 +49,21 @@ testException' (sw, se) exc
 
 {- The Exceptions monad is a kind of writer, to which exceptions and warnings can be written. Even when a exception is encountered, the monad will continue, as to gather as much exceptions as possible. Only the fail will stop execution!-}
 
-data Exceptions w e a	= Exceptions [w] [e] a	| Halt [w] [e] e
+data Exceptions w e a	= Exceptions [w] [e] (Either e a)
+type Exceptions' e a	= Exceptions e e a
 
 instance Monad (Exceptions w e) where
-	return a	= Exceptions [] [] a
-	(>>=) (Exceptions ws es a) fa2mb
-			= let excs	= fa2mb a in
-				case excs of
-					(Exceptions ws' es' b) 	-> Exceptions (ws ++ ws') (es ++ es') b
-					(Halt ws' es' e)	-> Halt (ws ++ ws') (es ++ es') e
-	(>>=) (Halt ws es e) _
-			= Halt ws es e
+	return a	= Exceptions [] [] $ Right a
+	(>>=) (Exceptions ws es (Right a)) fa2mb
+			= let Exceptions ws' es' eOrB	= fa2mb a in
+				Exceptions (ws ++ ws') (es ++ es') eOrB
+	(>>=) (Exceptions ws es (Left e)) _
+			= Exceptions ws es (Left e)
 
+
+instance Functor (Exceptions w e) where
+	fmap f ma 	= do	a <- ma
+				return $ f a
 
 
 {- Stack executes another 'procedure' and converts its result into the current exception.
@@ -69,19 +71,18 @@ Usefull for adding a stacktrace:
     do	a <- stack ("In file "++filename++": ") stuffWithFile
 -}
 stack	:: (w -> w', e -> e') -> Exceptions w e a -> Exceptions w' e' a
-stack (fw, fe) (Exceptions ws es a)
-	= Exceptions (map fw ws) (map fe es) a
-stack (fw, fe) (Halt ws es e)
-	= Halt (map fw ws) (map fe es) $ fe e
+stack (fw, fe) (Exceptions ws es eOrA)
+	= Exceptions (map fw ws) (map fe es) $ lmap fe eOrA
+
 -- same as stac, but both functions are the same
 stack'	:: (we -> we') -> Exceptions we we a -> Exceptions we' we' a
 stack' f	= stack (f,f)
 
 warn	:: w -> Exceptions w e ()
-warn w	=  Exceptions [w] [] ()
+warn w	=  Exceptions [w] [] $ Right ()
 
 err	:: e -> Exceptions w e ()
-err e	= Exceptions [] [e] ()
+err e	= Exceptions [] [e] $ Right ()
 
 assert	:: Bool -> e -> Exceptions w e ()
 assert c	= unless c . err
@@ -91,8 +92,22 @@ assert'	:: Bool -> w -> Exceptions w e ()
 assert' c	= unless c . warn
 warnIf c	= assert' (not c)
 
-halt	:: e -> Exceptions w e ()
-halt e	=  Halt [] [] e
+halt	:: e -> Exceptions w e a
+halt e	=  Exceptions [] [] (Left e)
 
 haltIf	:: Bool -> e -> Exceptions w e ()
-haltIf c= when c . halt
+haltIf c e
+	= when c $ halt e
+
+pass	:: Exceptions w e ()
+pass	= return ()
+
+
+lmap	:: (a -> c) -> Either a b -> Either c b
+lmap f (Left a)	= Left $ f a
+lmap _ (Right b)	= Right b
+
+
+(?)	:: Maybe a -> e -> Exceptions w e a
+(?) Nothing e	= halt e
+(?) (Just a) _	= return a

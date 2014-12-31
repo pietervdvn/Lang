@@ -5,6 +5,7 @@ Gives the type requirements for each type.
 --}
 
 import StdDef
+import Exceptions
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Map (Map, mapWithKey, findWithDefault)
@@ -19,6 +20,7 @@ import Languate.World
 import Control.Arrow
 
 
+
 type RequirementTable	= Map (TypeID, Int) (Set RType)
 {- The type requirement table is the table which keeps track of what frees should be instances of what.
 
@@ -30,15 +32,15 @@ Type requirements should be explicit in type declarations.
 Mentally keeping track of where each requirement comes from is not user-friendly.
 -}
 
-buildRequirementTables	:: Map FQN TypeLookupTable -> World -> Map FQN RequirementTable
+buildRequirementTables	:: Map FQN TypeLookupTable -> World -> Exceptions' String (Map FQN RequirementTable)
 buildRequirementTables tlts w
-			= let	mods	= modules w
-				lookup' fqn	= findWithDefault (error $ "Bug: No tlt for FQN "++show fqn) fqn tlts in
-				mapWithKey (\fqn mod -> buildRequirementTable (lookup' fqn) (statements mod)) mods
+			= do	tables <- mapM (\(fqn, mod) -> buildRequirementTable tlts fqn (statements mod)) $ M.toList $ modules w
+				return $ M.fromList tables
 
-buildRequirementTable	:: TypeLookupTable -> [Statement] -> Map (TypeID, Int) (Set RType)
-buildRequirementTable tlt stmts
-		= M.unions $ map (M.fromList . requirementsIn tlt) stmts
+buildRequirementTable	:: Map FQN TypeLookupTable -> FQN -> [Statement] -> Exceptions' String (FQN, Map (TypeID, Int) (Set RType))
+buildRequirementTable tlts fqn stmts
+		= do	tlt	<- M.lookup fqn tlts ? ("Bug: no tlt found for "++show fqn++" while building typeReqTable")
+			return $ (\t -> (fqn, t)) $ M.unions $ map (M.fromList . requirementsIn tlt) stmts
 
 
 requirementsIn	:: TypeLookupTable -> Statement -> [((TypeID, Int), Set RType)]

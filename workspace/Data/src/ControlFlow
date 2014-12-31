@@ -1,10 +1,11 @@
-Misc
-----
+ControlFlow
+-----------
 Some miscallaneous, control flow functions, such as id, const, flip, if, ...
-----
+-----------
 
 import Data.Bool
 
+-- fixme stuff
 -- The identity function, returns it's argument
 > id 42		= 42
 ~ id: a => id a 	= a

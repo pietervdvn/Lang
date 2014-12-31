@@ -4,4 +4,4 @@ Stub, filled in by compiler.
 --------
 
 -- A int!
-data BIInt = Zero | Succ Int | Prev Int | Inf
+data BIInt = Zero | Succ BIInt | Prev BIInt | Inf

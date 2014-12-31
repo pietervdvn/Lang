@@ -15,7 +15,8 @@ import Languate.TypeTable.BuildTypeLookupTable
 import Languate.TypeTable.BuildTypeTable
 import Languate.TypeTable
 
-
+import Exceptions
+import Languate.Checks
 {--
 Dev code for semantic analysis.
 --}
@@ -30,7 +31,8 @@ tlts	= buildTLTs package
 preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
 boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"
 
-tt	= buildTypeTable tlts package
+
+t	= runExceptionsIO' $ buildTypeTable package
 
 pre	= fromJust $ lookup preludeFQN tlts
 bl	= fromJust $ lookup boolFQN tlts

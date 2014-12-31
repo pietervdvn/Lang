@@ -69,6 +69,10 @@ _resolveType' tlt k@(mods,t)
 		if S.null tps	then notFoundErr
 			else if S.size tps == 1	then S.findMin tps else ambigErr
 
+safeResolveType	:: TypeLookupTable -> ([Name], Name) -> Maybe [FQN]
+safeResolveType tlt k@(mods, t)
+	= M.lookup k tlt |> S.toList
+
 
 showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict
 
