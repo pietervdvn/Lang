@@ -58,8 +58,8 @@ s _ (Comms comms:DataT:PrivT:tail)
 		= let Data comms' _ name freetypes sums reqs = s "data" (Comms comms:DataT:tail) in
 			Data comms' Private name freetypes sums reqs
 s _ (Comms comms:DataT:Ident name:FreeTypes frees reqs:tail)
-		=  let Data comms' vis name' _ sums reqs = s "data" (Comms comms:DataT:Ident name:tail) in
-			Data comms' vis name' frees sums reqs
+		=  let Data comms' vis name' _ sums reqs' = s "data" (Comms comms:DataT:Ident name:tail) in
+			Data comms' vis name' frees sums (reqs ++ reqs')
 s _ [Comms comms, DataT, Ident name,EqualT, Prod sums reqs]
 		= Data comms Public name [] sums reqs
 s _ [ast]	= ast

@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes, setComment, setCommentIf) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes, setComment, setCommentIf, freesIn, trav) where
 
 {--
 This module implements utilities for type asts
@@ -36,6 +36,16 @@ traverse f (TupleType ts)
 		= TupleType $ map (traverse f) ts
 traverse f t	= f t
 
+trav		:: (Type -> a) -> ([a] -> a) -> Type -> a
+trav f aggr (Applied t tps)
+		= let 	h	= trav f aggr t
+			tail	= map (trav f aggr) tps in
+			aggr (h:tail)
+trav f aggr (Curry tps)
+		= aggr $ map (trav f aggr) tps
+trav f aggr (TupleType tps)
+		= aggr $ map (trav f aggr) tps
+trav f _ t	= f t
 
 instance Show Type where
 	show t	= case normalize t of
@@ -53,17 +63,23 @@ st (TupleType tps)
 		=  "(" ++ intercalate ", " (map st tps) ++")"
 st Infer	= "_"
 
+
+freesIn	:: Type -> [Name]
+freesIn	= trav _freesIn concat
+
+_freesIn		:: Type -> [Name]
+_freesIn (Free a)	= [a]
+_freesIn _		= []
+
 -- calculates which types are used in the type. This way we know what types are used and might be public
 usedTypes	:: Type -> [Name]
-usedTypes (Normal [] n)
+usedTypes	= trav _usedTypes concat
+
+
+_usedTypes	:: Type -> [Name]
+_usedTypes (Normal [] n)
 		= [n]
-usedTypes (Applied t ts)
-		= usedTypes t ++ concatMap usedTypes ts
-usedTypes (Curry ts)
-		= concatMap usedTypes ts
-usedTypes (TupleType ts)
-		= concatMap usedTypes ts
-usedTypes _	= []
+_usedTypes _	= []
 
 instance Show ADTDef where
 	show (ADTDef name frees reqs docstr sums)
@@ -74,8 +90,8 @@ showTypeReq (name, t)
 		=  "("++name++" in "++show t++")"
 
 instance Show ADTSum where
-	show (ADTSum nm v mc namedArgs )
-		= "ADTSum "++nm++" "++show v ++ " " ++ show mc++" "++ show namedArgs
+	show (ADTSum nm v maybeDocstr namedArgs )
+		= "ADTSum "++nm++" "++show v ++ " " ++ show maybeDocstr ++" "++ show namedArgs
 
 setVisibility	:: Visible -> ADTSum -> ADTSum
 setVisibility vis (ADTSum nm _ comm args)
