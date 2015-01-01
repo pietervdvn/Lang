@@ -28,8 +28,8 @@ _runExceptionsIO'	:: ([String], [String], Either String a) -> IO a
 _runExceptionsIO' (ws, es, eOrA)
 		= do	let lEs	= length es
 			let lWs	= length ws
-			when (lWs > 0) $ putStrLn $ concatMap (indent' "\nWarning: ") ws
-			when (lEs > 0) $ putStrLn $ concatMap (indent' "\nError: "  ) es
+			when (lWs > 0) $ putStrLn $ concatMap (indent' "\n\nWarning: ") ws
+			when (lEs > 0) $ putStrLn $ concatMap (indent' "\n\nError: "  ) es
 			let multi ls	= if (length ls == 0 || length ls >1) then "s" else ""
 			let cnt ls word	= show (length ls) ++" "++ word ++ multi ls
 			when (lWs + lEs > 0) $ putStrLn $ cnt ws "warning"++", "++cnt es "error"++"."
