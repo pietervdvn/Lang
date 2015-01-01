@@ -1,0 +1,60 @@
+module Languate.Graphs.PathFinder (searchPath, searchPaths) where
+
+{-
+Pathfinder algorithm.
+Thanks to @iasoon!
+-}
+
+import StdDef
+import Data.Maybe
+import Data.Map hiding (filter, null)
+import Data.Set (Set)
+import Data.Function (fix)
+import qualified Data.Set as S
+
+
+-- all paths from start to target. Shortest path first
+searchPaths :: (Eq n, Ord n) => Map n (Set n) -> n -> n -> [[n]]
+searchPaths links start target =
+        let foundPaths  = fix (expandPaths links (endsOn target)) [[start]] in
+        fmap reverse foundPaths
+
+
+searchPath	:: (Eq n, Ord n) => Map n (Set n) -> n -> n -> [[n]]
+searchPath links start target =
+	let	isValid		= endsOn target
+		foundPaths	= until (any isValid <||> null) (>>= expandPath links) [[start]] in
+		fmap reverse $ filter isValid foundPaths
+
+endsOn target	= (== target) . head
+
+
+expandPaths	:: (Eq n, Ord n) => Map n (Set n) -> ([n] -> Bool) -> ([[n]] -> [[n]]) -> [[n]] -> [[n]]
+expandPaths _ _ _ []	= []
+expandPaths links valid recur start
+		= let	expanded	= start >>= expandPath links in
+			filter valid expanded ++ recur expanded
+
+expandPath 	:: (Eq n, Ord n) => Map n (Set n) -> [n] -> [[n]]
+expandPath links path	=
+        let	foundLinks      =  getLinks (head path) links
+            	nonCyclicLinks  =  S.filter (not . (`elem` path)) foundLinks in
+        -- append node to path
+            	 fmap (:path) $ S.toList nonCyclicLinks
+
+getLinks 	:: (Eq n, Ord n) => n -> Map n (Set n) -> Set n
+getLinks	= findWithDefault S.empty
+
+(<||>) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
+(<||>) f g v = f v || g v
+
+test = fmap S.fromList $ fromList $ merge [
+						('A', 'B'),
+						('A', 'C'),
+						('A', 'E'),
+						('B', 'C'),
+						('B', 'D'),
+						('C', 'D'),
+						('D', 'E'),
+						('E', 'F')
+						]
