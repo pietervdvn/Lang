@@ -38,3 +38,19 @@ embed f	=  do	s	<- get
 
 runstate		:: State s r -> s -> (r,s)
 runstate (State f)	=  f
+
+-- executes the given state change, until the state is stable
+stabilize	:: (Eq s) => State s a -> State s [a]
+stabilize act	=  do	s	<- get
+			a	<- act
+			s'	<- get
+			if s == s' then	return [a]
+				else do	as	<- stabilize act
+					return (a:as)
+
+stabilize_	:: (Eq s) => State s a -> State s ()
+stabilize_ act	=  do	s	<- get
+			act
+			s'	<- get
+			if s == s' then return ()
+				else stabilize_ act
