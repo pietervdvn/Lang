@@ -48,13 +48,18 @@ getLinks	= findWithDefault S.empty
 (<||>) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
 (<||>) f g v = f v || g v
 
-test = fmap S.fromList $ fromList $ merge [
-						('A', 'B'),
-						('A', 'C'),
-						('A', 'E'),
-						('B', 'C'),
-						('B', 'D'),
-						('C', 'D'),
-						('D', 'E'),
-						('E', 'F')
-						]
+buildTest	= fmap S.fromList . fromList . merge
+
+test = buildTest [
+		('A', 'B'),
+		('A', 'C'),
+		('A', 'E'),
+		('B', 'C'),
+		('B', 'D'),
+		('C', 'D'),
+		('D', 'E'),
+		('E', 'F')
+		]
+
+test0 = buildTest [('A','B'),
+			('B','A')]

@@ -82,3 +82,6 @@ showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict
 sitem (k, possib)	= spth k ++ " --> {"++intercalate ", " (fmap shwFQN possib)  ++ "}"
 shwFQN (fqn, _)	= intercalate "." $ modulePath fqn
 spth (nms, nm)	= intercalate "." $ nms ++ [nm]
+
+showTypeID (fqn,nm)
+		= show fqn ++"."++show nm

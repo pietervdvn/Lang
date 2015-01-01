@@ -30,6 +30,8 @@ ital	= modif "_"
 bold	= modif "**"
 code	= modif "````"
 
+pars str	= "("++str++")"
+
 modif		:: String -> MarkDown -> MarkDown
 modif str md
 	| strip md == "" =	 ""
@@ -59,7 +61,7 @@ number i	= fromMaybe (show i) $ lookup i $ zip [0..]
 			["zero", "one", "two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
 
 plural	:: Int -> String -> String
-plural i str	= if i > 1 || i == 0 then show i++" " ++ pluralize str
+plural i str	= if i > 1 || i == 0 then number i ++" " ++ pluralize str
 			else "one "++ str
 
 
@@ -68,4 +70,5 @@ pluralize "mouse"	=  "mice"
 pluralize "woman"	=  "women"
 pluralize "man"		=  "men"
 pluralize "gender"	=  "queer"
+pluralize "was"		=  "were"
 pluralize str		=  str ++ "s"

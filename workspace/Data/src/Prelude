@@ -11,6 +11,10 @@ data B a	= B a
 -- Example A
 data A0	= A Dummy A0
 
+
+-- X
+data X (a:Dummy Dummy)	= X
+
 -- dummy
 data Dummy	= Dummy
 

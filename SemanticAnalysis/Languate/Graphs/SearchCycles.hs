@@ -1,4 +1,4 @@
-module Languate.Graphs.SearchCycles where
+module Languate.Graphs.SearchCycles (searchCycles, cleanCycles) where
 
 {--
 This module implements a cycle searcher. It works as a reference counting garbage collector
@@ -8,23 +8,27 @@ This module implements a cycle searcher. It works as a reference counting garbag
 import StdDef
 import State
 import Data.Map hiding (null, filter, map)
+import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
 import Prelude hiding (lookup)
 
+import Languate.Graphs.PathFinder
+
 
 -- Constructs all possible cycles
-cleanCycles	:: Map n (Set n) -> [[n]]
+cleanCycles	:: (Ord n, Eq n) => Map n (Set n) -> [[n]]
 cleanCycles dict
-	| null dict	= []
+	| M.null dict	= []
 	| otherwise	= let 	(start, _)	= findMax dict
-				cycles		= cleanCyclesFrom dict start
-				cycles ++ cleanCycles $ delete start dict
+				cycles		= cleanCyclesFrom dict start	in
+				cycles ++ cleanCycles (delete start dict)
 
-
-cleanCyclesFrom	:: n -> Map n (Set n) -> [n]
-cleanCyclesFrom n dict
-		=  if
+cleanCyclesFrom	:: (Ord n, Eq n) => Map n (Set n) -> n -> [[n]]
+cleanCyclesFrom dict n
+		= let   starts	= S.toList $ findWithDefault S.empty n dict
+			selfCycles	= if n `elem` starts then [n,n] else []	in
+			selfCycles : (starts >>= flip (searchPaths dict) n ) |> (n:)
 
 {-
 Calculates the cycles in a given import graph

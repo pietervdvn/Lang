@@ -50,7 +50,9 @@ kindOf _ frees (RFree a)
 kindOf klt frees (RApplied rt rts)
 		= do	bk	<- kindOf klt frees rt
 			appliedKnds	<- mapM (kindOf klt frees) rts
-			applyKind (bk, rt, length appliedKnds) bk (zip appliedKnds rts)
+			let msg	= "In the type application "++ pars (show rt) ++" "++ unwords (rts |> (pars . show))
+			inside msg $
+				applyKind (bk, rt, length appliedKnds) bk (zip appliedKnds rts)
 kindOf klt frees (RCurry tps)
 		= do	mapM_ (kindOf klt frees) tps	-- Recursively check kind applications, but throw result away
 			return Kind
@@ -61,8 +63,8 @@ applyKind	:: (Kind, RType, Int) -> Kind -> [(Kind,RType)] -> Exceptions' String 
 applyKind _ Kind []
 		= return Kind
 applyKind (origKind, rtype, provided) Kind args
-		= do	err $ show rtype++" is applied to too many type arguments.\n"++
-				show origKind++" takes only "++ plural (numberOfKindArgs origKind) "type argument" ++ ", but "++show provided++" were given."
+		= do	err $ "Type overapplication:\n"++
+				show rtype++":: "++show origKind++" takes only "++ plural (numberOfKindArgs origKind) "type argument" ++ ", but "++plural provided "was" ++" given."
 		 	return Kind
 applyKind ctx@(origKind, rtype, provided) (KindCurry k rest) ((arg,t):args)
 		= do	assert (sameStructure k arg) $
