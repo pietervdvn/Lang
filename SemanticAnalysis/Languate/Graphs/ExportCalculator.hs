@@ -1,4 +1,4 @@
-module Languate.ImportTable.ExportCalculator where
+module Languate.Graphs.ExportCalculator where
 
 {--
 This module implements calculateExports and calculateImports

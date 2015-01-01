@@ -4,6 +4,17 @@ Some type functions, to test the kind constructor
 -------
 
 -- a
-data A b c	= A
+data A a (b:A a b)	= A
 -- b
-data B (a:A String String)	= B a
+data B a	= B a
+
+-- Example A
+data A0	= A Dummy A0
+
+-- dummy
+data Dummy	= Dummy
+
+
+
+id	: (a:Eq) -> (a:c)
+a	= a

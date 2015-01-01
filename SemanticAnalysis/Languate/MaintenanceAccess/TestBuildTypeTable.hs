@@ -16,7 +16,6 @@ import Languate.TypeTable.BuildTypeTable
 import Languate.TypeTable
 
 import Exceptions
-import Languate.Checks
 {--
 Dev code for semantic analysis.
 --}

@@ -6,36 +6,41 @@ This means that some kinds can only be known the moment the entire kind table is
 
 --}
 import StdDef
+import Exceptions
 
 import Languate.KindChecker.KindConstraint
 import Languate.TAST
 import Languate.AST
 import Languate.FQN
 import Languate.TypeTable
-
 import Languate.World
-import Data.Map (mapWithKey, findWithDefault, Map)
 
+import Data.Map (mapWithKey, findWithDefault, Map)
+import Data.Maybe
 import Control.Monad.Reader
 import Control.Arrow
 
-import Data.Maybe
-
-import Debug.Trace
 
 
-buildKindConstraintTable	:: Map FQN TypeLookupTable -> World -> Map FQN [KindConstraint]
+
+buildKindConstraintTable	:: Map FQN TypeLookupTable -> World -> Map FQN [(KindConstraint, Coor)]
 buildKindConstraintTable tlts w
 	= 	let lookup' fqn	= findWithDefault (error $ "Bug: Type lookup table not found: (constructKindConstraints)"++show fqn) fqn	in
 		mapWithKey (\fqn -> kindConstraints (lookup' fqn tlts) fqn) $ modules w
 
-kindConstraints	::  TypeLookupTable -> FQN -> Module -> [KindConstraint]
+kindConstraints	::  TypeLookupTable -> FQN -> Module -> [(KindConstraint, Coor)]
 kindConstraints tlt fqn modul
-		= concat $ runReader (mapM kindConstraintIn (statements modul)) (Info fqn tlt)
+		= concat $ runReader (mapM kindConstraintIn' (statements' modul)) (Info fqn tlt)
 
 
 data Info	= Info {fqn :: FQN, tlt :: TypeLookupTable}
 type RI a	= Reader Info a
+
+
+kindConstraintIn'	:: (Statement, Coor) -> RI [(KindConstraint, Coor)]
+kindConstraintIn' (stm, coor)
+			= do	constrs	<- kindConstraintIn stm
+				return $ zip constrs $ repeat coor
 
 -- Kind of declares what relations of kinds between types exists. E.g. "Functor" has kind "a ~> b", "Maybe" has the same kind as "Functor" etc...
 kindConstraintIn	:: Statement -> RI [KindConstraint]
@@ -74,7 +79,7 @@ subtypeConstraints base frees superClasses
 -- Constructs a basic 'has kind' relation, for the given (declared) name with it frees
 baseTypeConstr	:: Name -> [Name] -> [TypeRequirement] -> RI [KindConstraint]
 baseTypeConstr name frees reqs
-		= do	base	<- resolve' name
+		= do	base	<- _resolve' name
 			(curry, constr)	<- buildCurry frees reqs
 			return $ HasKind base curry : constr
 
@@ -97,9 +102,13 @@ buildCurry' (n:nms) reqs
 
 
 -- util methods
-resolve'	:: Name -> RI RType
-resolve' name	=  do	lt 	<- asks tlt
-			return $ resolveType' lt ([], name)
+_resolve'	:: Name -> RI (FQN, Name)
+_resolve' name	=  do	lt 	<- asks tlt
+			return (_resolveType' lt ([], name), name)
+
+
+resolve' name	= do	(fqn, nm)	<- _resolve' name
+			return $ RNormal fqn nm
 
 resolve		:: Type -> RI RType
 resolve t	=  do	lt	<- asks tlt

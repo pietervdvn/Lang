@@ -77,28 +77,6 @@ safeResolveType tlt k@(mods, t)
 	= M.lookup k tlt |> S.toList
 
 
--- simple kind application. kindOf Functor = "* ~> *", kindOf (Functor a) = "*". No recursive checks: e.g. kindOf Functor (Monad) = "*", the fact that monad is not applied enough does not matter
-kindOf		:: KindLookupTable -> RType -> Maybe Kind
-kindOf klt (RNormal fqn nm)
-		=  M.lookup (fqn, nm) klt
-kindOf klt applied@(RApplied rtype rts)
-		= do	baseKind	<- kindOf klt rtype
-			simpleKindApply applied baseKind
-kindOf _ _	= Just Kind
-
-
-
-simpleKindApply	:: RType -> Kind -> Maybe Kind
-simpleKindApply (RApplied rtype []) kind
-		= Just kind
-simpleKindApply (RApplied _ _) Kind
-		= Nothing	-- over application
-simpleKindApply (RApplied rtype (rt:rts)) (KindCurry _ rest)
-		= simpleKindApply (RApplied rtype rts) rest
-simpleKindApply _ _
-		= Nothing
-
-
 showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict
 
 sitem (k, possib)	= spth k ++ " --> {"++intercalate ", " (fmap shwFQN possib)  ++ "}"

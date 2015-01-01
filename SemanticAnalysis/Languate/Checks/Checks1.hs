@@ -4,12 +4,9 @@ module Languate.Checks.Checks1 where
 
 This module implements lots of usefull checks.
 
-These checks both need the TLookupT, the TRequirementT and the subtype relationships
+These checks which only need the KLT, e.g. over application checks, invalid kind application checks,...
+
 
 --}
 
 import Data.Set
-
-
-implicitReqs	:: TypeReqTable -> [(Name, Int)] -> RType -> Set RType
-implicitReqs	= todo

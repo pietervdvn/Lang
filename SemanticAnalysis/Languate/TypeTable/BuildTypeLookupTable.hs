@@ -22,7 +22,7 @@ import StdDef
 import Languate.World
 import Languate.FQN
 import Languate.TypeTable
-import Languate.ImportTable.ExportCalculator
+import Languate.Graphs.ExportCalculator
 
 import Debug.Trace
 

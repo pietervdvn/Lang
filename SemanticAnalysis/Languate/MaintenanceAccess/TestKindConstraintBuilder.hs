@@ -7,6 +7,7 @@ This module implements code which loads the workspace and tries to calculate the
 --}
 
 import qualified Bnf
+import Exceptions
 import Languate.World
 import Languate.FQN
 import System.IO.Unsafe
@@ -37,7 +38,7 @@ t	= do	package <- packageIO
 		let kctable		= buildKindConstraintTable tlts package
 		print kctable
 		putStrLn "\n\n---\n\n"
-		return $ solve kctable
+		runExceptionsIO' $ solve kctable
 
 boolFQN	= toFQN' "pietervdvn:Data:Data.Bool"
 colFQN	= toFQN' "pietervdvn:Data:Collection.Collection"

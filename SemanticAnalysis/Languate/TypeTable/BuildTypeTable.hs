@@ -34,7 +34,7 @@ import Languate.World
 import Languate.TypeTable
 import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable.BuildTypeLookupTable
-import Languate.Checks
+import Languate.Checks.Checks0
 
 import Data.Map
 import Data.Map as M
@@ -42,6 +42,6 @@ import Data.Map as M
 buildTypeTable	:: World -> Exceptions' String (Map FQN TypeLookupTable, TypeTable)
 buildTypeTable w
 		= do	let tlts	=  buildTLTs w
-			validateWorld tlts w
+			validateWorld0 tlts w
 			typeReqs	<- buildRequirementTables tlts w |> M.elems |> M.unions
 			return $ ( tlts , TypeTable (todos "Kinds") typeReqs (todos "supertypes") (todos "instConstr") )
