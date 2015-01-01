@@ -41,6 +41,8 @@ numberOfArgs' _	= Nothing
 dependsOn	:: UnresolvedKind -> [(FQN, Name)]
 dependsOn (SameAs rt)
 		= dependsOn' rt
+dependsOn (UKindCurry a b)
+		= dependsOn a ++ dependsOn b
 dependsOn _	= []
 
 dependsOn'	:: RType -> [(FQN, Name)]
@@ -52,3 +54,5 @@ dependsOn' (RCurry rs)
 		= concatMap dependsOn' rs
 dependsOn' (RTuple rs)
 		= concatMap dependsOn' rs
+dependsOn' (RFree _)
+		= []

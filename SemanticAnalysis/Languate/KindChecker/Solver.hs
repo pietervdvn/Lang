@@ -9,11 +9,17 @@ Kind constraints come in, kinds for types come out!
 import StdDef
 import State
 import Exceptions
+
+import Data.Char
 import Data.Maybe
-import Data.Map (Map, elems, empty, lookup, insert)
+import Data.Set (Set)
+import qualified Data.Set as S
+import Data.Map (Map, elems, empty, lookup, insert, fromList)
 import Prelude hiding (lookup, iterate)
 import Control.Monad
 import Control.Arrow
+
+import Languate.Graphs.SearchCycles
 
 import Languate.FQN
 import Languate.AST (Coor)
@@ -22,7 +28,6 @@ import Languate.KindChecker.KindConstraint
 import Languate.KindChecker.KindChecks
 import Languate.Checks.CheckUtils
 import Languate.TypeTable
-import Data.Char
 
 
 {-
@@ -47,7 +52,8 @@ solveAll	:: [SimpleConstraint'] -> Exceptions' String KindLookupTable
 solveAll constraints
 		= do	let (failed, klt) = runstate (solveAll' constraints) empty
 			warn $ "Following constraints were not resolved: "++show failed	-- TODO remove warning when debug fase is done
-			searchCycles
+			let cycles	= cyclesIn $ map fst failed
+			err $ "Cycles found: "++show cycles
 			-- mapM_ (validateConstraint klt) failed
 			return klt
 
@@ -133,3 +139,12 @@ buildFreeTable klt (SameAs rtype)
 		= do	kindOf klt
 
 -}
+
+
+cyclesIn	:: [SimpleConstraint] -> Map (FQN, Name) (Set (FQN, Name))
+cyclesIn	=  searchCycles . fromList . map buildDeps
+
+
+buildDeps	:: SimpleConstraint -> ((FQN, Name), (Set (FQN, Name)))
+buildDeps (id, uk)
+		= (id, S.fromList $ dependsOn uk)

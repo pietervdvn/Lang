@@ -12,6 +12,20 @@ import Data.Set (Set)
 import qualified Data.Set as S
 import Prelude hiding (lookup)
 
+
+-- Constructs all possible cycles
+cleanCycles	:: Map n (Set n) -> [[n]]
+cleanCycles dict
+	| null dict	= []
+	| otherwise	= let 	(start, _)	= findMax dict
+				cycles		= cleanCyclesFrom dict start
+				cycles ++ cleanCycles $ delete start dict
+
+
+cleanCyclesFrom	:: n -> Map n (Set n) -> [n]
+cleanCyclesFrom n dict
+		=  if
+
 {-
 Calculates the cycles in a given import graph
 Args:
