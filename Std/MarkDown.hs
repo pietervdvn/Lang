@@ -5,6 +5,8 @@ module MarkDown where
 import Data.List
 import StdDef
 
+import Data.Maybe
+
 type MarkDown	= String
 
 
@@ -45,3 +47,25 @@ recode []	= []
 recode ('\'':'\'':str)
 		= "````"++recode str
 recode (a:str)	= a:recode str
+
+count	:: Int -> String
+count i	= fromMaybe (show i ++"th") $ lookup i $ zip [0..]
+		["zeroth","first","second","third","fourth","fifth",
+		"sixth","seventh"]
+
+number	:: Int -> String
+number 42	= "42 (the answer to life, the universe and everything)"	-- obligatory
+number i	= fromMaybe (show i) $ lookup i $ zip [0..]
+			["zero", "one", "two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+
+plural	:: Int -> String -> String
+plural i str	= if i > 1 || i == 0 then show i++" " ++ pluralize str
+			else "one "++ str
+
+
+pluralize	:: String -> String
+pluralize "mouse"	=  "mice"
+pluralize "woman"	=  "women"
+pluralize "man"		=  "men"
+pluralize "gender"	=  "queer"
+pluralize str		=  str ++ "s"
