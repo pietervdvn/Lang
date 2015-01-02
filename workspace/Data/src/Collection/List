@@ -4,10 +4,10 @@ A simple list class implementation
 ----
 
 import Collection.Collection
+import Collection.Maybe
 import Category.Monoid
 import Category.Mappable
 
-import Data.Maybe
 -- The class which defines a list
 cat List a in Collection a
 	-- Returns the first element of the list. The element returned is of the type 'a', but might be a subclass of element 'a' too.

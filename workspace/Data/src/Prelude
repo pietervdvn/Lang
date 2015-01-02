@@ -15,7 +15,7 @@ public import Category.Mappable
 public import Type.Function
 
 public import Collection.Collection
-public import Collections.Maybe
+public import Collection.Maybe
 public import Collection.List
 public import Collection.Dict
 
