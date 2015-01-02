@@ -28,6 +28,9 @@ type SimpleConstraint'	= (SimpleConstraint, Coor)
 isHasKind (HasKind _ _)	= True
 isHasKind _		= False
 
+getHasKind (HasKind id uk)	= Just (id, uk)
+getHasKind _		= Nothing
+
 haveSameKinds (HaveSameKind r1 r2)	= Just (r1, r2)
 haveSameKinds _	= Nothing
 

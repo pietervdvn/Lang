@@ -39,11 +39,10 @@ Type requirements are all given withing the constraints. This means we have free
 
 -}
 
-solve		:: Map FQN [(KindConstraint, Coor)] -> Exceptions' String KindLookupTable
+solve		:: Map FQN [(KindConstraint, (Coor, FQN))] -> Exceptions' String KindLookupTable
 solve dict	=  do	let allConstr	= concat $ elems dict
-			let constrs	= filter (isHasKind .fst) allConstr
 			klt <- stack' ("While building the kind table:\n"++) $
-					solveAll $ map (first $ \(HasKind id uk) -> (id,uk)) constrs
+					solveAll $ mapMaybe (unpackMaybeTuple . (getHasKind *** fst)) allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
 			-- TODO fix frees! issue #57

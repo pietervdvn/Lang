@@ -23,24 +23,25 @@ import Control.Arrow
 
 
 
-buildKindConstraintTable	:: Map FQN TypeLookupTable -> World -> Map FQN [(KindConstraint, Coor)]
+buildKindConstraintTable	:: Map FQN TypeLookupTable -> World -> Map FQN [(KindConstraint, (Coor, FQN))]
 buildKindConstraintTable tlts w
 	= 	let lookup' fqn	= findWithDefault (error $ "Bug: Type lookup table not found: (constructKindConstraints)"++show fqn) fqn	in
 		mapWithKey (\fqn -> kindConstraints (lookup' fqn tlts) fqn) $ modules w
 
-kindConstraints	::  TypeLookupTable -> FQN -> Module -> [(KindConstraint, Coor)]
+kindConstraints	::  TypeLookupTable -> FQN -> Module -> [(KindConstraint, (Coor, FQN))]
 kindConstraints tlt fqn modul
-		= concat $ runReader (mapM kindConstraintIn' (statements' modul)) (Info fqn tlt)
+		= concat $ runReader (mapM kindConstraintIn' $ statements' modul) (Info fqn tlt)
 
 
 data Info	= Info {fqn :: FQN, tlt :: TypeLookupTable}
 type RI a	= Reader Info a
 
 
-kindConstraintIn'	:: (Statement, Coor) -> RI [(KindConstraint, Coor)]
+kindConstraintIn'	:: (Statement, Coor) -> RI [(KindConstraint, (Coor, FQN))]
 kindConstraintIn' (stm, coor)
 			= do	constrs	<- kindConstraintIn stm
-				return $ zip constrs $ repeat coor
+				(Info fqn _)	<- ask
+				return $ zip constrs $ repeat (coor, fqn)
 
 -- Kind of declares what relations of kinds between types exists. E.g. "Functor" has kind "a ~> b", "Maybe" has the same kind as "Functor" etc...
 kindConstraintIn	:: Statement -> RI [KindConstraint]

@@ -25,9 +25,9 @@ import Languate.Graphs.SearchCycles
 
 
 {-Validates wether the 'HaveSameKind'-constraints are met-}
-validateSameKindConstraints	:: KindLookupTable -> Map Name Kind -> ((RType, RType), Coor) -> Check
-validateSameKindConstraints klt frees ((rt0, rt1), coor)
-			= onLine coor $ inside "Kind constraint error" $
+validateSameKindConstraints	:: KindLookupTable -> Map Name Kind -> ((RType, RType), (Coor, FQN)) -> Check
+validateSameKindConstraints klt frees ((rt0, rt1), (coor, fqn))
+			= inFile fqn $ onLine coor $ inside "Kind constraint error" $
 			  do	k0	<- kindOf klt frees rt0
 				k1	<- kindOf klt frees rt1
 				let s t k	= show t ++ " :: \t"++show k
