@@ -46,6 +46,7 @@ solve dict	=  do	let allConstr	= concat $ elems dict
 					solveAll $ map (first $ \(HasKind id uk) -> (id,uk)) constrs
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
+			-- TODO fix frees! issue #57
 			mapM_ (validateSameKindConstraints klt empty) sameKinds
 			return klt
 

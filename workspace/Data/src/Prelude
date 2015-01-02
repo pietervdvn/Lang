@@ -1,26 +1,22 @@
 Prelude
 ---
-Some type functions, to test the kind constructor
+Contains a lot of usefull functions, types, classes.
+Each program imports these by default
 -------
 
--- b
-data B a	= B a
+public import Data.Bool
 
+public import ControlFlow
 
--- C
-data C (a:Eq,B)	= C
+public import Category.Eq
+public import Category.Monoid
+public import Category.Mappable
 
--- Example A
-data A0	= A Dummy A0
+public import Type.Function
 
+public import Collection.Collection
+public import Collections.Maybe
+public import Collection.List
+public import Collection.Dict
 
--- dummy
-data Dummy	= Dummy
--- Eq
-data Eq		= Eq
--- Ord
-data Ord	= Ord
-
-
-id	: (a:Eq) -> (a:c)
-a	= a
+public import Num.Nat
