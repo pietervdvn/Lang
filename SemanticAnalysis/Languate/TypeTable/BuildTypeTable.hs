@@ -34,6 +34,7 @@ import Languate.World
 import Languate.TypeTable
 import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable.BuildTypeLookupTable
+import Languate.KindChecker.BuildKindTable
 import Languate.Checks.Checks0
 
 import Data.Map
@@ -44,4 +45,5 @@ buildTypeTable w
 		= do	let tlts	=  buildTLTs w
 			validateWorld0 tlts w
 			typeReqs	<- buildRequirementTables tlts w |> M.elems |> M.unions
-			return $ ( tlts , TypeTable (todos "Kinds") typeReqs (todos "supertypes") (todos "instConstr") )
+			klt		<- buildKindTable w tlts
+			return $ ( tlts , TypeTable klt typeReqs (todos "supertypes") (todos "instConstr") )

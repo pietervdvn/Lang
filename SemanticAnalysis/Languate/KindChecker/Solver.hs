@@ -15,12 +15,10 @@ import Data.Maybe
 import Data.Set (Set)
 import Data.List (intercalate)
 import qualified Data.Set as S
-import Data.Map (Map, elems, empty, lookup, insert, fromList, keys)
+import Data.Map (Map, elems, empty, lookup, insert, fromList, keys, empty)
 import Prelude hiding (lookup, iterate)
 import Control.Monad
 import Control.Arrow
-
-import Languate.Graphs.SearchCycles
 
 import Languate.FQN
 import Languate.AST (Coor)
@@ -41,18 +39,20 @@ Type requirements are all given withing the constraints. This means we have free
 
 -}
 
-type SimpleConstraint	= ((FQN, Name), UnresolvedKind)
-type SimpleConstraint'	= (SimpleConstraint, Coor)
-
 solve		:: Map FQN [(KindConstraint, Coor)] -> Exceptions' String KindLookupTable
-solve dict	=  let constrs	= filter (isHasKind .fst) $ concat $ elems dict	in
-			stack' ("While building the kind table:\n"++) $
-				solveAll $ map (first $ \(HasKind id uk) -> (id,uk)) constrs
+solve dict	=  do	let allConstr	= concat $ elems dict
+			let constrs	= filter (isHasKind .fst) allConstr
+			klt <- stack' ("While building the kind table:\n"++) $
+					solveAll $ map (first $ \(HasKind id uk) -> (id,uk)) constrs
+			let sameKindConstraints	= map (first haveSameKinds) allConstr
+			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
+			mapM_ (validateSameKindConstraints klt empty) sameKinds
+			return klt
+
 
 solveAll	:: [SimpleConstraint'] -> Exceptions' String KindLookupTable
 solveAll constraints
 		= do	let (failed, klt) = runstate (solveAll' constraints) empty
-			warn $ "Following constraints were not resolved: "++show failed	-- TODO remove warning when debug fase is done
 			let cycles	= cyclesIn $ map fst failed
 			reportCycles cycles
 			mapM_ (reportOverApplication klt) $ filterCycles (keys cycles) failed
@@ -114,47 +114,3 @@ simpleKindApply (RApplied rtype (rt:rts)) (KindCurry _ rest)
 		= simpleKindApply (RApplied rtype rts) rest
 simpleKindApply _ _
 		= Nothing
-
-
-
--- REPORT CODE
-
-
-
-reportOverApplication	:: KindLookupTable -> SimpleConstraint' -> Check
-reportOverApplication klt (((fqn, nm), uk), coor)
-		= inFile fqn $ onLine coor $ checkUKOverApp klt uk
-
-checkUKOverApp	:: KindLookupTable -> UnresolvedKind -> Check
-checkUKOverApp _ UKind	= pass
-checkUKOverApp klt (UKindCurry k1 k2)
-			= checkUKOverApp klt k1 >> checkUKOverApp klt k2
-checkUKOverApp klt (SameAs rtype)
-			= do	kindOf klt empty rtype
-				return ()
-
-
-
-reportCycles	:: Map (FQN, Name) (Set (FQN, Name)) -> Check
-reportCycles graph
-		= let	cycles	= cleanCycles graph in
-			mapM_ reportCycle cycles
-
-filterCycles	:: [(FQN, Name)] -> [SimpleConstraint'] -> [SimpleConstraint']
-filterCycles inCycle
-		= filter (\((id,_),_) -> id `notElem` inCycle)
-
-reportCycle	:: [(FQN, Name)] -> Check
-reportCycle [a,_]
-		= err $ "Could not construct the infinite type "++showTypeID a++". Please remove the dependency (in the type requirements) on itself."
-reportCycle (typ:path)
-		= err $ indent' ("Could not construct the kind for "++ showTypeID typ ++", as this type has a cyclic dependency") $
-				intercalate " -> " $ map showTypeID path
-
-cyclesIn	:: [SimpleConstraint] -> Map (FQN, Name) (Set (FQN, Name))
-cyclesIn	=  searchCycles . fromList . map buildDeps
-
-
-buildDeps	:: SimpleConstraint -> ((FQN, Name), (Set (FQN, Name)))
-buildDeps (id, uk)
-		= (id, S.fromList $ dependsOn uk)

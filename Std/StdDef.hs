@@ -34,6 +34,12 @@ last'		:: a -> [a] -> a
 last' defaul []	=  defaul
 last' _ ls	=  last ls
 
+unpackMaybeTuple
+		:: (Maybe a, b) -> Maybe (a,b)
+unpackMaybeTuple (ma,b)
+		= do	a	<- ma
+			return (a,b)
+
 
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []

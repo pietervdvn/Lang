@@ -5,6 +5,7 @@ Implementation of kind constraint and related functions
 
 
 import StdDef
+import Languate.AST (Coor)
 import Languate.TAST
 import Languate.FQN
 
@@ -21,9 +22,14 @@ data KindConstraint	= HaveSameKind RType RType	-- used for e.g. subtypes. ''' su
 			| HasKind (FQN, Name) UnresolvedKind
 	deriving (Show, Eq)
 
+type SimpleConstraint	= ((FQN, Name), UnresolvedKind)
+type SimpleConstraint'	= (SimpleConstraint, Coor)
+
 isHasKind (HasKind _ _)	= True
 isHasKind _		= False
 
+haveSameKinds (HaveSameKind r1 r2)	= Just (r1, r2)
+haveSameKinds _	= Nothing
 
 numberOfArgs	:: UnresolvedKind -> Maybe Int
 numberOfArgs UKind	= Just 0

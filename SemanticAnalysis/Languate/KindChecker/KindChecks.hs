@@ -9,13 +9,72 @@ import MarkDown
 import Exceptions
 import Languate.Checks.CheckUtils
 
-import Data.Map
+import Data.Map hiding (map, filter)
 import Prelude hiding (lookup)
+import Data.Set (Set)
+import qualified Data.Set as S
+import Data.List (intercalate)
 
 import Languate.AST
 import Languate.TAST
 import Languate.TypeTable
+import Languate.FQN
+import Languate.KindChecker.KindConstraint
 
+import Languate.Graphs.SearchCycles
+
+
+{-Validates wether the 'HaveSameKind'-constraints are met-}
+validateSameKindConstraints	:: KindLookupTable -> Map Name Kind -> ((RType, RType), Coor) -> Check
+validateSameKindConstraints klt frees ((rt0, rt1), coor)
+			= onLine coor $ inside "Kind constraint error" $
+			  do	k0	<- kindOf klt frees rt0
+				k1	<- kindOf klt frees rt1
+				let s t k	= show t ++ " :: \t"++show k
+				assert (k0 == k1) $ "Types which are used to denominate a free should have the same kind. Found types:\n" ++
+					s rt0 k0 ++"\n"++s rt1 k1
+
+
+{-Code to report cycles-}
+reportCycles	:: Map (FQN, Name) (Set (FQN, Name)) -> Check
+reportCycles graph
+		= let	cycles	= cleanCycles graph in
+			mapM_ reportCycle cycles
+
+filterCycles	:: [(FQN, Name)] -> [SimpleConstraint'] -> [SimpleConstraint']
+filterCycles inCycle
+		= filter (\((id,_),_) -> id `notElem` inCycle)
+
+reportCycle	:: [(FQN, Name)] -> Check
+reportCycle [a,_]
+		= err $ "Could not construct the infinite type "++showTypeID a++". Please remove the dependency (in the type requirements) on itself."
+reportCycle (typ:path)
+		= err $ indent' ("Could not construct the kind for "++ showTypeID typ ++", as this type has a cyclic dependency") $
+				intercalate " -> " $ map showTypeID path
+
+cyclesIn	:: [SimpleConstraint] -> Map (FQN, Name) (Set (FQN, Name))
+cyclesIn	=  searchCycles . fromList . map buildDeps
+
+
+buildDeps	:: SimpleConstraint -> ((FQN, Name), (Set (FQN, Name)))
+buildDeps (id, uk)
+		= (id, S.fromList $ dependsOn uk)
+
+
+
+{-Over application checks -}
+
+reportOverApplication	:: KindLookupTable -> SimpleConstraint' -> Check
+reportOverApplication klt (((fqn, nm), uk), coor)
+		= inFile fqn $ onLine coor $ checkUKOverApp klt uk
+
+checkUKOverApp	:: KindLookupTable -> UnresolvedKind -> Check
+checkUKOverApp _ UKind	= pass
+checkUKOverApp klt (UKindCurry k1 k2)
+			= checkUKOverApp klt k1 >> checkUKOverApp klt k2
+checkUKOverApp klt (SameAs rtype)
+			= do	kindOf klt empty rtype
+				return ()
 
 
 {- Checks types are correctly applied. E.g. ''Functor Int Int'' does not make sense, just as Functor -> Monad.
