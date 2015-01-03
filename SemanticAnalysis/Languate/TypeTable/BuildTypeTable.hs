@@ -36,6 +36,7 @@ import Languate.TypeTable.BuildTypeLookupTable
 import Languate.KindChecker.BuildKindTable
 import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable.BuildDocstringTable
+import Languate.TypeTable.BuildFreeNameTable
 import Languate.Checks.Checks0
 import Languate.Checks.CheckUtils
 
@@ -49,4 +50,5 @@ buildTypeTable w tlts
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w
-			return $ TypeTable klt typeReqs (todos "supertypes") (todos "instConstr") docstrings
+			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
+			return $ TypeTable klt typeReqs (todos "supertypes") (todos "instConstr") docstrings freeNames

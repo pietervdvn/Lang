@@ -42,7 +42,8 @@ data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
 				In TypeTable and not in instanceConstr: not a class def!
 				-}
 				, instConstr	:: Map TypeID (ClassDef, Kind)
-				, docstrings	:: Map TypeID String}
+				, docstrings	:: Map TypeID String
+				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
 
 -- basically the same as the aliastable, but with types.
