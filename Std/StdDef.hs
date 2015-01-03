@@ -96,6 +96,9 @@ rstrip	= reverse . lstrip . reverse
 
 strip	= lstrip . rstrip
 
+stripnl('\n':str)	= stripnl str
+stripnl s	= s
+
 (|>)	:: (Functor f)	=> f a -> (a -> b) -> f b
 (|>)	= flip fmap
 

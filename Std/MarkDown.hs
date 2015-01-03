@@ -32,7 +32,7 @@ code	= modif "````"
 
 firstLine	:: MarkDown -> MarkDown
 firstLine str
-	= case lines str of
+	= case lines $ stripnl str of
 		(s:_)	-> s
 		_	-> ""
 
