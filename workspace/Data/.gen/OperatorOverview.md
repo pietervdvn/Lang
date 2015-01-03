@@ -1,4 +1,4 @@
-### Operator overview
+# Operator overview
 
 # Precedences overview
 
@@ -27,5 +27,7 @@ Operator | Precedence | Associativity
 
 
 
-> This page was automatically generated on 2015-01-03 17:44:30
+> This page was automatically generated on 
+> 
+> 2015-01-03 18:08:07
 > Do not edit it, as re-generation will overwrite your changes.

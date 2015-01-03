@@ -29,7 +29,7 @@ saveTo fp md	=  do	txt	<- md
 footer	:: IO MarkDown
 footer	= do	time	<- getCurrentTime
 		let date	= fst $ break (=='.') $ show time
-		let p =  ["This page was automatically generated on "++date
+		let p =  [parag "This page was automatically generated on "++date
 			, "Do not edit it, as re-generation will overwrite your changes."
 			]
 		return $ qoute $ unlines p
