@@ -1,4 +1,4 @@
-module Languate.Precedence.PrecTable2MD where
+smodule Languate.Precedence.PrecTable2MD where
 
 {--
 This module implements the conversion from a precedence table into a markdown,. This document contains an overview for the precedence classes.
@@ -38,4 +38,4 @@ sOp	:: Name -> String
 sOp op	=  "``"++op++"``"
 
 explanation
-	= "The higher the operator stand in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated\n\nTo test precedence, invoke ````--p <expression>```` in the interpreter, which converts expression to prefix notation.\n\n"
+	= "The higher the operator stands in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated\n\nTo test precedence, invoke ````--p <expression>```` in the interpreter, which converts expression to prefix notation.\n\n"
