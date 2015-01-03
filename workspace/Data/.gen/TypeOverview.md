@@ -28,7 +28,7 @@ Flip | pietervdvn:Data:Type.Function | (* ~> (* ~> (* ~> *))) | **TODO**  |
 
 
 
-> This page was automatically generated on 2015-01-03 19:20:34
+> This page was automatically generated on 2015-01-03 19:21:34
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.
