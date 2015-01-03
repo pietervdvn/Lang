@@ -30,6 +30,12 @@ ital	= modif "_"
 bold	= modif "**"
 code	= modif "````"
 
+firstLine	:: MarkDown -> MarkDown
+firstLine str
+	= case lines str of
+		(s:_)	-> s
+		_	-> ""
+
 qoute msg	= "> " ++ intercalate "\n> " (lines msg)
 
 pars str	= "("++str++")"

@@ -5,11 +5,7 @@ Type | Declared in | Kind | Requirements | Docstring
 BIInt | pietervdvn:Data:Builtins | * | **TODO**  | A int!
 Eq | pietervdvn:Data:Category.Eq | * | **TODO**  | When a type is instance of ''Eq'' it means data of this type can be compared for equivalence.
 Associative | pietervdvn:Data:Category.Function | (* ~> *) | **TODO**  | 
-An associative function is a function for which you can swap the arguments, and get the same function.
-
 Commutative | pietervdvn:Data:Category.Function | (* ~> *) | **TODO**  | 
-A commutative function
-
 Mappable | pietervdvn:Data:Category.Mappable | (* ~> *) | **TODO**  | A functor is a container which has a 'map'-function
 Monoid | pietervdvn:Data:Category.Monoid | * | **TODO**  | A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
 Product | pietervdvn:Data:Category.Monoid | * | **TODO**  | Product is an instance of monoid, with (+) defined as append
@@ -32,7 +28,7 @@ Flip | pietervdvn:Data:Type.Function | (* ~> (* ~> (* ~> *))) | **TODO**  |
 
 
 
-> This page was automatically generated on 2015-01-03 19:16:08
+> This page was automatically generated on 2015-01-03 19:20:34
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.

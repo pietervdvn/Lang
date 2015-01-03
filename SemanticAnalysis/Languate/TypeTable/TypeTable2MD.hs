@@ -19,5 +19,5 @@ typeRow	tt (fqn, name)
 			, show fqn
 			, maybe (bold "ERROR: no kind found") show $ getMaybe kinds
 			, bold "TODO"
-			, maybe "" id $ getMaybe docstrings
+			, maybe "" firstLine $ getMaybe docstrings
 			]
