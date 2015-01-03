@@ -13,10 +13,11 @@ typeTable2md	:: TypeTable -> MarkDown
 typeTable2md tt	= (table ["Type","Declared in","Kind","Requirements","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)
 
 typeRow		:: TypeTable -> TypeID -> [MarkDown]
-typeRow	tt id@(fqn, name)
-		=  	[ name
+typeRow	tt (fqn, name)
+		=  let getMaybe table	= lookup (fqn, name) $ table tt in
+			[ name
 			, show fqn
-			, maybe (bold "ERROR: no kind found") show $ lookup id $ kinds tt
+			, maybe (bold "ERROR: no kind found") show $ getMaybe kinds
 			, bold "TODO"
-			, bold "TODO"
+			, maybe (ital "No docstring found") (\a->a) $ getMaybe docstrings
 			]

@@ -41,7 +41,8 @@ data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
 				Tells what functions should be implemented to be an instance of given superclass
 				In TypeTable and not in instanceConstr: not a class def!
 				-}
-				, instConstr	:: Map TypeID (ClassDef, Kind)}
+				, instConstr	:: Map TypeID (ClassDef, Kind)
+				, docstrings	:: Map TypeID String}
 	deriving (Show, Ord, Eq)
 
 -- basically the same as the aliastable, but with types.

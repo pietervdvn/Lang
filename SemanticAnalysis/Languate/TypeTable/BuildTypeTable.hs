@@ -35,6 +35,7 @@ import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
 import Languate.KindChecker.BuildKindTable
 import Languate.TypeTable.BuildRequirementTable
+import Languate.TypeTable.BuildDocstringTable
 import Languate.Checks.Checks0
 import Languate.Checks.CheckUtils
 
@@ -47,4 +48,5 @@ buildTypeTable w tlts
 		   do	inside "Checks0" $ validateWorld0 tlts w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts
-			return $ TypeTable klt typeReqs (todos "supertypes") (todos "instConstr")
+			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w
+			return $ TypeTable klt typeReqs (todos "supertypes") (todos "instConstr") docstrings
