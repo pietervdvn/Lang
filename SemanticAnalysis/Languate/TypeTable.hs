@@ -77,6 +77,11 @@ resolveType tlt e@(Curry tps)
 		= _construct tlt e tps RCurry
 resolveType tlt e@(TupleType tps)
 		= _construct tlt e tps RTuple
+resolveType _ Infer
+		= halt "Unresolved infer"
+
+resolveTypes tlt
+		= mapM (resolveType tlt)
 
 _construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
 _construct tlt e tps cons

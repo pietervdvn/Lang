@@ -19,6 +19,8 @@ import Languate.World
 
 import Control.Arrow
 
+import Languate.Checks.CheckUtils
+
 
 
 type RequirementTable	= Map (TypeID, Int) (Set RType)
@@ -32,39 +34,46 @@ Type requirements should be explicit in type declarations.
 Mentally keeping track of where each requirement comes from is not user-friendly.
 -}
 
-buildRequirementTables	:: Map FQN TypeLookupTable -> World -> Exceptions' String (Map FQN RequirementTable)
+buildRequirementTables	:: Map FQN TypeLookupTable -> World -> Exc (Map FQN RequirementTable)
 buildRequirementTables tlts w
 			= do	tables <- mapM (\(fqn, mod) -> buildRequirementTable tlts fqn (statements mod)) $ M.toList $ modules w
 				return $ M.fromList tables
 
 -- Builds the requirements table for all the type declarations in FQN
-buildRequirementTable	:: Map FQN TypeLookupTable -> FQN -> [Statement] -> Exceptions' String (FQN, Map (TypeID, Int) (Set RType))
+buildRequirementTable	:: Map FQN TypeLookupTable -> FQN -> [Statement] -> Exc (FQN, Map (TypeID, Int) (Set RType))
 buildRequirementTable tlts fqn stmts
 		= do	tlt	<- M.lookup fqn tlts ? ("Bug: no tlt found for "++show fqn++" while building typeReqTable")
 			allReqs	<- mapM (requirementsIn tlt fqn) stmts |> concat
 			return (fqn, M.fromList allReqs)
 
 
-requirementsIn	:: TypeLookupTable -> FQN -> Statement -> Exceptions' String [((TypeID, Int), Set RType)]
+requirementsIn	:: TypeLookupTable -> FQN -> Statement -> Exc [((TypeID, Int), Set RType)]
 requirementsIn tlt fqn (ADTDefStm (ADTDef name frees reqs _ _))
-		=  buildReqs tlt fqn name frees reqs
+		=  buildReqs tlt (fqn, name) frees reqs
 
 requirementsIn tlt fqn (SynDefStm (SynDef name frees _ reqs))
-		= buildReqs tlt fqn name frees reqs
+		= buildReqs tlt (fqn, name) frees reqs
 requirementsIn tlt fqn (SubDefStm (SubDef name _ frees _ reqs ))
-		= buildReqs tlt fqn name frees reqs
+		= buildReqs tlt (fqn, name) frees reqs
 requirementsIn tlt fqn (ClassDefStm classDef)
-		= buildReqs tlt fqn (name classDef) (frees classDef) (classReqs classDef)
-requirementsIn _ _
+		= buildReqs tlt (fqn, (name classDef)) (frees classDef) (classReqs classDef)
+requirementsIn _ _ _
 		= return []
 
 -- Build reqs in the frees for the definition of typeid
-buildReqs	:: TypeLookupTable -> TypeID -> [Name] -> [TypeRequirement] -> [((TypeID, Int), Set RType)]
+buildReqs	:: TypeLookupTable -> TypeID -> [Name] -> [TypeRequirement] -> Exc [((TypeID, Int), Set RType)]
 buildReqs tlt typeid frees reqs
-		= let   reqTables 	= zip [0..] $ map (reqTable tlt reqs) frees :: [(Int, Set RType)] in
-			map (\(argIndex, tps) -> ((typeid,argIndex), tps)) reqTables
+		= do	reqs'		<- mapM (resolveReq tlt) reqs
+			let reqTables	= zip [0..] $ map (reqTable reqs') frees :: [(Int, Set RType)]
+			let addIndices (argIndex, tps)	= ((typeid,argIndex), tps)
+			return $ map addIndices reqTables
 
 
-reqTable	:: TypeLookupTable -> [TypeRequirement] -> Name -> Set RType
-reqTable tlt reqs nm
-		= S.fromList $ map (resolveType tlt . snd) $ filter ((==) nm . fst) reqs
+reqTable	:: [(Name, RType)] -> Name -> Set RType
+reqTable reqs nm
+		= S.fromList $ map snd $ filter ((==) nm . fst) reqs
+
+resolveReq	:: TypeLookupTable -> TypeRequirement -> Exc (Name, RType)
+resolveReq tlt (nm, typ)
+		= do	rtype	<- resolveType tlt typ
+			return (nm, rtype)

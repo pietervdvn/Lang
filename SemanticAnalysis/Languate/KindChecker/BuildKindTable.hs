@@ -21,5 +21,5 @@ import Data.Map (Map)
 buildKindTable	:: World -> Map FQN TypeLookupTable -> Exceptions' String KindLookupTable
 buildKindTable w tlts
 		= do	constraints	<- inside ("While gathering the kind constraints ") $ buildKindConstraints tlts w
-			solve constraints
+			inside ("While solving the kind constraints") $ solve constraints
 			-- Thats it folks! No more code here

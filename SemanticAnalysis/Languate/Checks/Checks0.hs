@@ -58,7 +58,7 @@ validateStm tlts stm	= warn $ "Install checks for "++show stm
 
 
 validateADTDef tlt (ADTDef nm frees reqs docStr sums)
-		= inside ("In the definition of ADT-type "++show nm++":\n") $
+		= inside ("In the definition of ADT-type "++show nm) $
 		   do	validateComment docStr
 			validateReqs tlt frees reqs
 			validateReqsFreeOrder reqs frees
@@ -77,7 +77,7 @@ validateADTSum tlt frees (ADTSum nm _ mc prods)
 
 validateFunction	:: TypeLookupTable -> Function -> Check
 validateFunction tlt (Function docStr _ signs laws clauses)
-		= inside ("In the function declaration of "++intercalate ", " nms++":\n") $
+		= inside ("In the function declaration of "++intercalate ", " nms) $
 		   do	mapM_ validateLaw laws
 			mapM_ (validateSign tlt) signs
 			validateComment docStr
@@ -110,42 +110,21 @@ validateComment comment
 			mapM_ warn todos
 
 
-validateTypes	:: TypeLookupTable -> [Name] -> [Type] -> Exceptions' String [RType]
-validateTypes tlt frees tps
-		= mapM (validateType tlt frees) tps
-
-validateType	:: TypeLookupTable -> [Name] -> Type -> Exceptions' String RType
-validateType tlt _ (Normal path nm)
-		= inside ("The type "++show (intercalate "." $ path++[nm]) ++ " ") $ do
-			let notFoundMsg	= err "can not be resolved"
-			case safeResolveType tlt (path, nm) of
-				Nothing		-> do	err "can not be resolved"
-							return $ RCurry []
-				Just [fqn]	-> return $ RNormal fqn nm
-				Just []		-> do	err "can not be resolved (bug)"
-							return $ RCurry []
-				Just fqns	-> do	err $ " is ambigous. It can refer to "++intercalate ", " (map (\fqn -> show fqn ++ "." ++ nm) fqns)
-							return $ RCurry []
-
-validateType tlt frees (Applied t tps)
-		= do	t' 	<- validateType tlt frees t
-			tps' 	<- mapM (validateType tlt frees) tps
-			return $ RApplied t' tps'
-validateType tlt frees (Curry tps)
-		= mapM (validateType tlt frees) tps >>= return . RCurry
-validateType tlt frees (TupleType tps)
-		= mapM (validateType tlt frees) tps >>= return . RTuple
-validateType tlt frees (Free a)
-		= do	assert (a `elem` frees) $ "The free type variable "++show a++" is not declared"
-			return $ RFree a
-validateType _ _ Infer
-		= do	err "Unresolved Infer"
-			return $ RCurry []
-
 
 validateReqs tlt frees	= mapM_ (validateType tlt frees . snd)
 
 
+validateTypes tlt frees	= mapM (validateType tlt frees)
+validateType tlt frees t
+		= do	rt 	<- catch (resolveType tlt t) (recover t)
+			let foundFrees	= freesIn t
+			mapM (\a -> assert (a `elem` frees) $ "The free type variable "++show a++" wat not declared") foundFrees
+			return rt
+
+
+recover	t e	= do	err $ "Failed lookup of the type "++show t++".\nContinuing with checks anyway."
+			err e
+			return $ RFree "FAILED lookup"
 {-
 Validates that, when a free is used in a typerequirement, this free is declared and the declaration is on the left of it's usage.
 E.g:

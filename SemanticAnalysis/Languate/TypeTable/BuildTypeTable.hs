@@ -34,16 +34,18 @@ import Languate.World
 import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
 import Languate.KindChecker.BuildKindTable
--- import Languate.TypeTable.BuildRequirementTable
--- import Languate.Checks.Checks0
+import Languate.TypeTable.BuildRequirementTable
+import Languate.Checks.Checks0
+import Languate.Checks.CheckUtils
 
 import Data.Map
 import Data.Map as M
 
 buildTypeTable	:: World -> Exceptions' String (Map FQN TypeLookupTable, TypeTable)
 buildTypeTable w
-		= do	let tlts	=  buildTLTs w
-			-- validateWorld0 tlts w
-			-- typeReqs	<- buildRequirementTables tlts w |> M.elems |> M.unions
-			klt		<- buildKindTable w tlts
-			return todo -- $ ( tlts , TypeTable klt typeReqs (todos "supertypes") (todos "instConstr") )
+		= inside "While building the type table" $
+		   do	let tlts	=  buildTLTs w
+			inside "Checks0" $ validateWorld0 tlts w
+			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
+			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts
+			return (tlts , TypeTable klt typeReqs (todos "supertypes") (todos "instConstr") )

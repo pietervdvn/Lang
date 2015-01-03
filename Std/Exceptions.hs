@@ -99,6 +99,15 @@ haltIf	:: Bool -> e -> Exceptions w e ()
 haltIf c e
 	= when c $ halt e
 
+
+catch	:: Exceptions w e a -> (e -> Exceptions w e a)-> Exceptions w e a
+catch failed@(Exceptions ws es (Left e)) f
+	= do	failed
+		f e
+
+catch exc _
+	= exc
+
 pass	:: Exceptions w e ()
 pass	= return ()
 

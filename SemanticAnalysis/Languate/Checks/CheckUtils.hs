@@ -21,6 +21,6 @@ onLine (line, col)
 		=  inside $ "On or below line "++show line
 
 onLocation (fqn, coor)
-		= inFile fqn >> onLine coor
+		= inFile fqn . onLine coor
 
 inside str	=  stack' ((++) $ str ++ ":\n")
