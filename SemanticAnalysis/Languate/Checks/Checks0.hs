@@ -122,8 +122,7 @@ validateType tlt frees t
 			return rt
 
 
-recover	t e	= do	err $ "Failed lookup of the type "++show t++".\nContinuing with checks anyway."
-			err e
+recover	t e	= do	err $ "Failed lookup of the type "++show t++".\nContinuing with checks anyway.\nThe error was:\n" ++ e
 			return $ RFree "FAILED lookup"
 {-
 Validates that, when a free is used in a typerequirement, this free is declared and the declaration is on the left of it's usage.

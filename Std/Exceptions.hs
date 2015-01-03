@@ -101,9 +101,9 @@ haltIf c e
 
 
 catch	:: Exceptions w e a -> (e -> Exceptions w e a)-> Exceptions w e a
-catch failed@(Exceptions ws es (Left e)) f
-	= do	failed
-		f e
+catch (Exceptions ws es (Left e)) f
+	= let	(Exceptions ws' es' eOrA)	=  f e	in
+		Exceptions (ws++ws') (es++es') eOrA
 
 catch exc _
 	= exc
