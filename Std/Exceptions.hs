@@ -34,7 +34,7 @@ _runExceptionsIO' (ws, es, eOrA)
 			let cnt ls word	= show (length ls) ++" "++ word ++ multi ls
 			when (lWs + lEs > 0) $ putStrLn $ cnt ws "warning"++", "++cnt es "error"++"."
 			case eOrA of
-				Left e	-> error  e
+				Left e	-> putStrLn "Fatal error:\n" >> error  e
 				Right a	-> return a
 
 

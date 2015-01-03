@@ -10,12 +10,14 @@ import Exceptions
 
 import Languate.KindChecker.KindConstraint
 import Languate.TAST
-import Languate.AST
+import Languate.AST as AST
 import Languate.FQN
 import Languate.TypeTable
 import Languate.World
+import Languate.Checks.CheckUtils
 
 import Data.Map (mapWithKey, findWithDefault, Map)
+import qualified Data.Map as M
 import Data.Maybe
 import Control.Monad.Reader
 import Control.Arrow
@@ -23,49 +25,57 @@ import Control.Arrow
 
 
 
-buildKindConstraintTable	:: Map FQN TypeLookupTable -> World -> Map FQN [(KindConstraint, (Coor, FQN))]
-buildKindConstraintTable tlts w
-	= 	let lookup' fqn	= findWithDefault (error $ "Bug: Type lookup table not found: (constructKindConstraints)"++show fqn) fqn	in
-		mapWithKey (\fqn -> kindConstraints (lookup' fqn tlts) fqn) $ modules w
+buildKindConstraints	:: Map FQN TypeLookupTable -> World -> Exc [(KindConstraint, Location)]
+buildKindConstraints tlts w
+	= do	let mods	= M.toList $ modules w
+		mapM (uncurry $ kindConstraints tlts) mods |> concat
 
-kindConstraints	::  TypeLookupTable -> FQN -> Module -> [(KindConstraint, (Coor, FQN))]
-kindConstraints tlt fqn modul
-		= concat $ runReader (mapM kindConstraintIn' $ statements' modul) (Info fqn tlt)
+kindConstraints	:: Map FQN TypeLookupTable -> FQN -> Module -> Exc [(KindConstraint, Location)]
+kindConstraints tlts fqn modul
+		= inFile fqn $  do
+			tlt	<- M.lookup fqn tlts ? ("Bug: Type lookup table not found: (constructKindConstraints)"++show fqn)
+			constraints <- mapM (kindConstraintIn' (Info fqn tlt)) $ statements' modul
+			return $ concat constraints
 
 
 data Info	= Info {fqn :: FQN, tlt :: TypeLookupTable}
-type RI a	= Reader Info a
+type RI a	= ReaderT Info (Exceptions String String) a
 
 
-kindConstraintIn'	:: (Statement, Coor) -> RI [(KindConstraint, (Coor, FQN))]
-kindConstraintIn' (stm, coor)
-			= do	constrs	<- kindConstraintIn stm
-				(Info fqn _)	<- ask
-				return $ zip constrs $ repeat (coor, fqn)
+
+
+kindConstraintIn'	:: Info -> (Statement, Coor) -> Exc [(KindConstraint, Location)]
+kindConstraintIn' inf@(Info fqn _) (stm, coor)
+			= onLine coor $ do
+				constrs	<- runReaderT (kindConstraintIn stm) inf
+				return $ zip constrs $ repeat (fqn, coor)
 
 -- Kind of declares what relations of kinds between types exists. E.g. "Functor" has kind "a ~> b", "Maybe" has the same kind as "Functor" etc...
 kindConstraintIn	:: Statement -> RI [KindConstraint]
 kindConstraintIn (ADTDefStm (ADTDef name frees reqs _ _))
-		= baseTypeConstr name frees reqs
+		= do	id		<- getId name
+			baseTypeConstr id frees reqs
 kindConstraintIn (ClassDefStm classDef)
-		= do	baseConstrs	<- baseTypeConstr (name classDef) (frees classDef) (classReqs classDef)
-			base		<- resolve' (name classDef)
-			constraints	<- subtypeConstraints base (frees classDef) (subclassFrom classDef)
+		= do	id@(fqn, nm)	<- getId $ name classDef
+			let frees	=  AST.frees classDef
+			let reqs	=  classReqs classDef
+			baseConstrs	<- baseTypeConstr id frees reqs
+			constraints	<- subtypeConstraints (RNormal fqn nm) frees $ subclassFrom classDef
 			return $ baseConstrs ++ constraints
-kindConstraintIn (InstanceStm (Instance id subtype reqs))
-		= do	superT	<- resolve id
+kindConstraintIn (InstanceStm (Instance nm subtype reqs))
+		= do	superT	<- resolve nm
 			subT	<- resolve subtype
 			returnOne $ HaveSameKind subT superT
 kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs))
-		= do	baseConstrs	<- baseTypeConstr name frees reqs
-			subT	<- resolve' name
-			constraints <- subtypeConstraints subT frees superTypes
+		= do	id@(fqn,_)	<- getId name
+			baseConstrs	<- baseTypeConstr id frees reqs
+			constraints 	<- subtypeConstraints (RNormal fqn name) frees superTypes
 			return $ baseConstrs ++ constraints
 kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
 		= do	synonym		<- resolve sameAs
-			baseType	<- resolve' nm
-			baseConstrs	<- baseTypeConstr nm frees reqs
-			let base	= RApplied baseType $ map RFree frees
+			id@(fqn, _)	<- getId nm
+			baseConstrs	<- baseTypeConstr id frees reqs
+			let base	= RNormal fqn nm
 			let same	= HaveSameKind base synonym
 			return $ same:baseConstrs
 kindConstraintIn _	= return []
@@ -78,46 +88,44 @@ subtypeConstraints base frees superClasses
 			return $ zipWith HaveSameKind (repeat appliedBase) superClasses
 
 -- Constructs a basic 'has kind' relation, for the given (declared) name with it frees
-baseTypeConstr	:: Name -> [Name] -> [TypeRequirement] -> RI [KindConstraint]
-baseTypeConstr name frees reqs
-		= do	base	<- _resolve' name
-			(curry, constr)	<- buildCurry frees reqs
-			return $ HasKind base curry : constr
+baseTypeConstr	:: TypeID -> [Name] -> [TypeRequirement] -> RI [KindConstraint]
+baseTypeConstr id frees reqs
+		= do	(curry, constr)	<- buildCurry frees reqs
+			return $ HasKind id curry : constr
 
 -- builds the kind, based on frees. e.g. ["k","v"] becomes '' * ~> * ~> * ''. This might cause addition constraints, e.g. k is ''Eq'' and ''Ord''. This means ''Eq'' and ''Ord'' should have the same kind too
 buildCurry	:: [Name] -> [TypeRequirement] -> RI (UnresolvedKind, [KindConstraint])
 buildCurry frees reqs
-		= do	reqs'	<- resolveReqs reqs
+		= do	reqs'	<- resolveReqs reqs |> merge
 			buildCurry' frees reqs'
 
-buildCurry'	:: [Name] -> [(Name, RType)] -> RI (UnresolvedKind, [KindConstraint])
+buildCurry'	:: [Name] -> [(Name, [RType])] -> RI (UnresolvedKind, [KindConstraint])
 buildCurry' [] reqs
 		=  return (UKind, [])
 buildCurry' (n:nms) reqs
 	= do	(tail, constrs)	<- buildCurry' nms reqs
-		let reqs'	= merge reqs
-		let found	= fromMaybe [] $ lookup n reqs'
+		let found	= fromMaybe [] $ lookup n reqs
 		return $ if null found then (UKindCurry UKind tail, constrs)
 				else (UKindCurry (SameAs $ head found) tail, constrs ++ zipWith HaveSameKind found (tail' found) )
 
 
 
--- util methods
-_resolve'	:: Name -> RI (FQN, Name)
-_resolve' name	=  do	lt 	<- asks tlt
-			return (_resolveType' lt ([], name), name)
+-- UTILS
 
-
-resolve' name	= do	(fqn, nm)	<- _resolve' name
-			return $ RNormal fqn nm
-
+-- resolves a single type
 resolve		:: Type -> RI RType
 resolve t	=  do	lt	<- asks tlt
-			return $ resolveType lt t
+			lift $ resolveType lt t
 
-resolveReqs	:: [TypeRequirement] -> RI [(Name, RType)]
-resolveReqs rqs	=  do	lt	<- asks tlt
-			return $ map (second (resolveType lt)) rqs
+getId		:: Name -> RI TypeID
+getId nm	=  do	fqn'	<- asks fqn
+			return (fqn', nm)
+
+resolveReqs	= mapM resolveReq
+
+resolveReq	:: TypeRequirement -> RI (Name, RType)
+resolveReq (nm, t)	=  do	rt	<- resolve t
+				return (nm, rt)
 
 
 returnOne	:: a -> RI [a]

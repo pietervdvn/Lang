@@ -53,11 +53,12 @@ validateStm tlt (FunctionStm f)	= validateFunction tlt f
 validateStm tlt (ADTDefStm adt)	= validateADTDef tlt adt
 validateStm _ (Comments comms)
 		= do	mapM_ validateComment comms
-validateStm tlts stm	= pass -- warn $ "Install checks for "++show stm
+validateStm tlt (SubDefStm subdef)	= validateSubDef tlt subdef
+validateStm tlts stm	= warn $ "Install checks for "++show stm
 
 
 validateADTDef tlt (ADTDef nm frees reqs docStr sums)
-		= stack' (("In the definition of ADT-type "++show nm++":\n")++) $
+		= inside ("In the definition of ADT-type "++show nm++":\n") $
 		   do	validateComment docStr
 			validateReqs tlt frees reqs
 			validateReqsFreeOrder reqs frees
@@ -68,25 +69,29 @@ validateADTDef tlt (ADTDef nm frees reqs docStr sums)
 
 
 validateADTSum tlt frees (ADTSum nm _ mc prods)
-		= stack' (("In the definition of "++nm++": ")++) $
+		= inside ("In the definition of "++nm++": ") $
 			do	validateComment $ fromMaybe "" mc
 				let usedNms = mapMaybe fst prods
 				assert (unique usedNms) $ "a field name should be unique in each constructor. You used "++intercalate ", " (dubbles usedNms)++" at least twice"
-				mapM_ (validateType tlt frees . snd) prods
+				validateTypes tlt frees $ map snd prods
 
 validateFunction	:: TypeLookupTable -> Function -> Check
 validateFunction tlt (Function docStr _ signs laws clauses)
-		= stack' (("In the function declaration of "++intercalate ", " nms++":\n" )++) $
+		= inside ("In the function declaration of "++intercalate ", " nms++":\n") $
 		   do	mapM_ validateLaw laws
 			mapM_ (validateSign tlt) signs
 			validateComment docStr
 			where nms	= nub $ map (\(n,_,_) -> n) signs
 
 
+validateSubDef tlt (SubDef nm _ frees superTps trex)	-- RAR! T-Rexes are allowed, velociraptors aren't
+		= inside ("In the subtype declaration of "++nm) $
+			do	validateTypes tlt frees superTps
+				validateReqs tlt frees trex
+				validateReqsFreeOrder trex frees
 
 
-
-validateLaw law	= pass
+validateLaw law	= pass	-- TODO validate laws
 
 validateSign	:: TypeLookupTable -> (Name, Type, [TypeRequirement]) -> Check
 validateSign tlt (name, t, tr)
@@ -105,12 +110,13 @@ validateComment comment
 			mapM_ warn todos
 
 
-
-
+validateTypes	:: TypeLookupTable -> [Name] -> [Type] -> Exceptions' String [RType]
+validateTypes tlt frees tps
+		= mapM (validateType tlt frees) tps
 
 validateType	:: TypeLookupTable -> [Name] -> Type -> Exceptions' String RType
 validateType tlt _ (Normal path nm)
-		= stack' (("The type "++show (intercalate "." $ path++[nm]) ++ " ") ++) $ do
+		= inside ("The type "++show (intercalate "." $ path++[nm]) ++ " ") $ do
 			let notFoundMsg	= err "can not be resolved"
 			case safeResolveType tlt (path, nm) of
 				Nothing		-> do	err "can not be resolved"
@@ -136,6 +142,7 @@ validateType _ _ Infer
 		= do	err "Unresolved Infer"
 			return $ RCurry []
 
+
 validateReqs tlt frees	= mapM_ (validateType tlt frees . snd)
 
 
@@ -153,7 +160,7 @@ _vAllrfo		:: [TypeRequirement] -> [Name] -> Check
 _vAllrfo reqs defined@(free:_)
 			= do	let tps	= map snd $ filter ((==) free . fst) reqs
 				let stackMsg	= "In the type requirements for "++free++": "++intercalate "," (map show tps)
-				stack' (stackMsg ++) $ mapM_ (_vrfo defined) tps
+				inside stackMsg $ mapM_ (_vrfo defined) tps
 
 
 -- validate that frees in type is declared

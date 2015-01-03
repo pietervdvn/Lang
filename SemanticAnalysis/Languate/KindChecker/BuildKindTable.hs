@@ -12,12 +12,14 @@ import Languate.World
 import Languate.KindChecker.ConstructKindConstraints
 import Languate.KindChecker.Solver
 
+import Languate.Checks.CheckUtils
+
 import Data.Map (Map)
 
 
 -- Builds the kind table, does lots of checks on it
 buildKindTable	:: World -> Map FQN TypeLookupTable -> Exceptions' String KindLookupTable
 buildKindTable w tlts
-		= do	let constraints	= buildKindConstraintTable tlts w
+		= do	constraints	<- inside ("While gathering the kind constraints ") $ buildKindConstraints tlts w
 			solve constraints
 			-- Thats it folks! No more code here

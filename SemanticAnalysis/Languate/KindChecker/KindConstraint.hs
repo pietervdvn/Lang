@@ -23,7 +23,7 @@ data KindConstraint	= HaveSameKind RType RType	-- used for e.g. subtypes. ''' su
 	deriving (Show, Eq)
 
 type SimpleConstraint	= ((FQN, Name), UnresolvedKind)
-type SimpleConstraint'	= (SimpleConstraint, Coor)
+type SimpleConstraint'	= (SimpleConstraint, Location)
 
 isHasKind (HasKind _ _)	= True
 isHasKind _		= False

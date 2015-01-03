@@ -39,10 +39,9 @@ Type requirements are all given withing the constraints. This means we have free
 
 -}
 
-solve		:: Map FQN [(KindConstraint, (Coor, FQN))] -> Exceptions' String KindLookupTable
-solve dict	=  do	let allConstr	= concat $ elems dict
-			klt <- stack' ("While building the kind table:\n"++) $
-					solveAll $ mapMaybe (unpackMaybeTuple . (getHasKind *** fst)) allConstr
+solve		:: [(KindConstraint, Location)] -> Exc KindLookupTable
+solve allConstr	= inside ("While building the kind table") $ do
+			klt 	<- solveAll $ mapMaybe (unpackMaybeTuple . (first getHasKind)) allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
 			-- TODO fix frees! issue #57
@@ -50,7 +49,7 @@ solve dict	=  do	let allConstr	= concat $ elems dict
 			return klt
 
 
-solveAll	:: [SimpleConstraint'] -> Exceptions' String KindLookupTable
+solveAll	:: [SimpleConstraint'] -> Exc KindLookupTable
 solveAll constraints
 		= do	let (failed, klt) = runstate (solveAll' constraints) empty
 			let cycles	= cyclesIn $ map fst failed

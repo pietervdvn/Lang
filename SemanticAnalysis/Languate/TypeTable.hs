@@ -14,12 +14,15 @@ Bool is [Eq, Ord, Monoid, Show, ...]
 -}
 
 import StdDef
+import Exceptions
+
 import Data.Map as M
 import Data.Set as S
 import Data.List (intercalate)
 import Languate.AST
 import Languate.TAST
 import Languate.FQN
+import Languate.Checks.CheckUtils
 
 {-
 The type table contains all known types within a certain module.
@@ -44,37 +47,47 @@ data TypeTable	= TypeTable	{ kinds		:: Map TypeID Kind
 -- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
 
-resolveType	:: TypeLookupTable -> Type -> RType
+
+-- Finds the type within the TLT
+findTypeOrigin	:: TypeLookupTable -> ([Name], Name) -> Exc FQN
+findTypeOrigin tlt id@(path, t)
+	=  do	fqnSet	<- M.lookup id tlt ? ("The type "++spth id ++" could not be resolved. It is not declared or imported.")
+		let fqns	= S.toList fqnSet
+		assert (isSingleton fqns) $ "The type "++spth id++" is ambigous. We found it in modules "++show fqns
+		return $ head fqns
+
+
+findTypeOrigin'	:: TypeLookupTable -> ([Name],Name) -> Exc (FQN, Name)
+findTypeOrigin' tlt id@(_, nm)
+		= do	fqn	<- findTypeOrigin tlt id
+			return (fqn, nm)
+
+
+
+
+resolveType	:: TypeLookupTable -> Type -> Exc RType
 resolveType tlt (Normal path name)
-		= RNormal (_resolveType' tlt (path, name)) name
+		= do	fqn	<- findTypeOrigin tlt (path, name)
+			return $ RNormal fqn name
 resolveType tlt (Free nm)
-		= RFree nm
-resolveType tlt (Applied t tps)
-		= RApplied (resolveType tlt t) $ fmap (resolveType tlt) tps
-resolveType tlt (Curry tps)
-		= RCurry $ fmap (resolveType tlt) tps
-resolveType tlt (TupleType tps)
-		= RTuple $ fmap (resolveType tlt) tps
+		= return $ RFree nm
+resolveType tlt e@(Applied t tps)
+		= _construct tlt e (t:tps) (\(rt:rtps) -> RApplied rt rtps)
+resolveType tlt e@(Curry tps)
+		= _construct tlt e tps RCurry
+resolveType tlt e@(TupleType tps)
+		= _construct tlt e tps RTuple
+
+_construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
+_construct tlt e tps cons
+		=  inside ("In the type expression "++show e) $ do
+			rtps	<- mapM (resolveType tlt) tps	-- mapM gives Nothing if one type is not found
+			return $ cons rtps
 
 
 
-resolveType'	:: TypeLookupTable -> ([Name], Name) -> RType
-resolveType' tlt (path, name)
-		= RNormal (_resolveType' tlt (path, name)) name
 
 
-_resolveType'	:: TypeLookupTable -> ([Name], Name) -> FQN
-_resolveType' tlt k@(mods,t)
-	= let 	repr		= intercalate "." $ mods ++ [t]
-		notFoundErr	= error $ "Type error: the following type is not declared or imported: " ++ repr
-		tps	= findWithDefault notFoundErr k tlt
-		ambigErr	= error $ "Type error: the type "++ repr ++ " can both resolve to: "++ show tps in
-		if S.null tps	then notFoundErr
-			else if S.size tps == 1	then S.findMin tps else ambigErr
-
-safeResolveType	:: TypeLookupTable -> ([Name], Name) -> Maybe [FQN]
-safeResolveType tlt k@(mods, t)
-	= M.lookup k tlt |> S.toList
 
 
 showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict

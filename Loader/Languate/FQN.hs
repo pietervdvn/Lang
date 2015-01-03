@@ -8,6 +8,8 @@ This module implements the FQN-datatype, which represents a fully qualified name
 import StdDef
 import Data.Maybe
 
+import Languate.AST (Coor)
+
 
 newtype Author	= Author Name
 	deriving (Eq,Ord)
@@ -35,6 +37,10 @@ instance Show FQPN where
 -- fully qualified module name
 data FQN	= FQN FQPN [ModuleName] ModuleName
 	deriving (Eq,Ord)
+
+
+type Location	= (FQN, Coor)
+
 instance Show FQN where
 	show (FQN fqnp mods mod)
 		= show fqnp++":"++foldr (\m acc -> show m++"."++acc) (show mod) mods
