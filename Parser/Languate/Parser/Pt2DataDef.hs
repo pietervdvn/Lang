@@ -22,8 +22,9 @@ pt2adtdef	=  pt2a h t s convert
 
 convert		:: AST -> ([Comment], ADTDef)
 convert (Data comms vis name frees sums reqs)
-		=  let edit	= if vis == Private then map (setVisibility vis) else id in
-			(init' comms, ADTDef name frees reqs (last comms) $ edit sums)
+		=  let  edit	= if vis == Private then map (setVisibility vis) else id
+			docstr	= if null comms then Nothing else Just $ last comms 	in
+			(init' comms, ADTDef name frees reqs docstr $ edit sums)
 convert ast	=  convErr modName ast
 
 
@@ -63,10 +64,10 @@ s _ (Comms comms:DataT:Ident name:FreeTypes frees reqs:tail)
 s _ [Comms comms, DataT, Ident name,EqualT, Prod sums reqs]
 		= Data comms Public name [] sums reqs
 s _ [ast]	= ast
-s "data" (DataT:Ident name:_)
-		= error $ "No comment for data definition "++show name
-s "data" (DataT:PrivT:Ident name:_)
-		= error $ "No comment for data definition "++show name
+s "data" (DataT:Ident name:tail)
+		= s "data" (Comms []:DataT:Ident name: tail)
+s "data" (DataT:PrivT:Ident name:tail)
+		= s "data" (Comms []:DataT:PrivT:Ident name: tail)
 s nm asts	= seqErr modName nm asts
 
 pt2freetypes	:: ParseTree -> ([Name],[TypeRequirement])

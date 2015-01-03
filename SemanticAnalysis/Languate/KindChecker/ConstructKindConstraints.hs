@@ -66,12 +66,12 @@ kindConstraintIn (InstanceStm (Instance nm subtype reqs))
 		= do	superT	<- resolve nm
 			subT	<- resolve subtype
 			returnOne $ HaveSameKind subT superT
-kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs))
+kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs _))
 		= do	id@(fqn,_)	<- getId name
 			baseConstrs	<- baseTypeConstr id frees reqs
 			constraints 	<- subtypeConstraints (RNormal fqn name) frees superTypes
 			return $ baseConstrs ++ constraints
-kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
+kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs _))
 		= do	synonym		<- resolve sameAs
 			id@(fqn, _)	<- getId nm
 			baseConstrs	<- baseTypeConstr id frees reqs

@@ -18,22 +18,35 @@ import Data.Maybe
 
 buildDocstringTable	:: World -> Exc (Map TypeID String)
 buildDocstringTable w	= do	let fqnMods	= toList $ modules w
-				return $ fromList $ concatMap (uncurry buildDocstr) fqnMods
+				docStrings	<- mapM (uncurry buildDocstr) fqnMods
+				return $ fromList $ concat docStrings
+
+buildDocstr		:: FQN -> Module -> Exc [(TypeID, String)]
+buildDocstr fqn m	=  do	let stms	= statements' m
+				docstrs	<- mapM (declaredType' fqn) stms
+				return $ catMaybes docstrs
 
 
-buildDocstr		:: FQN -> Module -> [(TypeID, String)]
-buildDocstr fqn m	=  let stms	= statements m in
-				mapMaybe (declaredType fqn) stms
+declaredType'	:: FQN -> (Statement, Coor) -> Exc (Maybe (TypeID, String))
+declaredType' fqn (stm, coor)
+		= onLocation (fqn, coor) $
+			declaredType fqn stm
 
-
-declaredType	:: FQN -> Statement -> Maybe ((FQN, Name), String)
+declaredType	:: FQN -> Statement -> Exc (Maybe ((FQN, Name), String))
 declaredType fqn  (ADTDefStm (ADTDef name _ _ docstring _))
-		= Just ((fqn,name),docstring)
-{-
-declaredType fqn (SynDefStm (SynDef name _ _ _))
-		= Just name
-declaredType fqn (SubDefStm (SubDef name _ _ _ _ ))
-		= Just name
+		= unpack fqn name docstring
+declaredType fqn (SynDefStm (SynDef name _ _ _ docstring))
+		= unpack fqn name docstring
+declaredType fqn (SubDefStm (SubDef name _ _ _ _ docstring))
+		= unpack fqn name docstring
 declaredType fqn (ClassDefStm classDef)
-		= Just $ name classDef -}
-declaredType _ _	= Nothing
+		= unpack fqn (name classDef) (classdocstr classDef)
+declaredType _ _	= return $ Nothing
+
+
+unpack		:: FQN -> Name -> Maybe String -> Exc (Maybe (TypeID, String))
+unpack fqn name (Just doc)
+		= return $ Just ((fqn,name), doc)
+unpack _ name Nothing
+		= do	err $ "No docstring in the type declaration of "++name
+			return Nothing

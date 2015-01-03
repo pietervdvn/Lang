@@ -30,7 +30,8 @@ pt2classDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
 
 convert		:: AST -> ([Comment], ClassDef)
 convert (Clss name frees subs reqs comms laws declarations)
-		=  (init' comms, ClassDef name frees reqs subs (last comms) laws $ injectTypeReq name declarations)
+		=  let docstr	= if null comms then Nothing else Just $ last comms in
+			(init' comms, ClassDef name frees reqs subs docstr laws $ injectTypeReq name declarations)
 convert ast	=  convErr modName ast
 
 injectTypeReq	:: Name -> [(Name, Type, Maybe Comment, [TypeRequirement])] -> [(Name, Type, Maybe Comment, [TypeRequirement])]
@@ -95,8 +96,8 @@ s _ [Comms comms, ClassT, Ident name, SubClassOf subs reqs, Body laws decls]
 		= Clss name [] subs reqs comms laws decls
 s _ [Comms comms, ClassT, Ident name, Body laws decls]
 		= Clss name [] [] [] comms laws decls
-s _ (ClassT:Ident name:_)
-		= error $ "No docstring comment with class definition of "++show name
+s r (ClassT:Ident name:tail)
+		= s r (Comms []: ClassT: Ident name:tail)
 s nm asts	= seqErr modName nm asts
 
 

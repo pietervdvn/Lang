@@ -120,9 +120,9 @@ locallyDeclared	w fqn
 declaredType	:: Statement -> Maybe Name
 declaredType (ADTDefStm (ADTDef name _ _ _ _))
 		= Just name
-declaredType (SynDefStm (SynDef name _ _ _))
+declaredType (SynDefStm (SynDef name _ _ _ _))
 		= Just name
-declaredType (SubDefStm (SubDef name _ _ _ _ ))
+declaredType (SubDefStm (SubDef name _ _ _ _ _))
 		= Just name
 declaredType (ClassDefStm classDef)
 		= Just $ name classDef

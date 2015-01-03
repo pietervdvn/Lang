@@ -51,9 +51,9 @@ requirementsIn	:: TypeLookupTable -> FQN -> Statement -> Exc [((TypeID, Int), Se
 requirementsIn tlt fqn (ADTDefStm (ADTDef name frees reqs _ _))
 		=  buildReqs tlt (fqn, name) frees reqs
 
-requirementsIn tlt fqn (SynDefStm (SynDef name frees _ reqs))
+requirementsIn tlt fqn (SynDefStm (SynDef name frees _ reqs _))
 		= buildReqs tlt (fqn, name) frees reqs
-requirementsIn tlt fqn (SubDefStm (SubDef name _ frees _ reqs ))
+requirementsIn tlt fqn (SubDefStm (SubDef name _ frees _ reqs _))
 		= buildReqs tlt (fqn, name) frees reqs
 requirementsIn tlt fqn (ClassDefStm classDef)
 		= buildReqs tlt (fqn, (name classDef)) (frees classDef) (classReqs classDef)

@@ -25,7 +25,7 @@ data Law	= Law 	{ lawName		:: Maybe Name
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
 type DocString	= Comment
-
+type OptDocStr	= Maybe DocString
 
 data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
 		| PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
@@ -87,7 +87,7 @@ becomes : ADTDef "List" [("a", Nothing)] "Comment about a list" product
 becomes
 ADTDef "Dict" ["k","v"] [("k","Ord")] "Docstring blabla" product
 -}
-data ADTDef	= ADTDef Name [Name] [TypeRequirement] DocString [ADTSum]
+data ADTDef	= ADTDef Name [Name] [TypeRequirement] OptDocStr [ADTSum]
 
 
 {-
@@ -108,7 +108,7 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 > type SortedSet (a:Ord)	= {a}
   SynDef "SortedSet" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"]
    no obligated docstring for this one! -}
-data SynDef	= SynDef Name [Name] Type [TypeRequirement]
+data SynDef	= SynDef Name [Name] Type [TypeRequirement] OptDocStr
 
 {-
 Data type representing a subtype declaration, e.g.
@@ -118,7 +118,7 @@ Might have multiple supertypes
 > subtype Name = String -- see bnf for usage
 > subtype TenSet (a in Ord)	= ...
 no obligated docstring for this one! -}
-data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement]
+data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement] OptDocStr
 
 -- ## Creating classes and instances
 
@@ -128,7 +128,7 @@ data ClassDef	= ClassDef
 			, frees		:: [Name]
 			, classReqs	:: [TypeRequirement]
 			, subclassFrom	:: [Type]
-			, classdocstr 	:: DocString
+			, classdocstr 	:: OptDocStr
 			, classlaws	:: [Law]
 			, decls		:: [(Name,Type,Maybe Comment, [TypeRequirement])] }
 	deriving (Ord, Eq)

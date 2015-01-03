@@ -59,7 +59,7 @@ validateStm tlts stm	= warn $ "Install checks for "++show stm
 
 validateADTDef tlt (ADTDef nm frees reqs docStr sums)
 		= inside ("In the definition of ADT-type "++show nm) $
-		   do	validateComment docStr
+		   do	validateComment' docStr
 			validateReqs tlt frees reqs
 			validateReqsFreeOrder reqs frees
 			mapM_ (validateADTSum tlt frees) sums
@@ -70,7 +70,7 @@ validateADTDef tlt (ADTDef nm frees reqs docStr sums)
 
 validateADTSum tlt frees (ADTSum nm _ mc prods)
 		= inside ("In the definition of "++nm++": ") $
-			do	validateComment $ fromMaybe "" mc
+			do	validateComment' mc
 				let usedNms = mapMaybe fst prods
 				assert (unique usedNms) $ "a field name should be unique in each constructor. You used "++intercalate ", " (dubbles usedNms)++" at least twice"
 				validateTypes tlt frees $ map snd prods
@@ -84,9 +84,10 @@ validateFunction tlt (Function docStr _ signs laws clauses)
 			where nms	= nub $ map (\(n,_,_) -> n) signs
 
 
-validateSubDef tlt (SubDef nm _ frees superTps trex)	-- RAR! T-Rexes are allowed, velociraptors aren't
+validateSubDef tlt (SubDef nm _ frees superTps trex docstr)	-- RAR! T-Rexes are allowed, velociraptors aren't
 		= inside ("In the subtype declaration of "++nm) $
-			do	validateTypes tlt frees superTps
+			do	validateComment' docstr
+				validateTypes tlt frees superTps
 				validateReqs tlt frees trex
 				validateReqsFreeOrder trex frees
 
@@ -100,7 +101,8 @@ validateSign tlt (name, t, tr)
 
 
 
-
+validateComment' (Just comment)	= validateComment comment
+validateComment' _	= pass
 
 validateComment comment
 		= let	caseIns	str	= concatMap (\c -> '[':toLower c:toUpper c : "]") str
