@@ -30,6 +30,8 @@ ital	= modif "_"
 bold	= modif "**"
 code	= modif "````"
 
+qoute msg	= "> " ++ intercalate "\n> " (lines msg)
+
 pars str	= "("++str++")"
 
 modif		:: String -> MarkDown -> MarkDown

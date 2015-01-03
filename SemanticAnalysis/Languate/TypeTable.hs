@@ -34,7 +34,7 @@ type TypeID	= (FQN, Name)
 
 type TypeReqTable	= Map (TypeID, Int) (Set RType)
 type KindLookupTable	= Map TypeID Kind
-data TypeTable	= TypeTable	{ kinds		:: Map TypeID Kind
+data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
 				, typeReqs	:: TypeReqTable			-- type requirements are explicit for new type declarations; contains synonyms
 				, supertypes	:: Map RType (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				{-
