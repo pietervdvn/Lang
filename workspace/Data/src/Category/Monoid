@@ -1,15 +1,16 @@
 Monoid
 ------
-A monoid is an type on which a neutral (identity) element and an _addition_ operator are defined.
-The addition operator should be associative.
-
-By adding the associativity, the compiler has a high degree of freedom in optimizing the order in which the operation is performed. Because all collections are monoids, this means (for example) taking unions can be done in parallel without much ado, with a mapReduce.
-
+Declaration and functions for Monoids
 ------
 
 import Num.Nat
 
--- A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
+---
+A monoid is an type on which a neutral (identity) element and an _addition_ operator is defined.
+The addition operator should be associative.
+
+By adding the associativity, the compiler has a high degree of freedom in optimizing the order in which the operation is performed. Because all collections are monoids, this means (for example) taking unions can be done in parallel without much ado, with a mapReduce.
+---
 cat Monoid
 	-- The neutral element
 	~ identity element:	append neutral a	= a
@@ -50,3 +51,7 @@ a b	= a * b
 
 neutral	: Product
 neutral	= 1
+
+(^)	: Product -> Nat -> Product
+_ 0	= neutral
+p i	= p * (p * (i - 1))

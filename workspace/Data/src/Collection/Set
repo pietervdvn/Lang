@@ -5,6 +5,10 @@ Declaration and utils of Set, an unorderd colletion.
 
 import Category.Eq
 
--- A set is a unordered collection, where each element is saved exactly once
+---
+A ''Collection'' without order and duplicates.
+
+The syntactic sugar ''{a}'' desugars to ''Set a''
+---
 cat Set (a:Eq)
 	head	: Set a -> (b:a)

@@ -72,6 +72,10 @@ plural	:: Int -> String -> String
 plural i str	= if i > 1 || i == 0 then number i ++" " ++ pluralize str
 			else "one "++ str
 
+-- same as intercalate, but with a empty list filter
+intercal	:: MarkDown -> [MarkDown] -> MarkDown
+intercal token mds
+		= intercalate token $ filter ((/=) "" . strip) mds
 
 pluralize	:: String -> String
 pluralize "mouse"	=  "mice"

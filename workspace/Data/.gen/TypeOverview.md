@@ -11,7 +11,7 @@ Type | Declared in | Kind | Requirements | Docstring
 **Product**  | Category.Monoid | * |  | Product is an instance of monoid, with (+) defined as append
 **Sum**  | Category.Monoid | * |  | Sum is an instance of monoid, with (+) defined as append
 **Collection** a | Collection.Collection | (* ~> *) |  | A collection represents, well, a collection of data. Each set, list, map, bag, ... is instance of this class
-**Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq;  | A ````Dict```` (dictionary) is any type that maps a certain key onto a certain value.
+**Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq | A ````Dict```` (dictionary) is any type that maps a certain key onto a certain value.
 **List** a | Collection.List | (* ~> *) |  | The class which defines a list
 **Maybe** a | Collection.Maybe | (* ~> *) |  | The Maybe datatype definition.
 **Set** a | Collection.Set | (* ~> *) | a:Eq | A set is a unordered collection, where each element is saved exactly once
@@ -24,11 +24,11 @@ Type | Declared in | Kind | Requirements | Docstring
 **Nat'**  | Num.Nat | * |  | 
 **NatInf**  | Num.Nat | * |  | 
 **NatInf'**  | Num.Nat | * |  | 
-**Flip** x b a | Type.Function | (* ~> (* ~> (* ~> *))) | ; ;  | 
+**Flip** x b a | Type.Function | (* ~> (* ~> (* ~> *))) |  | 
 
 
 
-> This page was automatically generated on 2015-01-03 21:26:57
+> This page was automatically generated on 2015-01-03 21:32:51
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.

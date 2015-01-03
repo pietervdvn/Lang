@@ -1,6 +1,6 @@
 List
 ----
-A simple list class implementation
+The list category declaration.
 ----
 
 import Collection.Collection
@@ -8,7 +8,12 @@ import Collection.Maybe
 import Category.Monoid
 import Category.Mappable
 
--- The class which defines a list
+---
+A ''Collection'' which preserves order and allows duplicate elements.
+
+The syntactic sugar ''[a]'' desugars to ''List a''
+
+---
 cat List a in Collection a
 	-- Returns the first element of the list. The element returned is of the type 'a', but might be a subclass of element 'a' too.
 	head	: [a] -> (b:a)

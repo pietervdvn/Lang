@@ -9,7 +9,13 @@ import Category.Monoid
 import Collection.Set
 
 
--- A ''Dict'' (dictionary) is any type that maps a certain key onto a certain value.
+---
+A ''Collection'' which maps a key onto a value.
+
+Keys are required to be unique. When a key-value pair ''(k,v)'' gets inserted, the dictionary will point to this value (thus old values get overwritten).
+
+The syntactic sugar ''{k --> v}'' desugars to ''Dict k v''
+---
 cat Dict (k:Eq) v is Set k
 	empty	: dict k v
 	insert	: k -> v -> dict k v -> dict k v

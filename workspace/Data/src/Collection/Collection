@@ -4,34 +4,50 @@ Collection
 Congratulations, dear explorer.
 You have found the root of all data, the root of each collection.
 
-This module gives the class interface of each collection.
+This module gives the category declaration of each collection.
 ----------
 
 import Category.Monoid
 import Category.Function
+import Category.Mappable
 
--- A collection represents, well, a collection of data. Each set, list, map, bag, ... is instance of this class
+---
+A ''Collection'' is a data structure which contains zero or more elements.
+
+This declaration does not put requirements about the order in which elements are saved or wether duplicate elements are allowed or not.
+
+The syntactic sugar ''a*'' desugars to ''Collection a''
+---
 cat Collection a
-	-- Give the first element of the collection
+	-- Gives the first element of the collection
 	head	: collection a -> (b:a)?
-	-- Give the entire collection without the element that head gives
+	-- Gives the entire collection without the element that head gives
 	tail	: collection a -> (collection (b:a))?
-	-- Give the first element of the collection, only if exactly one element is in the collection
+	-- Gives the first element of the collection, only if exactly one element is in the collection
 	singleton	: collection a -> (b:a)?
 	-- empty constructor
 	empty	: collection a
 	-- empty the given collection. In other words, start a new collection with the same internal structure
-	empty	: collection a -> collection a
+	clear	: collection a -> collection a
 	-- empty deconstructor
-	isEmpty	: collection -> Bool
+	isEmpty	: collection a -> Bool
+	-- Empty deconstructor
+	({})	: collection a -> Maybe ()
+	(:)	: (a:b) -> collection b -> collection b
+
+
+instance Mappable Collection
+instance Monoid (Collection a)
+
+map	: (a -> b) -> a* -> b*
+_ {}	= empty
+f (a:as)= f a : as
 
 
 reduce	: Associative a -> a+ -> a
 f (singleton a)	= a
 f (unpack a as)	= f a $ reduce f as
 
----
 reduce	: (m:Monoid)* -> m
-|isEmpty	= neutral
+{}	= neutral
 (m:ms)	= append m $ reduce ms
----

@@ -1,11 +1,16 @@
 Mappable
 -------
-A mappable is some kind of container, which supports a map function.
+Declaration and util functions
 -------
 
-
--- A functor is a container which has a 'map'-function
+---
+A ''container'' on which ''map'' is defined. Aka ''functor''
+---
 cat Mappable a
 	~ identity: map id	= id
 	-- map takes a function and applies that function op the value(s) inside the functor
 	map	: (a -> b) -> functor a -> functor b
+
+
+(|>)	: (m a : Mappable a) -> (a -> b) -> m b
+ma fa2b	= map fa2b ma

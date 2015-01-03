@@ -25,7 +25,7 @@ precTable2md op2classes class2ops modifs
 
 class2md	:: Map Name PrecModifier -> Int -> [Name] -> [MarkDown]
 class2md mods i ops@(repr:_)
-		=  [show i, intercalate ", " $ map sOp ops, precOf mods repr]
+		=  [show i, intercal ", " $ map sOp ops, precOf mods repr]
 
 op2md		:: Map Name PrecModifier -> Name -> Int -> [MarkDown]
 op2md mods op i	=  [sOp op, show i, precOf mods op]

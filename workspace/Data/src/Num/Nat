@@ -5,7 +5,7 @@ Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
 
 import Builtins
 
--- The root of numbers
+-- The root of all numbers
    type IntInf		= Builtins.BIInt
 subtype IntInf'		= _ IntInf
 subtype Int		= _ IntInf

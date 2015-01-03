@@ -6,7 +6,7 @@ import MarkDown
 import Data.Map (keys, Map, lookup, findWithDefault, empty)
 import qualified Data.Set as S
 import Prelude hiding (lookup)
-import Data.List (sort, intercalate)
+import Data.List (sort)
 
 import Languate.FQN
 import Languate.TypeTable
@@ -39,7 +39,7 @@ typeReqsFor	:: TypeTable -> TypeID -> MarkDown
 typeReqsFor tt id
 	= let	freeNmT	= findWithDefault empty id $ freeNames tt
 		kys	= sort $ keys freeNmT in
-		intercalate "; " $ map (typeReqFor tt id freeNmT) kys
+		intercal "; " $ map (typeReqFor tt id freeNmT) kys
 
 
 typeReqFor	:: TypeTable -> TypeID -> Map Int Name -> Int -> MarkDown

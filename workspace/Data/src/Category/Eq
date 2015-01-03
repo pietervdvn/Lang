@@ -8,7 +8,9 @@ import Data.Bool
 precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
 precedence of (!=) is Left, (!=) = (==)
 
--- When a type is instance of ''Eq'' it means data of this type can be compared for equivalence.
+---
+The category which declares equality ''=='' and inequality ''!=''
+---
 cat Eq
 	-- Checks if the two given values are the same.
 	> !True == False	= True

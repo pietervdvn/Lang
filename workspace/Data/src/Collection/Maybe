@@ -1,16 +1,20 @@
 Maybe
 -----
-The maybe type is widely used in syntac sugar ''?'' and in pattern matching.
-It represents a computation which may have failed, e.g. ''head ls''. If the list ''ls'' was empty, no head exist and the correct value is ''Nothing''.
-
-This type also plays an important role in pattern matching, as deconstruction is done with a functions which maps on a Maybe.
+Here you'll find the declaration of ''Maybe'' and util functions.
 -----
 
 import Data.Bool
 
--- The Maybe datatype definition.
-data Maybe a	= Nothing	-- Represents the failed value. Always keep ''Nothing'' as first one in the ADT!
-		| Just a
+--- A collection which contains at most one value.
+
+It represents a computation that might fail, such as ''head ls'' or a missing value within a ''Dict''.
+
+The syntactic sugar ''a?'' desugars to ''Maybe a''.
+
+This type plays an important role within the compiler, as it is used for pattern matching.
+---
+data Maybe a	= Nothing	-- Represents the missing value. Always keep ''Nothing'' as first one in the ADT!
+		| Just a	-- Constructor with the actual value
 
 -- The ''isJust'' function returns ''True'' iff its argument is of the form ''Just _''.
 isJust		: Maybe a -> Bool
@@ -32,9 +36,9 @@ _		= False
 _ 	 a	= a
 
 ---
--- Removes all ''Nothing''s out of the list
-justs		: [a?] -> [a]
-[Nothing:as]	= Just as
+-- Removes all ''Nothing''s out of the collection
+justs		: (a?)* -> a*
+(Nothing:as)	= Just as
 [(Just a):as]	= [a]:just as
 ---
 
@@ -42,7 +46,7 @@ justs		: [a?] -> [a]
 
 # The role of Maybe within the compiler
 
-When a function is deconstructed in a function, e.g. in the and function:
+When a function is deconstructed in a function, e.g. in the ''and'' function:
 
 	and		: Bool -> Bool -> Bool
 	True True	= True
@@ -50,7 +54,7 @@ When a function is deconstructed in a function, e.g. in the and function:
 
 Let us take the first ''True'' pattern. This is internally transformed into a ''Deconstruct "True" [Bool -> Maybe (,)]'' (where ''(,)'' represents a tuple with _no_ internal elements).
 
-Whenever the interpreter wants to do pattern matching, e.g. against a value 'ADTValue 0 "False" []'' (((Here does the "False" represent a print name of the constructor))) it does this by executing the (automatically generated) function. Note that this is exactly the same as a regular functions, allowing your own deconstructor functions.
+Whenever the interpreter wants to do pattern matching, e.g. against a value ''ADTValue 0 "False" []'' (((Here does the "False" represent a print name of the constructor))) it does this by executing the (automatically generated) function. Note that this is exactly the same as a regular functions, allowing your own deconstructor functions.
 
 	True		: Bool -> Maybe (,)
 	#ADTValue 0 "False" 	= ADTValue 0 "Nothing" []
