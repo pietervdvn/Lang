@@ -17,7 +17,7 @@ import Languate.Precedence.PrecedenceTable
 import Languate.Precedence.PrecTable2MD
 
 
-import Languate.MDGen
+import Languate.MD.MDGen
 
 import Languate.Checks.CheckUtils
 

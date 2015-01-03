@@ -9,6 +9,7 @@ import StdDef
 import Data.Maybe
 
 import Languate.AST (Coor)
+import Data.List (intercalate)
 
 
 newtype Author	= Author Name
@@ -42,9 +43,12 @@ data FQN	= FQN FQPN [ModuleName] ModuleName
 type Location	= (FQN, Coor)
 
 instance Show FQN where
-	show (FQN fqnp mods mod)
-		= show fqnp++":"++foldr (\m acc -> show m++"."++acc) (show mod) mods
+	show fqn@(FQN fqnp mods mod)
+		= show fqnp++":"++showShortFQN fqn
 
+showShortFQN	:: FQN -> String
+showShortFQN (FQN _ mods mod)
+		= intercalate "." $ map show mods ++ [show mod]
 
 -- converts "Languate.Core.Blabla" -> "Languate/Core/Blabla"
 relativePath	:: FQN -> FilePath

@@ -1,4 +1,5 @@
-module Languate.MDGen where
+
+module Languate.MD.MDGen where
 
 {--
 

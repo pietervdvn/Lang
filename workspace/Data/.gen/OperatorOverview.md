@@ -2,7 +2,7 @@
 
 # Precedences overview
 
-The higher the operator stand in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated
+The higher the operator stands in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated
 
 To test precedence, invoke ````--p <expression>```` in the interpreter, which converts expression to prefix notation.
 
@@ -27,7 +27,7 @@ Operator | Precedence | Associativity
 
 
 
-> This page was automatically generated on 2015-01-03 20:59:57
+> This page was automatically generated on 2015-01-03 21:26:57
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.

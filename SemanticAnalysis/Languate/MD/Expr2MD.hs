@@ -1,4 +1,4 @@
-module Languate.TypeTable.Expr2MD where
+module Languate.MD.Expr2MD where
 
 {-Conversion of laws, expressions, ... into MD -}
 
@@ -44,4 +44,4 @@ rtypeReqs2MD	= (++ " ") . commas . fmap showRTypeReq'
 
 showTypeId	:: (FQN, Name) -> MarkDown
 showTypeId (fqn, n)
-		= show fqn ++ "." ++ n
+		= showShortFQN fqn ++ "." ++ n

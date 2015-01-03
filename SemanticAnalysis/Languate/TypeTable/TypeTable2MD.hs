@@ -8,7 +8,7 @@ import qualified Data.Set as S
 import Prelude hiding (lookup)
 import Data.List (sort, intercalate)
 
-
+import Languate.FQN
 import Languate.TypeTable
 import Languate.TAST
 
@@ -22,10 +22,10 @@ typeRow		:: TypeTable -> TypeID -> [MarkDown]
 typeRow	tt (fqn, name)
 		=  let getMaybe table	= lookup (fqn, name) $ table tt in
 			[ bold name ++ unwords (frees tt (fqn, name))
-			, show fqn
+			, showShortFQN fqn
 			, maybe (bold "ERROR: no kind found") show $ getMaybe kinds
 			, typeReqsFor tt (fqn, name)
-			, maybe "" firstLine $ getMaybe docstrings
+			, recode $ maybe "" firstLine $ getMaybe docstrings
 			]
 
 
