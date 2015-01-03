@@ -38,10 +38,10 @@ cat Collection a
 
 instance Mappable Collection
 instance Monoid (Collection a)
-
+---
 map	: (a -> b) -> a* -> b*
-_ {}	= empty
-f (a:as)= f a : as
+f empty	= empty
+f (a:as)= add (f a) as
 
 
 reduce	: Associative a -> a+ -> a
@@ -49,5 +49,6 @@ f (singleton a)	= a
 f (unpack a as)	= f a $ reduce f as
 
 reduce	: (m:Monoid)* -> m
-{}	= neutral
+empty	= neutral
 (m:ms)	= append m $ reduce ms
+---

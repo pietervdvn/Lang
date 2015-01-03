@@ -3,18 +3,18 @@
 Type | Declared in | Kind | Requirements | Docstring
 ---- | ----------- | ---- | ------------ | ---------
 **BIInt**  | Builtins | * |  | A int!
-**Eq**  | Category.Eq | * |  | When a type is instance of ````Eq```` it means data of this type can be compared for equivalence.
-**Associative** a | Category.Function | (* ~> *) |  | An associative function is a function for which you can swap the arguments, and get the same function.
-**Commutative** a | Category.Function | (* ~> *) |  | A commutative function
-**Mappable** a | Category.Mappable | (* ~> *) |  | A functor is a container which has a 'map'-function
-**Monoid**  | Category.Monoid | * |  | A monoid is a type on which an _addition_ operation is defined together with a neutral element for this operator.
+**Eq**  | Category.Eq | * |  | The category which declares equality ````==```` and inequality ````!=````
+**Associative** a | Category.Function | (* ~> *) |  | Functions for which the order of evaluation does not matter.
+**Commutative** a | Category.Function | (* ~> *) |  | Functions for which the arguments can be swapped.
+**Mappable** a | Category.Mappable | (* ~> *) |  | A ````container```` on which ````map```` is defined. Aka ````functor````
+**Monoid**  | Category.Monoid | * |  | A monoid is an type on which a neutral (identity) element and an _addition_ operator is defined.
 **Product**  | Category.Monoid | * |  | Product is an instance of monoid, with (+) defined as append
 **Sum**  | Category.Monoid | * |  | Sum is an instance of monoid, with (+) defined as append
-**Collection** a | Collection.Collection | (* ~> *) |  | A collection represents, well, a collection of data. Each set, list, map, bag, ... is instance of this class
-**Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq | A ````Dict```` (dictionary) is any type that maps a certain key onto a certain value.
-**List** a | Collection.List | (* ~> *) |  | The class which defines a list
-**Maybe** a | Collection.Maybe | (* ~> *) |  | The Maybe datatype definition.
-**Set** a | Collection.Set | (* ~> *) | a:Eq | A set is a unordered collection, where each element is saved exactly once
+**Collection** a | Collection.Collection | (* ~> *) |  | A ````Collection```` is a data structure which contains zero or more elements.
+**Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq | A ````Collection```` which maps a key onto a value.
+**List** a | Collection.List | (* ~> *) |  | A ````Collection```` which preserves order and allows duplicate elements.
+**Maybe** a | Collection.Maybe | (* ~> *) |  | A collection which contains at most one value.
+**Set** a | Collection.Set | (* ~> *) | a:Eq | A ````Collection```` without order and duplicates.
 **Bool**  | Data.Bool | * |  | The ````Bool```` datatype represents truth values of logic.
 **Int**  | Num.Nat | * |  | 
 **Int'**  | Num.Nat | * |  | 
@@ -28,7 +28,7 @@ Type | Declared in | Kind | Requirements | Docstring
 
 
 
-> This page was automatically generated on 2015-01-03 21:32:51
+> This page was automatically generated on 2015-01-03 22:14:49
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.
