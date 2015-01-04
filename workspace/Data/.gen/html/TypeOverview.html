@@ -1,1191 +1,153 @@
-<h1 id="type-overview">
-    Type
-     
-    overview
-</h1>
-
-
+<h1 id="type-overview">Type overview</h1>
 <table>
-    
-
-    <thead>
-        
-
-        <tr class="header">
-            
-
-            <th align="left">
-                Type
-            </th>
-            
-
-            <th align="left">
-                Declared
-                 
-                in
-            </th>
-            
-
-            <th align="left">
-                Kind
-            </th>
-            
-
-            <th align="left">
-                Docstring
-            </th>
-            
-
-        </tr>
-        
-
-    </thead>
-    
-
-    <tbody>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    BIInt
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Builtins
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                int!
-                 
-                This
-                 
-                is
-                 
-                a
-                 
-                temporary
-                 
-                representations,
-                 
-                which
-                 
-                will
-                 
-                be
-                 
-                replaced
-                 
-                by
-                 
-                a
-                 
-                truly
-                 
-                builtin
-                 
-                one
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Eq
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Category.Eq
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                The
-                 
-                category
-                 
-                which
-                 
-                defines
-                 
-                <em>
-                    equality
-                </em>
-                 
-                <code>
-                    ==
-                </code>
-                 
-                and
-                 
-                <em>
-                    inequality
-                </em>
-                 
-                <code>
-                    !=
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Associative
-                </strong>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Category.Function
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Functions
-                 
-                for
-                 
-                which
-                 
-                the
-                 
-                order
-                 
-                of
-                 
-                evaluation
-                 
-                does
-                 
-                not
-                 
-                matter.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Commutative
-                </strong>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Category.Function
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Functions
-                 
-                for
-                 
-                which
-                 
-                the
-                 
-                arguments
-                 
-                can
-                 
-                be
-                 
-                swapped.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Mappable
-                </strong>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Category.Mappable
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                <em>
-                    container
-                </em>
-                 
-                on
-                 
-                which
-                 
-                <code>
-                    map
-                </code>
-                 
-                is
-                 
-                defined.
-                 
-                Also
-                 
-                known
-                 
-                as
-                 
-                <code>
-                    Functor
-                </code>
-                 
-                in
-                 
-                most
-                 
-                other
-                 
-                functional
-                 
-                programming
-                 
-                languages.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Monoid
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Category.Monoid
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                <code>
-                    Monoid
-                </code>
-                 
-                is
-                 
-                an
-                 
-                type
-                 
-                which
-                 
-                has
-                 
-                <em>
-                    neutral
-                     
-                    element
-                </em>
-                 
-                and
-                 
-                an
-                 
-                <em>
-                    addition
-                </em>
-                .
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Product
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Category.Monoid
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                An
-                 
-                instance
-                 
-                of
-                 
-                <code>
-                    Monoid
-                </code>
-                ,
-                 
-                with
-                 
-                <code>
-                    *
-                </code>
-                 
-                defined
-                 
-                as
-                 
-                append
-                 
-                and
-                 
-                <code>
-                    1
-                </code>
-                 
-                as
-                 
-                neutral
-                 
-                element.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Sum
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Category.Monoid
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                An
-                 
-                instance
-                 
-                of
-                 
-                <code>
-                    Monoid
-                </code>
-                ,
-                 
-                with
-                 
-                <code>
-                    +
-                </code>
-                 
-                defined
-                 
-                as
-                 
-                append
-                 
-                and
-                 
-                <code>
-                    0
-                </code>
-                 
-                as
-                 
-                neutral
-                 
-                element.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Ord
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Category.Ord
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                The
-                 
-                category
-                 
-                which
-                 
-                defines
-                 
-                <em>
-                    lower
-                     
-                    then
-                </em>
-                 
-                and
-                 
-                <em>
-                    higher
-                     
-                    then
-                </em>
-                .
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Collection
-                </strong>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Collection.Collection
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                <code>
-                    Collection
-                </code>
-                 
-                is
-                 
-                a
-                 
-                data
-                 
-                structure
-                 
-                which
-                 
-                contains
-                 
-                zero
-                 
-                or
-                 
-                more
-                 
-                elements.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Dict
-                </strong>
-                 
-                <code>
-                    k:Eq
-                </code>
-                 
-                <code>
-                    v
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Collection.Dict
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; (* ~&gt; *))
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                <code>
-                    Collection
-                </code>
-                 
-                which
-                 
-                maps
-                 
-                a
-                 
-                key
-                 
-                onto
-                 
-                a
-                 
-                value.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    List
-                </strong>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Collection.List
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                <code>
-                    Collection
-                </code>
-                 
-                which
-                 
-                preserves
-                 
-                order
-                 
-                and
-                 
-                allows
-                 
-                duplicate
-                 
-                elements.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Maybe
-                </strong>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Collection.Maybe
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                collection
-                 
-                which
-                 
-                contains
-                 
-                at
-                 
-                most
-                 
-                one
-                 
-                value.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Set
-                </strong>
-                 
-                <code>
-                    a:Eq
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Collection.Set
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; *)
-                </code>
-            </td>
-            
-
-            <td align="left">
-                A
-                 
-                <code>
-                    Collection
-                </code>
-                 
-                without
-                 
-                order
-                 
-                and
-                 
-                duplicates.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Bool
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Data.Bool
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-            <td align="left">
-                The
-                 
-                <code>
-                    Bool
-                </code>
-                 
-                datatype
-                 
-                represents
-                 
-                truth
-                 
-                values
-                 
-                of
-                 
-                logic.
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Int
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Int
-                    '
-                    
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    IntInf
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    IntInf
-                    '
-                    
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Nat
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    Nat
-                    '
-                    
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    NatInf
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <strong>
-                    NatInf
-                    '
-                    
-                </strong>
-            </td>
-            
-
-            <td align="left">
-                Num.Nat
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    *
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <strong>
-                    Flip
-                </strong>
-                 
-                <code>
-                    x
-                </code>
-                 
-                <code>
-                    b
-                </code>
-                 
-                <code>
-                    a
-                </code>
-            </td>
-            
-
-            <td align="left">
-                Type.Function
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    (* ~&gt; (* ~&gt; (* ~&gt; *)))
-                </code>
-            </td>
-            
-
-        </tr>
-        
-
-    </tbody>
-    
-
+<thead>
+<tr class="header">
+<th align="left">Type</th>
+<th align="left">Declared in</th>
+<th align="left">Kind</th>
+<th align="left">Docstring</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>BIInt</strong></td>
+<td align="left">Builtins</td>
+<td align="left"><code>*</code></td>
+<td align="left">A int! This is a temporary representations, which will be replaced by a truly builtin one</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Eq</strong></td>
+<td align="left">Category.Eq</td>
+<td align="left"><code>*</code></td>
+<td align="left">The category which defines <em>equality</em> <code>==</code> and <em>inequality</em> <code>!=</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Associative</strong> <code>a</code></td>
+<td align="left">Category.Function</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">Functions for which the order of evaluation does not matter.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Commutative</strong> <code>a</code></td>
+<td align="left">Category.Function</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">Functions for which the arguments can be swapped.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Mappable</strong> <code>a</code></td>
+<td align="left">Category.Mappable</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">A <em>container</em> on which <code>map</code> is defined. Also known as <code>Functor</code> in most other functional programming languages.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Monoid</strong></td>
+<td align="left">Category.Monoid</td>
+<td align="left"><code>*</code></td>
+<td align="left">A <code>Monoid</code> is an type which has <em>neutral element</em> and an <em>addition</em>.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Product</strong></td>
+<td align="left">Category.Monoid</td>
+<td align="left"><code>*</code></td>
+<td align="left">An instance of <code>Monoid</code>, with <code>*</code> defined as append and <code>1</code> as neutral element.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Sum</strong></td>
+<td align="left">Category.Monoid</td>
+<td align="left"><code>*</code></td>
+<td align="left">An instance of <code>Monoid</code>, with <code>+</code> defined as append and <code>0</code> as neutral element.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Ord</strong></td>
+<td align="left">Category.Ord</td>
+<td align="left"><code>*</code></td>
+<td align="left">The category which defines <em>lower then</em> and <em>higher then</em>.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Collection</strong> <code>a</code></td>
+<td align="left">Collection.Collection</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">A <code>Collection</code> is a data structure which contains zero or more elements.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Dict</strong> <code>k:Eq</code> <code>v</code></td>
+<td align="left">Collection.Dict</td>
+<td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
+<td align="left">A <code>Collection</code> which maps a key onto a value.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>List</strong> <code>a</code></td>
+<td align="left">Collection.List</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">A <code>Collection</code> which preserves order and allows duplicate elements.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Maybe</strong> <code>a</code></td>
+<td align="left">Collection.Maybe</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">A collection which contains at most one value.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Set</strong> <code>a:Eq</code></td>
+<td align="left">Collection.Set</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">A <code>Collection</code> without order and duplicates.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Bool</strong></td>
+<td align="left">Data.Bool</td>
+<td align="left"><code>*</code></td>
+<td align="left">The <code>Bool</code> datatype represents truth values of logic.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Int</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Int'</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>IntInf</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>IntInf'</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Nat</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Nat'</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>NatInf</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>NatInf'</strong></td>
+<td align="left">Num.Nat</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Flip</strong> <code>x</code> <code>b</code> <code>a</code></td>
+<td align="left">Type.Function</td>
+<td align="left"><code>(* ~&gt; (* ~&gt; (* ~&gt; *)))</code></td>
+</tr>
+</tbody>
 </table>
-
-
 <blockquote>
-    
-
-    <p>
-        This
-         
-        page
-         
-        was
-         
-        automatically
-         
-        generated
-         
-        on
-         
-        2015-01-04
-         
-        23:13:27
-         
-        UTC
-         
-        (2015-01-05
-         
-        00:13:27
-         
-        CET)
-    </p>
-    
-
-    <p>
-        Do
-         
-        not
-         
-        edit
-         
-        it,
-         
-        as
-         
-        regeneration
-         
-        will
-         
-        overwrite
-         
-        your
-         
-        changes.
-    </p>
-    
-
-    <p>
-        Back
-         
-        to
-         
-        <a href="Index.html">
-            index
-        </a>
-    </p>
-    
-
+<p>This page was automatically generated on 2015-01-04 23:14:54 UTC (2015-01-05 00:14:54 CET)</p>
+<p>Do not edit it, as regeneration will overwrite your changes.</p>
+<p>Back to <a href="Index.html">index</a></p>
 </blockquote>

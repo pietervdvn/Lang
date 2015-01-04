@@ -1,486 +1,76 @@
-<h1 id="operator-overview">
-    Operator
-     
-    overview
-</h1>
-
-
-<h1 id="precedences-overview">
-    Precedences
-     
-    overview
-</h1>
-
-
-<p>
-    The
-     
-    higher
-     
-    the
-     
-    operator
-     
-    stands
-     
-    in
-     
-    the
-     
-    table
-     
-    (the
-     
-    lower
-     
-    the
-     
-    number),
-     
-    the
-     
-    more
-     
-    range
-     
-    it
-     
-    will
-     
-    have.
-     
-    The
-     
-    lower
-     
-    it
-     
-    stands,
-     
-    the
-     
-    tighter
-     
-    the
-     
-    operator
-     
-    binds.
-     
-    The
-     
-    lower
-     
-    the
-     
-    operator
-     
-    stands,
-     
-    the
-     
-    earlier
-     
-    it
-     
-    will
-     
-    be
-     
-    evaluated
-</p>
-
-
-<p>
-    To
-     
-    test
-     
-    precedence,
-     
-    invoke
-     
-    <code>
-        --p &lt;expression&gt;
-    </code>
-     
-    in
-     
-    the
-     
-    interpreter,
-     
-    which
-     
-    converts
-     
-    expression
-     
-    to
-     
-    prefix
-     
-    notation.
-</p>
-
-
+<h1 id="operator-overview">Operator overview</h1>
+<h1 id="precedences-overview">Precedences overview</h1>
+<p>The higher the operator stands in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated</p>
+<p>To test precedence, invoke <code>--p &lt;expression&gt;</code> in the interpreter, which converts expression to prefix notation.</p>
 <table>
-    
-
-    <thead>
-        
-
-        <tr class="header">
-            
-
-            <th align="left">
-                Precedence
-            </th>
-            
-
-            <th align="left">
-                Operators
-            </th>
-            
-
-            <th align="left">
-                Associativity
-            </th>
-            
-
-        </tr>
-        
-
-    </thead>
-    
-
-    <tbody>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                1
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    &amp;&amp;
-                </code>
-                ,
-                 
-                <code>
-                    ||
-                </code>
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                2
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    ==
-                </code>
-                ,
-                 
-                <code>
-                    !=
-                </code>
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                3
-            </td>
-            
-
-            <td align="left">
-                <code>
-                    !
-                </code>
-            </td>
-            
-
-            <td align="left">
-                prefix
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                4
-            </td>
-            
-
-            <td align="left">
-                Other
-                 
-                operators
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-    </tbody>
-    
-
+<thead>
+<tr class="header">
+<th align="left">Precedence</th>
+<th align="left">Operators</th>
+<th align="left">Associativity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1</td>
+<td align="left"><code>&amp;&amp;</code>, <code>||</code></td>
+<td align="left">left</td>
+</tr>
+<tr class="even">
+<td align="left">2</td>
+<td align="left"><code>==</code>, <code>!=</code></td>
+<td align="left">left</td>
+</tr>
+<tr class="odd">
+<td align="left">3</td>
+<td align="left"><code>!</code></td>
+<td align="left">prefix</td>
+</tr>
+<tr class="even">
+<td align="left">4</td>
+<td align="left">Other operators</td>
+<td align="left">left</td>
+</tr>
+</tbody>
 </table>
-
-
 <table>
-    
-
-    <thead>
-        
-
-        <tr class="header">
-            
-
-            <th align="left">
-                Operator
-            </th>
-            
-
-            <th align="left">
-                Precedence
-            </th>
-            
-
-            <th align="left">
-                Associativity
-            </th>
-            
-
-        </tr>
-        
-
-    </thead>
-    
-
-    <tbody>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <code>
-                    !
-                </code>
-            </td>
-            
-
-            <td align="left">
-                3
-            </td>
-            
-
-            <td align="left">
-                prefix
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <code>
-                    !=
-                </code>
-            </td>
-            
-
-            <td align="left">
-                2
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <code>
-                    &amp;&amp;
-                </code>
-            </td>
-            
-
-            <td align="left">
-                1
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="even">
-            
-
-            <td align="left">
-                <code>
-                    ==
-                </code>
-            </td>
-            
-
-            <td align="left">
-                2
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-        <tr class="odd">
-            
-
-            <td align="left">
-                <code>
-                    ||
-                </code>
-            </td>
-            
-
-            <td align="left">
-                1
-            </td>
-            
-
-            <td align="left">
-                left
-            </td>
-            
-
-        </tr>
-        
-
-    </tbody>
-    
-
+<thead>
+<tr class="header">
+<th align="left">Operator</th>
+<th align="left">Precedence</th>
+<th align="left">Associativity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>!</code></td>
+<td align="left">3</td>
+<td align="left">prefix</td>
+</tr>
+<tr class="even">
+<td align="left"><code>!=</code></td>
+<td align="left">2</td>
+<td align="left">left</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>&amp;&amp;</code></td>
+<td align="left">1</td>
+<td align="left">left</td>
+</tr>
+<tr class="even">
+<td align="left"><code>==</code></td>
+<td align="left">2</td>
+<td align="left">left</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>||</code></td>
+<td align="left">1</td>
+<td align="left">left</td>
+</tr>
+</tbody>
 </table>
-
-
 <blockquote>
-    
-
-    <p>
-        This
-         
-        page
-         
-        was
-         
-        automatically
-         
-        generated
-         
-        on
-         
-        2015-01-04
-         
-        23:13:27
-         
-        UTC
-         
-        (2015-01-05
-         
-        00:13:27
-         
-        CET)
-    </p>
-    
-
-    <p>
-        Do
-         
-        not
-         
-        edit
-         
-        it,
-         
-        as
-         
-        regeneration
-         
-        will
-         
-        overwrite
-         
-        your
-         
-        changes.
-    </p>
-    
-
-    <p>
-        Back
-         
-        to
-         
-        <a href="Index.html">
-            index
-        </a>
-    </p>
-    
-
+<p>This page was automatically generated on 2015-01-04 23:14:54 UTC (2015-01-05 00:14:54 CET)</p>
+<p>Do not edit it, as regeneration will overwrite your changes.</p>
+<p>Back to <a href="Index.html">index</a></p>
 </blockquote>

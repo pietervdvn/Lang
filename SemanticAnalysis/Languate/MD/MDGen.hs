@@ -10,7 +10,7 @@ Helper function to generate a markdown overview page.
 import StdDef
 import MarkDown
 import Text.Pandoc
-import Text.Blaze.Html.Renderer.Pretty
+import Text.Blaze.Html.Renderer.String
 
 import Languate.FQN
 
