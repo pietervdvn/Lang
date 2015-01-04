@@ -3,7 +3,6 @@
 Type | Declared in | Kind | Requirements | Docstring
 ---- | ----------- | ---- | ------------ | ---------
 **BIInt**  | Builtins | * |  | A int!
-**T**  | Prelude | * |  | 
 **Eq**  | Category.Eq | * |  | The category which declares equality ````==```` and inequality ````!=````
 **Associative** a | Category.Function | (* ~> *) |  | Functions for which the order of evaluation does not matter.
 **Commutative** a | Category.Function | (* ~> *) |  | Functions for which the arguments can be swapped.
@@ -29,7 +28,7 @@ Type | Declared in | Kind | Requirements | Docstring
 
 
 
-> This page was automatically generated on 2015-01-04 17:35:48
+> This page was automatically generated on 2015-01-04 18:17:59
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.

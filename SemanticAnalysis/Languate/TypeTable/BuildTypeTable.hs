@@ -33,7 +33,7 @@ import Languate.FQN
 import Languate.World
 import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
-import Languate.KindChecker.BuildKindTable
+import Languate.TypeTable.KindChecker.BuildKindTable
 import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable.BuildDocstringTable
 import Languate.TypeTable.BuildFreeNameTable
@@ -48,7 +48,7 @@ buildTypeTable w tlts
 		= inside "While building the type table" $
 		   do	validateWorld0 tlts w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
-			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts
-			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w
 			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
+			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
+			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w
 			return $ TypeTable klt typeReqs (todos "supertypes") docstrings freeNames

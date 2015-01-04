@@ -1,4 +1,4 @@
-module Languate.KindChecker.Solver where
+module Languate.TypeTable.KindChecker.Solver where
 
 {--
 
@@ -23,8 +23,8 @@ import Control.Arrow
 import Languate.FQN
 import Languate.AST (Coor)
 import Languate.TAST
-import Languate.KindChecker.KindConstraint
-import Languate.KindChecker.KindChecks
+import Languate.TypeTable.KindChecker.KindConstraint
+import Languate.TypeTable.KindChecker.KindChecks
 import Languate.Checks.CheckUtils
 import Languate.TypeTable
 
@@ -39,8 +39,9 @@ Type requirements are all given withing the constraints. This means we have free
 
 -}
 
-solve		:: [(KindConstraint, Location)] -> Exc KindLookupTable
-solve allConstr	= inside ("While building the kind table") $ do
+solve		:: TypeReqTable -> Map TypeID (Map Int Name) -> [(KindConstraint, Location)] -> Exc KindLookupTable
+solve treqt freenmt allConstr
+		= inside ("While building the kind table") $ do
 			klt 	<- solveAll $ mapMaybe (unpackMaybeTuple . (first getHasKind)) allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints

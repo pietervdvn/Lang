@@ -1,4 +1,4 @@
-module Languate.KindChecker.KindChecks where
+module Languate.TypeTable.KindChecker.KindChecks where
 
 {--
 This module implements various checks on kinds. It provides helper functions for the kindsolver.
@@ -19,7 +19,7 @@ import Languate.AST
 import Languate.TAST
 import Languate.TypeTable
 import Languate.FQN
-import Languate.KindChecker.KindConstraint
+import Languate.TypeTable.KindChecker.KindConstraint
 
 import Languate.Graphs.SearchCycles
 

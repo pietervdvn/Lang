@@ -1,4 +1,4 @@
-module Languate.KindChecker.ConstructKindConstraints where
+module Languate.TypeTable.KindChecker.ConstructKindConstraints where
 {--
 This module implements the functions which calculate what kind a declaration has.
 
@@ -8,7 +8,7 @@ This means that some kinds can only be known the moment the entire kind table is
 import StdDef
 import Exceptions
 
-import Languate.KindChecker.KindConstraint
+import Languate.TypeTable.KindChecker.KindConstraint
 import Languate.TAST
 import Languate.AST as AST
 import Languate.FQN

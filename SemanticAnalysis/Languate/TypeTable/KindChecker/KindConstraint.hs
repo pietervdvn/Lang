@@ -1,4 +1,4 @@
-module Languate.KindChecker.KindConstraint where
+module Languate.TypeTable.KindChecker.KindConstraint where
 {--
 Implementation of kind constraint and related functions
 --}
