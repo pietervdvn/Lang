@@ -10,7 +10,7 @@ fi
 
 FOUND=0
 
-for pack in Std/ Consumer/ Regex/ Bnf/ Parser/ Loader/ SemanticAnalysis/ Interpreter/ ExampleChecker/
+for pack in Std/ Consumer/ Regex/ Bnf/ Parser/ Loader/ SemanticAnalysis/ # Interpreter/ ExampleChecker/
 do
 	if [ "$FOUND" -eq 1 -o "$START" = "$pack" ]
 	then
@@ -31,8 +31,12 @@ do
 done
 
 cd Main
-if [[ ghc Main.hs ]]; then
-	echo "Installing Main failed"
+ghc Main.hs
+EXITCODE="$?"
+echo "Exit code $EXITCODE"
+if [[ $EXITCODE -ne 0 ]]
+then
+	echo "Compiling langc (Main) failed"
 	exit
 fi
 
@@ -45,12 +49,5 @@ rm */*.o
 cd ..
 cd ..
 
-./langc$version --no-repl
-if [[ $? -ne 0 ]]
-then
-	echo "Installing Main failed"
-	exit
-fi
-
-
+# Test all the laws!
 ./langc$version --no-repl
