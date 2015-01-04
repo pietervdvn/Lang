@@ -1,13 +1,13 @@
 Monoid
 ------
-Declaration and functions for Monoids
+Declaration and functions for ''Monoids'', ''Sum'' and ''Product''
 ------
 
 import Num.Nat
 
 ---
-A monoid is an type on which a neutral (identity) element and an _addition_ operator is defined.
-The addition operator should be associative.
+A ''Monoid'' is an type which has _neutral element_ and an _addition_.
+The addition operator should be ''Associative''.
 
 By adding the associativity, the compiler has a high degree of freedom in optimizing the order in which the operation is performed. Because all collections are monoids, this means (for example) taking unions can be done in parallel without much ado, with a mapReduce.
 ---
@@ -21,13 +21,13 @@ cat Monoid
 	append	: monoid -> monoid -> monoid
 
 
--- Sum is an instance of monoid, with (+) defined as append
+-- An instance of ''Monoid'', with ''+'' defined as append and ''0'' as neutral element.
 cat Sum
 	(+)	: sum -> sum -> sum
 	zero	: sum
 
 
--- Product is an instance of monoid, with (*) defined as append
+-- An instance of ''Monoid'', with ''*'' defined as append and ''1'' as neutral element.
 cat Product
 	(*)	: product -> product -> product
 	one	: product

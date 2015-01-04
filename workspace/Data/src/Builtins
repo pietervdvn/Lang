@@ -3,5 +3,5 @@ Builtins
 Stub, filled in by compiler.
 --------
 
--- A int!
+-- A int! This is a temporary representations, which will be replaced by a truly builtin one
 data BIInt = Zero | Succ BIInt | Prev BIInt | Inf

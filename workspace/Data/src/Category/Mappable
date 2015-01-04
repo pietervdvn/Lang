@@ -4,7 +4,7 @@ Declaration and util functions
 -------
 
 ---
-A ''container'' on which ''map'' is defined. Aka ''functor''
+A _container_ on which ''map'' is defined. Also known as ''Functor'' in most other functional programming languages.
 ---
 cat Mappable a
 	~ identity: map id	= id
