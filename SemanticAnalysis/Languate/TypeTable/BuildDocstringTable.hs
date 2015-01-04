@@ -48,5 +48,5 @@ unpack		:: FQN -> Name -> Maybe String -> Exc (Maybe (TypeID, String))
 unpack fqn name (Just doc)
 		= return $ Just ((fqn,name), doc)
 unpack _ name Nothing
-		= do	err $ "No docstring in the type declaration of "++name
+		= do	warn $ "No docstring in the type declaration of "++name
 			return Nothing

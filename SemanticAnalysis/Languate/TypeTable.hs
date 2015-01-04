@@ -29,19 +29,26 @@ The type table contains all known types within a certain module.
 
 -}
 
-data Duplicate	= Duplicate [FQN]
 type TypeID	= (FQN, Name)
 
 type TypeReqTable	= Map (TypeID, Int) (Set RType)
 type KindLookupTable	= Map TypeID Kind
+
+{-
+Keeps track of each supertype.
+
+E.g. {Set -->  {Collection}, Collection --> {Mappable, Monoid},  }
+
+Note that a 'Collection a' (with free type variable) is a monoid, but 'Collection' is not.
+This is why the [Name] gives how much (and what) frees are applied.
+There might be type requirements involved with those frees.
+-}
+type SuperTypeTable	= Map TypeID (Set (RType, [Name]))
+
+
 data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
 				, typeReqs	:: TypeReqTable			-- type requirements are explicit for new type declarations; contains synonyms
-				, supertypes	:: Map RType (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
-				{-
-				Tells what functions should be implemented to be an instance of given superclass
-				In TypeTable and not in instanceConstr: not a class def!
-				-}
-				, instConstr	:: Map TypeID (ClassDef, Kind)
+				, supertypes	:: Map TypeID (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				, docstrings	:: Map TypeID String
 				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
