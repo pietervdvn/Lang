@@ -43,6 +43,6 @@ footer	= do	time	<- getCurrentTime
 		let dateLocal	= remNanos . show $ utcToLocalTime zone time
 		let p =  [parag $ "This page was automatically generated on "++date++" UTC ("++dateLocal++" "++show zone++")"
 			, parag $ "Do not edit it, as regeneration will overwrite your changes."
-			, "Back to "++link "index" "Index.html"
+			, "Back to "++link "index" "Index"
 			]
 		return $ qoute $ unlines p
