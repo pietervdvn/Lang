@@ -39,14 +39,14 @@ typeReqsFor	:: TypeTable -> TypeID -> MarkDown
 typeReqsFor tt id
 	= let	freeNmT	= findWithDefault empty id $ freeNames tt
 		kys	= sort $ keys freeNmT in
-		intercal "; " $ map (typeReqFor tt id freeNmT) kys
+		unwords $ map (typeReqFor tt id freeNmT) kys
 
 
 typeReqFor	:: TypeTable -> TypeID -> Map Int Name -> Int -> MarkDown
 typeReqFor tt id names i
 	= let 	name	= findWithDefault "?" i names
 		reqs	= findWithDefault S.empty (id,i) $ typeReqs tt in
-		name ++ when (":") (code $ intercal "," $ map showShort $ S.toList reqs)
+		name ++(code $ strip $ intercal "," $ map showShort $ S.toList reqs)
 
 
 showShort	:: RType -> String
