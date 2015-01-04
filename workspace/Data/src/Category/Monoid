@@ -27,7 +27,7 @@ cat Sum
 	zero	: sum
 
 
--- Product is an instance of monoid, with (+) defined as append
+-- Product is an instance of monoid, with (*) defined as append
 cat Product
 	(*)	: product -> product -> product
 	one	: product

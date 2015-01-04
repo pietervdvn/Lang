@@ -3,12 +3,13 @@
 Type | Declared in | Kind | Requirements | Docstring
 ---- | ----------- | ---- | ------------ | ---------
 **BIInt**  | Builtins | * |  | A int!
+**T**  | Prelude | * |  | 
 **Eq**  | Category.Eq | * |  | The category which declares equality ````==```` and inequality ````!=````
 **Associative** a | Category.Function | (* ~> *) |  | Functions for which the order of evaluation does not matter.
 **Commutative** a | Category.Function | (* ~> *) |  | Functions for which the arguments can be swapped.
 **Mappable** a | Category.Mappable | (* ~> *) |  | A ````container```` on which ````map```` is defined. Aka ````functor````
 **Monoid**  | Category.Monoid | * |  | A monoid is an type on which a neutral (identity) element and an _addition_ operator is defined.
-**Product**  | Category.Monoid | * |  | Product is an instance of monoid, with (+) defined as append
+**Product**  | Category.Monoid | * |  | Product is an instance of monoid, with (*) defined as append
 **Sum**  | Category.Monoid | * |  | Sum is an instance of monoid, with (+) defined as append
 **Collection** a | Collection.Collection | (* ~> *) |  | A ````Collection```` is a data structure which contains zero or more elements.
 **Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq | A ````Collection```` which maps a key onto a value.
@@ -28,7 +29,7 @@ Type | Declared in | Kind | Requirements | Docstring
 
 
 
-> This page was automatically generated on 2015-01-03 22:14:49
+> This page was automatically generated on 2015-01-04 17:35:48
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.
