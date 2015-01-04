@@ -41,5 +41,11 @@ writeTables to packagePath
 			let save nm mdGen table	= saveTo path (nm++"Overview") $ generate (nm++" overview") $ mdGen $ table to
 			save "Operator" show precedenceTable
 			save "Type" typeTable2md typeTable
-			let index	= generate "Index" $ parag (link "Type Overview" "TypeOverview") ++ parag (link "Operator Overview" "OperatorOverview")
+			let index	= generate' "Index" indexMD
 			saveTo path "Index" index
+
+
+indexMD	:: (String -> String -> String) -> MarkDown
+indexMD link	=  concatMap parag
+			[ link "Type Overview" "TypeOverview"
+			, link "Operator Overview" "OperatorOverview"]
