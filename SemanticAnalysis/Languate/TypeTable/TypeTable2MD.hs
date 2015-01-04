@@ -21,14 +21,14 @@ typeTable2md tt	= (table ["Type","Declared in","Kind","Requirements","Docstring"
 typeRow		:: TypeTable -> TypeID -> [MarkDown]
 typeRow	tt (fqn, name)
 		=  let getMaybe table	= lookup (fqn, name) $ table tt in
-			[ bold name ++ unwords (frees tt (fqn, name))
+			[ bold name ++ typeReqsFor tt (fqn, name)
 			, showShortFQN fqn
 			, maybe (bold "ERROR: no kind found") show $ getMaybe kinds
 			, typeReqsFor tt (fqn, name)
 			, recode $ maybe "" firstLine $ getMaybe docstrings
 			]
 
-
+-- builds frees for type id, e.g. ''k :Eq, Ord) v'
 frees		:: TypeTable -> TypeID -> [Name]
 frees tt id	=  let  freeNmT	= findWithDefault empty id $ freeNames tt
 			kys	= sort $ keys freeNmT	in
@@ -46,7 +46,7 @@ typeReqFor	:: TypeTable -> TypeID -> Map Int Name -> Int -> MarkDown
 typeReqFor tt id names i
 	= let 	name	= findWithDefault "?" i names
 		reqs	= findWithDefault S.empty (id,i) $ typeReqs tt in
-		when (name ++":") $ intercal ", " $ map showShort $ S.toList reqs
+		name ++ when (":") (code $ intercal "," $ map showShort $ S.toList reqs)
 
 
 showShort	:: RType -> String

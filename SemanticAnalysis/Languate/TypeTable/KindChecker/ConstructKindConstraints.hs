@@ -90,23 +90,23 @@ subtypeConstraints base frees superClasses
 -- Constructs a basic 'has kind' relation, for the given (declared) name with it frees
 baseTypeConstr	:: TypeID -> [Name] -> [TypeRequirement] -> RI [KindConstraint]
 baseTypeConstr id frees reqs
-		= do	(curry, constr)	<- buildCurry frees reqs
-			return $ HasKind id curry : constr
+		= do	curry	<- buildCurry frees reqs
+			return HasKind id curry
 
--- builds the kind, based on frees. e.g. ["k","v"] becomes '' * ~> * ~> * ''. This might cause addition constraints, e.g. k is ''Eq'' and ''Ord''. This means ''Eq'' and ''Ord'' should have the same kind too
-buildCurry	:: [Name] -> [TypeRequirement] -> RI (UnresolvedKind, [KindConstraint])
+-- builds the kind, based on frees. e.g. ["k","v"] becomes '' * ~> * ~> * ''. Consider that extra constraints lay on ''k'' (it should be, e.g. Mappable and Eq). This implies they both have the same kind. This is checked by checking the type requirement table, not by adding extra constraints. The first type (of the requirements) is used as kind constraint!
+buildCurry	:: [Name] -> [TypeRequirement] -> RI UnresolvedKind
 buildCurry frees reqs
 		= do	reqs'	<- resolveReqs reqs |> merge
 			buildCurry' frees reqs'
 
-buildCurry'	:: [Name] -> [(Name, [RType])] -> RI (UnresolvedKind, [KindConstraint])
+buildCurry'	:: [Name] -> [(Name, [RType])] -> RI UnresolvedKind
 buildCurry' [] reqs
-		=  return (UKind, [])
+		=  return UKind
 buildCurry' (n:nms) reqs
-	= do	(tail, constrs)	<- buildCurry' nms reqs
+	= do	tail	<- buildCurry' nms reqs
 		let found	= fromMaybe [] $ lookup n reqs
-		return $ if null found then (UKindCurry UKind tail, constrs)
-				else (UKindCurry (SameAs $ head found) tail, constrs ++ zipWith HaveSameKind found (tail' found) )
+		return $ if null found then UKindCurry UKind tail
+				else UKindCurry (SameAs $ head found) tail
 
 
 
