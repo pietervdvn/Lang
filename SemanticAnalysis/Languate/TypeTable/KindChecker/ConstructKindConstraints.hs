@@ -54,14 +54,14 @@ kindConstraintIn' inf@(Info fqn _) (stm, coor)
 kindConstraintIn	:: Statement -> RI [KindConstraint]
 kindConstraintIn (ADTDefStm (ADTDef name frees reqs _ _))
 		= do	id		<- getId name
-			baseTypeConstr id frees reqs
+			baseTypeConstr id frees reqs |> (:[])
 kindConstraintIn (ClassDefStm classDef)
 		= do	id@(fqn, nm)	<- getId $ name classDef
 			let frees	=  AST.frees classDef
 			let reqs	=  classReqs classDef
 			baseConstrs	<- baseTypeConstr id frees reqs
 			constraints	<- subtypeConstraints (RNormal fqn nm) frees $ subclassFrom classDef
-			return $ baseConstrs ++ constraints
+			return $ baseConstrs:constraints
 kindConstraintIn (InstanceStm (Instance nm subtype reqs))
 		= do	superT	<- resolve nm
 			subT	<- resolve subtype
@@ -70,14 +70,14 @@ kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs _))
 		= do	id@(fqn,_)	<- getId name
 			baseConstrs	<- baseTypeConstr id frees reqs
 			constraints 	<- subtypeConstraints (RNormal fqn name) frees superTypes
-			return $ baseConstrs ++ constraints
+			return $ baseConstrs:constraints
 kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs _))
 		= do	synonym		<- resolve sameAs
 			id@(fqn, _)	<- getId nm
 			baseConstrs	<- baseTypeConstr id frees reqs
 			let base	= RNormal fqn nm
 			let same	= HaveSameKind base synonym
-			return $ same:baseConstrs
+			return $ [same, baseConstrs]
 kindConstraintIn _	= return []
 
 
@@ -88,10 +88,10 @@ subtypeConstraints base frees superClasses
 			return $ zipWith HaveSameKind (repeat appliedBase) superClasses
 
 -- Constructs a basic 'has kind' relation, for the given (declared) name with it frees
-baseTypeConstr	:: TypeID -> [Name] -> [TypeRequirement] -> RI [KindConstraint]
+baseTypeConstr	:: TypeID -> [Name] -> [TypeRequirement] -> RI KindConstraint
 baseTypeConstr id frees reqs
 		= do	curry	<- buildCurry frees reqs
-			return HasKind id curry
+			return $ HasKind id curry
 
 -- builds the kind, based on frees. e.g. ["k","v"] becomes '' * ~> * ~> * ''. Consider that extra constraints lay on ''k'' (it should be, e.g. Mappable and Eq). This implies they both have the same kind. This is checked by checking the type requirement table, not by adding extra constraints. The first type (of the requirements) is used as kind constraint!
 buildCurry	:: [Name] -> [TypeRequirement] -> RI UnresolvedKind
