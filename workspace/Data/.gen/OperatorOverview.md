@@ -27,7 +27,7 @@ Operator | Precedence | Associativity
 
 
 
-> This page was automatically generated on 2015-01-04 21:36:53
+> This page was automatically generated on 2015-01-04 22:05:49 UTC (2015-01-04 23:05:49 CET)
 > 
 > 
-> Do not edit it, as re-generation will overwrite your changes.
+> Do not edit it, as regeneration will overwrite your changes.

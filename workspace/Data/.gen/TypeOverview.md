@@ -3,7 +3,7 @@
 Type | Declared in | Kind | Docstring
 ---- | ----------- | ---- | ---------
 **BIInt**  | Builtins | * | A int! This is a temporary representations, which will be replaced by a truly builtin one
-**Eq**  | Category.Eq | * | The category which defines equality ````==```` and inequality ````!=````
+**Eq**  | Category.Eq | * | The category which defines _equality_ ````==```` and _inequality_ ````!=````
 **Associative** ````a````  | Category.Function | (* ~> *) | Functions for which the order of evaluation does not matter.
 **Commutative** ````a````  | Category.Function | (* ~> *) | Functions for which the arguments can be swapped.
 **Mappable** ````a````  | Category.Mappable | (* ~> *) | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
@@ -29,7 +29,7 @@ Type | Declared in | Kind | Docstring
 
 
 
-> This page was automatically generated on 2015-01-04 21:36:53
+> This page was automatically generated on 2015-01-04 22:05:49 UTC (2015-01-04 23:05:49 CET)
 > 
 > 
-> Do not edit it, as re-generation will overwrite your changes.
+> Do not edit it, as regeneration will overwrite your changes.
