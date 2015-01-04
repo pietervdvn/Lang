@@ -34,7 +34,7 @@ buildAllTables w	= do	let tlts	=  buildTLTs w
 				return $ TableOverview tlts tt precT
 
 
--- Writes the overview tables to the relevant .md
+-- Writes the overview tables to the relevant .md and .html
 writeTables	:: TableOverview -> FilePath -> IO ()
 writeTables to packagePath
 		=  do	let path	= packagePath++"/.gen/"
