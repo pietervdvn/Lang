@@ -12,6 +12,11 @@ type Check	= Exc ()
 type Exc a	= Exceptions' String a
 
 unique ls	= length ls == (length $ nub ls)
+
+allSame []	= True
+allSame (a:as)	= all (==a) as
+
+
 isSingleton [_]	= True
 isSingleton _	= False
 

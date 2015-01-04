@@ -53,5 +53,5 @@ crossValidateField tlt frees prodss field
 			let (pivot:foundRTypes)	=  map fst foundRTypesCons
 			-- All types should be the same, thus all types should equal the first
 			let showOne (rt,c)	= show rt ++ " in '"++c++"'"
-			assert (all (==pivot) foundRTypes) $
+			assert (allSame foundRTypes) $
 				"Multiple types were found for the field '"++field++"': "++intercalate ", " (map showOne foundRTypesCons)

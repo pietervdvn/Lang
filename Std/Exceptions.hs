@@ -108,6 +108,9 @@ catch (Exceptions ws es (Left e)) f
 catch exc _
 	= exc
 
+
+try	= flip catch
+
 pass	:: Exceptions w e ()
 pass	= return ()
 

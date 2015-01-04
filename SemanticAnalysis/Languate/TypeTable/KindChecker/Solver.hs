@@ -24,8 +24,9 @@ import Languate.FQN
 import Languate.AST (Coor)
 import Languate.TAST
 import Languate.TypeTable.KindChecker.KindConstraint
-import Languate.TypeTable.KindChecker.KindChecks
 import Languate.Checks.CheckUtils
+import Languate.Checks.CheckKind
+
 import Languate.TypeTable
 
 
@@ -45,8 +46,8 @@ solve treqt freenmt allConstr
 			klt 	<- solveAll $ mapMaybe (unpackMaybeTuple . (first getHasKind)) allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
-			-- TODO fix frees! issue #57
-			mapM_ (validateSameKindConstraints klt empty) sameKinds
+			-- TODO resolve these! What rest here is
+			-- mapM_ (validateSameKindConstraints klt empty) sameKinds
 			return klt
 
 

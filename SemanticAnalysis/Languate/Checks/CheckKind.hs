@@ -1,4 +1,4 @@
-module Languate.TypeTable.KindChecker.KindChecks where
+module Languate.Checks.CheckKind where
 
 {--
 This module implements various checks on kinds. It provides helper functions for the kindsolver.
@@ -105,7 +105,7 @@ kindOf		:: KindLookupTable -> Map Name Kind -> RType -> Exceptions' String Kind
 kindOf klt _ (RNormal fqn nm)
 		= lookup (fqn, nm) klt ? ("Kind of the type "++show fqn++"."++nm++" was not found")
 kindOf _ frees (RFree a)
-		= return $ findWithDefault Kind a frees
+		= lookup a frees ? ("Free type variable '"++a++"' was not found.\nMake sure it is declared before used (thus left of it's usage)")
 kindOf klt frees (RApplied rt rts)
 		= do	bk	<- kindOf klt frees rt
 			appliedKnds	<- mapM (kindOf klt frees) rts

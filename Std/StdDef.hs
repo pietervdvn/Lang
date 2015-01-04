@@ -109,4 +109,4 @@ indent str
 
 indent'	:: String -> String -> String
 indent' msg str
-	= msg ++ "\n" ++ indent str
+	= msg ++ indent ("\n" ++  str)
