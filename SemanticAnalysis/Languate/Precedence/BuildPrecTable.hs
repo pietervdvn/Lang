@@ -54,10 +54,16 @@ addOp op unions	(dict, dict')
 
 -- ### Building of partial and ordering
 
--- gets a list of ("a" --> ["b","c"]), meaning "a" should be evaluated before b and c, and the inverse relation.
--- Gives a partion ordering by removing representative operations step by step.
+{-
+ Makes a list of {"a" --> ["b","c"], "b" --> ["c"], "c" --> []}, which means that "a" should be evaluated after ["b","c"].
+The first one in the list will thus be "c", which has no elements it should wait for.
+
+ Gives a partial ordering by removing representative operations step by step.
+
+Might get in a _loop_, e.g. on {"a" -> ["a"]}. This should not happen when the input is a union find input.
+--}
 buildOrdering	:: (Map Name [Name], Map Name [Name]) -> [Name]
-buildOrdering rels@(ltRel, revRel)
+buildOrdering rels@(ltRel, _)
 		=  	let highestPreced	= emptyKey ltRel in
 			if null highestPreced then	checkCycle ltRel -- either we're done or are stuck on a loop.
 				else 	let op 	= head highestPreced in

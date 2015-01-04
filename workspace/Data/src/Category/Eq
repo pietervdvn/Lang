@@ -9,7 +9,7 @@ precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
 precedence of (!=) is Left, (!=) = (==)
 
 ---
-The category which defines equality ''=='' and inequality ''!=''
+The category which defines _equality_ ''=='' and _inequality_ ''!=''
 ---
 cat Eq
 	-- Checks if the two given values are the same.
