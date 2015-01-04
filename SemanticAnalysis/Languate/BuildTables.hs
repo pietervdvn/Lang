@@ -5,6 +5,7 @@ This module builds all the tables you'll ever need!
 --}
 
 import StdDef
+import MarkDown
 import Data.Map (Map)
 import Languate.FQN
 import Languate.World
@@ -36,7 +37,9 @@ buildAllTables w	= do	let tlts	=  buildTLTs w
 -- Writes the overview tables to the relevant .md
 writeTables	:: TableOverview -> FilePath -> IO ()
 writeTables to packagePath
-		=  do	let genPath str	= packagePath++"/.gen/"++str++"Overview.md"
-			let save nm mdGen table	= saveTo (genPath nm) $ generate (nm++" overview") $ mdGen $ table to
+		=  do	let path	= packagePath++"/.gen/"
+			let save nm mdGen table	= saveTo path (nm++"Overview") $ generate (nm++" overview") $ mdGen $ table to
 			save "Operator" show precedenceTable
 			save "Type" typeTable2md typeTable
+			let index	= generate "Index" $ parag (link "Type Overview" "TypeOverview.html") ++ parag (link "Operator Overview" "OperatorOverview.html")
+			saveTo path "Index" index

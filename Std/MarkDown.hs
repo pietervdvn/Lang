@@ -29,6 +29,8 @@ commas	= intercalate ", "
 ital	= modif "_"
 bold	= modif "**"
 code	= modif "````"
+link title to
+	= "["++title++"]("++to++")"
 
 firstLine	:: MarkDown -> MarkDown
 firstLine str

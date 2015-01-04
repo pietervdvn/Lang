@@ -23,7 +23,7 @@ typeRow	tt (fqn, name)
 		=  let getMaybe table	= lookup (fqn, name) $ table tt in
 			[ bold name ++ typeReqsFor tt (fqn, name)
 			, showShortFQN fqn
-			, maybe (bold "ERROR: no kind found") show $ getMaybe kinds
+			, code $ maybe (bold "ERROR: no kind found") show $ getMaybe kinds
 			, recode $ maybe "" firstLine $ getMaybe docstrings
 			]
 
