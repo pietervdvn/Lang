@@ -46,7 +46,7 @@ typeReqFor	:: TypeTable -> TypeID -> Map Int Name -> Int -> MarkDown
 typeReqFor tt id names i
 	= let 	name	= findWithDefault "?" i names
 		reqs	= findWithDefault S.empty (id,i) $ typeReqs tt in
-		when (name ++":") $ unwords $ map showShort $ S.toList reqs
+		when (name ++":") $ intercal ", " $ map showShort $ S.toList reqs
 
 
 showShort	:: RType -> String

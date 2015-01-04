@@ -17,7 +17,7 @@ Keys are required to be unique. When a key-value pair ''(k,v)'' gets inserted, t
 
 The syntactic sugar ''{k --> v}'' desugars to ''Dict k v''
 ---
-cat Dict (k:Eq, Ord) v is Set k
+cat Dict (k:Eq, Mappable) v is Set k
 	empty	: dict k v
 	insert	: k -> v -> dict k v -> dict k v
 	lookup	: k -> dict k v -> v

@@ -12,7 +12,7 @@ Type | Declared in | Kind | Requirements | Docstring
 **Sum**  | Category.Monoid | * |  | Sum is an instance of monoid, with (+) defined as append
 **Ord**  | Category.Ord | * |  | The category which defines _lower then_ and _higher then_.
 **Collection** a | Collection.Collection | (* ~> *) |  | A ````Collection```` is a data structure which contains zero or more elements.
-**Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq Ord | A ````Collection```` which maps a key onto a value.
+**Dict** k v | Collection.Dict | (* ~> (* ~> *)) | k:Eq, Mappable | A ````Collection```` which maps a key onto a value.
 **List** a | Collection.List | (* ~> *) |  | A ````Collection```` which preserves order and allows duplicate elements.
 **Maybe** a | Collection.Maybe | (* ~> *) |  | A collection which contains at most one value.
 **Set** a | Collection.Set | (* ~> *) | a:Eq | A ````Collection```` without order and duplicates.
@@ -29,7 +29,7 @@ Type | Declared in | Kind | Requirements | Docstring
 
 
 
-> This page was automatically generated on 2015-01-04 18:30:02
+> This page was automatically generated on 2015-01-04 18:31:47
 > 
 > 
 > Do not edit it, as re-generation will overwrite your changes.
