@@ -36,8 +36,8 @@ cat Collection a
 	(:)	: (a:b) -> collection b -> collection b
 
 
-instance Mappable Collection
-instance Monoid (Collection a)
+instance Collection is Mappable
+instance Collection a is Monoid
 ---
 map	: (a -> b) -> a* -> b*
 f empty	= empty

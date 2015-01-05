@@ -15,4 +15,4 @@ The syntactic sugar ''a+'' desugars to ''More a''
 cat More a
 	head	: more a -> (b:a)
 
-instance Collection More
+instance More is Collection

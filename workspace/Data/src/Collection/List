@@ -21,9 +21,9 @@ cat List a in Collection a
 	tail	: [a] -> [(b:a)]
 	empty	: Maybe ()
 
-instance Monoid [a]
+instance List a is Monoid
 
-instance Mappable List
+instance List is Mappable
 
 
 map	: (a -> b) -> [a] -> [b]

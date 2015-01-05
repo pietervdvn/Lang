@@ -78,9 +78,8 @@ _subclass	::= ("in" | "is") type ("," type)*
 _categoryBody	::= categoryStm*
 _categoryStm	::= "\n+\t" (law | declaration | mlcomment | comment)
 
- -- ''instance Show (Set (a:Show))'',
- -- TODO will become instance ''Set (a:Show) is Show'' when Tleilaxu comes around. Change baseType to type!
- instance	::= "instance" knownType baseType
+ -- ''instance Set (a:Show) is Show'',
+ instance	::= "instance" type reqSep type
 
 
 

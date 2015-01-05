@@ -144,26 +144,23 @@ convi ast	=  convErr modName ast
 
 
 data ASTi	= Inst Type Type [TypeRequirement]
-		| IIdent Type	| Typei Type [TypeRequirement]
-		| InstanceT
+		| TypeT Type [TypeRequirement]
+		| InstanceT	| SubT
 	deriving (Show)
 
 
 hi		:: [(Name, ParseTree -> ASTi)]
 	-- basetype: the type which gets instantiated; knownType: the type which is the supertype of basetype
-hi		=  [("baseType", uncurry Typei . pt2type), ("knownType", IIdent . fst . pt2type)]
-
-check		:: (Type, [TypeRequirement]) -> Type
-check (t,[])	=  t
-check (t,reqs)	= error $ "Type requirements are not allowed in instance declarations: "++show t++" "++show reqs
+hi		=  [("type", uncurry TypeT . pt2type)]
 
 ti		:: Name -> String -> ASTi
 ti _ "instance"	=  InstanceT
+ti "reqSep" _	=  SubT
 ti nm cont	=  tokenErr (modName++"i") nm cont
 
 
 si		:: Name -> [ASTi] -> ASTi
-si _ [InstanceT, IIdent id, Typei t tr]
-		= Inst id t tr
+si _ [InstanceT, TypeT id tr, SubT, TypeT super tr']
+		= Inst super id $ tr++tr'
 si _ [ast]	= ast
 si nm asts	= seqErr modName nm asts

@@ -32,7 +32,7 @@ cat Product
 	(*)	: product -> product -> product
 	one	: product
 
-instance Monoid Sum
+instance Sum is Monoid
 
 append	: Sum -> Sum -> Sum
 a b	= a + b
@@ -48,7 +48,7 @@ precedence of (+) is Left, (+) < (<)
 _ 0	= neutral
 s i	= s + (s * (i - 1))
 
-instance Monoid Product
+instance Product is Monoid
 
 append	: Product -> Product -> Product
 a b	= a * b
