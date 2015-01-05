@@ -3,7 +3,7 @@ module Languate.Parser.Pt2Annot (pt2annot)where
 import StdDef
 import Bnf.ParseTree
 import Bnf
-import Languate.Parser.Pt2PrecedenceAnnot
+import Languate.Parser.Pt2Precedence
 import Languate.Parser.Utils
 import Languate.AST
 
@@ -18,15 +18,15 @@ modName	= "Pt2Annot"
 
 
 pt2annot	:: ParseTree -> Annotation
-pt2annot	= pt2a [("precedenceAnnot", pt2precAnnot),("normalAnnotation", pt2normAnnot)] (tokenErr $ "top level:"++ modName) seq' id
+pt2annot	= pt2a [("precedence", pt2prec),("annotation", pt2annot)] (tokenErr $ "top level:"++ modName) seq' id
 
 
 seq'		:: Name -> [Annotation] -> Annotation
 seq' _ [ast]	=  ast
 seq' name asts	=  seqErr ("top level:" ++ modName) name asts
 
-pt2normAnnot	:: ParseTree -> Annotation
-pt2normAnnot	=  pt2a [] t s convert
+pt2annot	:: ParseTree -> Annotation
+pt2annot	=  pt2a [] t s convert
 
 convert		:: AST -> Annotation
 convert	(Annot name cont)

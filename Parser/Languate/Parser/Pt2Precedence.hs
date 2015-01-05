@@ -1,4 +1,4 @@
-module Languate.Parser.Pt2PrecedenceAnnot (pt2precAnnot) where
+module Languate.Parser.Pt2Precedence (pt2precedence) where
 
 import StdDef
 import Bnf.ParseTree
@@ -12,8 +12,8 @@ This module converts the ParseTree into a precedence annotation.
 
 modName	= "Pt2PrecedenceAnnot"
 
-pt2precAnnot	:: ParseTree -> Annotation
-pt2precAnnot	=  pt2a [] t s convert
+pt2precedence	:: ParseTree -> Annotation
+pt2precedence	=  pt2a [] t s convert
 
 convert		:: AST -> Annotation
 convert	(PrecAnnotT annot)

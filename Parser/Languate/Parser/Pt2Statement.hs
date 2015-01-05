@@ -62,7 +62,8 @@ h		:: [(Name, ParseTree -> AST)]
 h		=  [ ("nls",Comm . pt2nls),("function", unc Func pt2func)
 		   , ("data",unc ADTDf pt2adtdef), ("synonym", SynDf . pt2syndef)
 		   , ("subtype", SubTypeDf . pt2subdef), ("cat", unc ClassDf pt2classDef)
-		   , ("annotation", Annot . pt2annot), ("instance", InstanceAST . pt2instance)]
+		   , ("annotation", Annot . pt2annot), ("precedence", Annot . pt2annot),
+		   , ("instance", InstanceAST . pt2instance)]
 
 unc		:: (a -> AST) -> (ParseTree -> ([Comment], a)) -> ParseTree -> AST
 unc constr f pt =  let (comms, a) = f pt in
