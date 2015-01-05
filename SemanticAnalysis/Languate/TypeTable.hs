@@ -35,16 +35,24 @@ type TypeReqTable	= Map (TypeID, Int) (Set RType)
 type KindLookupTable	= Map TypeID Kind
 
 {-
-Keeps track of each supertype.
+Keeps track of supertype relations.
 
-E.g. {Set -->  {Collection}, Collection --> {Mappable, Monoid},  }
+E.g.
 
-Note that a 'Collection a' (with free type variable) is a monoid, but 'Collection' is not.
-This is why the [Name] gives how much (and what) frees are applied.
-There might be type requirements involved with those frees.
+instance List (a:Eq) is Eq
+instance List (a:Eq) is Set a
+instance Dict k (v:Dict k k) is Multigraph
+
+This is saved as
+{List --> { [] -> Collection
+	    [{Eq}] --> Eq
+	    [{Show}] --> Show
+	    [{Eq}] --> Set a}}
 -}
-type SuperTypeTable	= Map TypeID (Set (RType, [Name]))
 
+
+type SuperTypeTableFor	= Map [Set RType] (Set RType)
+type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
 data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
 				, typeReqs	:: TypeReqTable			-- type requirements are explicit for new type declarations; contains synonyms

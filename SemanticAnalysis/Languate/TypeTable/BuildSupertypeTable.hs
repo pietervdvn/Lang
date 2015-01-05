@@ -10,3 +10,5 @@ e.g.
 instance Set (a:Show) is Show
 
 --}
+
+buildSuperTypeTable	:: World -> SuperTypeTable
