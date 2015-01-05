@@ -15,11 +15,9 @@ import Data.List
 
 
 validateFunction	:: TypeLookupTable -> Function -> Check
-validateFunction tlt (Function docStr _ signs laws clauses)
+validateFunction tlt (Function _ signs clauses)
 		= inside ("In the function declaration of "++intercalate ", " nms) $
-		   do	mapM_ validateLaw laws
 			mapM_ (validateSign tlt) signs
-			validateComment docStr
 			where nms	= nub $ map (\(n,_,_) -> n) signs
 
 

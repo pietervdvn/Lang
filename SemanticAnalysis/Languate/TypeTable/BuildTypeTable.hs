@@ -49,9 +49,10 @@ buildTypeTable	:: World -> Map FQN TypeLookupTable -> Exceptions' String TypeTab
 buildTypeTable w tlts
 		= inside "While building the type table" $
 		   do	validateWorld0 tlts w
-			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
+			let knownTypes	= keys klt
+			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
 			validateReqTable freeNames klt typeReqs
 			return $ TypeTable klt typeReqs (todos "supertypes") docstrings freeNames

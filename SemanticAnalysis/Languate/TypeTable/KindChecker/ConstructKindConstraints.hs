@@ -52,7 +52,7 @@ kindConstraintIn' inf@(Info fqn _) (stm, coor)
 
 -- Kind of declares what relations of kinds between types exists. E.g. "Functor" has kind "a ~> b", "Maybe" has the same kind as "Functor" etc...
 kindConstraintIn	:: Statement -> RI [KindConstraint]
-kindConstraintIn (ADTDefStm (ADTDef name frees reqs _ _))
+kindConstraintIn (ADTDefStm (ADTDef name frees reqs _))
 		= do	id		<- getId name
 			baseTypeConstr id frees reqs |> (:[])
 kindConstraintIn (ClassDefStm classDef)
@@ -66,12 +66,12 @@ kindConstraintIn (InstanceStm (Instance nm subtype reqs))
 		= do	superT	<- resolve nm
 			subT	<- resolve subtype
 			returnOne $ HaveSameKind subT superT
-kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs _))
+kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs))
 		= do	id@(fqn,_)	<- getId name
 			baseConstrs	<- baseTypeConstr id frees reqs
 			constraints 	<- subtypeConstraints (RNormal fqn name) frees superTypes
 			return $ baseConstrs:constraints
-kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs _))
+kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
 		= do	synonym		<- resolve sameAs
 			id@(fqn, _)	<- getId nm
 			baseConstrs	<- baseTypeConstr id frees reqs

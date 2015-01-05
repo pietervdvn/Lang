@@ -36,11 +36,11 @@ declaredType' fqn (stm, coor)
 			declaredType fqn stm
 
 declaredType	:: FQN -> Statement -> Exc (Maybe (TypeID, Map Int String))
-declaredType fqn  (ADTDefStm (ADTDef name frees _ _ _))
+declaredType fqn  (ADTDefStm (ADTDef name frees _ _))
 		= unpack fqn name frees
-declaredType fqn (SynDefStm (SynDef name frees _ _ _))
+declaredType fqn (SynDefStm (SynDef name frees _ _))
 		= unpack fqn name frees
-declaredType fqn (SubDefStm (SubDef name _ frees _ _ _))
+declaredType fqn (SubDefStm (SubDef name _ frees _ _))
 		= unpack fqn name frees
 declaredType fqn (ClassDefStm classDef)
 		= unpack fqn (name classDef) (frees classDef)

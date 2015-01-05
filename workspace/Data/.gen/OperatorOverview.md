@@ -8,26 +8,30 @@ To test precedence, invoke ````--p <expression>```` in the interpreter, which co
 
 Precedence | Operators | Associativity
 ---------- | --------- | -------------
-1 | ``&&``, ``||`` | left
-2 | ``==``, ``!=`` | left
-3 | ``!`` | prefix
-4 | Other operators | left
+1 | ``:`` | left (default)
+2 | ``?`` | right
+3 | ``&&``, ``||`` | left
+4 | ``==``, ``!=`` | left
+5 | ``!`` | prefix
+6 | Other operators | left
 
 
 
 Operator | Precedence | Associativity
 -------- | ---------- | -------------
-``!`` | 3 | prefix
-``!=`` | 2 | left
-``&&`` | 1 | left
-``==`` | 2 | left
-``||`` | 1 | left
+``!`` | 5 | prefix
+``!=`` | 4 | left
+``&&`` | 3 | left
+``:`` | 1 | left (default)
+``==`` | 4 | left
+``?`` | 2 | right
+``||`` | 3 | left
 
 
 
 
 
-> This page was automatically generated on 2015-01-04 23:26:01 UTC (2015-01-05 00:26:01 CET)
+> This page was automatically generated on 2015-01-05 21:08:42 UTC (2015-01-05 22:08:42 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.

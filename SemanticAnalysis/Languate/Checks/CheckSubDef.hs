@@ -11,9 +11,8 @@ import Languate.Checks.CheckComment
 
 
 
-validateSubDef tlt (SubDef nm _ frees superTps trex docstr)	-- RAR! T-Rexes are allowed, velociraptors aren't
+validateSubDef tlt (SubDef nm _ frees superTps trex)	-- RAR! T-Rexes are allowed, velociraptors aren't
 		= inside ("In the subtype declaration of "++nm) $
-			do	validateComment' docstr
-				validateTypes tlt frees superTps
+			do	validateTypes tlt frees superTps
 				validateReqs tlt frees trex
 				validateReqsFreeOrder trex frees

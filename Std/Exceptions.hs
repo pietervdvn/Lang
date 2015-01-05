@@ -111,6 +111,11 @@ catch exc _
 
 try	= flip catch
 
+try' a exc
+	= do	let recover e	= do	err e
+					return a
+		try recover exc
+
 pass	:: Exceptions w e ()
 pass	= return ()
 

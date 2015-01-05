@@ -17,19 +17,19 @@ Type | Declared in | Kind | Docstring
 **Maybe** ````a````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
-**Int**  | Num.Nat | ````*````  | 
-**Int'**  | Num.Nat | ````*````  | 
-**IntInf**  | Num.Nat | ````*````  | 
-**IntInf'**  | Num.Nat | ````*````  | 
-**Nat**  | Num.Nat | ````*````  | 
-**Nat'**  | Num.Nat | ````*````  | 
-**NatInf**  | Num.Nat | ````*````  | 
-**NatInf'**  | Num.Nat | ````*````  | 
-**Flip** ````x````  ````b````  ````a````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | 
+**Int**  | Num.Nat | ````*````  | An _integer_
+**Int'**  | Num.Nat | ````*````  | An _integer_ which is not zero
+**IntInf**  | Num.Nat | ````*````  | An _integer_ or positive or negative _Infinity_ (````Inf````).
+**IntInf'**  | Num.Nat | ````*````  | An _integer_ which is not zero, or positive or negative _Infinity_ (````Inf````).
+**Nat**  | Num.Nat | ````*````  | A natural number
+**Nat'**  | Num.Nat | ````*````  | A natural number, which is not zero.
+**NatInf**  | Num.Nat | ````*````  | A natural number or _infinity_ (````Inf````).
+**NatInf'**  | Num.Nat | ````*````  | A natural number, which is not zero, or _infinity_ (````Inf````).
+**Flip** ````x````  ````b````  ````a````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | The 'Flip' type takes a type function (````* -> * -> *````) and flips it arguments. E.g. Flip Dict v k = Dict k v
 
 
 
-> This page was automatically generated on 2015-01-04 23:26:01 UTC (2015-01-05 00:26:01 CET)
+> This page was automatically generated on 2015-01-05 21:08:42 UTC (2015-01-05 22:08:42 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.

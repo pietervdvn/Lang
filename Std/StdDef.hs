@@ -123,3 +123,7 @@ third3 f (a,b,c)	= (a, b, f c)
 fst3 (a,b,c)		= a
 snd3 (a,b,c)		= b
 thd3 (a,b,c)		= c
+
+
+firstJust (Just a) _	= Just a
+firstJust _ a		= a
