@@ -1,4 +1,4 @@
-module Languate.AST.FunctionASTUtils (show, isNl, remNl, setDocStr, addClause, addLaw, addDecl) where
+module Languate.AST.FunctionASTUtils (show, isNl, remNl, addClause, addDecl) where
 
 {--
 
@@ -60,26 +60,17 @@ np pt		= pt
 nps	= map normalize
 
 instance Show Function where
-	show f	= "Function: docstr: "++show (docstr f)++" visibility: "++ show (visibility f)++" signs: "++ show (signs f)++" laws: "++show (laws f)++" clauses: "++ show (clauses f)
+	show f	= "Function: "++" visibility: "++ show (visibility f)++" signs: "++ show (signs f)++" clauses: "++ show (clauses f)
 
 
-
-
-setDocStr	:: Comment -> Function -> Function
-setDocStr docString (Function _ v decls laws clauses)
-		= Function docString v decls laws clauses
 
 addClause	:: Clause -> Function -> Function
-addClause clause (Function docString v decls laws clauses)
-		= Function docString v decls laws $ clause:clauses
-
-addLaw		:: Law -> Function -> Function
-addLaw law (Function docString v decls laws clauses)
-		= Function docString v decls (law:laws) clauses
+addClause clause (Function v decls clauses)
+		= Function v decls $ clause:clauses
 
 addDecl		:: (Name,Type, Visible, [TypeRequirement]) -> Function -> Function
-addDecl (n,t,v,reqs) (Function docString visibility decls laws clauses)
-		= Function docString (vAnd v visibility) ((n,t, reqs):decls) laws clauses
+addDecl (n,t,v,reqs) (Function visibility decls clauses)
+		= Function (vAnd v visibility) ((n,t, reqs):decls) clauses
 			where 	vAnd	:: Visible -> Visible -> Visible
 				vAnd Public Public	= Public
 				vAnd _ _		= Private

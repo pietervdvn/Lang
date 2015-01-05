@@ -13,6 +13,10 @@ It also contains meta things, as laws, comments, docstrings
 
 import StdDef
 
+type Line	= Int
+type Column	= Int
+type Coor	= (Line, Column)
+
 -- ## META STUFF
 data Law	= Law 	{ lawName		:: Maybe Name
 			, lawDeclarations	:: [(Name, Maybe Type)]
@@ -24,8 +28,7 @@ data Law	= Law 	{ lawName		:: Maybe Name
 
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
-type DocString	= Comment
-type OptDocStr	= Maybe DocString
+data DocString a	= DocString {comment::Comment, about::a, coor::Coor}
 
 data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
 		| PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
@@ -85,9 +88,11 @@ becomes : ADTDef "List" [("a", Nothing)] "Comment about a list" product
 > data NaiveDict a b	= [a,b]
 > data BalancedTreeDict (a in Eq) b	= ...
 becomes
-ADTDef "Dict" ["k","v"] [("k","Ord")] "Docstring blabla" product
+ADTDef "Dict" ["k","v"] [("k","Ord")] product
+
+The docstring is saved within the statements
 -}
-data ADTDef	= ADTDef Name [Name] [TypeRequirement] OptDocStr [ADTSum]
+data ADTDef	= ADTDef Name [Name] [TypeRequirement] [ADTSum]
 
 
 {-
@@ -97,7 +102,7 @@ e.g.
 > data ADT	= A x:Int Float	-- docstring for A
 ADTSum "A" Visible (Just "docstring for A") [(Just "x", "Int"),(Nothing, "Float")]
 -}
-data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
+data ADTSum	= ADTSum Name Visible [(Maybe Name, Type)]
 
 
 -- Synonym and subtyping --
@@ -108,7 +113,7 @@ data ADTSum	= ADTSum Name Visible (Maybe Comment) [(Maybe Name, Type)]
 > type SortedSet (a:Ord)	= {a}
   SynDef "SortedSet" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"]
    no obligated docstring for this one! -}
-data SynDef	= SynDef Name [Name] Type [TypeRequirement] OptDocStr
+data SynDef	= SynDef Name [Name] Type [TypeRequirement]
 
 {-
 Data type representing a subtype declaration, e.g.
@@ -118,7 +123,7 @@ Might have multiple supertypes
 > subtype Name = String -- see bnf for usage
 > subtype TenSet (a in Ord)	= ...
 no obligated docstring for this one! -}
-data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement] OptDocStr
+data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement]
 
 -- ## Creating classes and instances
 
@@ -128,9 +133,8 @@ data ClassDef	= ClassDef
 			, frees		:: [Name]
 			, classReqs	:: [TypeRequirement]
 			, subclassFrom	:: [Type]
-			, classdocstr 	:: OptDocStr
 			, classlaws	:: [Law]
-			, decls		:: [(Name,Type,Maybe Comment, [TypeRequirement])] }
+			, decls		:: [(Name,Type, [TypeRequirement])] }
 	deriving (Ord, Eq)
 
 -- Instance: Type 1 is the supertype of type 2, in other words: instance (2) is (1)

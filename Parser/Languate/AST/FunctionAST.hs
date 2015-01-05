@@ -7,10 +7,8 @@ This module implements the Abstract Syntax tree data structures representing fun
 import StdDef
 import Languate.AST.TypeAST
 
-data Function	= Function	{ docstr	:: DocString
-				, visibility	:: Visible
+data Function	= Function	{ visibility	:: Visible
 				, signs		:: [(Name, Type, [TypeRequirement])]
-				, laws		:: [Law]
 				, clauses	:: [Clause]
 				}
 

@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes, setComment, setCommentIf, freesIn, trav) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes, freesIn, trav) where
 
 {--
 This module implements utilities for type asts
@@ -83,20 +83,20 @@ _usedTypes (Normal [] n)
 _usedTypes _	= []
 
 instance Show ADTDef where
-	show (ADTDef name frees reqs docstr sums)
-		= "-- "++fromMaybe "" docstr++"\ndata "++name++" "++show frees++" "++foldr (\f acc -> showTypeReq f++" "++acc) " " reqs ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
+	show (ADTDef name frees reqs sums)
+		= "data "++name++" "++show frees++" "++foldr (\f acc -> showTypeReq f++" "++acc) " " reqs ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
 
 showTypeReq	:: TypeRequirement -> String
 showTypeReq (name, t)
 		=  "("++name++" in "++show t++")"
 
 instance Show ADTSum where
-	show (ADTSum nm v maybeDocstr namedArgs )
-		= "ADTSum "++nm++" "++show v ++ " " ++ show maybeDocstr ++" "++ show namedArgs
+	show (ADTSum nm v namedArgs )
+		= "ADTSum "++nm++" "++show v ++ " " ++ show namedArgs
 
 setVisibility	:: Visible -> ADTSum -> ADTSum
-setVisibility vis (ADTSum nm _ comm args)
-		= ADTSum nm vis comm args
+setVisibility vis (ADTSum nm _ args)
+		= ADTSum nm vis args
 
 visible2bool	:: Visible -> Bool
 visible2bool Public	= True
@@ -162,24 +162,13 @@ instance Normalizable Expression where
 	normalize	= ne
 
 instance Show ClassDef where
-	show (ClassDef n frees reqs subC docs laws signs)
-		= "class "++n ++" "++ show frees ++" in "++show subC++" "++ concatMap showTypeReq reqs ++ "---"++fromMaybe "" docs++"---"++show laws++show signs
+	show (ClassDef n frees reqs subC laws signs)
+		= "class "++n ++" "++ show frees ++" in "++show subC++" "++ concatMap showTypeReq reqs ++ show laws++show signs
 
 instance Show SubDef where
-	show (SubDef n priv frees t reqs doc)
-		= "subtype " ++ n ++" "++show frees ++" = " ++ show priv ++ show t ++ " where "++concatMap showTypeReq reqs++ "-- "++fromMaybe "" doc
+	show (SubDef n priv frees t reqs)
+		= "subtype " ++ n ++" "++show frees ++" = " ++ show priv ++ show t ++ " where "++concatMap showTypeReq reqs
 
 instance Show SynDef where
-	show (SynDef n frees t treqs doc)	-- lookout! the t-reqs might eat you
-		= show "type "++n++show frees ++ " = "++show t++" where "++concatMap showTypeReq treqs++ "-- "++fromMaybe "" doc
-
-
-setComment	:: Comment -> ADTSum -> ADTSum
-setComment comm (ADTSum nm v _ nmts)
-		=  ADTSum nm v (Just comm) nmts
-
-setCommentIf	:: Comment -> ADTSum -> ADTSum
-setCommentIf comm sum@(ADTSum _ _ Nothing _)
-		= setComment comm sum
-setCommentIf _ sum
-		= sum
+	show (SynDef n frees t treqs)	-- lookout! the t-reqs might eat you
+		= show "type "++n++show frees ++ " = "++show t++" where "++concatMap showTypeReq treqs
