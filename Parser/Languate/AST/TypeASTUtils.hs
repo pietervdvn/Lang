@@ -172,3 +172,9 @@ instance Show SubDef where
 instance Show SynDef where
 	show (SynDef n frees t treqs)	-- lookout! the t-reqs might eat you
 		= show "type "++n++show frees ++ " = "++show t++" where "++concatMap showTypeReq treqs
+
+
+
+instance Functor DocString where
+	fmap f (DocString comm about)
+		= DocString comm $ f about

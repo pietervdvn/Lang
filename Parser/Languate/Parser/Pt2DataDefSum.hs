@@ -33,14 +33,14 @@ pt2sum	=  pt2a h t s convert . cleanAll ["nlt","comma"]
 
 convert		:: AST -> (ADTSum, [TypeRequirement])
 convert (Priv ast)
-		= let (ADTSum name _ comm types, reqs) = convert ast in
-			(ADTSum name Private comm types, reqs)
+		= let (ADTSum name _ types, reqs) = convert ast in
+			(ADTSum name Private types, reqs)
 convert (UnNamedConstr name types reqs)
-		= (ADTSum name Public Nothing $ zip (repeat Nothing) types, reqs)
+		= (ADTSum name Public $ zip (repeat Nothing) types, reqs)
 convert (Constr name)
-		= (ADTSum name Public Nothing [], [])
+		= (ADTSum name Public [], [])
 convert (NamedConstr name names reqs)
-		= (ADTSum name Public Nothing names, reqs)
+		= (ADTSum name Public names, reqs)
 convert ast	= convErr modName ast
 
 

@@ -17,28 +17,28 @@ This module converts the ParseTree into a data def. The heavy lifting --parsing 
 
 modName	= "Pt2DataDef"
 
-pt2adtdef	:: ParseTree -> ([Comment],ADTDef)
+pt2adtdef	:: ParseTree -> ([DocString (Name, Name)],ADTDef)
 pt2adtdef	=  pt2a h t s convert
 
-convert		:: AST -> ([Comment], ADTDef)
-convert (Data comms vis name frees sums reqs)
-		=  let  edit	= if vis == Private then map (setVisibility vis) else id
-			docstr	= if null comms then Nothing else Just $ last comms 	in
-			(init' comms, ADTDef name frees reqs docstr $ edit sums)
+convert		:: AST -> ([DocString (Name,Name)], ADTDef)
+convert (Data vis name frees sums reqs docs)
+		=  let  edit	= if vis == Private then map (setVisibility vis) else id in
+
+			(map (fmap $ \cons -> (name,cons)) docs, ADTDef name frees reqs $ edit sums)
 convert ast	=  convErr modName ast
 
 
-data AST	= Comms [Comment]
-		| Ident Name
+data AST	= Ident Name
 		| FreeTypes [Name] [TypeRequirement]
-		| Prod [ADTSum] [TypeRequirement]
-		| Data [Comment] Visible Name [Name] [ADTSum] [TypeRequirement]
+		| Prod [ADTSum] [TypeRequirement] [DocString Name]
+		| Data Visible Name [Name] [ADTSum] [TypeRequirement] [DocString Name]
 		| DataT	| PrivT	| EqualT
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("nlcomments", Comms . pt2nlcomments),("prod", uncurry Prod . pt2prod),("freeTypes", uncurry FreeTypes . pt2freetypes)]
+h		=  	[ ("prod", uncurry3 Prod . pt2prod)
+			, ("freeTypes", uncurry FreeTypes . pt2freetypes)]
 
 t		:: Name -> String -> AST
 t "globalIdent" id
@@ -55,19 +55,15 @@ t nm cont	=  tokenErr modName nm cont
 
 s		:: Name -> [AST] -> AST
 
-s _ (Comms comms:DataT:PrivT:tail)
-		= let Data comms' _ name freetypes sums reqs = s "data" (Comms comms:DataT:tail) in
-			Data comms' Private name freetypes sums reqs
-s _ (Comms comms:DataT:Ident name:FreeTypes frees reqs:tail)
-		=  let Data comms' vis name' _ sums reqs' = s "data" (Comms comms:DataT:Ident name:tail) in
-			Data comms' vis name' frees sums (reqs ++ reqs')
-s _ [Comms comms, DataT, Ident name,EqualT, Prod sums reqs]
-		= Data comms Public name [] sums reqs
+s _ (DataT:PrivT:tail)
+		= let Data _ name freetypes sums reqs docs = s "data" (DataT:tail) in
+			Data Private name freetypes sums reqs docs
+s _ (DataT:Ident name:FreeTypes frees reqs:tail)
+		=  let Data vis name' _ sums reqs' docs = s "data" (DataT:Ident name:tail) in
+			Data vis name' frees sums (reqs ++ reqs') docs
+s _ [DataT, Ident name,EqualT, Prod sums reqs docs]
+		= Data Public name [] sums reqs docs
 s _ [ast]	= ast
-s "data" (DataT:Ident name:tail)
-		= s "data" (Comms []:DataT:Ident name: tail)
-s "data" (DataT:PrivT:Ident name:tail)
-		= s "data" (Comms []:DataT:PrivT:Ident name: tail)
 s nm asts	= seqErr modName nm asts
 
 pt2freetypes	:: ParseTree -> ([Name],[TypeRequirement])

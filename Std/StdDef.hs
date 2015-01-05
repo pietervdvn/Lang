@@ -103,6 +103,10 @@ stripnl s	= s
 (|>)	= flip fmap
 
 
+uncurry3	:: (a -> b -> c -> d) -> (a,b,c) -> d
+uncurry3 f (a,b,c)
+		= f a b c
+
 indent	:: String -> String
 indent str
 	= str >>= (\c -> if c == '\n' then "\n   " else [c])

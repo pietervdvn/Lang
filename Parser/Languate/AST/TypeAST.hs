@@ -28,7 +28,8 @@ data Law	= Law 	{ lawName		:: Maybe Name
 
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
-data DocString a	= DocString {comment::Comment, about::a, coor::Coor}
+data DocString a	= DocString {comment::Comment, about::a}
+	deriving Show
 
 data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
 		| PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}

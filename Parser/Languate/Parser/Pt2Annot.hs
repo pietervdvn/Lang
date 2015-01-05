@@ -18,15 +18,15 @@ modName	= "Pt2Annot"
 
 
 pt2annot	:: ParseTree -> Annotation
-pt2annot	= pt2a [("precedence", pt2prec),("annotation", pt2annot)] (tokenErr $ "top level:"++ modName) seq' id
+pt2annot	= pt2a [("precedence", pt2precedence),("annotation", pt2annot)] (tokenErr $ "top level:"++ modName) seq' id
 
 
 seq'		:: Name -> [Annotation] -> Annotation
 seq' _ [ast]	=  ast
 seq' name asts	=  seqErr ("top level:" ++ modName) name asts
 
-pt2annot	:: ParseTree -> Annotation
-pt2annot	=  pt2a [] t s convert
+pt2annot'	:: ParseTree -> Annotation
+pt2annot'	=  pt2a [] t s convert
 
 convert		:: AST -> Annotation
 convert	(Annot name cont)
