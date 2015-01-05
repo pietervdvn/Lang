@@ -36,6 +36,7 @@ conv (LineT clause)
 		= addClause clause
 conv (Decl typ)
 		= addDecl typ
+conv NlT	= id
 conv (Root asts)
 		= \func -> foldr conv func asts
 
@@ -43,12 +44,15 @@ conv (Root asts)
 data AST	= Decl (Name, Type, Visible, [TypeRequirement])
 		| LineT Clause
 		| Root [AST]
+		| NlT
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
 h		=  	[ ("declaration", Decl   . pt2decl)
-			, ("clause"	, LineT  . pt2line)]
+			, ("clause"	, LineT  . pt2line)
+			, ("nl"		, const NlT)
+			]
 
 s _ [ast]	= ast
 s _ asts	= Root asts

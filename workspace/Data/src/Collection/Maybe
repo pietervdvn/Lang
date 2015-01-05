@@ -26,7 +26,7 @@ isNothing	: Maybe a -> Bool
 Nothing		= True
 _		= False
 
-@precedence: (?) is right, (&&) < (?), (?) < (:)
+precedence of (?) is right, (&&) < (?), (?) < (:)
 -- Unpacks the ''Maybe''. If it is nothing, the default value is used.
 --~ id: a,x => (Just a) ? x = a
 --> Nothing ? 1	= 1
@@ -64,5 +64,4 @@ Thus:
 
 	True (((as deconstructor))) False	= Nothing
 	True (((as deconstructor))) False	= Just (,)
----
 ---

@@ -114,3 +114,12 @@ indent str
 indent'	:: String -> String -> String
 indent' msg str
 	= msg ++ indent ("\n" ++  str)
+
+
+first3 f (a,b,c)	= (f a, b, c)
+second3 f (a,b,c)	= (a, f b, c)
+third3 f (a,b,c)	= (a, b, f c)
+
+fst3 (a,b,c)		= a
+snd3 (a,b,c)		= b
+thd3 (a,b,c)		= c

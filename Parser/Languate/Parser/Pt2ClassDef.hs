@@ -25,32 +25,37 @@ See bnf for usage
 
 modName	= "Pt2ClassDef"
 
-pt2classDef	:: ParseTree -> ClassDef
+pt2classDef	:: ParseTree -> ([DocString (Name, Name)], ClassDef)
 pt2classDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
 
-convert		:: AST -> ClassDef
-convert (Clss name frees subs reqs laws declarations)
-		=  ClassDef name frees reqs subs laws $ injectTypeReq name declarations
+convert		:: AST -> ([DocString (Name, Name)], ClassDef)
+convert (Clss name frees subs reqs asts)
+		=  let 	(laws, declarations, docs)	= triage name asts
+			classDef	= ClassDef name frees reqs subs laws $ injectTypeReq name declarations in
+			(docs, classDef)
 convert ast	=  convErr modName ast
 
 
 -- injects the syntactic sugar that 'cat Abc\n\t abc -> abc' means '(abc:Abc)'
 injectTypeReq	:: Name -> [(Name, Type, [TypeRequirement])] -> [(Name, Type, [TypeRequirement])]
 injectTypeReq (n:nm) decls
-		= let	typeReq	= nub [(toLower n : nm, Normal [] $ n:nm), (map toLower (n:nm), Normal [] $ n:nm)]	in
+		= let	typeReq	= nub   [ (toLower n : nm, Normal [] $ n:nm)
+					, (map toLower (n:nm), Normal [] $ n:nm)]	in
 			map (\(n,t, treqs) -> (n,t, typeReq ++ treqs)) decls
 
 
-data AST	= Clss Name [Name] [Type] [TypeRequirement] [Law] [(Name, Type, [TypeRequirement])] -- ""class Dict (k:Ord) v in Collection v:"" => Clss "Dict" ["k","v"] ["Collection"]
-		| Body [Law] [(Name,Type, [TypeRequirement])]
+data AST	= Clss Name [Name] [Type] [TypeRequirement] [AST]
+		| Body [AST]
 		| Ident Name
 		| Lw Law
+		| Comm Comment
 		| SubClassOf [Type] [TypeRequirement]
 		| Decl (Name, Type, Visible, [TypeRequirement])
 		| FreeT [Name] [TypeRequirement]
 		| Type Type [TypeRequirement]
 		| ClassT	| SubClassT
 		| ColonT	| CommaT
+		| NlT
 	deriving (Show)
 
 
@@ -58,13 +63,16 @@ h		:: [(Name, ParseTree -> AST)]
 h		= 	[ ("law"	, Lw    . pt2law )
 			, ("declaration", Decl  . pt2decl)
 			, ("type"	, uncurry Type 	. pt2type)
-			, ("freeTypes"	, uncurry FreeT . pt2freetypes)]
+			, ("freeTypes"	, uncurry FreeT . pt2freetypes)
+			, ("comment"	, Comm . pt2comment)
+			, ("mlcomment"	, Comm . pt2comment)]
 
 t		:: Name -> String -> AST
 t "typeIdent" n
 		=  Ident n
 t "globalIdent" n
 		=  Ident n
+t _ ('\n':_)	=  NlT
 t _ ":"		=  ColonT
 t _ "cat"	=  ClassT
 t _ "category" = ClassT
@@ -76,8 +84,10 @@ t nm cont	=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
-s "classBody" asts
-		= uncurry Body $ triage asts
+s "categoryStm" [NlT, ast]
+		= ast
+s "categoryBody" asts
+		= Body asts
 s "subclass" (SubClassT:Type t reqs:tail)
 		= let SubClassOf ts reqs'	= s "subclass" tail in
 			SubClassOf (t:ts) (reqs++reqs')
@@ -85,26 +95,39 @@ s "subclass" [CommaT, Type t reqs]
 		= SubClassOf [t] reqs
 s "subclass" []	= SubClassOf [] []
 s _ [ast]	= ast
-s _ [ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', Body laws decls]
-		= Clss name freeNames subs (reqs++reqs') laws decls
-s _ [ClassT, Ident name, FreeT names reqs,  Body laws decls]
-		= Clss name names [] reqs laws decls
-s _ [ClassT, Ident name, SubClassOf subs reqs, Body laws decls]
-		= Clss name [] subs reqs laws decls
-s _ [ClassT, Ident name, Body laws decls]
-		= Clss name [] [] [] laws decls
+s _ [ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', Body asts]
+		= Clss name freeNames subs (reqs++reqs') asts
+s _ [ClassT, Ident name, FreeT names reqs,  Body asts]
+		= Clss name names [] reqs asts
+s _ [ClassT, Ident name, SubClassOf subs reqs, Body asts]
+		= Clss name [] subs reqs asts
+s _ [ClassT, Ident name, Body asts]
+		= Clss name [] [] [] asts
 s nm asts	= seqErr modName nm asts
 
 
-triage		:: [AST] -> ([Law], [(Name,Type, [TypeRequirement])])
-triage []
-		= ([], [])
-triage (Lw law:tail)
-		= first (law:) $ triage tail
-triage (Decl (n,t,v,reqs):tail)
-		= second ((n,t,reqs):) $ triage tail
-triage (Body laws decls:tail)
-		= first (laws++) $ second (decls++) $ triage tail
+triage		:: Name -> [AST] -> ([Law], [(Name, Type, [TypeRequirement])], [DocString (Name, Name)])
+triage _ []
+		= ([], [], [])
+triage catName 	(Lw law:tail)
+		= first3 (law:) $ triage catName tail
+triage catName (Decl (n,t,v,reqs):tail)
+		= second3 ((n,t,reqs):) $ triage catName tail
+triage catName (Comm c:tail)
+		= let 	(lws, sign, oldDocs)	= triage catName tail
+			newDocs	= buildDocsFor catName c (map fst3 sign) oldDocs in
+			(lws, sign, oldDocs ++ newDocs )
+triage catName [Body asts]
+		= triage catName asts
+
+
+
+buildDocsFor 	:: Name -> Comment -> [Name] -> [DocString (Name, Name)] -> [DocString (Name, Name)]
+buildDocsFor gizmo doc need alreadyHave
+		= let	alreadyHaveNms	= map (snd . about) alreadyHave in
+			map (\n -> DocString doc (gizmo, n)) $ filter (`notElem` alreadyHaveNms) need
+
+
 
 -- INSTANCE DEF --
 ------------------

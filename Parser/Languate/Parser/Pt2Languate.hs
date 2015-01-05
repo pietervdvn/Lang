@@ -51,9 +51,6 @@ toMod (Stm stms, coor)
 		=  addStms $ zip stms $ repeat coor
 toMod (Root cpts, _)
 		=  applyAll cpts
-toMod (Examp ex, coor)
-		=  addStm coor $ ExampleStm ex
-
 
 
 data CPT	= Ident Name
@@ -62,16 +59,17 @@ data CPT	= Ident Name
 		| Imp Import
 		| Imps [Comment] Import (Line,Column)
 		| Stm [Statement]
-		| Examp Law
 		| Root [(CPT, (Line, Column))]
 		| Nl
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> CPT)]
-h		=  [("idSet", Exports . pt2idset),("nlcomment", Comms . (:[]) . pt2comment)
-		   , ("import", Imp . pt2imp), ("example", Examp . pt2law)
-		   , ("nls", Comms . pt2nls),("statement", Stm . pt2stm)]
+h		=  [ ("idSet", Exports . pt2idset)
+		   , ("nlcomment", Comms . (:[]) . pt2comment)
+		   , ("import", Imp . pt2imp)
+		   , ("nls", Comms . pt2nls)
+		   , ("statement", Stm . pt2stm)]
 
 t		:: Name -> String -> CPT
 t "globalIdent" id

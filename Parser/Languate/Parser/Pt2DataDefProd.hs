@@ -75,7 +75,6 @@ s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
 
 
-
 makeDocsFor	:: Comment -> [ADTSum] -> [DocString Name] -> [DocString Name]
 makeDocsFor c sums alreadyHave
 		= concatMap (makeDocstringIf (map about alreadyHave) c) sums
@@ -84,7 +83,6 @@ makeDocstringIf	:: [Name] -> Comment -> ADTSum -> [DocString Name]
 makeDocstringIf alreadyHave c (ADTSum nm _ _)
 		= if nm `notElem` alreadyHave then [DocString c nm]
 			else []
-
 
 
 accSums		:: [AST] -> ([ADTSum], [TypeRequirement], [DocString Name])

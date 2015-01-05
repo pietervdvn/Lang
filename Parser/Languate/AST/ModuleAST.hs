@@ -32,6 +32,7 @@ data Restrict	= BlackList [Name] | WhiteList [Name]
 
 
 data Statement	= FunctionStm 	Function
+		| LawStm	Law
 		| ADTDefStm	ADTDef
 		| SynDefStm	SynDef
 		| SubDefStm	SubDef
@@ -39,6 +40,5 @@ data Statement	= FunctionStm 	Function
 		| InstanceStm 	Instance
 		| Comments [Comment]
 		| DocStringStm [DocString (Name, Name)]
-		| ExampleStm	Law
 		| AnnotationStm	Annotation
 	deriving (Show)
