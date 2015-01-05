@@ -16,7 +16,8 @@ import Languate.TAST
 
 -- Build a simple markdown overview of the type table
 typeTable2md	:: TypeTable -> MarkDown
-typeTable2md tt	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)
+typeTable2md tt	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)	++ title 2 "Supertypes " ++ parag (superTypeTable2md tt)
+
 
 typeRow		:: TypeTable -> TypeID -> [MarkDown]
 typeRow	tt (fqn, name)
@@ -26,6 +27,7 @@ typeRow	tt (fqn, name)
 			, code $ maybe (bold "ERROR: no kind found") show $ getMaybe kinds
 			, recode $ maybe "" firstLine $ getMaybe docstrings
 			]
+
 
 -- Builds a string as k ````Eq```` v
 typeReqsFor	:: TypeTable -> TypeID -> MarkDown
@@ -44,3 +46,34 @@ typeReqFor tt id names i
 
 showShort	:: RType -> String
 showShort	=  st True
+
+showShorts 	:: String -> [RType] -> String
+showShorts comma tps
+		= intercal ", " $ map showShort tps
+
+
+-- Supertypetable --
+--------------------
+
+superTypeTable2md	:: TypeTable -> MarkDown
+superTypeTable2md tt	=  let	all	= keys $ supertypes tt	in
+				table ["Type","Is subtype of"] $ concatMap (superType2md tt) all
+
+superType2md	:: TypeTable -> TypeID -> [[MarkDown]]
+superType2md tt tid
+		= let 	all	= superTypesFor tt tid	in
+			map (showEntry tid) all
+
+
+showEntry	:: TypeID -> ([RType], [Name], Map Name [RType]) -> [MarkDown]
+showEntry (_, n) (supers, frees, freeReqs)
+		= [ n ++ showReqs (\n -> findWithDefault [] n freeReqs) frees
+		  , intercal ", " $ map showShort supers
+		  ]
+
+showReqs	:: (Name -> [RType]) -> [Name] -> MarkDown
+showReqs f	= intercal " " . map (showReq f)
+
+
+showReq		:: (Name -> [RType]) -> Name -> MarkDown
+showReq f free	= code $ free ++ when ":" (intercal ", " $ map showShort $ f free)

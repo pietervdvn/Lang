@@ -1,7 +1,7 @@
 Builtins
 --------
-Stub, filled in by compiler.
+Stub, will be filled in by compiler.
 --------
 
--- A int! This is a temporary representations, which will be replaced by a truly builtin one
+-- A int! This is a temporary representation, which will be replaced by a truly builtin one
 data BIInt = Zero | Succ BIInt | Prev BIInt | Inf

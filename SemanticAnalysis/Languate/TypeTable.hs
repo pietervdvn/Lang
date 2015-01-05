@@ -24,6 +24,8 @@ import Languate.TAST
 import Languate.FQN
 import Languate.Checks.CheckUtils
 
+import Control.Arrow
+import Normalizable
 {-
 The type table contains all known types within a certain module.
 
@@ -45,18 +47,18 @@ instance Dict k (v:Dict k k) is Multigraph
 
 This is saved as
 {List --> { [] -> Collection
-	    [{Eq}] --> Eq
-	    [{Show}] --> Show
-	    [{Eq}] --> Set a}}
+	    ["a"] --> Eq	, where "a:Eq"
+	    ["a"] --> Show	, where "a:Show"
+	    ["a"] --> Set a}}
 -}
 
 
-type SuperTypeTableFor	= Map [Set RType] (Set RType)
+type SuperTypeTableFor	= Map [Name] (Set RType, Map Name [RType])
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
 data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
 				, typeReqs	:: TypeReqTable			-- type requirements are explicit for new type declarations; contains synonyms
-				, supertypes	:: Map TypeID (Set RType)	-- direct super types. should have the same kind. E.g. String in List Char; both are *
+				, supertypes	:: SuperTypeTable	-- direct super types. should have the same kind. E.g. String in List Char; both are *
 				, docstrings	:: Map TypeID String
 				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
@@ -108,7 +110,17 @@ _construct tlt e tps cons
 
 
 
+superTypesFor	::  TypeTable -> TypeID -> [([RType],[Name], Map Name [RType])]
+superTypesFor tt t
+		= let	stfor		= findWithDefault M.empty t $ supertypes tt
+			freeKeys	= keys stfor		in
+			fmap (superTypesFor' stfor) freeKeys
 
+
+superTypesFor'	:: SuperTypeTableFor -> [Name] -> ([RType],[Name], Map Name [RType])
+superTypesFor' sttf appliedFrees
+		= let	(supers, reqs)	= findWithDefault (S.empty,M.empty) appliedFrees sttf in
+			(S.toList supers, appliedFrees, reqs)
 
 
 

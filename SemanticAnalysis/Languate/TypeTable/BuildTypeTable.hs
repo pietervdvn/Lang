@@ -37,6 +37,8 @@ import Languate.TypeTable.KindChecker.BuildKindTable
 import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable.BuildDocstringTable
 import Languate.TypeTable.BuildFreeNameTable
+import Languate.TypeTable.BuildSuperTypeTable
+
 import Languate.Checks.CheckWorld
 import Languate.Checks.CheckReqTable
 
@@ -54,5 +56,6 @@ buildTypeTable w tlts
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
 			let knownTypes	= keys klt
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
+			supers		<- buildSuperTypeTable w
 			validateReqTable freeNames klt typeReqs
-			return $ TypeTable klt typeReqs (todos "supertypes") docstrings freeNames
+			return $ TypeTable klt typeReqs supers docstrings freeNames

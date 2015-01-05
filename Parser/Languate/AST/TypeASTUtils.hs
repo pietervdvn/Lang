@@ -72,7 +72,7 @@ _freesIn		:: Type -> [Name]
 _freesIn (Free a)	= [a]
 _freesIn _		= []
 
--- calculates which types are used in the type. This way we know what types are used and might be public
+-- calculates which types are used in the type. This way we know what types are used and might be public. Used to build the TLT
 usedTypes	:: Type -> [Name]
 usedTypes	= trav _usedTypes concat
 

@@ -2,7 +2,7 @@
 
 Type | Declared in | Kind | Docstring
 ---- | ----------- | ---- | ---------
-**BIInt**  | Builtins | ````*````  | A int! This is a temporary representations, which will be replaced by a truly builtin one
+**BIInt**  | Builtins | ````*````  | A int! This is a temporary representation, which will be replaced by a truly builtin one
 **Eq**  | Category.Eq | ````*````  | The category which defines _equality_ ````==```` and _inequality_ ````!=````
 **Associative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
 **Commutative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the arguments can be swapped.
@@ -15,6 +15,7 @@ Type | Declared in | Kind | Docstring
 **Dict** ````k:Eq````  ````v````  | Collection.Dict | ````(* ~> (* ~> *))````  | A ````Collection```` which maps a key onto a value.
 **List** ````a````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
 **Maybe** ````a````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
+**More** ````a````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
 **Int**  | Num.Nat | ````*````  | An _integer_
@@ -27,9 +28,17 @@ Type | Declared in | Kind | Docstring
 **NatInf'**  | Num.Nat | ````*````  | A natural number (which is not zero) or _infinity_ (````Inf````).
 **Flip** ````x````  ````b````  ````a````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | The 'Flip' type takes a type function (````* -> * -> *````) and flips it arguments. E.g. Flip Dict v k = Dict k v
 
+## Supertypes 
+
+Type | Is subtype of
+---- | -------------
+Set````a:Monoid````  | Monoid
 
 
-> This page was automatically generated on 2015-01-05 21:27:57 UTC (2015-01-05 22:27:57 CET)
+
+
+
+> This page was automatically generated on 2015-01-05 23:25:13 UTC (2015-01-06 00:25:13 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.

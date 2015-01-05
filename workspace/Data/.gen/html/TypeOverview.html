@@ -13,7 +13,7 @@
 <td align="left"><strong>BIInt</strong></td>
 <td align="left">Builtins</td>
 <td align="left"><code>*</code></td>
-<td align="left">A int! This is a temporary representations, which will be replaced by a truly builtin one</td>
+<td align="left">A int! This is a temporary representation, which will be replaced by a truly builtin one</td>
 </tr>
 <tr class="even">
 <td align="left"><strong>Eq</strong></td>
@@ -88,66 +88,72 @@
 <td align="left">A collection which contains at most one value.</td>
 </tr>
 <tr class="even">
+<td align="left"><strong>More</strong> <code>a</code></td>
+<td align="left">Collection.More</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">A <code>Collection</code> which contains at least one element.</td>
+</tr>
+<tr class="odd">
 <td align="left"><strong>Set</strong> <code>a:Eq</code></td>
 <td align="left">Collection.Set</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> without order and duplicates.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Bool</strong></td>
 <td align="left">Data.Bool</td>
 <td align="left"><code>*</code></td>
 <td align="left">The <code>Bool</code> datatype represents truth values of logic.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Int</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Int'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> which is not zero</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>IntInf</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> or positive or negative <em>Infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>IntInf'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> which is not zero, or positive or negative <em>Infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Nat</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Nat'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number, which is not zero.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>NatInf</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>NatInf'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number (which is not zero) or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Flip</strong> <code>x</code> <code>b</code> <code>a</code></td>
 <td align="left">Type.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; (* ~&gt; *)))</code></td>
@@ -155,8 +161,23 @@
 </tr>
 </tbody>
 </table>
+<h2 id="supertypes">Supertypes</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Type</th>
+<th align="left">Is subtype of</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Set<code>a:Monoid</code></td>
+<td align="left">Monoid</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
-<p>This page was automatically generated on 2015-01-05 21:27:57 UTC (2015-01-05 22:27:57 CET)</p>
+<p>This page was automatically generated on 2015-01-05 23:25:13 UTC (2015-01-06 00:25:13 CET)</p>
 <p>Do not edit it, as regeneration will overwrite your changes.</p>
 <p>Back to <a href="Index.html">index</a></p>
 </blockquote></article>
