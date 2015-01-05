@@ -38,6 +38,7 @@ data Statement	= FunctionStm 	Function
 		| ClassDefStm	ClassDef
 		| InstanceStm 	Instance
 		| Comments [Comment]
+		| DocStringStm [DocString (Name, Name)]
 		| ExampleStm	Law
 		| AnnotationStm	Annotation
 	deriving (Show)

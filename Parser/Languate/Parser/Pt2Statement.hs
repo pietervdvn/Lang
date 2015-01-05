@@ -10,6 +10,7 @@ import Languate.Parser.Pt2TypeDef
 import Languate.Parser.Pt2SubTypeDef
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Annot
+import Languate.Parser.Pt2Precedence
 import Languate.Parser.Utils
 import Languate.AST
 
@@ -36,6 +37,8 @@ convert (Comms comms ast)
 		= Comments comms:convert ast
 convert (Comm comms)
 		= [Comments comms]
+convert (Docs docstrs ast)
+		= DocStringStm docstrs:  convert ast
 convert (SubTypeDf def)
 		= [SubDefStm def]
 convert (ClassDf def)
@@ -49,6 +52,7 @@ convert (InstanceAST inst)
 data AST	= Func Function
 		| ADTDf ADTDef
 		| SynDf SynDef
+		| Docs [DocString (Name, Name)] AST
 		| Comms [Comment] AST
 		| Comm [Comment]
 		| SubTypeDf SubDef
@@ -59,15 +63,19 @@ data AST	= Func Function
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [ ("nls",Comm . pt2nls),("function", unc Func pt2func)
-		   , ("data",unc ADTDf pt2adtdef), ("synonym", SynDf . pt2syndef)
-		   , ("subtype", SubTypeDf . pt2subdef), ("cat", unc ClassDf pt2classDef)
-		   , ("annotation", Annot . pt2annot), ("precedence", Annot . pt2annot),
-		   , ("instance", InstanceAST . pt2instance)]
+h		=  [ ("nls",		Comm 	. pt2nls)
+		   , ("function",   	Func 	. pt2func)
+		   , ("data",	    unc ADTDf 	  pt2adtdef)
+		   , ("synonym", 	SynDf 	. pt2syndef)
+		   , ("subtype", 	SubTypeDf . pt2subdef)
+		   , ("cat", 		ClassDf . pt2classDef)
+		   , ("annotation", 	Annot 	. pt2annot)
+		   , ("precedence", 	Annot 	. pt2precedence)
+		   , ("instance", 	InstanceAST . pt2instance)]
 
-unc		:: (a -> AST) -> (ParseTree -> ([Comment], a)) -> ParseTree -> AST
-unc constr f pt =  let (comms, a) = f pt in
-			Comms comms $ constr a
+unc		:: (a -> AST) -> (ParseTree -> ([DocString (Name, Name)], a)) -> ParseTree -> AST
+unc constr f pt =  let (docs, a) = f pt in
+			Docs docs $ constr a
 
 t		:: Name -> String -> AST
 t 		=  tokenErr modName

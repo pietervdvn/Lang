@@ -25,40 +25,37 @@ See bnf for usage
 
 modName	= "Pt2ClassDef"
 
-pt2classDef	:: ParseTree -> ([Comment], ClassDef)
+pt2classDef	:: ParseTree -> ClassDef
 pt2classDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
 
-convert		:: AST -> ([Comment], ClassDef)
-convert (Clss name frees subs reqs comms laws declarations)
-		=  let docstr	= if null comms then Nothing else Just $ last comms in
-			(init' comms, ClassDef name frees reqs subs docstr laws $ injectTypeReq name declarations)
+convert		:: AST -> ClassDef
+convert (Clss name frees subs reqs laws declarations)
+		=  ClassDef name frees reqs subs laws $ injectTypeReq name declarations
 convert ast	=  convErr modName ast
 
-injectTypeReq	:: Name -> [(Name, Type, Maybe Comment, [TypeRequirement])] -> [(Name, Type, Maybe Comment, [TypeRequirement])]
+
+-- injects the syntactic sugar that 'cat Abc\n\t abc -> abc' means '(abc:Abc)'
+injectTypeReq	:: Name -> [(Name, Type, [TypeRequirement])] -> [(Name, Type, [TypeRequirement])]
 injectTypeReq (n:nm) decls
 		= let	typeReq	= nub [(toLower n : nm, Normal [] $ n:nm), (map toLower (n:nm), Normal [] $ n:nm)]	in
-			map (\(n,t,mc, treqs) -> (n,t,mc, typeReq ++ treqs)) decls
+			map (\(n,t, treqs) -> (n,t, typeReq ++ treqs)) decls
 
 
-data AST	= Clss Name [Name] [Type] [TypeRequirement] [Comment] [Law] [(Name, Type, Maybe Comment, [TypeRequirement])] -- ""class Dict (k:Ord) v in Collection v:"" => Clss "Dict" ["k","v"] ["Collection"]
-		| Body [Law] [(Name,Type,Maybe Comment, [TypeRequirement])]
+data AST	= Clss Name [Name] [Type] [TypeRequirement] [Law] [(Name, Type, [TypeRequirement])] -- ""class Dict (k:Ord) v in Collection v:"" => Clss "Dict" ["k","v"] ["Collection"]
+		| Body [Law] [(Name,Type, [TypeRequirement])]
 		| Ident Name
 		| Lw Law
 		| SubClassOf [Type] [TypeRequirement]
 		| Decl (Name, Type, Visible, [TypeRequirement])
 		| FreeT [Name] [TypeRequirement]
 		| Type Type [TypeRequirement]
-		| Comms [Comment]
 		| ClassT	| SubClassT
 		| ColonT	| CommaT
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		= 	[ ("nlcomments"	, Comms . pt2nlcomments)
-			, ("comment"	, Comms . (:[]) . pt2comment)
-			, ("mlcomment"	, Comms . (:[]) . pt2comment)
-		   	, ("law"	, Lw    . pt2law )
+h		= 	[ ("law"	, Lw    . pt2law )
 			, ("declaration", Decl  . pt2decl)
 			, ("type"	, uncurry Type 	. pt2type)
 			, ("freeTypes"	, uncurry FreeT . pt2freetypes)]
@@ -80,7 +77,7 @@ t nm cont	=  tokenErr modName nm cont
 
 s		:: Name -> [AST] -> AST
 s "classBody" asts
-		= uncurry Body $ triage asts Nothing
+		= uncurry Body $ triage asts
 s "subclass" (SubClassT:Type t reqs:tail)
 		= let SubClassOf ts reqs'	= s "subclass" tail in
 			SubClassOf (t:ts) (reqs++reqs')
@@ -88,34 +85,26 @@ s "subclass" [CommaT, Type t reqs]
 		= SubClassOf [t] reqs
 s "subclass" []	= SubClassOf [] []
 s _ [ast]	= ast
-s _ [Comms comms, ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', Body laws decls]
-		= Clss name freeNames subs (reqs++reqs') comms laws decls
-s _ [Comms comms, ClassT, Ident name, FreeT names reqs,  Body laws decls]
-		= Clss name names [] reqs comms laws decls
-s _ [Comms comms, ClassT, Ident name, SubClassOf subs reqs, Body laws decls]
-		= Clss name [] subs reqs comms laws decls
-s _ [Comms comms, ClassT, Ident name, Body laws decls]
-		= Clss name [] [] [] comms laws decls
-s r (ClassT:Ident name:tail)
-		= s r (Comms []: ClassT: Ident name:tail)
+s _ [ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', Body laws decls]
+		= Clss name freeNames subs (reqs++reqs') laws decls
+s _ [ClassT, Ident name, FreeT names reqs,  Body laws decls]
+		= Clss name names [] reqs laws decls
+s _ [ClassT, Ident name, SubClassOf subs reqs, Body laws decls]
+		= Clss name [] subs reqs laws decls
+s _ [ClassT, Ident name, Body laws decls]
+		= Clss name [] [] [] laws decls
 s nm asts	= seqErr modName nm asts
 
 
-triage		:: [AST] -> Maybe Comment -> ([Law], [(Name,Type, Maybe Comment, [TypeRequirement])])
-triage [] _
+triage		:: [AST] -> ([Law], [(Name,Type, [TypeRequirement])])
+triage []
 		= ([], [])
-triage (Lw law:tail) comm
-		= first (law:) $ triage tail comm
-triage (Decl (n,t,v,reqs):tail) comm
-	| v == Private	= error "No private functions allowed in classdefs!"
-	| otherwise	= second ((n,t,comm,reqs):) $ triage tail comm
-triage (Body laws decls:tail) comm
-		= first (laws++) $ second (decls++) $ triage tail comm
-triage (Comms []:tail) comm
-		= triage tail comm
-triage (Comms (a:_):tail) _
-		= triage tail (Just a)
-
+triage (Lw law:tail)
+		= first (law:) $ triage tail
+triage (Decl (n,t,v,reqs):tail)
+		= second ((n,t,reqs):) $ triage tail
+triage (Body laws decls:tail)
+		= first (laws++) $ second (decls++) $ triage tail
 
 -- INSTANCE DEF --
 ------------------
