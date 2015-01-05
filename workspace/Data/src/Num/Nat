@@ -16,7 +16,7 @@ subtype Int'		= _ IntInf' & Int	-- No Inf, no zero
 
 -- A natural number or _infinity_ (''Inf'').
 subtype NatInf		= _ IntInf
--- A natural number, which is not zero, or _infinity_ (''Inf'').
+-- A natural number (which is not zero) or _infinity_ (''Inf'').
 subtype NatInf'		= _ NatInf
 -- A natural number
 subtype Nat		= _ NatInf
@@ -37,6 +37,8 @@ abs	: IntInf' 	-> NatInf'
 i	= #abs
 
 
+precedence of (*) is Left, (*) = (%), (*) = (/), (*) = (//)
+precedence of (+) is Left, (+) = (-)
 -- (+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
 (+)	: IntInf -> IntInf	-> IntInf
 (+)	: Nat -> Nat 	-> Nat

@@ -40,6 +40,10 @@ a b	= a + b
 neutral	: Sum
 neutral	= 0
 
+
+precedence of (^) is Left, (^) < (*)
+precedence of (*) is Left, (*) < (+)
+precedence of (+) is Left, (+) < (<)
 (*)	: Sum -> Nat -> Sum
 _ 0	= neutral
 s i	= s + (s * (i - 1))

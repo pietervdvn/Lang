@@ -3,6 +3,9 @@ Ord
 Declaration and utils for ''Ord'', a total ordered relationship
 ---
 
+
+precedence of (<) is Left, (<) < (==), (<) = (>), (<) < (!)
+
 ---
 The category which defines _lower then_ and _higher then_.
 ---

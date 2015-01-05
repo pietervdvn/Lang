@@ -24,12 +24,12 @@ Type | Declared in | Kind | Docstring
 **Nat**  | Num.Nat | ````*````  | A natural number
 **Nat'**  | Num.Nat | ````*````  | A natural number, which is not zero.
 **NatInf**  | Num.Nat | ````*````  | A natural number or _infinity_ (````Inf````).
-**NatInf'**  | Num.Nat | ````*````  | A natural number, which is not zero, or _infinity_ (````Inf````).
+**NatInf'**  | Num.Nat | ````*````  | A natural number (which is not zero) or _infinity_ (````Inf````).
 **Flip** ````x````  ````b````  ````a````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | The 'Flip' type takes a type function (````* -> * -> *````) and flips it arguments. E.g. Flip Dict v k = Dict k v
 
 
 
-> This page was automatically generated on 2015-01-05 21:08:42 UTC (2015-01-05 22:08:42 CET)
+> This page was automatically generated on 2015-01-05 21:27:57 UTC (2015-01-05 22:27:57 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.
