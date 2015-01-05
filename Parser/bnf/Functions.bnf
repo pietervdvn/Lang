@@ -14,7 +14,7 @@ public import Patterns
    Note that these should not be case sensitive when referred to in docs;
    each law has a name which does not have to be unique -}
 _$lawname		::= "[a..zA..Z0..9 ]+"
-_lawDeclaration	::= localIdent ("," localIdent)* (":" type)?
+_lawDeclaration		::= localIdent ("," localIdent)* (":" type)?
 _lawDeclarations	::= lawDeclaration ("," lawDeclaration)*
 
 {- "=>" can never be parsed as operator. That is why it is will be disambiguated from an expression
@@ -38,8 +38,8 @@ declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type
 
 -- functions might have multiple types too
 _patterns	::= patternRoot*
-clause		::= patterns "=" expr (nltab expr)*
-function	::= nls* (law nl)* (declaration nl)+ (clause nl)+
+_clause		::= patterns "=" expr (nltab expr)*
+ function	::= (declaration nl)+ (clause nl)+
 
 {-
 law example

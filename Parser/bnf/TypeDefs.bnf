@@ -40,7 +40,7 @@ data _ ABC	= AB | BC
 data ABC	= _AB | _BC
 
 -}
- data		::= nlcomments? "data" "_"? typeIdent freeTypes "=" prod
+ data		::= "data" "_"? typeIdent freeTypes "=" prod
 
 {-
 
@@ -73,8 +73,8 @@ _typeDef	::= typeIdent freeTypes "=" type
  ------------------------
 
 -- comments are obligated, but it's not the parsers task to generate error messages
- cat		    ::= nlcomments? ("category"|"cat") globalIdent freeTypes subclass? classBody
-_subclass	  ::= ("in" | "is") type ("," type)*
+ cat		::= ("category"|"cat") globalIdent freeTypes subclass? classBody
+_subclass	::= ("in" | "is") type ("," type)*
 _classBody	::= (nltab (law | declaration | mlcomment | comment))+ nl
 
  -- ''instance Show (Set (a:Show))'',
