@@ -6,7 +6,7 @@ This module implements the function which gets the docstring for each type.
 
 import StdDef
 import Exceptions
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 
 import Languate.AST hiding (docstringFor)

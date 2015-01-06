@@ -13,7 +13,7 @@ import Languate.World
 import Languate.TypeTable.KindChecker.ConstructKindConstraints
 import Languate.TypeTable.KindChecker.Solver
 
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Data.Map (Map)
 

@@ -1,4 +1,4 @@
-module Languate.Checks.CheckComment where
+module Languate.TypeTable.Checks.CheckComment where
 
 import StdDef
 import Exceptions

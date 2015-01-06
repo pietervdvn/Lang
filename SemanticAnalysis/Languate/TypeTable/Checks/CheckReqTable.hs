@@ -1,9 +1,9 @@
-module Languate.Checks.CheckReqTable (validateReqTable) where
+module Languate.TypeTable.Checks.CheckReqTable (validateReqTable) where
 
 import StdDef
 import MarkDown
 import Exceptions
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import qualified Data.Set as S
 import Data.Maybe
@@ -11,7 +11,7 @@ import Data.Map hiding (map)
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.Checks.CheckKind
+import Languate.TypeTable.Checks.CheckKind
 import Data.List hiding (lookup, insert)
 import Prelude hiding (lookup)
 

@@ -20,7 +20,7 @@ import Languate.Precedence.PrecTable2MD
 
 import Languate.MD.MDGen
 
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 
 data TableOverview	= TableOverview { tlts			:: Map FQN TypeLookupTable

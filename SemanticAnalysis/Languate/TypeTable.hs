@@ -22,7 +22,7 @@ import Data.List (intercalate)
 import Languate.AST
 import Languate.TAST
 import Languate.FQN
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Control.Arrow
 import Normalizable

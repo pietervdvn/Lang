@@ -1,4 +1,4 @@
-module Languate.Checks.CheckADT where
+module Languate.TypeTable.Checks.CheckADT where
 
 {--
 This module implements a full ADT-check
@@ -6,9 +6,9 @@ This module implements a full ADT-check
 
 import StdDef
 import Exceptions
-import Languate.Checks.CheckUtils
-import Languate.Checks.CheckComment
-import Languate.Checks.CheckType
+import Languate.CheckUtils
+import Languate.TypeTable.Checks.CheckComment
+import Languate.TypeTable.Checks.CheckType
 
 import Languate.AST
 import Languate.TypeTable

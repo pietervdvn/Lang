@@ -1,14 +1,14 @@
-module Languate.Checks.CheckFunction where
+module Languate.TypeTable.Checks.CheckFunction where
 
 
 import StdDef
 import Exceptions
 
 import Languate.AST
-import Languate.Checks.CheckUtils
-import Languate.Checks.CheckComment
-import Languate.Checks.CheckType
-import Languate.Checks.CheckLaw
+import Languate.CheckUtils
+import Languate.TypeTable.Checks.CheckComment
+import Languate.TypeTable.Checks.CheckType
+import Languate.TypeTable.Checks.CheckLaw
 import Languate.TypeTable
 
 import Data.List

@@ -24,8 +24,8 @@ import Languate.FQN
 import Languate.AST (Coor)
 import Languate.TAST
 import Languate.TypeTable.KindChecker.KindConstraint
-import Languate.Checks.CheckUtils
-import Languate.Checks.CheckKind
+import Languate.CheckUtils
+import Languate.TypeTable.Checks.CheckKind
 
 import Languate.TypeTable
 

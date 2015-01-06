@@ -19,7 +19,7 @@ import Languate.World
 
 import Control.Arrow
 
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 
 

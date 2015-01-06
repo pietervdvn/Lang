@@ -16,7 +16,7 @@ instance Set (a:Show) is Show
 import StdDef
 
 import Exceptions
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Languate.World
 import Languate.TypeTable

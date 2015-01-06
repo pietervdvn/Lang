@@ -14,7 +14,7 @@ import Languate.AST as AST
 import Languate.FQN
 import Languate.TypeTable
 import Languate.World
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Data.Map (mapWithKey, findWithDefault, Map)
 import qualified Data.Map as M

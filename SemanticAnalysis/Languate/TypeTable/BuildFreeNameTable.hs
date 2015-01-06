@@ -7,7 +7,7 @@ E.g. Dict k v :{(Collections.Dict,Dict) --> {0 --> "k",1 --> "v"}
 
 import StdDef
 import Exceptions
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Data.Map as M
 import Data.Maybe

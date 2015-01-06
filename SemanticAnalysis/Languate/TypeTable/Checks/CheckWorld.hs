@@ -1,4 +1,4 @@
-module Languate.Checks.CheckWorld (validateWorld0) where
+module Languate.TypeTable.Checks.CheckWorld (validateWorld0) where
 
 {--
 
@@ -17,11 +17,11 @@ import Languate.AST
 import Languate.TAST
 import Languate.FQN
 import Languate.World
-import Languate.Checks.CheckUtils
-import Languate.Checks.CheckFunction
-import Languate.Checks.CheckComment
-import Languate.Checks.CheckADT
-import Languate.Checks.CheckSubDef
+import Languate.CheckUtils
+import Languate.TypeTable.Checks.CheckFunction
+import Languate.TypeTable.Checks.CheckComment
+import Languate.TypeTable.Checks.CheckADT
+import Languate.TypeTable.Checks.CheckSubDef
 
 
 

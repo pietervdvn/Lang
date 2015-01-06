@@ -1,12 +1,12 @@
-module Languate.Checks.CheckType where
+module Languate.TypeTable.Checks.CheckType where
 
 import StdDef
 import Exceptions
 
 import Languate.AST
 import Languate.TAST
-import Languate.Checks.CheckUtils
-import Languate.Checks.CheckComment
+import Languate.CheckUtils
+import Languate.TypeTable.Checks.CheckComment
 import Languate.TypeTable
 
 import Data.List

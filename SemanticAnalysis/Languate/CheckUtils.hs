@@ -1,4 +1,4 @@
-module Languate.Checks.CheckUtils where
+module Languate.CheckUtils where
 
 {--
 This module implements various recurring things in checks

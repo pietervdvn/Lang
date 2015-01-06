@@ -1,4 +1,4 @@
-module Languate.Checks.CheckKind where
+module Languate.TypeTable.Checks.CheckKind where
 
 {--
 This module implements various checks on kinds. It provides helper functions for the kindsolver.
@@ -7,7 +7,7 @@ This module implements various checks on kinds. It provides helper functions for
 import StdDef
 import MarkDown
 import Exceptions
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Data.Map hiding (map, filter)
 import Prelude hiding (lookup)

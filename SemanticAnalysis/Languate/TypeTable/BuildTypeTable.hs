@@ -39,10 +39,10 @@ import Languate.TypeTable.BuildDocstringTable
 import Languate.TypeTable.BuildFreeNameTable
 import Languate.TypeTable.BuildSuperTypeTable
 
-import Languate.Checks.CheckWorld
-import Languate.Checks.CheckReqTable
+import Languate.TypeTable.Checks.CheckWorld
+import Languate.TypeTable.Checks.CheckReqTable
 
-import Languate.Checks.CheckUtils
+import Languate.CheckUtils
 
 import Data.Map
 import Data.Map as M

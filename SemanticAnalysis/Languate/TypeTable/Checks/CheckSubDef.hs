@@ -1,13 +1,13 @@
-module Languate.Checks.CheckSubDef where
+module Languate.TypeTable.Checks.CheckSubDef where
 
 import StdDef
 import Exceptions
 
 import Languate.AST
-import Languate.Checks.CheckUtils
-import Languate.Checks.CheckADT
-import Languate.Checks.CheckType
-import Languate.Checks.CheckComment
+import Languate.CheckUtils
+import Languate.TypeTable.Checks.CheckADT
+import Languate.TypeTable.Checks.CheckType
+import Languate.TypeTable.Checks.CheckComment
 
 
 
