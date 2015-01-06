@@ -47,13 +47,11 @@ instance Dict k (v:Dict k k) is Multigraph
 
 This is saved as
 {List --> { [] -> Collection
-	    ["a"] --> Eq	, where "a:Eq"
-	    ["a"] --> Show	, where "a:Show"
-	    ["a"] --> Set a}}
+	    ["a"] --> { Eq	, where "a:Eq"}
+	    }
 -}
 
-
-type SuperTypeTableFor	= Map [Name] (Set RType, Map Name [RType])
+type SuperTypeTableFor	= Map [Name] (Set (RType, Map Name [RType]))
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
 data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
@@ -110,17 +108,17 @@ _construct tlt e tps cons
 
 
 
-superTypesFor	::  TypeTable -> TypeID -> [([RType],[Name], Map Name [RType])]
+superTypesFor	::  TypeTable -> TypeID -> [([Name], RType, Map Name [RType])]
 superTypesFor tt t
 		= let	stfor		= findWithDefault M.empty t $ supertypes tt
 			freeKeys	= keys stfor		in
-			fmap (superTypesFor' stfor) freeKeys
+			concatMap (superTypesFor' stfor) freeKeys
 
 
-superTypesFor'	:: SuperTypeTableFor -> [Name] -> ([RType],[Name], Map Name [RType])
+superTypesFor'	:: SuperTypeTableFor -> [Name] -> [([Name], RType, Map Name [RType])]
 superTypesFor' sttf appliedFrees
-		= let	(supers, reqs)	= findWithDefault (S.empty,M.empty) appliedFrees sttf in
-			(S.toList supers, appliedFrees, reqs)
+		= let	all	= S.toList $ findWithDefault S.empty appliedFrees sttf	:: [(RType, Map Name [RType])] in
+			fmap (\(a,(b,c)) -> (a,b,c)) $ unmerge [(appliedFrees , all)]
 
 
 

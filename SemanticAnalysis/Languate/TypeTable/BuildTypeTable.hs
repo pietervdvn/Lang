@@ -56,6 +56,6 @@ buildTypeTable w tlts
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
 			let knownTypes	= keys klt
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
-			supers		<- buildSuperTypeTable w
+			supers		<- buildSuperTypeTable w tlts
 			validateReqTable freeNames klt typeReqs
 			return $ TypeTable klt typeReqs supers docstrings freeNames

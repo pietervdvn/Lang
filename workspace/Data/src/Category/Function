@@ -14,5 +14,5 @@ cat Associative a	in a -> a -> a
 ---
 Functions for which the arguments can be swapped.
 ---
-cat Commutative a	in a -> a -> b
+cat Commutative a b	in a -> a -> b
 	> f:Commutative a, a,b:a => f a b = f b a

@@ -5,7 +5,7 @@ Type | Declared in | Kind | Docstring
 **BIInt**  | Builtins | ````*````  | A int! This is a temporary representation, which will be replaced by a truly builtin one
 **Eq**  | Category.Eq | ````*````  | The category which defines _equality_ ````==```` and _inequality_ ````!=````
 **Associative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
-**Commutative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the arguments can be swapped.
+**Commutative** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Functions for which the arguments can be swapped.
 **Mappable** ````a````  | Category.Mappable | ````(* ~> *)````  | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
 **Monoid**  | Category.Monoid | ````*````  | A ````Monoid```` is an type which has _neutral element_ and an _addition_.
 **Product**  | Category.Monoid | ````*````  | An instance of ````Monoid````, with ````*```` defined as append and ````1```` as neutral element.
@@ -32,13 +32,32 @@ Type | Declared in | Kind | Docstring
 
 Type | Is subtype of
 ---- | -------------
-Set````a:Monoid````  | Monoid
+Associative````a````  | (a -> a -> a)
+Commutative````a````  ````b````  | (a -> a -> b)
+Product | Monoid
+Sum | Monoid
+Collection | Mappable
+Collection````a````  | Monoid
+Dict````k````  ````v````  | Mappable, Monoid
+Dict````k:Eq````  ````v````  | (Set k)
+List | Mappable
+List````a````  | Monoid, (Collection a)
+More | Collection
+Int | IntInf
+Int' | Int, IntInf'
+IntInf | BIInt
+IntInf' | IntInf
+Nat | NatInf
+Nat' | Nat, NatInf'
+NatInf | IntInf
+NatInf' | NatInf
+Flip````x````  ````b````  ````a````  | (x a b)
 
 
 
 
 
-> This page was automatically generated on 2015-01-05 23:25:13 UTC (2015-01-06 00:25:13 CET)
+> This page was automatically generated on 2015-01-06 20:14:59 UTC (2015-01-06 21:14:59 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.

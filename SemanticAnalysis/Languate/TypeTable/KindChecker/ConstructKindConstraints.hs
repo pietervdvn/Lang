@@ -62,9 +62,9 @@ kindConstraintIn (ClassDefStm classDef)
 			baseConstrs	<- baseTypeConstr id frees reqs
 			constraints	<- subtypeConstraints (RNormal fqn nm) frees $ subclassFrom classDef
 			return $ baseConstrs:constraints
-kindConstraintIn (InstanceStm (Instance nm subtype reqs))
-		= do	superT	<- resolve nm
-			subT	<- resolve subtype
+kindConstraintIn (InstanceStm (Instance pathId@(path, nm) frees super reqs))
+		= do	superT	<- resolve super
+			subT	<- resolve $ Applied (Normal path nm) $ map Free frees
 			returnOne $ HaveSameKind subT superT
 kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs))
 		= do	id@(fqn,_)	<- getId name

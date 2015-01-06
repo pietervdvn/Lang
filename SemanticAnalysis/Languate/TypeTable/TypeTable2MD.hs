@@ -61,15 +61,17 @@ superTypeTable2md tt	=  let	all	= keys $ supertypes tt	in
 
 superType2md	:: TypeTable -> TypeID -> [[MarkDown]]
 superType2md tt tid
-		= let 	all	= superTypesFor tt tid	in
-			map (showEntry tid) all
+		= let 	all	= superTypesFor tt tid
+			merged	= merge $ map (showEntry tid) all	::  [(MarkDown, [MarkDown])]
+			mix (t, tps)	= [t, intercal ", " tps]	in
+			map mix merged
 
 
-showEntry	:: TypeID -> ([RType], [Name], Map Name [RType]) -> [MarkDown]
-showEntry (_, n) (supers, frees, freeReqs)
-		= [ n ++ showReqs (\n -> findWithDefault [] n freeReqs) frees
-		  , intercal ", " $ map showShort supers
-		  ]
+showEntry	:: TypeID -> ([Name], RType, Map Name [RType]) -> (MarkDown, MarkDown)
+showEntry (_, n) (frees, super, freeReqs)
+		= ( n ++ showReqs (\n -> findWithDefault [] n freeReqs) frees
+		  , showShort super
+		  )
 
 showReqs	:: (Name -> [RType]) -> [Name] -> MarkDown
 showReqs f	= intercal " " . map (showReq f)

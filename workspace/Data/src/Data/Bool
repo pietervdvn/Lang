@@ -21,7 +21,7 @@ precedence of (&&) is left, (&&) = (||)
   > True && False	= False
 (&&)		: Bool -> Bool -> Bool
   True True	= True
-  *		= False
+  _ _		= False
 
 precedence of (||) is left, (||) = (&&)
 -- Logical 'or'-function. Returns False if, and only if both arguments are False
@@ -32,7 +32,7 @@ precedence of (||) is left, (||) = (&&)
 (||)		: Bool -> Bool -> Bool
 or		: Bool -> Bool -> Bool
   False False	= False
-  *		= True
+  _ _		= True
 
 precedence of (!) is prefix, (!) < (&&)
 -- Logical 'not' function (aka invert).
