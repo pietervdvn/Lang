@@ -79,7 +79,7 @@ _categoryBody	::= categoryStm*
 _categoryStm	::= "\n+\t" (law | declaration | mlcomment | comment)
 
  -- ''instance Set (a:Show) is Show'',
- instance	::= "instance" type reqSep type
+ instance	::= "instance" knownType constrFreeType* reqSep type
 
 
 

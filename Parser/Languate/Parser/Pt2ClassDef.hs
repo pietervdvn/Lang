@@ -138,20 +138,25 @@ pt2instance	=  pt2a hi ti si convi
 
 
 convi		:: ASTi -> Instance
-convi (Inst name t reqs)
-		=  Instance name t reqs
+convi (Inst id frees t reqs)
+		=  Instance id frees t reqs
 convi ast	=  convErr modName ast
 
 
-data ASTi	= Inst Type Type [TypeRequirement]
+data ASTi	= Inst ([Name],Name) [Name] Type [TypeRequirement]
 		| TypeT Type [TypeRequirement]
+		| TypeId ([Name],Name)
+		| FreeIT Name [TypeRequirement]
+		| Frees [Name] [TypeRequirement]
 		| InstanceT	| SubT
 	deriving (Show)
 
 
 hi		:: [(Name, ParseTree -> ASTi)]
 	-- basetype: the type which gets instantiated; knownType: the type which is the supertype of basetype
-hi		=  [("type", uncurry TypeT . pt2type)]
+hi		=  [("type", uncurry TypeT . pt2type)
+			, ("knownType", TypeId . extractId . fst . pt2type)
+			, ("constrFreeType", uncurry FreeIT . extractFree . pt2type)]
 
 ti		:: Name -> String -> ASTi
 ti _ "instance"	=  InstanceT
@@ -160,7 +165,27 @@ ti nm cont	=  tokenErr (modName++"i") nm cont
 
 
 si		:: Name -> [ASTi] -> ASTi
-si _ [InstanceT, TypeT id tr, SubT, TypeT super tr']
-		= Inst super id $ tr++tr'
+si _ [InstanceT, TypeId id, Frees frees treqs, SubT, TypeT super treqs']
+		= Inst id frees super $ treqs++treqs'
+si _ [InstanceT, TypeId id, SubT, TypeT super treqs']
+		= Inst id [] super $ treqs'
+si _ all@(FreeIT n reqs:_)
+		= uncurry Frees $ concatFrees all
 si _ [ast]	= ast
 si nm asts	= seqErr modName nm asts
+
+
+
+concatFrees	:: [ASTi] -> ([Name], [TypeRequirement])
+concatFrees (FreeIT nm reqs:tail)
+		= let	(nm', reqs') = concatFrees tail in
+			(nm:nm', reqs ++ reqs')
+concatFrees _	= ([],[])
+
+
+extractId	:: Type -> ([Name], Name)
+extractId (Normal path nm)
+		= (path, nm)
+
+extractFree (Free a, treqs)
+		= (a,treqs)

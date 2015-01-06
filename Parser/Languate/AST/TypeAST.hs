@@ -138,5 +138,5 @@ data ClassDef	= ClassDef
 			, decls		:: [(Name,Type, [TypeRequirement])] }
 	deriving (Ord, Eq)
 
--- Instance: Type 1 is the supertype of type 2, in other words: instance (2) is (1)
-data Instance	= Instance Type Type [TypeRequirement]
+-- Instance: (["Collection"],"Set") ["a"] ---is--- "Show" [("a","Show")]
+data Instance	= Instance ([Name],Name) [Name] Type [TypeRequirement]

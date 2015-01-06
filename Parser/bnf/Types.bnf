@@ -27,7 +27,7 @@ public import Prelude
  -- TYPES --
  -----------
 
-$typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
+ $typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
  knownType	::= %((globalIdent moduleSep)* typeIdent)
  $reqSep	::= "in" | "is" | ":"
  $freeType	::= localIdent & !reqSep
