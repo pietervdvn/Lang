@@ -11,5 +11,6 @@ cabal-dev
 cabal.sandbox.config
 cabal.config
 
+pickup.txt
 
 workspace/Data/.gen/*

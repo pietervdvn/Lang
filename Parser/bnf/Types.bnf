@@ -23,21 +23,28 @@ desc		"The syntaxis of types in Languate.
 
 public import Prelude
 
+
+ $subTypeT	::= "in" | "is" | ":"
+ $typeConjT	::= "\&"  | ","
+ typeConj	::= type (typeConjT type)*
+
+
  -----------
  -- TYPES --
  -----------
 
+
  $typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
  knownType	::= %((globalIdent moduleSep)* typeIdent)
- $reqSep	::= "in" | "is" | ":"
- $freeType	::= localIdent & !reqSep
- parFreeType	::= "\(" freeType (reqSep commaSepTypes) "\)"
+ $freeType	::= localIdent & !subTypeT
+ parFreeType	::= "\(" freeType (subTypeT typeConj) "\)"
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
 _$infer		::= "_"		-- compiler should infer which is the type
 _simpleType	::= knownType | constrFreeType | void | infer | "\(" type "\)"
 
 
+-- used for lists of tuples. ''[Int, Bool]'' = ''[(Int, Bool)]''
 _commaSepTypes	::= type ( "," type)*
 _list		::= "\[" commaSepTypes "\]"
 _set		::= "\{" commaSepTypes "\}"

@@ -74,12 +74,12 @@ _typeDef	::= typeIdent freeTypes "=" type
 
 -- comments are obligated, but it's not the parsers task to generate error messages
  cat		::= ("category"|"cat") globalIdent freeTypes subclass? categoryBody
-_subclass	::= ("in" | "is") type ("," type)*
+_subclass	::= subTypeT typeConj
 _categoryBody	::= categoryStm*
 _categoryStm	::= "\n+\t" (law | declaration | mlcomment | comment)
 
  -- ''instance Set (a:Show) is Show'',
- instance	::= "instance" knownType constrFreeType* reqSep type
+ instance	::= "instance" knownType constrFreeType* subTypeT type
 
 
 
