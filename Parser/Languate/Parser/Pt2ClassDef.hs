@@ -76,10 +76,7 @@ t _ ('\n':_)	=  NlT
 t _ ":"		=  ColonT
 t _ "cat"	=  ClassT
 t _ "category" = ClassT
-t "subclass" "in"
-		= SubClassT
-t "subclass" "is"
-		= SubClassT
+t "subTypeT" _	= SubClassT
 t nm cont	=  tokenErr modName nm cont
 
 
@@ -160,7 +157,8 @@ hi		=  [("type", uncurry TypeT . pt2type)
 
 ti		:: Name -> String -> ASTi
 ti _ "instance"	=  InstanceT
-ti "reqSep" _	=  SubT
+ti "subTypeT" _	=  SubT
+
 ti nm cont	=  tokenErr (modName++"i") nm cont
 
 

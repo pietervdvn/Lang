@@ -57,7 +57,8 @@ t "typeIdent" s	= Ident s
 t "freeType" s	= FreeType s []
 t "void"  _	= KnownType [] "Void"
 t "infer" _	= Unknown
-t "reqSep" _	= InT
+t "subTypeT" _	= InT
+t "typeConjT" _	= Comma
 t _ "("		= ParO
 t _ ")"		= ParC
 t _ "["		= ParO
@@ -89,6 +90,15 @@ s "commaSepTypes" [typ, CommaSepTypes typs]
 		= CommaSepTypes $ typ:typs
 s "commaSepTypes" typs
 		= CommaSepTypes typs
+s "typeConj" [Comma, typ]
+		= typ
+s "typeConj" [typ]
+		= typ
+s "typeConj" [typ, CommaSepTypes typs]
+		= CommaSepTypes $ typ:typs
+s "typeConj" typs
+		= CommaSepTypes typs
+
 s "list" [ParO, cont, ParC]
 		= AppliedType (KnownType [] "List") [asTuple $ unpack cont]
 s "set" [ParO, cont, ParC]
