@@ -34,7 +34,7 @@ example declarations:
 	lookup	: (k : Ord) -> {k --> v} -> v
 -}
 
-declaration	::= "_"? (localIdent | "\(" op "\)" ) ":" type
+declaration	::= "_"? (localIdent | "\(" op "\)" ) subTypeT typeConj
 
 -- functions might have multiple types too
 _patterns	::= patternRoot*

@@ -43,7 +43,7 @@ t		:: Name -> String -> AST
 t "localIdent" id
 		=  Ident id
 t "op" id	=  Ident id
-t _ ":"		=  Colon
+t "subTypeT" _	=  Colon
 t _ "("		=  ParO
 t _ ")"		=  ParC
 t _ "_"		=  Underscore
