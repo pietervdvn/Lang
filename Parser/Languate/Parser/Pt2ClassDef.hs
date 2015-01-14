@@ -9,6 +9,8 @@ import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2TypeConj
+
 import Languate.AST
 import Control.Arrow
 
@@ -37,7 +39,7 @@ convert ast	=  convErr modName ast
 
 
 -- injects the syntactic sugar that 'cat Abc\n\t abc -> abc' means '(abc:Abc)'
-injectTypeReq	:: Name -> [(Name, Type, [TypeRequirement])] -> [(Name, Type, [TypeRequirement])]
+injectTypeReq	:: Name -> [(Name, [Type], [TypeRequirement])] -> [(Name, [Type], [TypeRequirement])]
 injectTypeReq (n:nm) decls
 		= let	typeReq	= nub   [ (toLower n : nm, Normal [] $ n:nm)
 					, (map toLower (n:nm), Normal [] $ n:nm)]	in
@@ -50,7 +52,7 @@ data AST	= Clss Name [Name] [Type] [TypeRequirement] [AST]
 		| Lw Law
 		| Comm Comment
 		| SubClassOf [Type] [TypeRequirement]
-		| Decl (Name, Type, Visible, [TypeRequirement])
+		| Decl (Name, [Type], Visible, [TypeRequirement])
 		| FreeT [Name] [TypeRequirement]
 		| Type Type [TypeRequirement]
 		| ClassT	| SubClassT
@@ -103,7 +105,7 @@ s _ [ClassT, Ident name, Body asts]
 s nm asts	= seqErr modName nm asts
 
 
-triage		:: Name -> [AST] -> ([Law], [(Name, Type, [TypeRequirement])], [DocString (Name, Name)])
+triage		:: Name -> [AST] -> ([Law], [(Name, [Type], [TypeRequirement])], [DocString (Name, Name)])
 triage _ []
 		= ([], [], [])
 triage catName 	(Lw law:tail)

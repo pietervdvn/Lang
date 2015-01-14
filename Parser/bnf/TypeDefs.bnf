@@ -66,6 +66,7 @@ _typeDef	::= typeIdent freeTypes "=" type
  -- SUB DEF --
  -------------
 
+-- TODO use typeConj
  subtype	::= "subtype" typeIdent freeTypes "=" "_"? type ("\&" type)*
 
  ------------------------

@@ -4,7 +4,7 @@ import StdDef
 import Bnf.ParseTree hiding (Line)
 import Bnf
 import Languate.Parser.Utils
-import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2TypeConj
 import Languate.Parser.Pt2Expr
 import Languate.Parser.Pt2Pattern
 import Languate.Parser.Pt2Comment
@@ -41,7 +41,7 @@ conv (Root asts)
 		= \func -> foldr conv func asts
 
 
-data AST	= Decl (Name, Type, Visible, [TypeRequirement])
+data AST	= Decl (Name, [Type], Visible, [TypeRequirement])
 		| LineT Clause
 		| Root [AST]
 		| NlT

@@ -25,6 +25,7 @@ import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Statement
 import Languate.Parser.Pt2Languate
 import Languate.Parser.Pt2SubTypeDef
+import Languate.Parser.Pt2TypeConj
 import Languate.File2AST
 
 

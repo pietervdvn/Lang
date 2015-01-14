@@ -135,7 +135,7 @@ data ClassDef	= ClassDef
 			, classReqs	:: [TypeRequirement]
 			, subclassFrom	:: [Type]
 			, classlaws	:: [Law]
-			, decls		:: [(Name,Type, [TypeRequirement])] }
+			, decls		:: [(Name,[Type], [TypeRequirement])] }
 	deriving (Ord, Eq)
 
 -- Instance: (["Collection"],"Set") ["a"] ---is--- "Show" [("a","Show")]
