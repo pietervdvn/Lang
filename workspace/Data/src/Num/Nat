@@ -40,7 +40,7 @@ i	= #abs
 precedence of (*) is Left, (*) = (%), (*) = (/), (*) = (//)
 precedence of (+) is Left, (+) = (-)
 -- (+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
-(+)	: IntInf -> IntInf	-> IntInf
+(+)	: IntInf -> IntInf	-> IntInf & Associative IntInf & Commutative IntInf IntInf
 (+)	: Nat -> Nat 	-> Nat
 (+)	: Nat -> Nat' 	-> Nat'
 (+)	: Nat' -> Nat 	-> Nat'

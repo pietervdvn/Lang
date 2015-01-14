@@ -67,6 +67,10 @@ data Signature	= Signature Name RType
 	deriving (Eq, Ord)
 
 
+type FunctionBody	= [TClause]
+data FunctionInfo	= FunctionInfo {declaredIn :: FQN, body :: FunctionBody}
+
+
 -------------------- Only utils, instance declaration and boring stuff below -------------------------------------
 
 instance Show ResolvedType where

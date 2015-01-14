@@ -23,15 +23,13 @@ import Languate.MD.MDGen
 import Languate.CheckUtils
 
 
-data TableOverview	= TableOverview { tlts			:: Map FQN TypeLookupTable
-					, typeTable		:: TypeTable
+data TableOverview	= TableOverview { typeTable		:: TypeTable
 					, precedenceTable	:: PrecedenceTable}
 
 buildAllTables	:: World -> Exc TableOverview
-buildAllTables w	= do	let tlts	=  buildTLTs w
-				tt	<- buildTypeTable w tlts
+buildAllTables w	= do	tt	<- buildTypeTable w
 				precT	<- buildPrecTable' w
-				return $ TableOverview tlts tt precT
+				return $ TableOverview tt precT
 
 
 -- Writes the overview tables to the relevant .md and .html

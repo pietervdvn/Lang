@@ -28,16 +28,17 @@ import Control.Arrow
 import Normalizable
 {-
 The type table contains all known types within a certain module.
-
 -}
 
 type TypeID	= (FQN, Name)
 
+--Type requirements are explicit for new type declarations; contains synonyms
 type TypeReqTable	= Map (TypeID, Int) (Set RType)
 type KindLookupTable	= Map TypeID Kind
 
 {-
 Keeps track of supertype relations.
+These are direct super types. All should have the same kind. E.g. String in List Char; both are *
 
 E.g.
 
@@ -54,15 +55,26 @@ This is saved as
 type SuperTypeTableFor	= Map [Name] (Set (RType, Map Name [RType]))
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
-data TypeTable	= TypeTable	{ kinds		:: KindLookupTable
-				, typeReqs	:: TypeReqTable			-- type requirements are explicit for new type declarations; contains synonyms
-				, supertypes	:: SuperTypeTable	-- direct super types. should have the same kind. E.g. String in List Char; both are *
+-- basically the same as the aliastable, but with types.
+type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
+
+
+
+
+
+data TypeTable	= TypeTable	{ typeLookups	:: Map FQN TypeLookupTable
+				, kinds		:: KindLookupTable
+				, typeReqs	:: TypeReqTable
+				, supertypes	:: SuperTypeTable
 				, docstrings	:: Map TypeID String
 				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
 
--- basically the same as the aliastable, but with types.
-type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
+
+
+
+
+
 
 
 -- Finds the type within the TLT

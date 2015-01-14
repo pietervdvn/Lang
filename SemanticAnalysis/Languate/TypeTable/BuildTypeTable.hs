@@ -47,10 +47,11 @@ import Languate.CheckUtils
 import Data.Map
 import Data.Map as M
 
-buildTypeTable	:: World -> Map FQN TypeLookupTable -> Exceptions' String TypeTable
-buildTypeTable w tlts
+buildTypeTable	:: World -> Exceptions' String TypeTable
+buildTypeTable w
 		= inside "While building the type table" $
-		   do	validateWorld0 tlts w
+		   do	let tlts	=  buildTLTs w
+			validateWorld0 tlts w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
@@ -58,4 +59,4 @@ buildTypeTable w tlts
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
 			supers		<- buildSuperTypeTable w tlts
 			validateReqTable freeNames klt typeReqs
-			return $ TypeTable klt typeReqs supers docstrings freeNames
+			return $ TypeTable tlts klt typeReqs supers docstrings freeNames
