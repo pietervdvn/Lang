@@ -14,6 +14,8 @@ import Data.List
 
 validateReqs tlt frees	= mapM_ (validateType tlt frees . snd)
 
+validateType' tlt t	= validateType tlt (freesIn t) t
+
 validateTypes tlt frees	= mapM (validateType tlt frees)
 validateType tlt frees t
 		= do	rt 	<- catch (resolveType tlt t) (recover t)

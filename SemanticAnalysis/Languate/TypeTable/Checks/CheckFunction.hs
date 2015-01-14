@@ -23,7 +23,7 @@ validateFunction tlt (Function _ signs clauses)
 
 
 
-validateSign	:: TypeLookupTable -> (Name, Type, [TypeRequirement]) -> Check
-validateSign tlt (name, t, tr)
-		=  do	validateType tlt (freesIn t) t
-			validateReqs tlt (freesIn t) tr
+validateSign	:: TypeLookupTable -> (Name, [Type], [TypeRequirement]) -> Check
+validateSign tlt (name, tps, tr)
+		=  do	mapM_ (validateType' tlt) tps
+			mapM_ (\t -> validateReqs tlt (freesIn t) tr) tps

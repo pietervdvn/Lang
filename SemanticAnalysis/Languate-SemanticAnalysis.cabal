@@ -1,11 +1,13 @@
 name:                Languate-SemanticAnalysis
 version:             0.1.0.0
 author:              pietervdvn
+maintainer:          pietervdvn@gmail.com
 category:            Language
 build-type:          Simple
-cabal-version:       >=1.8
+cabal-version:       >=1.10
 
 library
-  exposed-modules:      Languate.TAST, Languate.TypeTable
-  other-modules:        Languate.MDGen, Languate.BuildTables, Languate.Checks.CheckUtils, Languate.Checks.Checks0, Languate.MaintenanceAccess.TestBuild, Languate.TypeTable.BuildDocstringTable, Languate.TypeTable.TypeTable2MD, Languate.TypeTable.BuildTypeTable, Languate.TypeTable.BuildTypeLookupTable, Languate.TypeTable.BuildRequirementTable, Languate.TypeTable.Expr2MD, Languate.Precedence.BuildPrecTable, Languate.Precedence.PrecTable2MD, Languate.Precedence.Precedence, Languate.Precedence.PrecedenceTable, Languate.Precedence.AnnotationStrip, Languate.Precedence.Expr2PrefExpr, Languate.KindChecker.ConstructKindConstraints, Languate.KindChecker.KindConstraint, Languate.KindChecker.Solver, Languate.KindChecker.KindChecks, Languate.KindChecker.BuildKindTable, Languate.Graphs.ExportCalculator, Languate.Graphs.PathFinder, Languate.Graphs.SearchCycles
- build-depends:       base ==4.6.*, Std ==0.1.*, Parser ==0.1.*, Consumer ==0.1.*, Languate-Loader ==0.1.*, containers ==0.5.*, Bnf ==0.1.*, mtl ==2.1.*, Regex ==0.1.*, time==1.4.*
+  exposed-modules	: Languate.TAST, Languate.TypeTable
+  other-modules:     Languate.CheckUtils, Languate.BuildTables, Languate.FunctionTable, Languate.MaintenanceAccess.TestBuild, Languate.TypeTable.BuildDocstringTable, Languate.TypeTable.TypeTable2MD, Languate.TypeTable.BuildTypeTable, Languate.TypeTable.BuildFreeNameTable, Languate.TypeTable.BuildTypeLookupTable, Languate.TypeTable.BuildRequirementTable, Languate.TypeTable.BuildSuperTypeTable, Languate.TypeTable.Checks.CheckType, Languate.TypeTable.Checks.CheckLaw, Languate.TypeTable.Checks.CheckReqTable, Languate.TypeTable.Checks.CheckComment, Languate.TypeTable.Checks.CheckADT, Languate.TypeTable.Checks.CheckWorld, Languate.TypeTable.Checks.CheckSubDef, Languate.TypeTable.Checks.CheckKind, Languate.TypeTable.Checks.CheckFunction, Languate.TypeTable.KindChecker.ConstructKindConstraints, Languate.TypeTable.KindChecker.KindConstraint, Languate.TypeTable.KindChecker.Solver, Languate.TypeTable.KindChecker.BuildKindTable, Languate.Precedence.BuildPrecTable, Languate.Precedence.PrecTable2MD, Languate.Precedence.Precedence, Languate.Precedence.PrecedenceTable, Languate.Precedence.AnnotationStrip, Languate.Precedence.Expr2PrefExpr, Languate.FunctionTable.BuildFunctionTable, Languate.Graphs.ExportCalculator, Languate.Graphs.PathFinder, Languate.Graphs.SearchCycles, Languate.MD.MDGen, Languate.MD.Expr2MD
+  build-depends:       base >=4.6 && <4.7, Std >=0.1 && <0.2, Parser >=0.1 && <0.2, Consumer >=0.1 && <0.2, Languate-Loader >=0.1 && <0.2, containers >=0.5 && <0.6, Bnf >=0.1 && <0.2, Regex >=0.1 && <0.2, mtl >=2.1 && <2.2, pandoc >=1.13 && <1.14, blaze-html >=0.7 && <0.8, time >=1.4 && <1.5
+  default-language:    Haskell2010

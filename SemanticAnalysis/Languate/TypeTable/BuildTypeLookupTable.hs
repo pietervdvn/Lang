@@ -156,9 +156,9 @@ reexportType w curMod (impFrom, (_,typeName))
 
 
 
-allTypes	:: (Name, Type, [TypeRequirement]) -> [Type]
-allTypes (_,t,treqs)
-		= t : map snd treqs
+allTypes	:: (Name, [Type], [TypeRequirement]) -> [Type]
+allTypes (_,tps,treqs)
+		= tps ++ map snd treqs
 
 err str fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn++" within "++str++" table"
 fwd str fqn	= findWithDefault (err str fqn) fqn
