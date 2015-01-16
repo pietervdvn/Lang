@@ -6,7 +6,6 @@ import Exceptions
 import Languate.AST
 import Languate.TAST
 import Languate.CheckUtils
-import Languate.TypeTable.Checks.CheckComment
 import Languate.TypeTable
 
 import Data.List

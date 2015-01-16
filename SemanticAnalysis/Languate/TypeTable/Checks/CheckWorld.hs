@@ -19,7 +19,6 @@ import Languate.FQN
 import Languate.World
 import Languate.CheckUtils
 import Languate.TypeTable.Checks.CheckFunction
-import Languate.TypeTable.Checks.CheckComment
 import Languate.TypeTable.Checks.CheckADT
 import Languate.TypeTable.Checks.CheckSubDef
 
@@ -58,7 +57,13 @@ validateStm' tlt (stm,coor)
 validateStm	:: TypeLookupTable -> Statement -> Check
 validateStm tlt (FunctionStm f)	= validateFunction tlt f
 validateStm tlt (ADTDefStm adt)	= validateADTDef tlt adt
-validateStm _ (Comments comms)
-		= do	mapM_ validateComment comms
 validateStm tlt (SubDefStm subdef)	= validateSubDef tlt subdef
+
+-- No responsibilities here
+validateStm _ (LawStm _)	= pass
+validateStm _ (AnnotationStm _)	= pass
+-- Building of a md table
+validateStm _ (Comments _)	= pass
+validateStm _ (DocStringStm _)	= pass
+
 validateStm tlts stm	= warn $ "Install checks for "++show stm

@@ -7,7 +7,6 @@ import Languate.AST
 import Languate.CheckUtils
 import Languate.TypeTable.Checks.CheckADT
 import Languate.TypeTable.Checks.CheckType
-import Languate.TypeTable.Checks.CheckComment
 
 
 

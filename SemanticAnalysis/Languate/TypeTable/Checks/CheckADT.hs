@@ -7,7 +7,6 @@ This module implements a full ADT-check
 import StdDef
 import Exceptions
 import Languate.CheckUtils
-import Languate.TypeTable.Checks.CheckComment
 import Languate.TypeTable.Checks.CheckType
 
 import Languate.AST
