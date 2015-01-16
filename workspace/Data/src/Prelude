@@ -4,6 +4,8 @@ Contains a lot of usefull functions, types, classes.
 Each program imports these by default
 -------
 
+public import Any
+
 public import Data.Bool
 
 public import ControlFlow

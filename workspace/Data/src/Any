@@ -1,0 +1,12 @@
+Any
+---
+Implementation of Any
+---
+
+---
+The supertype of every single type. Each type has ''Any'' implicitly as supertype.
+
+The type ''.'' desugars to ''Any''
+---
+cat Any
+	> True

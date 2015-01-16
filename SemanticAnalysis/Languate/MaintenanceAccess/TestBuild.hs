@@ -16,6 +16,7 @@ import Languate.World
 import Languate.BuildTables
 
 import System.IO.Unsafe
+import System.Directory
 
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
@@ -25,4 +26,6 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 t	= do	world	<- packageIO $ path++"/src/"
 		to	<- runExceptionsIO' $ buildAllTables world
 		writeTables to path
-		putStrLn "Written MDs!"
+		wd	<- getCurrentDirectory
+		let wd'	= wd ++ "/" ++ path ++ "/.gen/html"
+		putStrLn $ "Written MDs! See file:///"++wd'++"/Index.html"

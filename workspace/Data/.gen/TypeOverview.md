@@ -2,6 +2,7 @@
 
 Type | Declared in | Kind | Docstring
 ---- | ----------- | ---- | ---------
+**Any**  | Any | ````*````  | The supertype of every single type. Each type has ````Any```` implicitly as supertype.
 **BIInt**  | Builtins | ````*````  | A int! This is a temporary representation, which will be replaced by a truly builtin one
 **Eq**  | Category.Eq | ````*````  | The category which defines _equality_ ````==```` and _inequality_ ````!=````
 **Associative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
@@ -57,7 +58,7 @@ Flip````x````  ````b````  ````a````  | (x a b)
 
 
 
-> This page was automatically generated on 2015-01-14 02:13:57 UTC (2015-01-14 03:13:57 CET)
+> This page was automatically generated on 2015-01-16 21:48:49 UTC (2015-01-16 22:48:49 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.

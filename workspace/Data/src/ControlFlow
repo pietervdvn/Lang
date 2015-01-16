@@ -27,3 +27,10 @@ False _ b	= b
 -- Takes a function with two arguments; returns a function with its arguments inversed
 flip	: (a -> b -> c) -> b -> a -> c
 f b a	= f a b
+
+
+--- Always returns the first argument
+TODO change ''b'' into a ''.'' when the parser is fixed
+---
+const	: a -> b -> a
+a _	= a

@@ -54,7 +54,7 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 type TExpression	= TypedExpression
 
 data TPattern	= TAssign Name
-		| TDeconstruct Signature [TPattern]
+		| TDeconstruct (Name, RType) [TPattern]
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression
@@ -62,13 +62,6 @@ data TPattern	= TAssign Name
 
 data TClause		= TClause [TPattern] TExpression
 	deriving (Show, Eq)
-
-data Signature	= Signature Name RType
-	deriving (Eq, Ord)
-
-
-type FunctionBody	= [TClause]
-data FunctionInfo	= FunctionInfo {declaredIn :: FQN, body :: FunctionBody}
 
 
 -------------------- Only utils, instance declaration and boring stuff below -------------------------------------
@@ -96,14 +89,6 @@ showRTypeReq (name, rtype)
 showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
 		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
-
-instance Show Signature where
-	show (Signature n t)
-	 	= tabs 2 n ++ ": "++ show t
-
-instance Normalizable Signature where
-	normalize (Signature n t)
-		= Signature n $ normalize t
 
 instance Normalizable ResolvedType where
 	normalize	= nt
