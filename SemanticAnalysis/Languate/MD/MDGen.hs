@@ -56,7 +56,7 @@ footer link
 		let remNanos	= fst . break (=='.')
 		let date	= remNanos $ show time
 		let dateLocal	= remNanos . show $ utcToLocalTime zone time
-		let p =  [parag $ "This page was automatically generated on "++date++" UTC ("++dateLocal++" "++show zone++")"
+		let p =  [parag $ "This page was automatically generated." -- " on "++date++" UTC ("++dateLocal++" "++show zone++")"
 			, parag $ "Do not edit it, as regeneration will overwrite your changes."
 			, "Back to "++link "index" "Index"
 			]
