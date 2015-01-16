@@ -92,8 +92,6 @@ resolveReqs tlt reqs
 fixTable	:: SuperTypeTable -> SuperTypeTable
 fixTable	=  mapWithKey fixTableFor
 
--- The (implicit) supertype for every type
-anyType		= RNormal (toFQN' "pietervdvn:Data:Any") "Any"
 
 fixTableFor	:: TypeID -> SuperTypeTableFor -> SuperTypeTableFor
 fixTableFor tid sttf
