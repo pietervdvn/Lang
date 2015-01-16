@@ -10,6 +10,9 @@ import Data.Map
 import Prelude hiding (lookup)
 import StdDef
 import Languate.TAST
+import Normalizable
+import Languate.FQN
+import Data.List
 
 {- A signature is a function identifier. When looking up a function with given signature, this function should be **all** of the given types (e.g. Assoc + Commut), and can be more.
 
@@ -33,7 +36,7 @@ instance Show Signature where
 
 instance Normalizable Signature where
 	normalize (Signature n t)
-		= Signature n $ normalize t
+		= Signature n $ nub $ Prelude.map normalize t
 
 
 
@@ -47,7 +50,3 @@ data FunctionInfo	= FunctionInfo {declaredIn :: FQN, body :: FunctionBody}
 {-The function table is a local function table, thus local for a single module-}
 data FunctionTable
 	= FunctionTable { locallyDeclared	:: Map Name Signature }
-
-findExact	:: FunctionTable -> Signature -> Maybe FunctionInfo
-findExact ft sign
-		=  lookup sign ft

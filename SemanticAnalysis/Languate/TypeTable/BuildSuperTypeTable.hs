@@ -42,7 +42,7 @@ type SuperTypeTable	= Map TypeID SuperTypeTableFor
 buildSuperTypeTable	:: World -> Map FQN TypeLookupTable -> Exc SuperTypeTable
 buildSuperTypeTable w tlts
 		= do	all	<- mapM (try' [] . superTypesIn' tlts w) $ keys $ modules w
-			return $ _buildTable $ concat all
+			return $ fixTable $ _buildTable $ concat all
 
 
 superTypesIn'	:: Map FQN TypeLookupTable -> World -> FQN ->
@@ -88,7 +88,24 @@ resolveReqs tlt reqs
 
 -- my cat's contribution to the project: frrrrrrrrrrrrrrrùD£+
 
+-- Adds ''Any'' supertype where needed
+fixTable	:: SuperTypeTable -> SuperTypeTable
+fixTable	=  mapWithKey fixTableFor
 
+-- The (implicit) supertype for every type
+anyType		= RNormal (toFQN' "pietervdvn:Data:Any") "Any"
+
+fixTableFor	:: TypeID -> SuperTypeTableFor -> SuperTypeTableFor
+fixTableFor tid sttf
+		= let	key	= longest $ keys sttf	-- the keys are the 'applied free' names. The longest chain = the defined chain, and should have at least one supertype
+			err	= error $ "Huh? No supertype for "++show tid++" "++show key++" while fixing the supertypes?"
+			known	= findWithDefault err key sttf
+			known'	= if S.null known then S.singleton (anyType, empty) else known		in
+			insert key known' sttf
+
+
+
+-- Builds the primary table
 _buildTable	:: [(TypeID, [Name], Reqs, [RType] )] -> SuperTypeTable
 _buildTable stuff
 		= let 	wrap4 (a,b,c,d)	= (a, (b,c,d))

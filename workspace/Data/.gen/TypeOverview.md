@@ -33,10 +33,15 @@ Type | Declared in | Kind | Docstring
 
 Type | Is subtype of
 ---- | -------------
+Any | Any
+Eq | Any
 Associative````a````  | (a -> a -> a)
 Commutative````a````  ````b````  | (a -> a -> b)
+Mappable````a````  | Any
+Monoid | Any
 Product | Monoid
 Sum | Monoid
+Ord | Any
 Collection | Mappable
 Collection````a````  | Monoid
 Dict````k````  ````v````  | Mappable, Monoid
@@ -44,6 +49,8 @@ Dict````k:Eq````  ````v````  | (Set k)
 List | Mappable
 List````a````  | Monoid, (Collection a)
 More | Collection
+More````a````  | Any
+Set````a:Eq````  | (Collection a)
 Int | IntInf
 Int' | Int, IntInf'
 IntInf | BIInt
@@ -58,7 +65,7 @@ Flip````x````  ````b````  ````a````  | (x a b)
 
 
 
-> This page was automatically generated on 2015-01-16 21:48:49 UTC (2015-01-16 22:48:49 CET)
+> This page was automatically generated on 2015-01-16 22:33:26 UTC (2015-01-16 23:33:26 CET)
 > 
 > 
 > Do not edit it, as regeneration will overwrite your changes.

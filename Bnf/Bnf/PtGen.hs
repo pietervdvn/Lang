@@ -13,7 +13,7 @@ import Bnf.ParseTree
 
 import Consumer hiding (Exception)
 import ConsumerL hiding (embed)
-import StdDef
+import StdDef hiding (longest)
 import Parser
 import StateT
 import Regex

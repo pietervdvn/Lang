@@ -46,6 +46,13 @@ dubbles []	=  []
 dubbles (a:as)	=  (if a `elem` as then (a:) else id) $ dubbles as
 
 
+longest		:: [[a]] -> [a]
+longest ass	=  let	long	= maximum $ map length ass in
+			head $ filter ((==) long . length) ass
+
+
+
+
 all2	:: (a -> b -> Bool) -> [a] -> [b] -> Bool
 all2 f as bs
 	= all (uncurry f) $ zip as bs

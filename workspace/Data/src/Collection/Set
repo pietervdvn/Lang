@@ -3,6 +3,7 @@ Set
 Declaration and utils of Set, an unorderd colletion.
 ---
 
+import Collection.Collection
 import Category.Eq
 
 ---
@@ -10,5 +11,5 @@ A ''Collection'' without order and duplicates.
 
 The syntactic sugar ''{a}'' desugars to ''Set a''
 ---
-cat Set (a:Eq)
+cat Set (a:Eq)	is Collection a
 	head	: Set a -> (b:a)
