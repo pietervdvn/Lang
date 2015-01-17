@@ -13,23 +13,21 @@ By adding the associativity, the compiler has a high degree of freedom in optimi
 ---
 cat Monoid
 	-- The neutral element
-	~ identity element:	append neutral a	= a
 	~ identity element:	append a neutral	= a
 	neutral	: monoid
 	-- The addition operator.
-	~ associativity: a,b,c:Monoid => append (append a b) c = append a (append b c)
-	append	: monoid -> monoid -> monoid
+	append	: monoid -> monoid -> monoid & Associative monoid
 
 
 -- An instance of ''Monoid'', with ''+'' defined as append and ''0'' as neutral element.
 cat Sum
-	(+)	: sum -> sum -> sum
+	(+)	: sum -> sum -> sum & Associative sum
 	zero	: sum
 
 
 -- An instance of ''Monoid'', with ''*'' defined as append and ''1'' as neutral element.
 cat Product
-	(*)	: product -> product -> product
+	(*)	: product -> product -> product & Associative sum
 	one	: product
 
 instance Sum is Monoid

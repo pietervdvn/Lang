@@ -19,7 +19,7 @@ precedence of (&&) is left, (&&) = (||)
   > False && True && False	= False
   > True && True	= True
   > True && False	= False
-(&&)		: Bool -> Bool -> Bool
+(&&)		: Bool -> Bool -> Bool & Associative Bool
   True True	= True
   _ _		= False
 
@@ -29,8 +29,7 @@ precedence of (||) is left, (||) = (&&)
   ~ neutral element for or: b => False  || b	= b
   > False || False		= False
   > False || True || False	= True
-(||)		: Bool -> Bool -> Bool
-or		: Bool -> Bool -> Bool
+(||)		: Bool -> Bool -> Bool & Associative Bool
   False False	= False
   _ _		= True
 

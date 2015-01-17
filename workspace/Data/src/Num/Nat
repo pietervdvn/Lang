@@ -6,6 +6,9 @@ Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
 import Builtins
 import Category.Function
 
+-- TODO add associative and commutative where needed
+
+
 -- An _integer_ or positive or negative _Infinity_ (''Inf'').
    type IntInf		= Builtins.BIInt
 -- An _integer_ which is not zero, or positive or negative _Infinity_ (''Inf'').
