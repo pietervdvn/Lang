@@ -6,9 +6,7 @@ Function-categories contains classes which functions can be, such as Associative
 ---
 Arbitrary functions from ''a'' to ''b''
 ---
-cat Curry a b		in a -> b
-	> True
-
+type Curry a b		= a -> b
 
 ---
 Functions for which the order of evaluation does not matter.

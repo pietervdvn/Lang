@@ -124,7 +124,7 @@ _construct tlt e tps cons
 			rtps	<- mapM (resolveType tlt) tps	-- mapM gives Nothing if one type is not found
 			return $ cons rtps
 
--- Returns all the supertypes, given per applied frees. Whenever the type is fully applied, ''Any'' is a supertype too. This supertypes is given when no other supertype exists.
+-- Returns all the supertypes, given per applied frees. Whenever the type is fully applied, ''Any'' is a supertype too. This supertypes is given when no other supertype exists. Used in the 2MD
 superTypesFor	::  TypeTable -> TypeID -> [([Name], RType, Map Name [RType])]
 superTypesFor tt t
 		= let	stfor		= findWithDefault M.empty t $ supertypes tt
