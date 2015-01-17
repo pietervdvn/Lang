@@ -3,7 +3,12 @@ Function
 Function-categories contains classes which functions can be, such as Associative, Commutative etc...
 --------
 
-import Category.Mappable
+---
+Arbitrary functions from ''a'' to ''b''
+---
+cat Curry a b		in a -> b
+	> True
+
 
 ---
 Functions for which the order of evaluation does not matter.
