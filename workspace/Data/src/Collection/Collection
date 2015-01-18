@@ -10,7 +10,7 @@ This module gives the category declaration of each collection.
 import Category.Monoid
 import Category.Function
 import Category.Mappable
-
+import Category.Eq
 ---
 A ''Collection'' is a data structure which contains zero or more elements.
 
@@ -38,6 +38,7 @@ cat Collection a
 
 instance Collection is Mappable
 instance Collection a is Monoid
+instance Collection (a:Eq) is Eq
 ---
 map	: (a -> b) -> a* -> b*
 f empty	= empty

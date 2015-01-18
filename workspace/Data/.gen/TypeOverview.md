@@ -34,7 +34,7 @@ Type | Declared in | Kind | Docstring
 
 Type | Is subtype of
 ---- | -------------
-Any | Any
+BIInt | Any
 Eq | Any
 Associative````a````  | (a -> a -> a)
 Commutative````a````  ````b````  | (a -> a -> b)
@@ -45,17 +45,20 @@ Product | Monoid
 Sum | Monoid
 Ord | Any
 Collection | Mappable
+Collection````a:Eq````  | Eq
 Collection````a````  | Monoid
 Dict````k````  ````v````  | Mappable, Monoid
 Dict````k:Eq````  ````v````  | (Set k)
 List | Mappable
 List````a````  | Monoid, (Collection a)
+Maybe````a````  | Any
 More | Collection
 More````a````  | Any
 Set````a:Eq````  | (Collection a)
+Bool | Any
 Int | IntInf
 Int' | Int, IntInf'
-IntInf | BIInt
+IntInf | BIInt, Eq
 IntInf' | IntInf
 Nat | NatInf
 Nat' | Nat, NatInf'

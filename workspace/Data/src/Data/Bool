@@ -3,6 +3,8 @@ Bool
 The bool type is a type which represents logical values.
 ----
 
+import Category.Function
+
 --## Definition
 
 -- The ''Bool'' datatype represents truth values of logic.

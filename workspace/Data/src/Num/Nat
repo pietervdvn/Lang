@@ -5,6 +5,7 @@ Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
 
 import Builtins
 import Category.Function
+import Category.Eq
 
 -- TODO add associative and commutative where needed
 
@@ -26,6 +27,8 @@ subtype NatInf'		= _ NatInf
 subtype Nat		= _ NatInf
 -- A natural number, which is not zero.
 subtype Nat'		= _ NatInf' & Nat
+
+instance IntInf is Eq
 
 -- Adds one to a number. A natural number + 1 is guaranteed not to be zero.
 succ	: Nat 		-> Nat'
