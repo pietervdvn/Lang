@@ -59,7 +59,8 @@ type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
 
 -- The (implicit) supertype for every type
-anyType		= RNormal (toFQN' "pietervdvn:Data:Any") "Any"
+anyType		= uncurry RNormal anyTypeID
+anyTypeID	= (toFQN' "pietervdvn:Data:Any", "Any")
 
 -- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!

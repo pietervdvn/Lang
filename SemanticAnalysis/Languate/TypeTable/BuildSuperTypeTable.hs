@@ -66,6 +66,10 @@ superTypeIn tlt (SynDefStm (SynDef nm frees super reqs))
 		= superTypeFor tlt [] nm frees [super] reqs
 superTypeIn tlt (ClassDefStm cd)
 		= superTypeFor tlt [] (name cd) (frees cd) (subclassFrom cd) (classReqs cd)
+superTypeIn tlt (ADTDefStm (ADTDef nm frees reqs _))
+		= do	fqn	<- findTypeOrigin tlt ([], nm)
+			reqs'	<- resolveReqs tlt reqs
+			return [((fqn, nm), frees, reqs', [anyType])]
 superTypeIn _ _	= return []
 
 
@@ -98,7 +102,9 @@ fixTableFor tid sttf
 		= let	key	= longest $ keys sttf	-- the keys are the 'applied free' names. The longest chain = the defined chain, and should have at least one supertype
 			err	= error $ "Huh? No supertype for "++show tid++" "++show key++" while fixing the supertypes?"
 			known	= findWithDefault err key sttf
-			known'	= if S.null known then S.singleton (anyType, empty) else known		in
+			known'	= if S.null known && tid /= anyTypeID
+					then S.singleton (anyType, empty)
+					else known		in
 			insert key known' sttf
 
 

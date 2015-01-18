@@ -12,78 +12,195 @@ import Normalizable
 import Data.Map (Map, findWithDefault)
 import Data.Set (Set, empty, member)
 import qualified Data.Set as S
+import Data.Map (Map, fromList, toList, keys, lookup)
+import qualified Data.Map as M
+import Prelude hiding (lookup)
+import Data.Maybe
+import Data.Either
+import Data.List (nub)
 
-import Control.Monad.Reader
+import Control.Monad.Trans
+import Control.Arrow
+import StateT
 
-{- Returns LT if type1 is a subtype of type2, GT in the opposite case and EQ if both are equals.
-When no ordering is possible, nothing is returned.
+import Debug.Trace
 
-We assume both the types live in a context where free type variables are bounded against certain super types. These are passed along.
-We also assume both types have the same kind. If not, ordering is impredictable.
+data Context	= Context 	{ frees		:: Map Name [RType]
+				, typeT 	:: TypeTable
+				, binding 	:: Binding}
+data Binding	= Binding (Map Name RType)
 
-t0 supertype of t1 if:
-RNormal blabla > RNormal _
-RFree x > RFree y <=> x has a type constraint which is a supertype of y
-RApplied x y > RApplied a b
-	<=> x > a && y >= b || x y > y b
-	e.g. 	Collection a < Mappable a
-		(a:Show)* < Mappable a
-		a*	? Mappable (a:Show)
-x -> y > a -> b
-	<=> x > a && y >= b
-		Nat -> Nat > Nat' -> Nat'
-		Nat' -> Nat > Nat' -> Nat'
-		Nat -> Nat' > Nat' -> Nat'
-	This follows out of the 'Curry a b = a -> b' equivalence
+type StMsg a	= StateT Context (Either String) a
 
-RNormal x > Free
-	<=> Free has a type requirement which is x or a subtype of x.
-	Thus: "Bool" > "a:Bool"
-RNormal x > RApplied a b
-	<=> a, applied to the free variables, is a subtype of x
 
-Whenever loops are found, the types are treated as equals:
-cat A
-cat B
-instance A is B
-instance B is A
+{- Tries to bind t0 in t1.
+
+bind "A" "a"	= {a --> A}
+bind "A" "B"	= {} if B is a supertype of A	== if A has a superType B
+			failure otherwise
+bind "Curry X Y" "a -> b"
+		= {a --> X, b --> Y}
 
 -}
-isSupertypeOf	:: TypeTable -> Map Name [RType] -> RType -> RType -> Maybe Ordering
-isSupertypeOf tt frees t1 t2
-	= runReaderT (isto (normalize t1) (normalize t2)) $ Context frees tt
+
+bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
+bind tt reqs
+	= bind' (Context reqs tt noBinding)
 
 
-data Context	= Context {frees :: Map Name [RType], typeT :: TypeTable}
+bind' ctx t0 t1
+	= runstateT (b' t0 t1) ctx |> snd |> binding
 
-supersOf free ctx
-	= findWithDefault [anyType] free $ frees ctx
+b'	:: RType -> RType -> StMsg ()
+b' t0 t1
+	= let (t0', t1')	= (normalize t0, normalize t1) in
+		if t0' == t1' then return ()
+			else b t0' t1'
+
+b	:: RType -> RType -> StMsg ()
+b t (RFree a)
+	= do	reqs	<- requirementsOn a
+		ctx	<- get
+		allSupers	<- allSuperTypesOf t
+		let unmetReqs	= filter (`notElem` allSupers) reqs
+		if null unmetReqs then addBinding (a, t) else do
+		failed $ "Could not bind "++show t++" to "++a++", type requirement is not met: "++show unmetReqs
+b t0 t1@(RNormal _ _)
+	= do	supers0	<- allSuperTypesOf' t0
+		if t1 `elem` supers0 then return ()
+		else failed $ "Could not bind "++show t0++" against "++show t1
 
 
---
-isto	:: RType -> RType -> ReaderT Context Maybe Ordering
-isto t0@(RNormal fqn0 nm0) t1@(RNormal fqn1 nm1)
-	= do	let tid0	= (fqn0, nm0)
-		let tid1	= (fqn1, nm1)
-		if tid0 == tid1 then return EQ else do
-		-- We do not know about applied frees here, so [] as key.
-		-- No frees => No reqs on the frees => We only care about FST
-		supers0	<- fetchSTF tid0 |> fetch [] |> (S.map fst)
-		supers1	<- fetchSTF tid1 |> fetch [] |> (S.map fst)
-		let t0inT1	= t0 `member` supers1
-		let t1inT0	= t1 `member` supers0
-		if t0inT1 && t1inT0 then return EQ else do
-		if t0inT1 then return GT else do
-		if t1inT0 then return LT else do
-		lift Nothing
+
+superTypesOf	:: RType -> StMsg [RType]
+superTypesOf (RNormal fqn nm)
+	= fetchSTF (fqn, nm)  |> findWithDefault S.empty [] |> (S.map fst) |> S.toList
+superTypesOf (RFree a)
+	= requirementsOn a
+superTypesOf (RApplied t args)
+	= do	baseSupers	<- allSuperTypesOf' (RApplied t $ tail' args)
+		argSupers	<- mapM allSuperTypesOf' args -- e.g. [[a,Eq,Ord], [b]]
+		let mixedSupers	= perms $ baseSupers:argSupers-- e.g. [[a,b], [Eq, b], [Ord, b]]
+		mapM appliedSuperTypes mixedSupers |> concat
 
 
-fetchSTF	:: TypeID -> ReaderT Context Maybe SuperTypeTableFor
+
+
+
+{-
+e.g.
+"Collection" "a" -> Monoid, Eq (if a is Eq)
+"Collection" "Eq"
+
+-}
+appliedSuperTypes	:: [RType] -> StMsg [RType]
+appliedSuperTypes (base:args)
+	= appSuper base args
+
+
+
+-- Given the base type and arguments, will try to give each super type
+appSuper	:: RType -> [RType] -> StMsg [RType]
+appSuper t@(RNormal fqn nm) args
+	= do	sttf	<- fetchSTF (fqn, nm)
+		ctx		<- get
+		-- kys = all free variables with exactly enough applied
+		let kys	=  filter ((==) (length args) . length) $ keys sttf
+		-- list of: (appliedFrees "a" "b", [(superType, ifTheseReqsAreMet)])
+		let supers	= map (\k -> (k,S.toList $ findWithDefault (error "Huh?") k sttf)) kys
+		let supers'	= mapMaybe (validateArgs ctx args) $ unmerge supers
+		return supers'
+
+
+-- Returns the supertype if the requirements (of the args) are met
+validateArgs	:: Context -> [RType] -> ([Name], (RType, Map Name [RType])) -> Maybe RType
+validateArgs ctx args (freeNames, (superT, reqs))
+	= if validateKeys ctx args freeNames  reqs
+		then Just superT
+		else Nothing
+
+{-
+The supertypetable says:
+if a is Eq, then Collection a is Eq
+This checks wether [Int] [a] {a --> Eq} is fullfilled, thus if Int is a Eq
+-}
+validateKeys	:: Context -> [RType] -> [Name] -> Map Name [RType] -> Bool
+validateKeys ctx args names reqs
+	= let	reqsFor a	= findWithDefault [] a reqs
+		namedArgs	= zip args names
+		argsWithReqs	= map (second reqsFor) namedArgs in	-- e.g. (Int, [Eq]), meaning: Int should be EQ
+		all (uncurry $ validateReqs ctx) argsWithReqs
+
+
+
+{- Validates a binding.
+Given a type t and a set of types it should be, returns True if t fulfills the reqs.
+-}
+validateReqs	:: Context -> RType -> [RType] -> Bool
+validateReqs ctx t reqs
+		= let 	bindings	= map (bind' ctx t) reqs
+			failedBindings	= length $ lefts bindings in
+			failedBindings == 0
+
+
+
+-- ## UTils
+allSuperTypesOf' (RApplied t [])
+			= allSuperTypesOf' t
+allSuperTypesOf' t	= allSuperTypesOf t |> (t:) |> nub
+
+allSuperTypesOf	:: RType -> StMsg [RType]
+allSuperTypesOf t
+	= do	supers	<- superTypesOf t
+		supers'	<- mapM allSuperTypesOf supers |> concat
+		return $ supers ++ supers'
+
+
+
+
+
+
+fetchSTF	:: TypeID -> StMsg SuperTypeTableFor
 fetchSTF tid
 	= do	let err	= error $ "No supertype table found for "++show tid
 		let f	= findWithDefault err tid
-		asks (f . supertypes . typeT)
+		get' (f . supertypes . typeT)
+
+
+requirementsOn	:: Name -> StMsg [RType]
+requirementsOn a
+	= get' frees |> findWithDefault [] a
 
 
 fetch		:: (Ord k) => k -> Map k (Set v) -> Set v
 fetch		=  findWithDefault empty
+
+addBinding	:: (Name, RType) -> StMsg ()
+addBinding (n,t)
+	= do	ctx	<- get
+		let (Binding b)	= binding ctx
+		put $ ctx {binding = Binding $ M.insert n t b}
+
+perms	:: [[a]] -> [[a]]
+perms []	= []
+perms [ls]	= [[l] | l <- ls]
+perms (ls:lss)
+	= do	l	<- ls
+		map (l:) $ perms lss
+
+instance Show Binding where
+	show	= sb
+
+sb (Binding b)
+	= sd b
+
+instance Show Context where
+	show (Context frees _ b)= "Context "++sd frees ++ ", "++show b
+
+sd	:: (Show k, Show v) => Map k v -> String
+sd  d
+	= "{"++unwords (map (\(k, v) -> show k ++" --> "++show v) $ toList d)++"}"
+
+noBinding	= Binding M.empty
+
+failed str	= lift $ Left str
