@@ -134,3 +134,10 @@ thd3 (a,b,c)		= c
 
 firstJust (Just a) _	= Just a
 firstJust _ a		= a
+
+perms	:: [[a]] -> [[a]]
+perms []	= []
+perms [ls]	= [[l] | l <- ls]
+perms (ls:lss)
+	= do	l	<- ls
+		map (l:) $ perms lss

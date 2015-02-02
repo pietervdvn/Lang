@@ -142,3 +142,12 @@ numberOfKindArgs (KindCurry _ k)
 asRType	:: FQN -> Type -> RType
 asRType fqn (Normal [] nm)
 	= RNormal fqn nm
+
+traverseRT	:: (RType -> RType) -> RType -> RType
+traverseRT f (RApplied bt tps)
+		= RApplied (traverseRT f bt) $ fmap (traverseRT f) tps
+traverseRT f (RCurry tps)
+		= RCurry $ fmap (traverseRT f) tps
+traverseRT f (RTuple tps)
+		= RTuple $ fmap (traverseRT f) tps
+traverseRT f t	= f t

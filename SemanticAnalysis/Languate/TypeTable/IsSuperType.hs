@@ -25,10 +25,10 @@ import StateT
 
 import Debug.Trace
 
-data Context	= Context 	{ frees		:: Map Name [RType]
+data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free. All bound frees should be included.
 				, typeT 	:: TypeTable
 				, binding 	:: Binding}
-data Binding	= Binding (Map Name RType)
+data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to allow a custom show function
 
 type StMsg a	= StateT Context (Either String) a
 
@@ -40,6 +40,8 @@ bind "A" "B"	= {} if B is a supertype of A	== if A has a superType B
 			failure otherwise
 bind "Curry X Y" "a -> b"
 		= {a --> X, b --> Y}
+
+Important: the requirement-table should contain **each bound free**, to prevent double binding.
 
 -}
 
@@ -109,7 +111,7 @@ appSuper t@(RNormal fqn nm) args
 		-- list of: (appliedFrees "a" "b", [(superType, ifTheseReqsAreMet)])
 		let supers	= map (\k -> (k,S.toList $ findWithDefault (error "Huh?") k sttf)) kys
 		let supers'	= mapMaybe (validateArgs ctx args) $ unmerge supers
-		return supers'
+		return $ trace (show t ++ show args ++ "--> "++show supers') supers'
 
 
 -- Returns the supertype if the requirements (of the args) are met
@@ -142,6 +144,37 @@ validateReqs ctx t reqs
 			failedBindings	= length $ lefts bindings in
 			failedBindings == 0
 
+{- Substitutes all frees which name is already bound in a different contect. The list are these "used" frees.
+
+e.g.
+
+["a"] (List (a,b)) -> List (a0,b)
+-}
+substitute'	:: [Name] -> RType -> RType
+substitute' nms	= substitute (fmap RFree $ buildBinding nms)
+
+-- Builds a binding, which substitutes away "bound" frees. e.g. [a,b,a0] -> Binding {a -> a1, b -> b0, a0 -> a11}
+buildBinding	:: [Name] -> Map Name Name
+buildBinding []	= M.empty
+buildBinding (a:as)
+		= let	base	= buildBinding as
+			bound	= M.keys base ++ M.elems base
+			canditates	= filter (`notElem` bound) [ a ++ show i | i <- [1..]]
+			replacement	= head canditates in
+			M.insert a replacement base
+
+
+
+{- Replaces all frees in the given rtype. Unknown types are ignored
+ e.g. {"a" -> Nat, "b" -> Bool} (RApplied Tuple [RFree a, RFree b, RFree c]) -> RApplied Dict [Nat, Bool, RFree c].     -}
+substitute	:: Map Name RType -> RType -> RType
+substitute dict t
+		= traverseRT (_substitute dict) t
+
+_substitute	:: Map Name RType -> RType -> RType
+_substitute dict (RFree a)
+		= findWithDefault (RFree a) a dict
+_substitute _ t	= t
 
 
 -- ## UTils
@@ -151,10 +184,9 @@ allSuperTypesOf' t	= allSuperTypesOf t |> (t:) |> nub
 
 allSuperTypesOf	:: RType -> StMsg [RType]
 allSuperTypesOf t
-	= do	supers	<- superTypesOf t
+	= do	supers	<- superTypesOf t -- TODO fix leak! Supertype could be "List a", where "a" suddenly got captured!
 		supers'	<- mapM allSuperTypesOf supers |> concat
 		return $ supers ++ supers'
-
 
 
 
