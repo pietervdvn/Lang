@@ -58,9 +58,9 @@ dependsOn'	:: RType -> [(FQN, Name)]
 dependsOn' (RNormal fqn nm)
 		= [(fqn, nm)]
 dependsOn' (RApplied r rs)
-		= concatMap dependsOn' (r:rs)
-dependsOn' (RCurry rs)
-		= concatMap dependsOn' rs
+		= concatMap dependsOn' [r,rs]
+dependsOn' (RCurry bt t)
+		= concatMap dependsOn' [bt, t]
 dependsOn' (RTuple rs)
 		= concatMap dependsOn' rs
 dependsOn' (RFree _)

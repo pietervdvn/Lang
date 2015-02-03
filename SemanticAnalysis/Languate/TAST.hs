@@ -38,8 +38,8 @@ data Kind		= Kind
 -- resoved type -- each type known where it is defined
 data ResolvedType	= RNormal FQN Name
 			| RFree String
-			| RApplied RType [RType]
-			| RCurry [RType]
+			| RApplied RType RType
+			| RCurry RType RType
 			| RTuple [RType]
 	deriving (Eq, Ord)
 type RType		= ResolvedType
@@ -74,10 +74,10 @@ st short (RNormal fqn str)
 		=  (if short then "" else show fqn++ "." ) ++ str
 st short (RFree str)
 		=  str
-st short (RApplied t tps)
-		=  "(" ++ st short t ++" "++ unwords (fmap (st short) tps)++")"
-st short (RCurry tps)
-		=  "(" ++ intercalate " -> " (fmap (st short) tps)++")"
+st short (RApplied bt t)
+		=   "(" ++ st short bt ++ " " ++ st short t ++")"
+st short (RCurry at rt)
+		=  "(" ++ st short at ++ " -> " ++ st short rt ++")"
 st short (RTuple tps)
 		=  "(" ++ intercalate ", " (fmap (st short) tps) ++")"
 
@@ -94,13 +94,8 @@ instance Normalizable ResolvedType where
 	normalize	= nt
 
 nt	:: ResolvedType -> ResolvedType
-nt (RApplied t [])	= nt t
-nt (RApplied t [t'])	= RApplied (nt t) [nt t']
--- all applied types are written as ( (State Int) Bool) to make biding easier
--- > deriveBindings (m a) (State Int Bool) = [ (m, State Int), (a, Bool)
-nt (RApplied t ts)	= RApplied (nt $ RApplied t $ init ts) [nt $ last ts]
-nt (RCurry [t])		= nt t
-nt (RCurry ts)		= RCurry [nt $ head ts, nt $ RCurry $ tail ts ]
+nt (RApplied t0 t1)	= RApplied (nt t0) $ nt t1
+nt (RCurry t0 t1)	= RCurry (nt t0) $ nt t1
 nt (RTuple [t])		= nt t
 nt (RTuple ts)		= RTuple $ fmap nt ts
 nt t			= t
@@ -144,10 +139,19 @@ asRType fqn (Normal [] nm)
 	= RNormal fqn nm
 
 traverseRT	:: (RType -> RType) -> RType -> RType
-traverseRT f (RApplied bt tps)
-		= RApplied (traverseRT f bt) $ fmap (traverseRT f) tps
-traverseRT f (RCurry tps)
-		= RCurry $ fmap (traverseRT f) tps
+traverseRT f (RApplied bt t)
+		= RApplied (traverseRT f bt) $ traverseRT f t
+traverseRT f (RCurry at rt)
+		= RCurry (traverseRT f at) $ traverseRT f rt
 traverseRT f (RTuple tps)
 		= RTuple $ fmap (traverseRT f) tps
 traverseRT f t	= f t
+
+foldRT	:: (RType -> a) -> ([a] -> a) -> RType -> a
+foldRT f concat (RApplied bt t)
+		= concat [foldRT f concat bt, foldRT f concat t]
+foldRT f concat (RCurry at rt)
+		= concat [foldRT f concat at, foldRT f concat rt]
+foldRT f concat (RTuple tps)
+		= concat $ fmap (foldRT f concat) tps
+foldRT f _ t	= f t

@@ -107,10 +107,20 @@ resolveType tlt (Normal path name)
 			return $ RNormal fqn name
 resolveType tlt (Free nm)
 		= return $ RFree nm
-resolveType tlt e@(Applied t tps)
-		= _construct tlt e (t:tps) (\(rt:rtps) -> RApplied rt rtps)
-resolveType tlt e@(Curry tps)
-		= _construct tlt e tps RCurry
+resolveType tlt (Applied bt [])
+		= resolveType tlt bt
+resolveType tlt (Applied bt tps)
+		= do	let (tps',t)	= (init' tps, last tps)
+			t'	<- resolveType tlt t
+			tail	<- resolveType tlt (Applied bt tps')
+			return $ RApplied tail t'
+
+resolveType tlt (Curry [t])
+		= resolveType tlt t
+resolveType tlt (Curry (t:tps))
+		= do	t'	<- resolveType tlt t
+			tail	<- resolveType tlt (Curry tps)
+			return $ RCurry t' tail
 resolveType tlt e@(TupleType tps)
 		= _construct tlt e tps RTuple
 resolveType _ Infer
@@ -124,6 +134,13 @@ _construct tlt e tps cons
 		=  inside ("In the type expression "++show e) $ do
 			rtps	<- mapM (resolveType tlt) tps	-- mapM gives Nothing if one type is not found
 			return $ cons rtps
+
+_construct'	:: TypeLookupTable -> Type -> Type -> Type -> (RType -> RType -> RType) -> Exc RType
+_construct' tlt e t0 t1 cons
+		= inside ("In the type expression "++show e) $ do
+			t0'	<- resolveType tlt t0
+			t1'	<- resolveType tlt t1
+			return $ cons t0' t1'
 
 -- Returns all the supertypes, given per applied frees. Whenever the type is fully applied, ''Any'' is a supertype too. This supertypes is given when no other supertype exists. Used in the 2MD
 superTypesFor	::  TypeTable -> TypeID -> [([Name], RType, Map Name [RType])]

@@ -25,12 +25,6 @@ import StateT
 
 import Debug.Trace
 
-data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free. All bound frees should be included.
-				, typeT 	:: TypeTable
-				, binding 	:: Binding}
-data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to allow a custom show function
-
-type StMsg a	= StateT Context (Either String) a
 
 
 {- Tries to bind t0 in t1.
@@ -68,7 +62,7 @@ b t (RFree a)
 		if null unmetReqs then addBinding (a, t) else do
 		failed $ "Could not bind "++show t++" to "++a++", type requirement is not met: "++show unmetReqs
 b t0 t1@(RNormal _ _)
-	= do	supers0	<- allSuperTypesOf' t0
+	= do	supers0	<- allSuperTypesOf t0
 		if t1 `elem` supers0 then return ()
 		else failed $ "Could not bind "++show t0++" against "++show t1
 
@@ -79,9 +73,11 @@ superTypesOf (RNormal fqn nm)
 	= fetchSTF (fqn, nm)  |> findWithDefault S.empty [] |> (S.map fst) |> S.toList
 superTypesOf (RFree a)
 	= requirementsOn a
+superTypesOf (RApplied t [])
+	= superTypesOf t
 superTypesOf (RApplied t args)
-	= do	baseSupers	<- allSuperTypesOf' (RApplied t $ tail' args)
-		argSupers	<- mapM allSuperTypesOf' args -- e.g. [[a,Eq,Ord], [b]]
+	= do	baseSupers	<- allSuperTypesOf (RApplied t $ tail' args)
+		argSupers	<- mapM allSuperTypesOf args -- e.g. [[a,Eq,Ord], [b]]
 		let mixedSupers	= perms $ baseSupers:argSupers-- e.g. [[a,b], [Eq, b], [Ord, b]]
 		mapM appliedSuperTypes mixedSupers |> concat
 
@@ -144,95 +140,12 @@ validateReqs ctx t reqs
 			failedBindings	= length $ lefts bindings in
 			failedBindings == 0
 
-{- Substitutes all frees which name is already bound in a different contect. The list are these "used" frees.
 
-e.g.
-
-["a"] (List (a,b)) -> List (a0,b)
--}
-substitute'	:: [Name] -> RType -> RType
-substitute' nms	= substitute (fmap RFree $ buildBinding nms)
-
--- Builds a binding, which substitutes away "bound" frees. e.g. [a,b,a0] -> Binding {a -> a1, b -> b0, a0 -> a11}
-buildBinding	:: [Name] -> Map Name Name
-buildBinding []	= M.empty
-buildBinding (a:as)
-		= let	base	= buildBinding as
-			bound	= M.keys base ++ M.elems base
-			canditates	= filter (`notElem` bound) [ a ++ show i | i <- [1..]]
-			replacement	= head canditates in
-			M.insert a replacement base
-
-
-
-{- Replaces all frees in the given rtype. Unknown types are ignored
- e.g. {"a" -> Nat, "b" -> Bool} (RApplied Tuple [RFree a, RFree b, RFree c]) -> RApplied Dict [Nat, Bool, RFree c].     -}
-substitute	:: Map Name RType -> RType -> RType
-substitute dict t
-		= traverseRT (_substitute dict) t
-
-_substitute	:: Map Name RType -> RType -> RType
-_substitute dict (RFree a)
-		= findWithDefault (RFree a) a dict
-_substitute _ t	= t
-
-
--- ## UTils
-allSuperTypesOf' (RApplied t [])
-			= allSuperTypesOf' t
-allSuperTypesOf' t	= allSuperTypesOf t |> (t:) |> nub
 
 allSuperTypesOf	:: RType -> StMsg [RType]
+allSuperTypesOf (RApplied t [])
+	= allSuperTypesOf t
 allSuperTypesOf t
 	= do	supers	<- superTypesOf t -- TODO fix leak! Supertype could be "List a", where "a" suddenly got captured!
 		supers'	<- mapM allSuperTypesOf supers |> concat
 		return $ supers ++ supers'
-
-
-
-
-
-fetchSTF	:: TypeID -> StMsg SuperTypeTableFor
-fetchSTF tid
-	= do	let err	= error $ "No supertype table found for "++show tid
-		let f	= findWithDefault err tid
-		get' (f . supertypes . typeT)
-
-
-requirementsOn	:: Name -> StMsg [RType]
-requirementsOn a
-	= get' frees |> findWithDefault [] a
-
-
-fetch		:: (Ord k) => k -> Map k (Set v) -> Set v
-fetch		=  findWithDefault empty
-
-addBinding	:: (Name, RType) -> StMsg ()
-addBinding (n,t)
-	= do	ctx	<- get
-		let (Binding b)	= binding ctx
-		put $ ctx {binding = Binding $ M.insert n t b}
-
-perms	:: [[a]] -> [[a]]
-perms []	= []
-perms [ls]	= [[l] | l <- ls]
-perms (ls:lss)
-	= do	l	<- ls
-		map (l:) $ perms lss
-
-instance Show Binding where
-	show	= sb
-
-sb (Binding b)
-	= sd b
-
-instance Show Context where
-	show (Context frees _ b)= "Context "++sd frees ++ ", "++show b
-
-sd	:: (Show k, Show v) => Map k v -> String
-sd  d
-	= "{"++unwords (map (\(k, v) -> show k ++" --> "++show v) $ toList d)++"}"
-
-noBinding	= Binding M.empty
-
-failed str	= lift $ Left str

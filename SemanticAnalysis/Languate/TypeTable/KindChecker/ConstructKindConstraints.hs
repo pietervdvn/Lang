@@ -84,7 +84,7 @@ kindConstraintIn _	= return []
 subtypeConstraints	:: RType -> [Name] -> [Type] -> RI [KindConstraint]
 subtypeConstraints base frees superClasses
 		= do 	superClasses	<- mapM resolve superClasses
-			let appliedBase	= RApplied base $ map RFree frees
+			let appliedBase	= foldl RApplied base $ map RFree frees
 			return $ zipWith HaveSameKind (repeat appliedBase) superClasses
 
 -- Constructs a basic 'has kind' relation, for the given (declared) name with it frees

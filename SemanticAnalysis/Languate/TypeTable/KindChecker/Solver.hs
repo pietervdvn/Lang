@@ -99,19 +99,8 @@ resolveKind klt (SameAs rtype)
 _kindOf		:: KindLookupTable -> RType -> Maybe Kind
 _kindOf klt (RNormal fqn nm)
 		=  lookup (fqn, nm) klt
-_kindOf klt applied@(RApplied rtype rts)
-		= do	baseKind	<- _kindOf klt rtype
-			simpleKindApply applied baseKind
+_kindOf klt applied@(RApplied bt at)
+		= do	bk	<- _kindOf klt bt
+			ak	<- _kindOf klt at
+			return $ KindCurry bk ak
 _kindOf _ _	= Just Kind
-
-
-
-simpleKindApply	:: RType -> Kind -> Maybe Kind
-simpleKindApply (RApplied rtype []) kind
-		= Just kind
-simpleKindApply (RApplied _ _) Kind
-		= Nothing	-- over application. Returns nothing
-simpleKindApply (RApplied rtype (rt:rts)) (KindCurry _ rest)
-		= simpleKindApply (RApplied rtype rts) rest
-simpleKindApply _ _
-		= Nothing

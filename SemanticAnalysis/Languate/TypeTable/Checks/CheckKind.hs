@@ -106,32 +106,38 @@ kindOf klt _ (RNormal fqn nm)
 		= lookup (fqn, nm) klt ? ("Kind of the type "++show fqn++"."++nm++" was not found")
 kindOf _ frees (RFree a)
 		= lookup a frees ? ("Free type variable '"++a++"' was not found.\nMake sure it is declared before used (thus left of it's usage)")
-kindOf klt frees (RApplied rt rts)
-		= do	bk	<- kindOf klt frees rt
-			appliedKnds	<- mapM (kindOf klt frees) rts
-			let msg	= "In the type application "++ pars (show rt) ++" "++ unwords (rts |> (pars . show))
-			inside msg $
-				applyKind (bk, rt, length appliedKnds) bk (zip appliedKnds rts)
-kindOf klt frees (RCurry tps)
-		= do	mapM_ (kindOf klt frees) tps	-- Recursively check kind applications, but throw result away
+kindOf klt frees t@(RApplied bt at)
+		= do	bk	<- kindOf klt frees bt
+			ak	<- kindOf klt frees at
+			let msg	= "In the type application "++ pars (show t) ++" "++ pars (show at)
+			inside msg $ applyKind t bk (ak, at)
+kindOf klt frees (RCurry at rt)
+		= do	let msg t k 	= "The type "++show t++" should be fully applied as it is used in a curry, but it has the kind "++show k
+			ak	<- kindOf klt frees at
+			assert (ak == Kind) $ msg at ak
+			rk	<- kindOf klt frees rt	-- calculate the kind of the rest, which should be fully applied too
+			assert (rk == Kind) $ msg rt rk
 			return Kind
-kindOf klt frees (RTuple tps)	= kindOf klt frees (RCurry tps)
+kindOf klt frees (RTuple tps)
+		= do	kind	<- mapM (kindOf klt frees) tps
+			mapM (\(k,t) -> assert (k == Kind) $ "The type "++show t++" should be fully applied as it is used in a tuple, but it has the kind "++show k) $
+					zip kind tps
+			return Kind
+
+
+
 
 -- Applies the first kind to given arguments. e.g. (* ~> (* ~> *) ~> *) $ [(* ~> *), (* ~> *)] is a valid application giving *
-applyKind	:: (Kind, RType, Int) -> Kind -> [(Kind,RType)] -> Exceptions' String Kind
-applyKind _ Kind []
-		= return Kind
-applyKind (origKind, rtype, provided) Kind args
+applyKind	:: RType -> Kind -> (Kind,RType) -> Exceptions' String Kind
+applyKind baseType Kind _
 		= do	err $ "Type overapplication:\n"++
-				show rtype++":: "++show origKind++" takes only "++ plural (numberOfKindArgs origKind) "type argument" ++ ", but "++plural provided "was" ++" given."
+				show baseType ++ " was applied to too much type arguments"
 		 	return Kind
-applyKind ctx@(origKind, rtype, provided) (KindCurry k rest) ((arg,t):args)
-		= do	assert (sameStructure k arg) $
-				"Kind mismatch: could not unify "++show k++" and "++show arg++", which are the "++(count $ numberOfKindArgs origKind - numberOfKindArgs rest)++
-				" needed argument of "++show rtype++" and the kind of "++show t
-			applyKind ctx rest args
-applyKind _ rest []
-		= return rest
+applyKind baseType bk@(KindCurry k rest) (argK,argT)
+		= do	assert (sameStructure k argK) $
+				"Kind mismatch: could not unify "++show k++" and "++show argK++".\n"++
+				"The type "++show argT ++ "::" ++ show argK ++" was applied to "++show baseType ++ "::" ++ show bk
+			return rest
 
 sameStructure	:: Kind -> Kind -> Bool
 sameStructure Kind Kind	= True
