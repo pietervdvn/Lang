@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.Substitute (substitute) where
+module Languate.TypeTable.Bind.Substitute (substitute, substitute') where
 
 {--
 This module implements substitute and friends
@@ -16,8 +16,11 @@ The list 'nms' represents thos frees which are already bound
 e.g.
 ["a"] (List (a,b)) -> List (a0,b)
 -}
-substitute'	:: [Name] -> RType -> RType
-substitute' nms	= substitute (buildBinding nms)
+substitute'	:: [Name] -> RType -> (RType, [Name])
+substitute' nms t
+	= let 	binding@(Binding dict)	= buildBinding nms
+		used	= M.keys dict in
+		(substitute binding t, used)
 
 {- Replaces frees in the given rtype. Unknown types are ignored
  e.g. {"a" -> Nat, "b" -> Bool} (RApplied Tuple [RFree a, RFree b, RFree c]) -> RApplied Dict [Nat, Bool, RFree c].     -}

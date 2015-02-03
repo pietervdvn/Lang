@@ -16,7 +16,8 @@ import Languate.World
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD
 
-import Languate.TypeTable.IsSuperType
+import Languate.TypeTable.Bind
+
 import Languate.TypeTable
 import Languate.TAST
 
@@ -39,9 +40,16 @@ toIO	= do	world	<- packageIO $ path++"/src/"
 to	= unsafePerformIO toIO
 tt	= typeTable to
 
-test t0 t1 reqs = runstateT (b' t0 t1) (Context reqs tt noBinding) |> snd
+test t0 t1 reqs = bind tt reqs t0 t1
+test' t	= superTypesOf tt t
 
-t	= test (RApplied list [RApplied coll [anyType]]) (RFree "a") (fromList [("a",[eqC]),("b",[eqC])])
+t0	= test intT (RFree "a") (fromList [("a",[eqC]),("b",[eqC])])
+t1	= test anyType (RFree "a") (fromList [("a", [eqC])])
+t2	= test intT anyType empty
+t3	= test anyType intT empty
+t4	= test curryT (RCurry (RFree "a") $ RFree "b") empty
+
+
 
 intT	= RNormal (fqn $ "Num.Nat") "Nat"
 
@@ -53,6 +61,8 @@ list	= RNormal (fqn $ col "List") "List"
 coll	= RNormal (fqn $ col "Collection") "Collection"
 eqC	= RNormal (fqn $ cat "Eq") "Eq"
 mapC	= RNormal (fqn $ cat "Mappable") "Mappable"
+
+curryT	= RNormal (fqn $ "Category.Function") "Curry"
 
 fqn	= toFQN' . (++) "pietervdvn:Data:"
 cat	= (++) "Category."
