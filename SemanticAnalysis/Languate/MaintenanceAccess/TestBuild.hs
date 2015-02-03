@@ -19,6 +19,9 @@ import Languate.MD.TableOverview2MD
 import System.IO.Unsafe
 import System.Directory
 
+import Languate.TypeTable
+import Data.Map
+import StdDef
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
@@ -30,3 +33,4 @@ t	= do	world	<- packageIO $ path++"/src/"
 		wd	<- getCurrentDirectory
 		let wd'	= wd ++ "/" ++ path ++ "/.gen/html"
 		putStrLn $ "Written MDs! See file:///"++wd'++"/Index.html"
+		mapM putStrLn $ ((toList $ recSupertypes $ typeTable to) |> show)

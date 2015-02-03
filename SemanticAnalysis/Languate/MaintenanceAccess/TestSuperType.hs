@@ -43,15 +43,23 @@ tt	= typeTable to
 test t0 t1 reqs = bind tt reqs t0 t1
 test' t	= superTypesOf tt t
 
-t0	= test intT (RFree "a") (fromList [("a",[eqC]),("b",[eqC])])
+-- basic test
+t0	= test natT (RFree "a") (fromList [("a",[eqC]),("b",[eqC])])
+-- fails
 t1	= test anyType (RFree "a") (fromList [("a", [eqC])])
-t2	= test intT anyType empty
-t3	= test anyType intT empty
-t4	= test curryT (RCurry (RFree "a") $ RFree "b") empty
+-- no binding
+t2	= test natT anyType empty
+-- fails
+t3	= test anyType natT empty
+-- binds {a --> natT, b --> intT} by recursive binding
+t4	= test (RApplied (RApplied curryT natT) intT)  (RCurry (RFree "a") $ RFree "b") empty
+-- binds {a --> List Nat, b --> Nat}. The "b" is bound via the type requirements
+t5	= test (RApplied list natT) (RFree "a")
+		(fromList [("a", [RApplied list $ RFree "b"])])
 
 
-
-intT	= RNormal (fqn $ "Num.Nat") "Nat"
+natT	= RNormal (fqn $ "Num.Nat") "Nat"
+intT	= RNormal (fqn $ "Num.Nat") "Int"
 
 prod	= RNormal (fqn $ cat "Monoid") "Product"
 sumM	= RNormal (fqn $ cat "Monoid") "Sum"

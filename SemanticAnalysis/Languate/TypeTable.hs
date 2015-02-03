@@ -50,12 +50,36 @@ This is saved as
 {List --> { [] -> Collection
 	    ["a"] --> { Eq	, where "a:Eq"}
 	    }
+
+This table is only a intermediate structure (which is usefull to generate the docs), but is transformed further into a 'recursiveSTT', which grants easier access.
 -}
-
-
 
 type SuperTypeTableFor	= Map [Name] (Set (RType, Map Name [RType]))
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
+
+
+{-
+Encodes the supertype relationship, but with a 'met type requirement approach'.
+
+E.g.
+List	is Mappable
+List a	is Collection a	=> gets written as List is Collection
+List Char is Show
+List Eq is Eq
+
+The 'typeId' points to a 'root' recursive table
+List -> isA {Mappable, Collection}, recursiveReqs: { (a,[Eq]) --> isA {Eq}, {} ; (a,[Char]) --> isA {Show}, {}}
+
+The 'Name' in the tuple of the keys denote what the name of the bound out free was
+
+Note that type application makes only sense on
+-> Other applied types
+-> Frees (a b, where 'a' has e.g. the requirements "collection, mappable")
+-> Normals
+
+-}
+data RecursiveSuperTypeTable	= RTT { isA :: Set RType, recursiveReqs	:: Map (Name, Set RType) RecursiveSuperTypeTable }
+	deriving (Eq, Ord)
 
 
 -- The (implicit) supertype for every type
@@ -72,7 +96,8 @@ type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple
 data TypeTable	= TypeTable	{ typeLookups	:: Map FQN TypeLookupTable
 				, kinds		:: KindLookupTable
 				, typeReqs	:: TypeReqTable
-				, supertypes	:: SuperTypeTable
+				, supertypes	:: Map TypeID SuperTypeTableFor
+				, recSupertypes	:: Map TypeID RecursiveSuperTypeTable
 				, docstrings	:: Map TypeID String
 				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
@@ -164,3 +189,14 @@ spth (nms, nm)	= intercalate "." $ nms ++ [nm]
 
 showTypeID (fqn,nm)
 		= show fqn ++"."++show nm
+
+instance Show RecursiveSuperTypeTable where
+	show	= srstt 0
+
+
+srstt	:: Int -> RecursiveSuperTypeTable -> String
+srstt indent rstt
+	= let	isa	= "{{" ++ intercalate ", " (S.toList (isA rstt) |> st True ) ++ "}"
+		showEntry (name, reqs) rstt	= name ++ ": " ++ (intercalate ", " (S.toList reqs |> st True)) ++ " --> "++srstt (indent + 3) rstt
+		entries	= fmap (uncurry showEntry) $ M.toList $ recursiveReqs rstt in
+		(intercalate ("\n" ++ replicate indent ' ' ) $ isa : entries) ++ "}"

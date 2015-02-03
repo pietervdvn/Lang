@@ -12,7 +12,6 @@ import qualified Data.Set as S
 import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
 import Prelude hiding (fail)
-
 import Control.Monad.Trans
 import StateT
 import MarkDown
@@ -47,7 +46,7 @@ Important: the requirement-table should contain **each bound free**, to prevent 
 bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
 bind tt reqs t0 t1
 	= let   ctx	= Context reqs tt noBinding
-		[t0', t1']	= [t0,t1] |> normalize in
+		[t0', t1']	= [t0,t1] |> normalize	in
 		runstateT (bind' t0' t1') ctx |> snd |> binding
 
 -- if both are the same, early return; if not delegate to b
@@ -95,7 +94,7 @@ Same as superTypesOf', but not within the monad
 superTypesOf	:: TypeTable -> RType -> Either String (Set RType)
 superTypesOf tt t
 	= let   ctx	= Context M.empty tt noBinding
-		t'	= normalize t in
+		t'	= normalize t	in
 		runstateT (superTypesOf' [] t') ctx |> fst
 
 
@@ -151,8 +150,8 @@ MyList is List
 => We should check for supertypes of List Char too, and substitute out the first free of List.
 -}
 _sto	:: [RType] -> RType -> StMsg (Set RType)
-_sto binding (RNormal fqn nm)
-	= fetchSTTF (fqn, nm)  |> findWithDefault S.empty [] |> (S.map fst)
+_sto binding t@(RNormal _ _)
+	= fetchSTTF t |> findWithDefault S.empty [] |> (S.map fst)
 _sto binding (RFree a)
 	= requirementsOn a
 _sto binding (RApplied bt at)
@@ -190,13 +189,13 @@ This means that Any can not be bound to a, but e.g. Int can.
 -}
 validateRequirement	:: RType -> Name -> StMsg ()
 validateRequirement t a
-	= do	neededSupers	<- requirementsOn a
-		actualSupers	<- superTypesOf' [] t
-		let missing	= neededSupers \\ actualSupers
-		if S.null missing then return ()
-			else fail $ "The type "++show t++" can not be bound to the free type variable '"++a++"', as it can not fullfill the " ++ plural (S.size missing) "type requirement" ++ show missing
-
-
+	= do	neededSupers	<- requirementsOn a |> S.toList
+		-- We try to bind t against all the supers. If this works out, we can allow this binding
+		works	<- mapM (doesBind t) neededSupers |> zip neededSupers
+		let missing	= filter (not . snd) works
+		let msg	= "Binding "++show t ++ " against '"++a++"' is not possible, as the requirements "++ unwords (missing |> fst |> show) ++" are not met"
+		if null missing then return ()
+			else fail msg
 
 
 
@@ -235,16 +234,20 @@ addFrees bound
 		put $ ctx {frees = frees'}
 
 
-fail str	= lift $ Left str
+-- Returns true if t0 binds validly into t1. Catches failures
+doesBind	:: RType -> RType -> StMsg Bool
+doesBind t0 t1	= catch False (bind' t0 t1 >> return True)
+
+fail		:: String -> StMsg a
+fail		=  lift . Left
+
 
 catch		:: a -> StMsg a -> StMsg a
-catch a m	=  do	ctx	<- get
-			let mRes	= runstateT m ctx
-			case mRes of
-				Left _	-> return a
-				Right (a, ctx')	-> do	put ctx
-							return a
-
+catch backup stmsg
+	= do	ctx	<- get
+		case runstateT stmsg ctx of
+			(Left _)	-> return backup
+			(Right (a, ctx))	-> put ctx >> return a
 
 instance Show Context where
 	show (Context frees _ b)= "Context "++sd frees ++ ", "++show b
