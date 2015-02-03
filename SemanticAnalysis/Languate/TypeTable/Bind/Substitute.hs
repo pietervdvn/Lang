@@ -1,0 +1,49 @@
+module Languate.TypeTable.Bind.Substitute (substitute) where
+
+{--
+This module implements substitute and friends
+--}
+import StdDef
+import Languate.TypeTable.Bind.Binding
+import Data.Map hiding (filter)
+import qualified Data.Map as M
+
+import Languate.TAST
+
+
+{- Substitutes all frees which name is already bound in a different context.
+The list 'nms' represents thos frees which are already bound
+e.g.
+["a"] (List (a,b)) -> List (a0,b)
+-}
+substitute'	:: [Name] -> RType -> RType
+substitute' nms	= substitute (buildBinding nms)
+
+{- Replaces frees in the given rtype. Unknown types are ignored
+ e.g. {"a" -> Nat, "b" -> Bool} (RApplied Tuple [RFree a, RFree b, RFree c]) -> RApplied Dict [Nat, Bool, RFree c].     -}
+substitute	:: Binding -> RType -> RType
+substitute (Binding dict) t
+		= traverseRT (_substitute dict) t
+
+
+
+
+
+_substitute	:: Map Name RType -> RType -> RType
+_substitute dict (RFree a)
+		= findWithDefault (RFree a) a dict
+_substitute _ t	= t
+
+
+
+buildBinding	= Binding . M.map RFree . _buildBinding
+
+-- Builds a binding, which substitutes away "bound" frees. e.g. [a,b,a0] -> Binding {a -> a1, b -> b0, a0 -> a11}
+_buildBinding	:: [Name] -> Map Name Name
+_buildBinding []	= empty
+_buildBinding (a:as)
+		= let	base	= _buildBinding as
+			bound	= keys base ++ elems base
+			canditates	= filter (`notElem` bound) [ a ++ show i | i <- [1..]]
+			replacement	= head canditates in
+			insert a replacement base

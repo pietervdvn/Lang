@@ -36,8 +36,8 @@ Type | Is subtype of
 ---- | -------------
 BIInt | Any
 Eq | Any
-Associative````a````  | (a -> a -> a)
-Commutative````a````  ````b````  | (a -> a -> b)
+Associative````a````  | (a -> (a -> a))
+Commutative````a````  ````b````  | (a -> (a -> b))
 Curry````a````  ````b````  | (a -> b)
 Mappable````a````  | Any
 Monoid | Any
@@ -64,7 +64,7 @@ Nat | NatInf
 Nat' | Nat, NatInf'
 NatInf | IntInf
 NatInf' | NatInf
-Flip````x````  ````b````  ````a````  | (x a b)
+Flip````x````  ````b````  ````a````  | ((x a) b)
 
 
 
