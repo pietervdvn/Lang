@@ -59,7 +59,7 @@ t5	= test (RApplied list natT) (RFree "a")
 
 t6	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "b")) empty
 
-
+t7	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "a")) empty
 
 
 natT	= RNormal (fqn $ "Num.Nat") "Nat"
