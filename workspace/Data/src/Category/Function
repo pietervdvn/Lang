@@ -4,18 +4,18 @@ Function-categories contains classes which functions can be, such as Associative
 --------
 
 ---
-Arbitrary functions from ''a'' to ''b''
+Arbitrary functions from ''a'' to ''b''.
 ---
 type Curry a b		= a -> b
 
 ---
 Functions for which the order of evaluation does not matter.
 ---
-cat Associative a	in a -> a -> a
+cat Associative a	in (Curry a (Curry a))
 	> f:Associative a, a,b,c:a => f a (f b c) = f (f a b) c
 
 ---
 Functions for which the arguments can be swapped.
 ---
-cat Commutative a b	in a -> a -> b
+cat Commutative a b	in (Curry a (Curry b))
 	> f:Commutative a, a,b:a => f a b = f b a

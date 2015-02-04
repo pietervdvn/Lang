@@ -1,4 +1,4 @@
-module Languate.TypeTable.Checks.CheckWorld (validateWorld0) where
+	module Languate.TypeTable.Checks.CheckWorld (validateWorld0) where
 
 {--
 
@@ -21,9 +21,7 @@ import Languate.CheckUtils
 import Languate.TypeTable.Checks.CheckFunction
 import Languate.TypeTable.Checks.CheckADT
 import Languate.TypeTable.Checks.CheckSubDef
-
-
-
+import Languate.TypeTable.Checks.CheckClassDef
 
 import Data.Char
 import Data.Maybe
@@ -58,6 +56,7 @@ validateStm	:: TypeLookupTable -> Statement -> Check
 validateStm tlt (FunctionStm f)	= validateFunction tlt f
 validateStm tlt (ADTDefStm adt)	= validateADTDef tlt adt
 validateStm tlt (SubDefStm subdef)	= validateSubDef tlt subdef
+validateStm tlt (ClassDefStm classDef)	= validateClassDef tlt classDef
 
 -- No responsibilities here
 validateStm _ (LawStm _)	= pass

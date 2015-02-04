@@ -109,6 +109,9 @@ stripnl s	= s
 (|>)	:: (Functor f)	=> f a -> (a -> b) -> f b
 (|>)	= flip fmap
 
+(||>>)	:: (Functor f, Functor g)	=> f (g a) -> (a -> b) -> f (g b)
+(||>>) fga f
+	=  fmap (\ga -> fmap f ga) fga
 
 uncurry3	:: (a -> b -> c -> d) -> (a,b,c) -> d
 uncurry3 f (a,b,c)

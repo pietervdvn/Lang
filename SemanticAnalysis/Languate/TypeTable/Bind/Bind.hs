@@ -11,10 +11,13 @@ import Data.Set (Set, empty, union, unions, (\\))
 import qualified Data.Set as S
 import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
+import Data.Tuple
+import Data.Maybe
 import Prelude hiding (fail)
+import Control.Monad hiding (fail)
 import Control.Monad.Trans
 import StateT
-import MarkDown
+import MarkDown hiding (when)
 
 import Languate.TAST
 import Languate.TypeTable
@@ -63,10 +66,20 @@ b	:: RType -> RType -> StMsg ()
 b t0 (RFree a)
 	= do	validateRequirement t0 a
 		addBinding (a,t0)
+b (RCurry t0 t0') (RCurry t1 t1')
+	= do	b t0  t1
+		b t0' t1'
+b t0@(RTuple tps0) t1@(RTuple tps1)
+	| length tps0 /= length tps1
+		= fail $ "Could not bind "++show t0++" and "++show t1++" as the tuples do not have the same length"
+	| otherwise
+		= mapM_ (uncurry b) $ zip tps0 tps1
 b t0 t1
-	= do	t0Supers	<- superTypesOf' [] t0
-		if t1 `S.member` t0Supers then return ()
-			else fail $ "Could not bind "++show t0++" against "++ show t1
+	= do	t0Supers	<- superTypesOf' t0 |> S.toList
+		successFull	<- mapM (t1 `isSupertypeOf`) t0Supers
+		-- if a single supertype can be bound, then we can find a valid binding.
+		when (not $ or successFull)
+			$ fail $ "Could not bind "++show t0++" against "++ show t1
 
 
 
@@ -95,12 +108,11 @@ superTypesOf	:: TypeTable -> RType -> Either String (Set RType)
 superTypesOf tt t
 	= let   ctx	= Context M.empty tt noBinding
 		t'	= normalize t	in
-		runstateT (superTypesOf' [] t') ctx |> fst
+		runstateT (superTypesOf' t') ctx |> fst
 
 
 {-
 Gives all the supertypes of the given type.
-All frees which appear in context.frees.keys will be substituted out, to prevent false capturing.
 
 Sometimes, filled in frees cause a extra supertype to exist. E.g:
 MyList		is List
@@ -109,39 +121,26 @@ List Char	is Showable
 This means a extra binding can be carried out, but these are not given.
 
 -}
-superTypesOf'	:: [RType] -> RType -> StMsg (Set RType)
-superTypesOf' binding t
-		= _superTypesOf' binding t S.empty
+superTypesOf'	:: RType -> StMsg (Set RType)
+superTypesOf' t
+		= _superTypesOf' t S.empty
 
 
 
--- This function recursively expands the supertypes and delegates the heavy work to _sto; The extra set passed are supertypes which are already seen, to prevent loops.
-_superTypesOf'	:: [RType] -> RType -> Set RType -> StMsg (Set RType)
-_superTypesOf' binding t seen
+-- This function recursively expands the supertypes and delegates the heavy work to _sto;
+_superTypesOf'	:: RType -> Set RType -> StMsg (Set RType)
+_superTypesOf' t seen
 	= do	bound	<- get' frees |> M.keys	-- type variables which are used
-		supers	<- _sto binding t	-- direct super types, with newly in substituted values
-		let supersOf t	= _superTypesOf' binding t (union seen supers)
+		supers	<- _sto t	-- direct super types, with newly in substituted values
+		let supersOf t	= _superTypesOf' t (union seen supers)
 		let toGetSupers	= S.toList $ supers \\ seen
 		indirectSupers	<- mapM supersOf toGetSupers |> unions
 		return $ union supers indirectSupers
 
-{- Same as _sto, but where all frees -which might get captured- are substituted out.
-We do not care about eventual extra requirements (e.g. Set a:Eq), as these are propageted elsewhere
--}
-_sto'	:: [RType] -> RType -> StMsg (Set RType)
-_sto' b t
-	= do 	supers	<- _sto' b t |> S.toList
-		supers'	<- mapM safeSubstitute supers
-		return $ S.fromList supers'
-safeSubstitute t
-	= do	bound	<- get' frees |> M.keys
-		let (t', used)	= substitute' bound t
-		addFrees used
-		return t'
 {-
 Gets the direct super types of the given type.
 
-The extra binding is to pass through bound frees.
+Normally, all frees in the returned type should be uncaptured.
 
 E.g.
 
@@ -149,17 +148,16 @@ MyList Char
 MyList is List
 => We should check for supertypes of List Char too, and substitute out the first free of List.
 -}
-_sto	:: [RType] -> RType -> StMsg (Set RType)
-_sto binding t@(RNormal _ _)
-	= fetchSTTF t |> findWithDefault S.empty [] |> (S.map fst)
-_sto binding (RFree a)
+_sto	:: RType -> StMsg (Set RType)
+_sto t@(RNormal _ _)
+	= fetchRSTTs t ||>> isA |> S.unions
+_sto (RFree a)
 	= requirementsOn a
-_sto binding (RApplied bt at)
-	= do	sttf	<- fetchSTTF bt
-		todos "Pickup here!" -- TODO Pickup point
-
-
-
+_sto t@(RApplied bt at)
+	= do	supers	<- _sto bt
+		supers'	<- fetchRSTTs t ||>> isA
+		return $ S.unions (supers:supers')
+_sto _	= return S.empty
 
 
 
@@ -191,7 +189,7 @@ validateRequirement	:: RType -> Name -> StMsg ()
 validateRequirement t a
 	= do	neededSupers	<- requirementsOn a |> S.toList
 		-- We try to bind t against all the supers. If this works out, we can allow this binding
-		works	<- mapM (doesBind t) neededSupers |> zip neededSupers
+		works	<- mapM (t `isSubtypeOf`) neededSupers |> zip neededSupers
 		let missing	= filter (not . snd) works
 		let msg	= "Binding "++show t ++ " against '"++a++"' is not possible, as the requirements "++ unwords (missing |> fst |> show) ++" are not met"
 		if null missing then return ()
@@ -203,14 +201,59 @@ validateRequirement t a
 -- UTILS --
 -----------
 
-fetchSTTF	:: RType -> StMsg SuperTypeTableFor
-fetchSTTF (RApplied bt _)
-	= fetchSTTF bt
-fetchSTTF (RNormal fqn nm)
+-- Fetches the RSTTF, with applying frees
+fetchRSTTs	:: RType -> StMsg [RecursiveSuperTypeTable]
+fetchRSTTs (RApplied bt at)
+	= do	-- first: build a list of dictionaries
+		-- each dictionary contains something of the form "if requirements met -> these rstt's apply"
+		rstts	<- fetchRSTTs bt ||>> recursiveReqs
+		-- for each of those dictionaries, we check that it works out with the arg type
+		-- this gives us a list of [valid RSTT, binding to apply on said RSTT]
+		rstts'	<- mapM (workingRSTT at) rstts |> concat
+		-- we apply these needed bindings
+		let apped	= rstts' |> swap |> uncurry substituteRSTT
+		-- and we're done!
+		return apped
+
+fetchRSTTs (RNormal fqn nm)
 	= do	let tid	= (fqn, nm)
 		let err	= error $ "No supertype table found for "++show tid
 		let f	= findWithDefault err tid
-		get' (f . supertypes . typeT)
+		get' ( (:[]) . f . recSupertypes . typeT)
+
+
+-- Returns all "vs" for which 't' can be bound against all the needed requirements. Binding includes {Name --> t}
+workingRSTT	:: RType -> Map (Name, Set RType) v -> StMsg [(v,Binding)]
+workingRSTT t dict
+	= do	let dict'	= M.toList dict
+		let keys	= dict'	|> fst
+		let vals	= dict'	|> snd
+		-- maybe bindings, if 't' is a subtype of all requirements
+		bound	<- mapM (\(nm, rtps) -> isolate $ _workingRSTT t nm rtps) keys
+		-- [maybe binding, value]
+		let bound'	= zip bound vals |> unpackMaybeTuple
+		return $ catMaybes bound' |> swap
+
+
+
+_workingRSTT	:: RType -> Name -> Set RType -> StMsg (Maybe Binding)
+_workingRSTT t nm rtypes
+	= do	ctx	<- get
+		put $ ctx {binding = noBinding}
+		addBinding (nm,t)
+	  	catch Nothing
+		    (do	mapM (t `isSubtypeOf`) (S.toList rtypes)
+			get' binding |> Just)
+
+
+
+
+
+
+
+
+
+
 
 
 requirementsOn	:: Name -> StMsg (Set RType)
@@ -238,6 +281,9 @@ addFrees bound
 doesBind	:: RType -> RType -> StMsg Bool
 doesBind t0 t1	= catch False (bind' t0 t1 >> return True)
 
+isSubtypeOf	= doesBind
+isSupertypeOf	= flip doesBind
+
 fail		:: String -> StMsg a
 fail		=  lift . Left
 
@@ -248,6 +294,24 @@ catch backup stmsg
 		case runstateT stmsg ctx of
 			(Left _)	-> return backup
 			(Right (a, ctx))	-> put ctx >> return a
+
+
+{- Substitutes with the given binding all the types.
+Assumes substituted frees are not used as key (error otherwise)
+-}
+substituteRSTT	:: Binding -> RecursiveSuperTypeTable -> RecursiveSuperTypeTable
+substituteRSTT binding (RTT isa recReq)
+	= let	isa'	= S.map (substitute binding) isa
+		-- substitute in the keys/requirements + merge if keys collide
+		recReq'	= M.mapKeysWith mergeRSTT (_substituteRSTT binding) recReq
+		-- and now the resting values
+		recReq''	= M.map (substituteRSTT binding) recReq' in
+		RTT isa' recReq''
+
+_substituteRSTT	:: Binding -> (Name, Set RType) -> (Name, Set RType)
+_substituteRSTT binding@(Binding dict) (nm, reqs)
+	| nm `M.member` dict	= error $ "Substituting over a RSTT: "++nm++" is used as key but substituted out. This is a bug"
+	| otherwise	= (nm, S.map (substitute binding) reqs)
 
 instance Show Context where
 	show (Context frees _ b)= "Context "++sd frees ++ ", "++show b

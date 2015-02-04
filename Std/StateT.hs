@@ -35,6 +35,13 @@ isolate m	= do	s	<- get
 			put s
 			return v
 
+isolate'	::  (Monad m) => StateT s m a -> StateT s m (a,s)
+isolate' m	= do	s	<- get
+			v	<- m
+			s'	<- get
+			put s
+			return (v,s)
+
 injState	:: Monad m => StateT s m a -> StateT s m a -> (m (a,s) -> m (a,s) -> m (a,s)) -> StateT s m a
 injState a b f	=  do	s	<- get
 			let mas	= runstateT a s

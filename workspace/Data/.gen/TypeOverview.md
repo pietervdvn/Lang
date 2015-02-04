@@ -7,7 +7,7 @@ Type | Declared in | Kind | Docstring
 **Eq**  | Category.Eq | ````*````  | The category which defines _equality_ ````==```` and _inequality_ ````!=````
 **Associative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
 **Commutative** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Functions for which the arguments can be swapped.
-**Curry** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Arbitrary functions from ````a```` to ````b````
+**Curry** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Arbitrary functions from ````a```` to ````b````.
 **Mappable** ````a````  | Category.Mappable | ````(* ~> *)````  | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
 **Monoid**  | Category.Monoid | ````*````  | A ````Monoid```` is an type which has _neutral element_ and an _addition_.
 **Product**  | Category.Monoid | ````*````  | An instance of ````Monoid````, with ````*```` defined as append and ````1```` as neutral element.
@@ -36,8 +36,8 @@ Type | Is subtype of
 ---- | -------------
 BIInt | Any
 Eq | Any
-Associative````a````  | (a -> (a -> a))
-Commutative````a````  ````b````  | (a -> (a -> b))
+Associative````a````  | ((Curry a) (Curry a))
+Commutative````a````  ````b````  | ((Curry a) (Curry b))
 Curry````a````  ````b````  | (a -> b)
 Mappable````a````  | Any
 Monoid | Any

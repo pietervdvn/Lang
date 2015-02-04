@@ -200,3 +200,8 @@ srstt indent rstt
 		showEntry (name, reqs) rstt	= name ++ ": " ++ (intercalate ", " (S.toList reqs |> st True)) ++ " --> "++srstt (indent + 3) rstt
 		entries	= fmap (uncurry showEntry) $ M.toList $ recursiveReqs rstt in
 		(intercalate ("\n" ++ replicate indent ' ' ) $ isa : entries) ++ "}"
+
+
+mergeRSTT	:: RecursiveSuperTypeTable -> RecursiveSuperTypeTable -> RecursiveSuperTypeTable
+mergeRSTT (RTT isa0 dict0) (RTT isa1 dict1)
+	= RTT (S.union isa0 isa1) $ M.unionWith mergeRSTT dict0 dict1

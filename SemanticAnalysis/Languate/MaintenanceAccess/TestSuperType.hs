@@ -47,7 +47,7 @@ test' t	= superTypesOf tt t
 t0	= test natT (RFree "a") (fromList [("a",[eqC]),("b",[eqC])])
 -- fails
 t1	= test anyType (RFree "a") (fromList [("a", [eqC])])
--- no binding
+-- no binding (but does not fail)
 t2	= test natT anyType empty
 -- fails
 t3	= test anyType natT empty
@@ -56,6 +56,10 @@ t4	= test (RApplied (RApplied curryT natT) intT)  (RCurry (RFree "a") $ RFree "b
 -- binds {a --> List Nat, b --> Nat}. The "b" is bound via the type requirements
 t5	= test (RApplied list natT) (RFree "a")
 		(fromList [("a", [RApplied list $ RFree "b"])])
+
+t6	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "b")) empty
+
+
 
 
 natT	= RNormal (fqn $ "Num.Nat") "Nat"
@@ -71,6 +75,7 @@ eqC	= RNormal (fqn $ cat "Eq") "Eq"
 mapC	= RNormal (fqn $ cat "Mappable") "Mappable"
 
 curryT	= RNormal (fqn $ "Category.Function") "Curry"
+assocT	= RNormal (fqn $ "Category.Function") "Associative"
 
 fqn	= toFQN' . (++) "pietervdvn:Data:"
 cat	= (++) "Category."
