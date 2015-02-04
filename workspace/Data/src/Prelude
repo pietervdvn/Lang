@@ -13,6 +13,8 @@ public import ControlFlow
 public import Category.Eq
 public import Category.Monoid
 public import Category.Mappable
+public import Category.Function
+
 
 public import Type.Function
 

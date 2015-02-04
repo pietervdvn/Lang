@@ -1,8 +1,20 @@
 module Languate.MaintenanceAccess.TestSuperType where
 
 {--
-This module implements tests for the super type relationship
+
+This module implements tests for the super type relationship.
+
+USAGE:
+
+bnd "Int" "a"	= bind "Int" in a
+supers "Int"	= superTypes of "Int" -> Any, Eq, BIInt
+
+Also see for a comprehensive type list:
+workspace/Data/.gen/html/TypeOverview.html
+
 --}
+
+
 import StdDef
 import qualified Bnf
 import Exceptions
@@ -25,60 +37,82 @@ import System.IO.Unsafe
 import System.Directory
 
 import StateT
+import Languate.ParserStub
 
-import Data.Map (empty, fromList)
+import Data.Map (empty, fromList, findWithDefault)
+import qualified Data.Set as S
+import Data.List
 
+import qualified Bnf
 
-
+-- setup
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
-
 toIO	= do	world	<- packageIO $ path++"/src/"
 		runExceptionsIO' $ buildAllTables world
-
 to	= unsafePerformIO toIO
 tt	= typeTable to
+tlt	= findWithDefault (error "Prelude not found")
+		(toFQN' "pietervdvn:Data:Prelude") $ typeLookups tt
+
+-- parsing of types + ugly unpacking
+str2type str	= let parsed	= Bnf.parseFull bnfs (Bnf.toFQN ["Types"]) "type" str in
+			case parsed of
+				Nothing	-> error $ "Could not parse "++str++" at all"
+				Just (Left exc)	-> error $ show exc
+				Just (Right pt)	-> pt2type pt
+
+type2rtype t	= let	(_,_,mType)	= runExceptions $ resolveType tlt t in
+			case mType of
+				Right rt	-> rt
+				Left msg	-> error msg
+
+-- parse types
+pt	= type2rtype . fst . str2type
+-- parse reqs
+pr	= (||>> type2rtype) . snd . str2type
+
+
+
+---------------
+-- TEST HERE --
+---------------
+
+-- Test binding of t0 in t1
+bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
+-- What are the supertypes of a type?
+supers	=  (|> intercalate ", ") . (||>> st True) . (|> S.toList) . test' . pt
+
+
+
+
+
+
 
 test t0 t1 reqs = bind tt reqs t0 t1
 test' t	= superTypesOf tt t
 
 -- basic test
-t0	= test natT (RFree "a") (fromList [("a",[eqC]),("b",[eqC])])
+t0	= bnd "Nat" "(a:Eq)"
 -- fails
-t1	= test anyType (RFree "a") (fromList [("a", [eqC])])
+t1	= bnd "Any" "(a:Eq)"
 -- no binding (but does not fail)
-t2	= test natT anyType empty
+t2	= bnd "Nat" "Any"
 -- fails
-t3	= test anyType natT empty
+t3	= bnd "Any" "Nat"
 -- binds {a --> natT, b --> intT} by recursive binding
-t4	= test (RApplied (RApplied curryT natT) intT)  (RCurry (RFree "a") $ RFree "b") empty
+t4	= bnd "Curry Nat Int" "a -> b"
 -- binds {a --> List Nat, b --> Nat}. The "b" is bound via the type requirements
-t5	= test (RApplied list natT) (RFree "a")
-		(fromList [("a", [RApplied list $ RFree "b"])])
+-- TODO
+t5	= bnd "List Nat" "(a:List b)"
 
 -- simple curry binding
-t6	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "b")) empty
+t6	= bnd "Nat -> Int" "a -> b"
 -- conflicting binding for a
-t7	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "a")) empty
+t7	= bnd "Nat -> Int" "a -> a"
 -- Binding in, a--> intT
-t8	= test (RCurry natT intT) (RCurry intT (RFree "a")) empty
+t8	= bnd "Nat -> Int" "Int -> a"
 
-natT	= RNormal (fqn $ "Num.Nat") "Nat"
-intT	= RNormal (fqn $ "Num.Nat") "Int"
-
-prod	= RNormal (fqn $ cat "Monoid") "Product"
-sumM	= RNormal (fqn $ cat "Monoid") "Sum"
-monoid	= RNormal (fqn $ cat "Monoid") "Monoid"
-
-list	= RNormal (fqn $ col "List") "List"
-coll	= RNormal (fqn $ col "Collection") "Collection"
-eqC	= RNormal (fqn $ cat "Eq") "Eq"
-mapC	= RNormal (fqn $ cat "Mappable") "Mappable"
-
-curryT	= RNormal (fqn $ "Category.Function") "Curry"
-assocT	= RNormal (fqn $ "Category.Function") "Associative"
-
-fqn	= toFQN' . (++) "pietervdvn:Data:"
-cat	= (++) "Category."
-col	= (++) "Collection."
+-- Binding via application
+t9	= bnd "List Nat" "List a"

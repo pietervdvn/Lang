@@ -74,7 +74,12 @@ b t0@(RTuple tps0) t1@(RTuple tps1)
 		= fail $ "Could not bind "++show t0++" and "++show t1++" as the tuples do not have the same length"
 	| otherwise
 		= mapM_ (uncurry b) $ zip tps0 tps1
+b (RApplied bt at) (RApplied bt' at')
+	= do	b bt bt'
+		b at at'
 b t0 t1
+ | t0 == t1	= return ()
+ | otherwise
 	= do	t0Supers	<- superTypesOf' t0 |> S.toList
 		successFull	<- mapM (t1 `isSupertypeOf`) t0Supers
 		-- if a single supertype can be bound, then we can find a valid binding.
