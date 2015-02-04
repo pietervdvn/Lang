@@ -33,4 +33,3 @@ t	= do	world	<- packageIO $ path++"/src/"
 		wd	<- getCurrentDirectory
 		let wd'	= wd ++ "/" ++ path ++ "/.gen/html"
 		putStrLn $ "Written MDs! See file:///"++wd'++"/Index.html"
-		mapM putStrLn $ ((toList $ recSupertypes $ typeTable to) |> show)
