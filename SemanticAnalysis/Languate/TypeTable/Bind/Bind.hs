@@ -127,7 +127,10 @@ superTypesOf' t
 
 
 
--- This function recursively expands the supertypes and delegates the heavy work to _sto;
+{-
+This function recursively expands the supertypes and delegates the heavy work to _sto;
+A 'already seen' set of types is passed recursively, to prevent infinite loops
+-}
 _superTypesOf'	:: RType -> Set RType -> StMsg (Set RType)
 _superTypesOf' t seen
 	= do	bound	<- get' frees |> M.keys	-- type variables which are used
@@ -157,10 +160,17 @@ _sto t@(RApplied bt at)
 	= do	supers	<- _sto bt
 		supers'	<- fetchRSTTs t ||>> isA
 		return $ S.unions (supers:supers')
-_sto _	= return S.empty
-
-
-
+_sto (RCurry bt rt)
+	= do	bSupers	<- _sto bt |> S.toList
+		rSupers	<- _sto rt |> S.toList
+		let possible	= S.fromList [RCurry bt' rt' | bt' <- bSupers, rt' <- rSupers]
+		return $ S.insert anyType possible
+_sto (RTuple tps)
+	= do	tps'	<- mapM (\t -> _sto t |> S.toList |> (t:)) tps
+		-- all possible combinations of supertypes
+		let combinations	= perms tps'
+		let tpls	= combinations |> RTuple
+		return tpls |> S.fromList |> S.insert anyType
 
 
 

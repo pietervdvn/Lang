@@ -57,10 +57,12 @@ t4	= test (RApplied (RApplied curryT natT) intT)  (RCurry (RFree "a") $ RFree "b
 t5	= test (RApplied list natT) (RFree "a")
 		(fromList [("a", [RApplied list $ RFree "b"])])
 
+-- simple curry binding
 t6	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "b")) empty
-
+-- conflicting binding for a
 t7	= test (RCurry natT intT) (RCurry (RFree "a") (RFree "a")) empty
-
+-- Binding in, a--> intT
+t8	= test (RCurry natT intT) (RCurry intT (RFree "a")) empty
 
 natT	= RNormal (fqn $ "Num.Nat") "Nat"
 intT	= RNormal (fqn $ "Num.Nat") "Int"
