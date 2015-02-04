@@ -268,6 +268,9 @@ addBinding	:: (Name, RType) -> StMsg ()
 addBinding (n,t)
 	= do	ctx	<- get
 		let (Binding b)	= binding ctx
+		-- check wether or not a conflicting binding exists
+		let previous	= M.lookup n b
+		assert (isNothing previous || t == fromJust previous) $ "Conflicting bindings for '"++n++"' are found. It could be both bound to "++show (fromJust previous)++" and "++show t
 		put $ ctx {binding = Binding $ M.insert n t b}
 
 addFrees	:: [Name] -> StMsg ()
@@ -286,6 +289,10 @@ isSupertypeOf	= flip doesBind
 
 fail		:: String -> StMsg a
 fail		=  lift . Left
+
+
+assert True _	= return ()
+assert False msg	= fail msg
 
 
 catch		:: a -> StMsg a -> StMsg a
