@@ -1,3 +1,9 @@
+
+
+
+
+
+
 module Languate.TypeTable.KindChecker.Solver where
 
 {--
@@ -47,7 +53,7 @@ solve treqt freenmt allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
 			-- TODO resolve these! What rest here is
-			-- mapM_ (validateSameKindConstraints klt empty) sameKinds
+			mapM_ (validateSameKindConstraints klt) sameKinds
 			return klt
 
 

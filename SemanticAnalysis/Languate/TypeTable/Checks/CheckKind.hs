@@ -25,14 +25,17 @@ import Languate.Graphs.SearchCycles
 
 
 {-Validates wether the 'HaveSameKind'-constraints are met-}
-validateSameKindConstraints	:: KindLookupTable -> Map Name Kind -> ((RType, RType), Location) -> Check
-validateSameKindConstraints klt frees ((rt0, rt1),loc)
-			= onLocation loc $ inside "Kind constraint error" $
+validateSameKindConstraints	:: KindLookupTable -> ((RType, RType), Location) -> Check
+validateSameKindConstraints klt ((rt0, rt1),loc)
+			= err $ "Check same kind: "++show rt0 ++"; "++show rt1
+
+ {-onLocation loc $ inside "Kind constraint error" $
 			  do	k0	<- kindOf klt frees rt0
 				k1	<- kindOf klt frees rt1
 				let s t k	= show t ++ " :: \t"++show k
 				assert (k0 == k1) $ "Types which are used to denominate a free should have the same kind. Found types:\n" ++
-					s rt0 k0 ++"\n"++s rt1 k1
+					s rt0 k0 ++"\n"++s rt1 k1-}
+
 
 
 {-Code to report cycles-}
