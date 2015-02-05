@@ -197,10 +197,9 @@ _sto t@(RApplied bt at)
 	= do	baseSupers	<- _sto' bt |> S.toList
 		argSupers	<- _sto' at |> S.toList
 		-- applied 'hybrid' supers
-		let appSupers	= [RApplied bt' at' | bt' <- baseSupers, at' <- argSupers]
 		let appBaseSupers	= [RApplied bt at' | at' <- argSupers]
 		let appArgSupers	= [RApplied bt' at | bt' <- baseSupers]
-		let appSupers'	= S.fromList (appSupers ++ appBaseSupers ++ appArgSupers)
+		let appSupers'	= S.fromList (appBaseSupers ++ appArgSupers)
 		-- Instance supers, e.g. "Collection Eq" => Eq
 		supers	<- fetchRSTTs t ||>> isA
 		return $ S.unions (appSupers' : supers)
