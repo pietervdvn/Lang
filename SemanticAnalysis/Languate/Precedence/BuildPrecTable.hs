@@ -11,17 +11,15 @@ import Languate.AST
 import Data.Map hiding (union, map, filter, null, foldr)
 import qualified Data.Map as Map
 import Data.Maybe
-import Data.List (nub)
 import Prelude hiding (lookup)
+import Data.List (nub)
 
 import Control.Arrow
 import Data.Tuple
 
+
 import Debug.Trace
 
-{- ### Checks
-Error msgs are generated somewhere else
--}
 {- checks if a ''(+) < (-)'' relation does not exist if ''(+) = (-)'' is defined somewhere. Thus, if two operators are in the same union, checks no LT-relation exists between them.
 Returns faulty arguments.
 -}
@@ -32,6 +30,7 @@ checkIllegalLT ltRels dict
 		   let zipped	= zip ltRels canons in
 			map fst $ filter (isSame . snd) zipped
 			where isSame (o1,o2)	= o1 == o2
+
 
 
 -- ### Building of actual table
@@ -108,38 +107,3 @@ collectGT	:: (Name, Name) -> State (Map Name [Name], Map Name [Name]) ()
 collectGT (o1,o2)
 		=  do	modify $ first $ insertLst o1 o2
 			modify $ second $ insertLst o2 o1
-
--- ### Union find algorithm
-
-union'	:: [(Name, Name)] -> Map Name Name
-union' tuples
-	= snd $ runstate (mapM_ add tuples) empty
-
--- the map is a map of pointers. A name will always try to point to its representative, being the smallest element of the set.
--- State invariant: if the name appears as value in the map, it will also appear as key.
-add	:: (Name, Name) -> State (Map Name Name) ()
-add (n1,n2)	= do	repres1	<- representative n1
-			repres2	<- representative n2
-			let r	= if repres1 < repres2 then repres1 else repres2
-			modify $ insert n1 r
-			modify $ insert n2 r
-			modify $ insert repres1 r
-			modify $ insert repres2 r
-
-
--- searches the representative for the given name. Does never insert nm in the map.
-representative	:: Name -> State (Map Name Name) Name
-representative nm
-		= do 	dict	<- get
-			let nmv	= lookup nm dict
-			case nmv of
-				(Just found)	-> collapse nm found
-				(Nothing)	-> return nm
-
-
-collapse	:: Name -> Name -> State (Map Name Name) Name
-collapse nm found
-	| nm == found	= return nm
-	| otherwise	= do	repres	<- representative found
-				modify	$ insert found repres
-				return repres

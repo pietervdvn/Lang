@@ -13,6 +13,7 @@ import Languate.TypeTable.BuildTypeTable
 import Languate.TypeTable.TypeTable2MD
 
 import Languate.Precedence.PrecedenceTable
+import Languate.Precedence.BuildPrecedenceTable
 import Languate.Precedence.PrecTable2MD
 
 import Languate.CheckUtils

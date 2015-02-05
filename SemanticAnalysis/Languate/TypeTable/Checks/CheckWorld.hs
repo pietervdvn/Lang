@@ -61,10 +61,5 @@ validateStm tlt (SubDefStm subdef)	= validateSubDef tlt subdef
 validateStm tlt (ClassDefStm classDef)	= validateClassDef tlt classDef
 validateStm tlt (InstanceStm instanc)	= validateInstance tlt instanc
 validateStm tlt (SynDefStm synDef)	= validateSynDef tlt synDef
-
--- No responsibilities here
-validateStm _ (LawStm _)	= pass
-validateStm _ (AnnotationStm _)	= pass
--- Building of a md table
-validateStm _ (Comments _)	= pass
-validateStm _ (DocStringStm _)	= pass
+-- No further responsibilities here
+validateStm _ _	= pass

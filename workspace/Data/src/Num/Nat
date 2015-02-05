@@ -46,7 +46,10 @@ i	= #abs
 
 precedence of (*) is Left, (*) = (%), (*) = (/), (*) = (//)
 precedence of (+) is Left, (+) = (-)
--- (+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
+--- Adds two numbers
+
+(+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
+---
 (+)	: IntInf -> IntInf	-> IntInf & Associative IntInf & Commutative IntInf IntInf
 (+)	: Nat -> Nat 	-> Nat
 (+)	: Nat -> Nat' 	-> Nat'
@@ -54,3 +57,9 @@ precedence of (+) is Left, (+) = (-)
 (+)	: NatInf -> NatInf -> NatInf
 (+)	: Int -> Int	-> Int
 i j	= #plus i j
+
+
+
+--- Multiply two numbers ---
+(*)	: IntInf -> IntInf	-> IntInf & Associative IntInf & Commutative IntInf IntInf
+i j 	= #multiply i j
