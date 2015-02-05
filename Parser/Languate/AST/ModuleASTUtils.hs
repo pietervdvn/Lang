@@ -5,6 +5,8 @@ import StdDef
 import Languate.AST.TypeAST
 import Languate.AST.ModuleAST
 import Languate.AST.FunctionAST
+import Normalizable
+
 
 import Data.Either
 import Data.Maybe (mapMaybe, listToMaybe)
@@ -112,3 +114,26 @@ declaresType nm (ClassDefStm cd)
 		= nm == (name cd)
 declaresType _ _
 		= False
+
+
+instance Normalizable Statement where
+	normalize	= ns
+
+
+ns (Comments coms)
+	= Comments $ filter (/= "") coms
+ns (DocStringStm docs)
+	= DocStringStm $ filter ((/=) "" . comment) docs
+ns stm	= stm
+
+
+nss	:: [Statement] -> [Statement]
+nss	= filter hasContent
+
+-- Returns True if the statement has usefull content. E.g. empty comments/docs will return false
+hasContent	:: Statement -> Bool
+hasContent (Comments [])
+		= False
+hasContent (DocStringStm [])
+		= False
+hasContent _	= True

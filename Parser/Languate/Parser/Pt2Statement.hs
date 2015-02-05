@@ -3,6 +3,8 @@ module Languate.Parser.Pt2Statement (pt2stm) where
 import StdDef
 import Bnf.ParseTree
 import Bnf
+import Normalizable
+
 import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2Law
 import Languate.Parser.Pt2Comment
@@ -25,7 +27,7 @@ Declarations may have multiple (explicit) types
 modName	= "Pt2Statement"
 
 pt2stm	:: ParseTree -> [Statement]
-pt2stm	=  pt2a h t s convert
+pt2stm	=  nss . fmap normalize . pt2a h t s convert
 
 convert		:: AST -> [Statement]
 convert (Func f)
