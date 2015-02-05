@@ -20,6 +20,7 @@ import Languate.TAST
 import Languate.TypeTable
 import Languate.FQN
 import Languate.TypeTable.KindChecker.KindConstraint
+import Languate.TypeTable.KindChecker.KindOf
 
 import Languate.Graphs.SearchCycles
 
@@ -27,16 +28,15 @@ import Languate.Graphs.SearchCycles
 {-Validates wether the 'HaveSameKind'-constraints are met-}
 validateSameKindConstraints	:: KindLookupTable -> ((RType, RType), Location) -> Check
 validateSameKindConstraints klt ((rt0, rt1),loc)
-			= warn $ "Check same kind: "++show rt0 ++"; "++show rt1
-
- {-onLocation loc $ inside "Kind constraint error" $
-			  do	k0	<- kindOf klt frees rt0
-				k1	<- kindOf klt frees rt1
-				let s t k	= show t ++ " :: \t"++show k
-				assert (k0 == k1) $ "Types which are used to denominate a free should have the same kind. Found types:\n" ++
-					s rt0 k0 ++"\n"++s rt1 k1-}
-
-
+      = onLocation loc $ inside ("Kind constraint error on "++ st True rt0 ++ " and "++st True rt1) $ try err $ do
+	bk0	<- lookupBaseKind klt rt0
+	bk1	<- lookupBaseKind klt rt1
+	binding	<- bindKind klt rt0 bk0
+	k0	<- kindOf klt binding rt0
+	k1	<- kindOf klt binding rt1
+	assert (k0 == k1) $ "The types "++ st True rt0++" and "++st True rt1++" should have the same kinds.\n"++
+		st True rt0++"::"++show k0 ++ "\n"++
+		st True rt1++"::"++show k1
 
 {-Code to report cycles-}
 reportCycles	:: Map (FQN, Name) (Set (FQN, Name)) -> Check
@@ -97,53 +97,6 @@ Args:
 -}
 checkKindApp	:: KindLookupTable -> Map Name Kind -> RType -> Check
 checkKindApp klt frees rtype
-		=  inside ("In the kind application of "++show rtype) $
+		=  inside ("In the kind application of "++st True rtype) $
 			do	kind	<- kindOf klt frees rtype
-				assert (0 == numberOfKindArgs kind) $ "Expecting " ++ number (numberOfKindArgs kind) ++ " more type arguments to "++show rtype
-
-
-
--- Gets the correct kind of a type (including applications), or an error message. Kinds might not be fully applied.
-kindOf		:: KindLookupTable -> Map Name Kind -> RType -> Exceptions' String Kind
-kindOf klt _ (RNormal fqn nm)
-		= lookup (fqn, nm) klt ? ("Kind of the type "++show fqn++"."++nm++" was not found")
-kindOf _ frees (RFree a)
-		= lookup a frees ? ("Free type variable '"++a++"' was not found.\nMake sure it is declared before used (thus left of it's usage)")
-kindOf klt frees t@(RApplied bt at)
-		= do	bk	<- kindOf klt frees bt
-			ak	<- kindOf klt frees at
-			let msg	= "In the type application "++ pars (show t) ++" "++ pars (show at)
-			inside msg $ applyKind t bk (ak, at)
-kindOf klt frees (RCurry at rt)
-		= do	let msg t k 	= "The type "++show t++" should be fully applied as it is used in a curry, but it has the kind "++show k
-			ak	<- kindOf klt frees at
-			assert (ak == Kind) $ msg at ak
-			rk	<- kindOf klt frees rt	-- calculate the kind of the rest, which should be fully applied too
-			assert (rk == Kind) $ msg rt rk
-			return Kind
-kindOf klt frees (RTuple tps)
-		= do	kind	<- mapM (kindOf klt frees) tps
-			mapM (\(k,t) -> assert (k == Kind) $ "The type "++show t++" should be fully applied as it is used in a tuple, but it has the kind "++show k) $
-					zip kind tps
-			return Kind
-
-
-
-
--- Applies the first kind to given arguments. e.g. (* ~> (* ~> *) ~> *) $ [(* ~> *), (* ~> *)] is a valid application giving *
-applyKind	:: RType -> Kind -> (Kind,RType) -> Exceptions' String Kind
-applyKind baseType Kind _
-		= do	err $ "Type overapplication:\n"++
-				show baseType ++ " was applied to too much type arguments"
-		 	return Kind
-applyKind baseType bk@(KindCurry k rest) (argK,argT)
-		= do	assert (sameStructure k argK) $
-				"Kind mismatch: could not unify "++show k++" and "++show argK++".\n"++
-				"The type "++show argT ++ "::" ++ show argK ++" was applied to "++show baseType ++ "::" ++ show bk
-			return rest
-
-sameStructure	:: Kind -> Kind -> Bool
-sameStructure Kind Kind	= True
-sameStructure (KindCurry k0 k1) (KindCurry k0' k1')
-		= sameStructure k0 k0' && sameStructure k1 k1'
-sameStructure _ _	= False
+				assert (0 == numberOfKindArgs kind) $ "Expecting " ++ number (numberOfKindArgs kind) ++ " more type arguments to "++st True rtype

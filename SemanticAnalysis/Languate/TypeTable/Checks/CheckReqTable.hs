@@ -12,6 +12,8 @@ import Data.Map hiding (map)
 import Languate.TAST
 import Languate.TypeTable
 import Languate.TypeTable.Checks.CheckKind
+import Languate.TypeTable.KindChecker.KindOf
+
 import Data.List hiding (lookup, insert)
 import Prelude hiding (lookup)
 

@@ -75,7 +75,7 @@ kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
 		= do	synonym		<- resolve sameAs
 			id@(fqn, _)	<- getId nm
 			baseConstrs	<- baseTypeConstr id frees reqs
-			let base	= RNormal fqn nm
+			let base	= foldl RApplied (RNormal fqn nm) (frees |> RFree)
 			let same	= HaveSameKind base synonym
 			return $ [same, baseConstrs]
 kindConstraintIn _	= return []
