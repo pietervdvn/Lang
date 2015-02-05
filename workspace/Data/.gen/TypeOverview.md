@@ -20,6 +20,9 @@ Type | Declared in | Kind | Docstring
 **More** ````a````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
+**Disjunct** ````n:Eq````  | Graph.Graph | ````(* ~> *)````  | Set of disjunct sets
+**Graph** ````n:Eq,Ord````  ````a````  | Graph.Graph | ````(* ~> (* ~> *))````  | A generic, undirected graph (which might contain cycles).
+**Weighted** ````graph:Graph````  ````n:Eq,Ord````  ````w:Eq,Monoid,Ord````  ````a````  | Graph.Graph | ````((* ~> (* ~> *)) ~> (* ~> (* ~> (* ~> *))))````  | A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.
 **Int**  | Num.Nat | ````*````  | An _integer_
 **Int'**  | Num.Nat | ````*````  | An _integer_ which is not zero
 **IntInf**  | Num.Nat | ````*````  | An _integer_ or positive or negative _Infinity_ (````Inf````).
@@ -58,6 +61,9 @@ More | Collection
 More````a````  | Any
 Set````a:Eq````  | (Collection a)
 Bool | Any
+Disjunct````n:Eq````  | (Set (Set n))
+Graph````n````  ````a````  | Any
+Weighted````graph:Graph````  ````n:Ord, Eq````  ````w:Monoid, Ord, Eq````  | (graph n)
 Int | IntInf
 Int' | Int, IntInf'
 IntInf | BIInt, Eq

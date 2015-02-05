@@ -118,54 +118,72 @@
 <td align="left">The <code>Bool</code> datatype represents truth values of logic.</td>
 </tr>
 <tr class="odd">
+<td align="left"><strong>Disjunct</strong> <code>n:Eq</code></td>
+<td align="left">Graph.Graph</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+<td align="left">Set of disjunct sets</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Graph</strong> <code>n:Eq,Ord</code> <code>a</code></td>
+<td align="left">Graph.Graph</td>
+<td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
+<td align="left">A generic, undirected graph (which might contain cycles).</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Weighted</strong> <code>graph:Graph</code> <code>n:Eq,Ord</code> <code>w:Eq,Monoid,Ord</code> <code>a</code></td>
+<td align="left">Graph.Graph</td>
+<td align="left"><code>((* ~&gt; (* ~&gt; *)) ~&gt; (* ~&gt; (* ~&gt; (* ~&gt; *))))</code></td>
+<td align="left">A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.</td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Int</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Int'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> which is not zero</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>IntInf</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> or positive or negative <em>Infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>IntInf'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> which is not zero, or positive or negative <em>Infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Nat</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Nat'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number, which is not zero.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>NatInf</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>NatInf'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number (which is not zero) or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Flip</strong> <code>x</code> <code>b</code> <code>a</code></td>
 <td align="left">Type.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; (* ~&gt; *)))</code></td>
@@ -279,38 +297,50 @@
 <td align="left">Any</td>
 </tr>
 <tr class="odd">
+<td align="left">Disjunct<code>n:Eq</code></td>
+<td align="left">(Set (Set n))</td>
+</tr>
+<tr class="even">
+<td align="left">Graph<code>n</code> <code>a</code></td>
+<td align="left">Any</td>
+</tr>
+<tr class="odd">
+<td align="left">Weighted<code>graph:Graph</code> <code>n:Ord, Eq</code> <code>w:Monoid, Ord, Eq</code></td>
+<td align="left">(graph n)</td>
+</tr>
+<tr class="even">
 <td align="left">Int</td>
 <td align="left">IntInf</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Int'</td>
 <td align="left">Int, IntInf'</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">IntInf</td>
 <td align="left">BIInt, Eq</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">IntInf'</td>
 <td align="left">IntInf</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Nat</td>
 <td align="left">Int, NatInf</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Nat'</td>
 <td align="left">Int', Nat</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">NatInf</td>
 <td align="left">IntInf</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">NatInf'</td>
 <td align="left">IntInf', NatInf</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Flip<code>x</code> <code>b</code> <code>a</code></td>
 <td align="left">((x a) b)</td>
 </tr>
