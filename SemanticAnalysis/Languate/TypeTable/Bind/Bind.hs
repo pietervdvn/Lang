@@ -24,6 +24,8 @@ import Languate.TypeTable
 import Languate.TypeTable.Bind.Binding
 import Languate.TypeTable.Bind.Substitute
 
+import Debug.Trace
+
 data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free. All bound frees should be included.
 				, typeT 	:: TypeTable
 				, binding 	:: Binding}
@@ -109,9 +111,9 @@ Bindings might have happened under the hood, but are not given.
 
 Same as superTypesOf', but not within the monad
 -}
-superTypesOf	:: TypeTable -> RType -> Either String (Set RType)
-superTypesOf tt t
-	= let   ctx	= Context M.empty tt noBinding
+superTypesOf	:: TypeTable -> Map Name [RType] -> RType -> Either String (Set RType)
+superTypesOf tt reqs t
+	= let   ctx	= Context reqs tt noBinding
 		t'	= normalize t	in
 		runstateT (superTypesOf' t') ctx |> fst
 
@@ -141,8 +143,8 @@ _superTypesOf' t seen
 	= do	bound	<- get' frees |> M.keys	-- type variables which are used
 		supers	<- _sto t	-- direct super types, with newly in substituted values
 		let supersOf t	= _superTypesOf' t (union seen supers)
-		let toGetSupers	= S.toList $ supers \\ seen
-		indirectSupers	<- mapM supersOf toGetSupers |> unions
+		let toGetSupers	= supers `S.difference` seen
+		indirectSupers	<- mapM supersOf (S.toList toGetSupers) |> unions
 		return $ union supers indirectSupers
 
 {-
@@ -162,9 +164,16 @@ _sto t@(RNormal _ _)
 _sto (RFree a)
 	= requirementsOn a
 _sto t@(RApplied bt at)
-	= do	supers	<- _sto bt
-		supers'	<- fetchRSTTs t ||>> isA
-		return $ S.unions (supers:supers')
+	= do	baseSupers	<- _sto bt |> S.toList
+		argSupers	<- _sto at |> S.toList
+		-- applied 'hybrid' supers
+		let appSupers	= [RApplied bt' at' | bt' <- baseSupers, at' <- argSupers]
+		let appBaseSupers	= [RApplied bt at' | at' <- argSupers]
+		let appArgSupers	= [RApplied bt' at | bt' <- baseSupers]
+		let appSupers'	= S.fromList (appSupers ++ appBaseSupers ++ appArgSupers)
+		-- Instance supers, e.g. "Collection Eq" => Eq
+		supers	<- fetchRSTTs t ||>> isA
+		return $ S.unions (appSupers' : supers)
 _sto (RCurry bt rt)
 	= do	bSupers	<- _sto bt |> S.toList
 		rSupers	<- _sto rt |> S.toList
@@ -222,7 +231,7 @@ fetchRSTTs (RApplied bt at)
 	= do	-- first: build a list of dictionaries
 		-- each dictionary contains something of the form "if requirements met -> these rstt's apply"
 		rstts	<- fetchRSTTs bt ||>> recursiveReqs
-		-- for each of those dictionaries, we check that it works out with the arg type
+		-- for each of those dictionaries, we check that it works out with the arg type or with a supertype of the arg type
 		-- this gives us a list of [valid RSTT, binding to apply on said RSTT]
 		rstts'	<- mapM (workingRSTT at) rstts |> concat
 		-- we apply these needed bindings
@@ -257,7 +266,8 @@ _workingRSTT t nm rtypes
 		put $ ctx {binding = noBinding}
 		addBinding (nm,t)
 	  	catch Nothing
-		    (do	mapM (t `isSubtypeOf`) (S.toList rtypes)
+		    (do	areSubtypes	<- mapM (t `isSubtypeOf`) (S.toList rtypes)
+			assert (and areSubtypes) "Not working rstt"
 			get' binding |> Just)
 
 

@@ -82,7 +82,8 @@ pr	= (||>> type2rtype) . snd . str2type
 -- Test binding of t0 in t1
 bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
 -- What are the supertypes of a type?
-supers	=  (|> intercalate ", ") . (||>> st True) . (|> S.toList) . test' . pt
+supers t	= let shw	= (|> intercalate ", ") . (||>> st True) . (|> S.toList) in
+			shw $ test' (pt t) (fromList $ merge $ pr t)
 
 
 
@@ -91,7 +92,7 @@ supers	=  (|> intercalate ", ") . (||>> st True) . (|> S.toList) . test' . pt
 
 
 test t0 t1 reqs = bind tt reqs t0 t1
-test' t	= superTypesOf tt t
+test' t reqs	= superTypesOf tt reqs t
 
 -- basic test
 t0	= bnd "Nat" "(a:Eq)"
@@ -104,7 +105,6 @@ t3	= bnd "Any" "Nat"
 -- binds {a --> natT, b --> intT} by recursive binding
 t4	= bnd "Curry Nat Int" "a -> b"
 -- binds {a --> List Nat, b --> Nat}. The "b" is bound via the type requirements
--- TODO
 t5	= bnd "List Nat" "(a:List b)"
 
 -- simple curry binding
