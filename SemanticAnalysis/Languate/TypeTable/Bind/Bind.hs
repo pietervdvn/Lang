@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.Bind (superTypesOf, bind) where
+	module Languate.TypeTable.Bind.Bind (superTypesOf, bind) where
 
 {--
 This module implements both bind and superTypesOf. Should be different modules, but ghc does not allow cyclic imports :(
@@ -84,12 +84,14 @@ b t0@(RTuple tps0) t1@(RTuple tps1)
 b t0@(RApplied bt at) t1@(RApplied bt' at')
 	= do	-- binding of the argument types
 		b at at'
-		-- All supertypes of the base type
-		t0baseSupers	<- superTypesOf' t0 |> S.toList |> filter isApplied ||>> (\(RApplied bt _) -> bt)
-		-- we try to bind at least one base superType against the base type of t1
-		successFull	<- mapM (bt' `isSupertypeOf`) t0baseSupers
-		when (not $ or successFull)
-			$ fail $ "Could not bind "++show t0++" against "++show t1++", no common ground found"
+		isSub	<- bt `isSubtypeOf` bt'	-- performs binding if succeeds
+		unless isSub $ do	-- we can not find a common ground immediatly: let's try a supertype of bt
+			-- All supertypes of the base type
+			t0baseSupers	<- superTypesOf' t0 |> S.toList |> filter isApplied ||>> (\(RApplied bt _) -> bt)
+			-- we try to bind at least one base superType against the base type of t1
+			successFull	<- mapM (bt' `isSupertypeOf`) t0baseSupers
+			when (not $ or successFull)
+				$ fail $ "Could not bind "++show t0++" against "++show t1++", no common ground found"
 b t0 t1
  | t0 == t1	= return ()
  | otherwise

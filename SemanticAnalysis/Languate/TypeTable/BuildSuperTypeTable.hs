@@ -24,13 +24,13 @@ import Languate.TAST
 import Languate.AST
 import Languate.FQN
 
-import Data.Map hiding (map)
+import Data.Map hiding (map, null)
 import Prelude hiding (lookup)
 import Data.Set (Set)
 import qualified Data.Set as S
 import Control.Arrow
 import Data.Tuple
-
+import Data.Maybe
 
 type Reqs	= [(Name, [RType])]
 
@@ -52,12 +52,15 @@ superTypesIn' tlts w fqn
 		tlt	<- lookup fqn tlts ? ("Bug: no tlt found for "++show fqn)
 		let inOne stm coor	= onLocation (fqn, coor) $ try' [] $
 						superTypeIn tlt stm
-		(mapM (uncurry inOne) $ statements' modul) |> concat
+		results	<- (mapM (uncurry inOne) $ statements' modul) |> concat
+		let split4 (a, b, c, d)	= ((a, b, c), d)
+		let unsplit4 ((a, b, c), d)	= (a, b, c, d)
+		return results ||>> split4 |> merge ||>> unsplit4
 
 
 
 -- Returns: (type id which is instance, applied free names, requirements on the frees, supertypes)
-superTypeIn	:: TypeLookupTable ->  Statement -> Exc [(TypeID, [Name], Reqs, [RType] )]
+superTypeIn	:: TypeLookupTable ->  Statement -> Exc [(TypeID, [Name], Reqs, RType )]
 superTypeIn tlt (SubDefStm (SubDef nm _ frees supers reqs))
 		= superTypeFor tlt [] nm frees supers reqs
 superTypeIn tlt (InstanceStm (Instance (path,nm) frees super reqs))
@@ -69,20 +72,51 @@ superTypeIn tlt (ClassDefStm cd)
 superTypeIn tlt (ADTDefStm (ADTDef nm frees reqs _))
 		= do	fqn	<- findTypeOrigin tlt ([], nm)
 			reqs'	<- resolveReqs tlt reqs
-			return [((fqn, nm), frees, reqs', [anyType])]
+			return [((fqn, nm), frees, reqs', anyType)]
 superTypeIn _ _	= return []
 
 
--- ["Collection"] "Set" ["a"] ['Monoid','BooleanAlgebra']
+{-
+
+Gives a supertype
+
+Args:
+- Modulepath	["Collection"]
+- Type names	"Set"
+- Frees		["a"]
+- Supertypes	['Monoid','BooleanAlgebra','Collection a']
+
+Returns:
+- A list of: the typeId of Collection.Set, applied frees, requirements on those frees, types it is.
+
+It gets passed through normalizeSTF, which transforms "List a is Collection a" into "List is Collection"
+
+-}
 superTypeFor	:: TypeLookupTable ->
 			[Name] -> Name -> [Name] -> [Type] -> [TypeRequirement]
-			-> Exc [(TypeID, [Name], Reqs, [RType] )]
+			-> Exc [(TypeID, [Name], Reqs, RType )]
 superTypeFor tlt path nm frees supers reqs
 		= do	fqn	<- findTypeOrigin tlt (path,nm)
 			let tId	= (fqn, nm)
 			supers'	<- resolveTypes tlt supers
 			reqs'	<- resolveReqs  tlt reqs
-			return [(tId, frees, reqs', supers')]
+			return [((tId, frees, reqs'), supers')] |> unmerge ||>> normalizeSTF
+
+
+--  Transforms "List a is Collection a" into "List is Collection"
+normalizeSTF	:: ((TypeID, [Name], Reqs), RType) -> (TypeID, [Name], Reqs, RType)
+normalizeSTF ((tid, [], reqs), super)
+		= (tid, [], reqs, super)
+
+normalizeSTF ((tid, frees, reqs), super@(RApplied bt (RFree a)))
+ | last frees == a &&	-- the last free is the applied free
+   not (a `elem` (reqs |> fst))	-- no requirements on this free
+		= normalizeSTF ((tid, init frees, reqs), bt)
+ | otherwise	= (tid, frees, reqs, super)
+
+normalizeSTF ((tid, frees, reqs), super)
+		= (tid, frees, reqs, super)
+
 
 resolveReqs	:: TypeLookupTable -> [(Name, Type)] -> Exc Reqs
 resolveReqs tlt reqs
