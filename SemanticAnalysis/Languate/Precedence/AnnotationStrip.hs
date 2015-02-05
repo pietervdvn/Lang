@@ -10,7 +10,7 @@ import Data.Maybe
 import Control.Arrow
 
 getPrecedenceInfo'	:: Statement -> Maybe ((Name, PrecModifier), [PrecRelation])
-getPrecedenceInfo' (AnnotationStm (PrecAnnot name modif rels))
+getPrecedenceInfo' (PrecedenceStm (PrecAnnot name modif rels))
 			= Just ((name, modif), rels)
 getPrecedenceInfo' _	= Nothing
 
