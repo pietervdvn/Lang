@@ -8,6 +8,8 @@ import StdDef
 import Exceptions
 import Data.Map hiding (map, foldr, null)
 import qualified Data.Map as M
+import qualified Data.Set as S
+
 import Prelude hiding (lookup)
 import Data.List hiding (lookup)
 import Data.Maybe
@@ -23,6 +25,7 @@ import Languate.Precedence.CheckPrecStatements
 import Languate.Precedence.PrecedenceTable
 
 import Languate.Graphs.UnionFind
+import Languate.Graphs.Order
 
 import Control.Arrow
 
@@ -41,7 +44,10 @@ buildPrecTable' world
 			let faultyLT		= checkIllegalLT ltRels equivUnion	-- erroronous LTs
 			assert (null faultyLT) $ errorMsg faultyLT
 			let partialOrder	= ltGraph $ withRepr equivUnion ltRels
-			let totalOrder		= buildOrdering partialOrder
+			let totalOrder'		= buildOrdering (fst partialOrder |> S.fromList)
+			totalOrder <- case totalOrder' of
+					Left loops	-> halt $ "Could not build the precedence table, as there is a loop in the precedences: "++ unwords (loops |> show)
+					Right ordering	-> return ordering
 			let (op2i, i2op)	= second (fmap nub) $ buildTable totalOrder allOps equivUnion
 		   	let table = PrecedenceTable (length totalOrder) op2i i2op (fromList nameMod)
 			checkNoMix table

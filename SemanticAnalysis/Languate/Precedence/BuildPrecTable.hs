@@ -17,8 +17,7 @@ import Data.List (nub)
 import Control.Arrow
 import Data.Tuple
 
-
-import Debug.Trace
+import Languate.Graphs.Order
 
 {- checks if a ''(+) < (-)'' relation does not exist if ''(+) = (-)'' is defined somewhere. Thus, if two operators are in the same union, checks no LT-relation exists between them.
 Returns faulty arguments.
@@ -53,35 +52,6 @@ addOp op unions	(dict, dict')
 
 -- ### Building of partial and ordering
 
-{-
- Makes a list of {"a" --> ["b","c"], "b" --> ["c"], "c" --> []}, which means that "a" should be evaluated after ["b","c"].
-The first one in the list will thus be "c", which has no elements it should wait for.
-
- Gives a partial ordering by removing representative operations step by step.
-
-Might get in a _loop_, e.g. on {"a" -> ["a"]}. This should not happen when the input is a union find input.
---}
-buildOrdering	:: (Map Name [Name], Map Name [Name]) -> [Name]
-buildOrdering rels@(ltRel, _)
-		=  	let highestPreced	= emptyKey ltRel in
-			if null highestPreced then	checkCycle ltRel -- either we're done or are stuck on a loop.
-				else 	let op 	= head highestPreced in
-					op : buildOrdering (removeGroup op rels)
-
-checkCycle	:: Map Name [Name] -> [Name]
-checkCycle dict	=  if Map.null dict then [] else error $ "Precedence building: stuck in a loop! "++show dict
-
--- > {"a" --> ["b","c"],"b" --> ["c"], "c" --> []}, {"c" --> ["a","b"], "b" --> "a"}
--- The second relation in the tuple is the 'reverse relation'. This means we can use that to quickly shorten lists.
-removeGroup	:: Name -> (Map Name [Name], Map Name [Name]) -> (Map Name [Name], Map Name [Name])
-removeGroup o (ltRel, revRel)
-		= let 	toRems	= fromMaybe [] $ lookup o revRel in
-			(delete o $ foldr (deleteFromLst o) ltRel toRems, revRel)
-
--- searches for entries with empty keys
-emptyKey	:: Map Name [Name] -> [Name]
-emptyKey dict	=  map fst $ filter (null . snd) $ toList dict
-
 -- assumes each element points to it's smallest representative
 neededGroups	:: Map Name Name -> Int
 neededGroups dict
@@ -95,8 +65,9 @@ canonLT dict (o1, o2)
 					r2	<- lookup o2 dict
 					return (r1,r2)
 
-ltGraph		:: [(Name,Name)] -> (Map Name [Name], Map Name [Name])
-ltGraph rels	=  let allOps	= concatMap (\(n1,n2) -> [n1,n2]) rels in
+
+
+ltGraph rels	=  let allOps	= rels >>= (\(n1,n2) -> [n1,n2]) in
 		   let startDict	= fromList $ zip allOps (repeat []) in
 			snd $ runstate (mapM_ collectGT rels) (startDict, startDict)
 
