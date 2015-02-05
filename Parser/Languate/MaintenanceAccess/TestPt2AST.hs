@@ -56,9 +56,8 @@ This is tf':
 -- pt 	:: implemented in TestBNF
 
 
--- ts rule str	=  pt rule str >>= print . simplify
-
--- tr rule str	= pt rule str >>= print
+ts rule str	=  pt rule str >>= print . simplify
+tr rule str	= pt rule str >>= print
 
 tf'		= tf pt2mod "module"
 

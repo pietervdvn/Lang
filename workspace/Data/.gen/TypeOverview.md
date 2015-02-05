@@ -36,8 +36,8 @@ Type | Is subtype of
 ---- | -------------
 BIInt | Any
 Eq | Any
-Associative````a````  | ((Curry a) (Curry a))
-Commutative````a````  ````b````  | ((Curry a) (Curry b))
+Associative````a````  | (a -> (a -> a))
+Commutative````a````  ````b````  | (a -> (a -> b))
 Curry````a````  ````b````  | (a -> b)
 Mappable````a````  | Any
 Monoid | Any
@@ -52,6 +52,7 @@ Dict````k````  ````v````  | Monoid
 Dict````k:Eq````  ````v````  | (Set k)
 List | Mappable, Collection
 List````a````  | Monoid
+List````a:(k, v)````  | ((Dict k) v)
 Maybe````a````  | Any
 More | Collection
 More````a````  | Any

@@ -6,6 +6,7 @@ The list category declaration.
 import Collection.Collection
 import Collection.Maybe
 import Collection.Set
+import Collection.Dict
 
 import Category.Monoid
 import Category.Mappable
@@ -27,6 +28,8 @@ cat List a in Collection a
 instance List a is Monoid
 
 instance List is Mappable
+
+instance List (a:(k,v)) is (Dict k v)
 
 
 map	: (a -> b) -> [a] -> [b]
