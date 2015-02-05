@@ -81,9 +81,15 @@ b t0@(RTuple tps0) t1@(RTuple tps1)
 		= fail $ "Could not bind "++show t0++" and "++show t1++" as the tuples do not have the same length"
 	| otherwise
 		= mapM_ (uncurry b) $ zip tps0 tps1
-b (RApplied bt at) (RApplied bt' at')
-	= do	b bt bt'
+b t0@(RApplied bt at) t1@(RApplied bt' at')
+	= do	-- binding of the argument types
 		b at at'
+		-- All supertypes of the base type
+		t0baseSupers	<- superTypesOf' t0 |> S.toList |> filter isApplied ||>> (\(RApplied bt _) -> bt)
+		-- we try to bind at least one base superType against the base type of t1
+		successFull	<- mapM (bt' `isSupertypeOf`) t0baseSupers
+		when (not $ or successFull)
+			$ fail $ "Could not bind "++show t0++" against "++show t1++", no common ground found"
 b t0 t1
  | t0 == t1	= return ()
  | otherwise
@@ -149,7 +155,7 @@ A 'already seen' set of types is passed recursively, to prevent infinite loops
 _superTypesOf'	:: RType -> Set RType -> StMsg (Set RType)
 _superTypesOf' t seen
 	= do	bound	<- get' frees |> M.keys	-- type variables which are used
-		supers	<- _sto t	-- direct super types, with newly in substituted values
+		supers	<- _sto' t	-- direct super types, with newly in substituted values
 		let supersOf t	= _superTypesOf' t (union seen supers)
 		let toGetSupers	= supers `S.difference` seen
 		indirectSupers	<- mapM supersOf (S.toList toGetSupers) |> unions

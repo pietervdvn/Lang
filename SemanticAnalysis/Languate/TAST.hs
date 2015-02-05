@@ -82,6 +82,11 @@ st short (RTuple tps)
 		=  "(" ++ intercalate ", " (fmap (st short) tps) ++")"
 
 
+isApplied	:: RType -> Bool
+isApplied (RApplied _ _)	= True
+isApplied _	= False
+
+
 showRTypeReq	:: RTypeReq -> String
 showRTypeReq (name, rtype)
 		=  showRTypeReq' (name, [rtype])
