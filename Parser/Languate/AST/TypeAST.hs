@@ -32,7 +32,8 @@ data DocString a	= DocString {comment::Comment, about::a}
 	deriving Show
 
 data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
-		| PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
+data PrecedenceAnnot
+		= PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
 
 data PrecModifier	= PrecLeft | PrecRight | PrecPrefix | PrecPostfix
 	deriving (Eq)

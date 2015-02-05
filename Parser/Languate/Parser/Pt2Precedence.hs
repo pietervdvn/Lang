@@ -12,10 +12,10 @@ This module converts the ParseTree into a precedence annotation.
 
 modName	= "Pt2PrecedenceAnnot"
 
-pt2precedence	:: ParseTree -> Annotation
+pt2precedence	:: ParseTree -> PrecedenceAnnot
 pt2precedence	=  pt2a [] t s convert
 
-convert		:: AST -> Annotation
+convert		:: AST -> PrecedenceAnnot
 convert	(PrecAnnotT annot)
 		=  annot
 
@@ -29,7 +29,7 @@ data AST	= ParO | ParC
 		| ColonT	| OfT
 		| PrecRel PrecRelation
 		| PrecRels [PrecRelation]
-		| PrecAnnotT Annotation
+		| PrecAnnotT PrecedenceAnnot
 	deriving (Show)
 
 

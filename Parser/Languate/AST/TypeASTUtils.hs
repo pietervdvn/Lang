@@ -116,6 +116,8 @@ instance Show Law where
 
 instance Show Annotation where
 	show (Annotation name str)	= "@ "++name++" : "++str
+
+instance Show PrecedenceAnnot where
 	show (PrecAnnot n mod rels)
 		= "@ precedence : "++n++" is "++show mod++", "++ intercalate ", " (map show rels)
 

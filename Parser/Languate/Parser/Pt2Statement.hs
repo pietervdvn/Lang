@@ -49,6 +49,8 @@ convert (ClassDf def)
 		= [ClassDefStm def]
 convert (Annot annot)
 		= [AnnotationStm annot]
+convert (PrecAnn prec)
+		= [PrecedenceStm prec]
 convert (InstanceAST inst)
 		= [InstanceStm inst]
 
@@ -63,6 +65,7 @@ data AST	= Func Function
 		| SubTpDf SubDef
 		| ClassDf ClassDef
 		| Annot Annotation
+		| PrecAnn PrecedenceAnnot
 		| InstanceAST Instance
 	deriving (Show)
 
@@ -76,7 +79,7 @@ h		=  [ ("nls",		Comm 	. pt2nls)
 		   , ("subtype", 	SubTpDf . pt2subdef)
 		   , ("cat", 	    unc ClassDf   pt2classDef)
 		   , ("annotation", 	Annot 	. pt2annot)
-		   , ("precedence", 	Annot 	. pt2precedence)
+		   , ("precedence", 	PrecAnn . pt2precedence)
 		   , ("instance", 	InstanceAST . pt2instance)]
 
 unc		:: (a -> AST) -> (ParseTree -> ([DocString (Name, Name)], a)) -> ParseTree -> AST

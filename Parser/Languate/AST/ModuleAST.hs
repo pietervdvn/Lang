@@ -41,4 +41,5 @@ data Statement	= FunctionStm 	Function
 		| Comments [Comment]
 		| DocStringStm [DocString (Name, Name)]
 		| AnnotationStm	Annotation
+		| PrecedenceStm PrecedenceAnnot
 	deriving (Show)
