@@ -52,7 +52,7 @@ import Data.Map as M
 buildTypeTable	:: World -> Exceptions' String TypeTable
 buildTypeTable w
 		= inside "While building the type table" $
-		   do	let tlts	=  buildTLTs w
+		   do	tlts		<-  buildTLTs w
 			validateWorld0 tlts w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w

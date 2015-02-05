@@ -18,13 +18,15 @@ import Control.Arrow (first, second)
 import Data.List
 import Languate.AST
 import StdDef
+import qualified Exceptions as E
+import Exceptions hiding (err)
+import Languate.CheckUtils
 
 import Languate.World
 import Languate.FQN
 import Languate.TypeTable
 import Languate.Graphs.ExportCalculator
 
-import Debug.Trace
 
 
 {-
@@ -43,15 +45,18 @@ Building of a type lookup table:
 -- {FQN (1) --> {FQN (2) --> Name (3)}}: This fqn (1) exports these type(names) (3), which are originally declared on location (2). E.g. {"Prelude" --> {"Data.Bool" --> "Bool", "Num.Nat" --> "Nat", "Num.Nat" --> "Nat'", ...}, ...}
 type Exports	= Map FQN (Map FQN (FQN, Name))
 
-buildTLTs	:: World -> Map FQN TypeLookupTable
-buildTLTs world	=  let	modules	= Languate.World.modules world
-			injectSet a	= S.map (\b -> (a,b))
-			injectSetFunc f fqn	= injectSet fqn $ f fqn
-			pubLocDecl	= injectSetFunc $ publicLocallyDeclared world
-			locDecl		= injectSetFunc $ locallyDeclared world
-			exports = calculateExports' world pubLocDecl (reexportType world)
-			imports = calculateImports' world locDecl exports					in
-			mapWithKey (buildTLT  world imports) $ aliasTables world
+
+buildTLTs	:: World -> Exc (Map FQN TypeLookupTable)
+buildTLTs world
+	=  do 	let modules	= Languate.World.modules world
+		let injectSet a	= S.map (\b -> (a,b))
+		let injectSetFunc f fqn	= injectSet fqn $ f fqn
+		let pubLocDecl	= injectSetFunc $ publicLocallyDeclared world
+		let locDecl	= injectSetFunc $ locallyDeclared world
+		let exports 	= calculateExports' world pubLocDecl (reexportType world)
+		let imports	= calculateImports' world locDecl exports
+		mapM_ (uncurry checkDoubleTypeDeclare) $ M.toList modules
+		return $ mapWithKey (buildTLT  world imports) $ aliasTables world
 
 {- builds a TLT for a certain module.
 
@@ -92,15 +97,6 @@ addLookupEntry at tlt (declaredIn, name)
 		= addAll [((p, name), declaredIn) | p <- tails $ fwd "at" declaredIn at] tlt
 
 
-addAll		:: (Ord k, Ord v) => [(k,v)] -> Map k (Set v) -> Map k (Set v)
-addAll pairs dict
-		= Prelude.foldr addOne dict pairs
-
-
-addOne		:: (Ord k, Ord v) => (k,v) -> Map k (Set v) -> Map k (Set v)
-addOne (k,v) dict
-		= M.insert k (S.insert v $ findWithDefault S.empty k dict) dict
-
 
 -- A type is publicly declared if: 1) at least one public function uses it or 2) not a single private function uses it. (e.g. declaration without usage in the module)
 publicLocallyDeclared	:: World -> FQN -> Set Name
@@ -112,10 +108,11 @@ publicLocallyDeclared w fqn
 			isPublic nm	= nm `elem` publicTypes || nm `notElem` privateTypes  in
 				S.filter isPublic localDeclared
 
-
+-- All locally declared types, as a set
 locallyDeclared	:: World -> FQN -> Set Name
 locallyDeclared	w fqn
 		=  S.fromList $ Data.Maybe.mapMaybe declaredType $ statements $ fwd "modules" fqn $ modules w
+
 
 declaredType	:: Statement -> Maybe Name
 declaredType (ADTDefStm (ADTDef name _ _ _))
@@ -127,6 +124,8 @@ declaredType (SubDefStm (SubDef name _ _ _ _))
 declaredType (ClassDefStm classDef)
 		= Just $ name classDef
 declaredType _	= Nothing
+
+
 
 
 {-
@@ -154,11 +153,49 @@ reexportType w curMod (impFrom, (_,typeName))
 			exportAllowed	= vis == Public && isAllowed restrict typeName		in
 			exportAllowed
 
+------------
+-- CHECKS --
+------------
+
+{--
+Checks that no types are declared twice in the same module.
+--}
+checkDoubleTypeDeclare	:: FQN -> Module -> Check
+checkDoubleTypeDeclare fqn m
+	= do	-- what is declared + what line
+		let dec	= statements' m |> swap ||>> declaredType |> swap |> unpackMaybeTuple
+		-- (declared type, cooridantes where declared - is only one position)
+		let dec'	= merge $ catMaybes dec	:: [(Name, [Coor])]
+		-- names which are declared twice
+		mapM_ (uncurry checkDouble) dec'
+
+
+checkDouble	:: Name -> [Coor] -> Check
+checkDouble _ []	= pass
+checkDouble _ [_]	= pass
+checkDouble t coors
+	= do	E.err $ "The type '"++t++"' has been declared multiple times:\n"++
+			intercalate ", " (coors |> fst |> show |> ("on line "++))
+
+-----------
+-- UTILS --
+-----------
 
 
 allTypes	:: (Name, [Type], [TypeRequirement]) -> [Type]
 allTypes (_,tps,treqs)
 		= tps ++ map snd treqs
+
+-- graph operator
+addAll		:: (Ord k, Ord v) => [(k,v)] -> Map k (Set v) -> Map k (Set v)
+addAll pairs dict
+		= Prelude.foldr addOne dict pairs
+
+-- graph operator
+addOne		:: (Ord k, Ord v) => (k,v) -> Map k (Set v) -> Map k (Set v)
+addOne (k,v) dict
+		= M.insert k (S.insert v $ findWithDefault S.empty k dict) dict
+
 
 err str fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn++" within "++str++" table"
 fwd str fqn	= findWithDefault (err str fqn) fqn

@@ -52,7 +52,6 @@ solve treqt freenmt allConstr
 			klt 	<- solveAll $ mapMaybe (unpackMaybeTuple . (first getHasKind)) allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
-			-- TODO resolve these! What rest here is
 			mapM_ (validateSameKindConstraints klt) sameKinds
 			return klt
 

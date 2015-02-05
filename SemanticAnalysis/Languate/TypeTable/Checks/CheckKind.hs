@@ -27,7 +27,7 @@ import Languate.Graphs.SearchCycles
 {-Validates wether the 'HaveSameKind'-constraints are met-}
 validateSameKindConstraints	:: KindLookupTable -> ((RType, RType), Location) -> Check
 validateSameKindConstraints klt ((rt0, rt1),loc)
-			= err $ "Check same kind: "++show rt0 ++"; "++show rt1
+			= warn $ "Check same kind: "++show rt0 ++"; "++show rt1
 
  {-onLocation loc $ inside "Kind constraint error" $
 			  do	k0	<- kindOf klt frees rt0
