@@ -28,7 +28,12 @@ import Debug.Trace
 
 data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free. All bound frees should be included.
 				, typeT 	:: TypeTable
-				, binding 	:: Binding}
+				, binding 	:: Binding
+				, knownDirectSuperTypes	-- cache of STO
+						:: Map RType (Set RType)
+				, knownAllSuperTypes	-- cache of superTypes
+						:: Map RType (Set RType)
+				}
 
 -- our monad we'll work with
 type StMsg a	= StateT Context (Either String) a
@@ -50,7 +55,7 @@ Important: the requirement-table should contain **each bound free**, to prevent 
 
 bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
 bind tt reqs t0 t1
-	= let   ctx	= Context reqs tt noBinding
+	= let   ctx	= Context reqs tt noBinding M.empty M.empty
 		[t0', t1']	= [t0,t1] |> normalize	in
 		runstateT (bind' t0' t1') ctx |> snd |> binding
 
@@ -113,7 +118,7 @@ Same as superTypesOf', but not within the monad
 -}
 superTypesOf	:: TypeTable -> Map Name [RType] -> RType -> Either String (Set RType)
 superTypesOf tt reqs t
-	= let   ctx	= Context reqs tt noBinding
+	= let   ctx	= Context reqs tt noBinding M.empty M.empty
 		t'	= normalize t	in
 		runstateT (superTypesOf' t') ctx |> fst
 
@@ -130,7 +135,10 @@ This means a extra binding can be carried out, but these are not given.
 -}
 superTypesOf'	:: RType -> StMsg (Set RType)
 superTypesOf' t
-		= _superTypesOf' t S.empty
+		= do	cache	<- get' knownAllSuperTypes
+			if t `M.member` cache
+				then return $ findWithDefault (error "Huh?") t cache
+				else _superTypesOf' t S.empty
 
 
 
@@ -145,7 +153,23 @@ _superTypesOf' t seen
 		let supersOf t	= _superTypesOf' t (union seen supers)
 		let toGetSupers	= supers `S.difference` seen
 		indirectSupers	<- mapM supersOf (S.toList toGetSupers) |> unions
-		return $ union supers indirectSupers
+		let allSupers	= union supers indirectSupers
+		ctx	<- get
+		cache	<- get' knownAllSuperTypes
+		put ctx { knownAllSuperTypes = M.insert t allSupers cache }
+		return allSupers
+
+
+
+_sto'	:: RType -> StMsg (Set RType)
+_sto' rt
+	= do	cache	<- get' knownDirectSuperTypes
+		if rt `M.member` cache
+			then return $ findWithDefault (error "Wut?") rt cache
+			else do	got	<- _sto rt
+				ctx	<- get
+				put $ ctx {knownDirectSuperTypes = M.insert rt got cache}
+				return got
 
 {-
 Gets the direct super types of the given type.
@@ -164,8 +188,8 @@ _sto t@(RNormal _ _)
 _sto (RFree a)
 	= requirementsOn a
 _sto t@(RApplied bt at)
-	= do	baseSupers	<- _sto bt |> S.toList
-		argSupers	<- _sto at |> S.toList
+	= do	baseSupers	<- _sto' bt |> S.toList
+		argSupers	<- _sto' at |> S.toList
 		-- applied 'hybrid' supers
 		let appSupers	= [RApplied bt' at' | bt' <- baseSupers, at' <- argSupers]
 		let appBaseSupers	= [RApplied bt at' | at' <- argSupers]
@@ -175,12 +199,12 @@ _sto t@(RApplied bt at)
 		supers	<- fetchRSTTs t ||>> isA
 		return $ S.unions (appSupers' : supers)
 _sto (RCurry bt rt)
-	= do	bSupers	<- _sto bt |> S.toList
-		rSupers	<- _sto rt |> S.toList
+	= do	bSupers	<- _sto' bt |> S.toList
+		rSupers	<- _sto' rt |> S.toList
 		let possible	= S.fromList [RCurry bt' rt' | bt' <- bSupers, rt' <- rSupers]
 		return $ S.insert anyType possible
 _sto (RTuple tps)
-	= do	tps'	<- mapM (\t -> _sto t |> S.toList |> (t:)) tps
+	= do	tps'	<- mapM (\t -> _sto' t |> S.toList |> (t:)) tps
 		-- all possible combinations of supertypes
 		let combinations	= perms tps'
 		let tpls	= combinations |> RTuple
@@ -346,4 +370,4 @@ _substituteRSTT binding@(Binding dict) (nm, reqs)
 	| otherwise	= (nm, S.map (substitute binding) reqs)
 
 instance Show Context where
-	show (Context frees _ b)= "Context "++sd frees ++ ", "++show b
+	show (Context frees _ b _ _)= "Context "++sd frees ++ ", "++show b

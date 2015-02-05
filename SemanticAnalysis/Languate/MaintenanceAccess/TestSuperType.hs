@@ -116,3 +116,11 @@ t8	= bnd "Nat -> Int" "Int -> a"
 
 -- Binding via application
 t9	= bnd "List Nat" "List a"
+
+-- Should be: Mappable, Collection
+-- TODO
+t10	= supers "List"
+
+-- Should contain (Set a)
+-- Note: works correctly, but not with the current example code base
+t11	= supers "List (a:Eq)"

@@ -5,8 +5,11 @@ The list category declaration.
 
 import Collection.Collection
 import Collection.Maybe
+import Collection.Set
+
 import Category.Monoid
 import Category.Mappable
+import Category.Eq
 
 ---
 A ''Collection'' which preserves order and allows duplicate elements.
