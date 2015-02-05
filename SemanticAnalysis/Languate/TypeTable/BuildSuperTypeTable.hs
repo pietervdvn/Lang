@@ -52,15 +52,12 @@ superTypesIn' tlts w fqn
 		tlt	<- lookup fqn tlts ? ("Bug: no tlt found for "++show fqn)
 		let inOne stm coor	= onLocation (fqn, coor) $ try' [] $
 						superTypeIn tlt stm
-		results	<- (mapM (uncurry inOne) $ statements' modul) |> concat
-		let split4 (a, b, c, d)	= ((a, b, c), d)
-		let unsplit4 ((a, b, c), d)	= (a, b, c, d)
-		return results ||>> split4 |> merge ||>> unsplit4
+		mapM (uncurry inOne) (statements' modul) |> concat
 
 
 
 -- Returns: (type id which is instance, applied free names, requirements on the frees, supertypes)
-superTypeIn	:: TypeLookupTable ->  Statement -> Exc [(TypeID, [Name], Reqs, RType )]
+superTypeIn	:: TypeLookupTable ->  Statement -> Exc [(TypeID, [Name], Reqs, [RType] )]
 superTypeIn tlt (SubDefStm (SubDef nm _ frees supers reqs))
 		= superTypeFor tlt [] nm frees supers reqs
 superTypeIn tlt (InstanceStm (Instance (path,nm) frees super reqs))
@@ -72,7 +69,7 @@ superTypeIn tlt (ClassDefStm cd)
 superTypeIn tlt (ADTDefStm (ADTDef nm frees reqs _))
 		= do	fqn	<- findTypeOrigin tlt ([], nm)
 			reqs'	<- resolveReqs tlt reqs
-			return [((fqn, nm), frees, reqs', anyType)]
+			return [((fqn, nm), frees, reqs', [anyType])]
 superTypeIn _ _	= return []
 
 
@@ -94,28 +91,32 @@ It gets passed through normalizeSTF, which transforms "List a is Collection a" i
 -}
 superTypeFor	:: TypeLookupTable ->
 			[Name] -> Name -> [Name] -> [Type] -> [TypeRequirement]
-			-> Exc [(TypeID, [Name], Reqs, RType )]
+			-> Exc [(TypeID, [Name], Reqs, [RType] )]
 superTypeFor tlt path nm frees supers reqs
 		= do	fqn	<- findTypeOrigin tlt (path,nm)
 			let tId	= (fqn, nm)
 			supers'	<- resolveTypes tlt supers
 			reqs'	<- resolveReqs  tlt reqs
-			return [((tId, frees, reqs'), supers')] |> unmerge ||>> normalizeSTF
+			let unsplit4 ((a, b, c), d)	= (a, b, c, d)
+
+			let sttfs	= unmerge [((tId, frees, reqs'), supers')]
+			let normed	= merge (sttfs |> normalizeSTF) |> unsplit4
+			return $ if null normed then [(tId, frees, reqs', [])]
+					else normed
 
 
 --  Transforms "List a is Collection a" into "List is Collection"
-normalizeSTF	:: ((TypeID, [Name], Reqs), RType) -> (TypeID, [Name], Reqs, RType)
-normalizeSTF ((tid, [], reqs), super)
-		= (tid, [], reqs, super)
+normalizeSTF	:: ((TypeID, [Name], Reqs), RType) -> ((TypeID, [Name], Reqs), RType)
+normalizeSTF s@((tid, [], reqs), super)
+		= s
 
-normalizeSTF ((tid, frees, reqs), super@(RApplied bt (RFree a)))
+normalizeSTF s@((tid, frees, reqs), super@(RApplied bt (RFree a)))
  | last frees == a &&	-- the last free is the applied free
    not (a `elem` (reqs |> fst))	-- no requirements on this free
 		= normalizeSTF ((tid, init frees, reqs), bt)
- | otherwise	= (tid, frees, reqs, super)
+ | otherwise	= s
 
-normalizeSTF ((tid, frees, reqs), super)
-		= (tid, frees, reqs, super)
+normalizeSTF s	= s
 
 
 resolveReqs	:: TypeLookupTable -> [(Name, Type)] -> Exc Reqs

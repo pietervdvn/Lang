@@ -35,11 +35,15 @@ Type | Declared in | Kind | Docstring
 Type | Is subtype of
 ---- | -------------
 BIInt | Any
+Eq | Any
 Associative````a````  | ((Curry a) (Curry a))
 Commutative````a````  ````b````  | ((Curry a) (Curry b))
 Curry````a````  ````b````  | (a -> b)
+Mappable````a````  | Any
+Monoid | Any
 Product | Monoid
 Sum | Monoid
+Ord | Any
 Collection | Mappable
 Collection````a:Eq````  | Eq
 Collection````a````  | Monoid
@@ -50,6 +54,7 @@ List | Mappable, Collection
 List````a````  | Monoid
 Maybe````a````  | Any
 More | Collection
+More````a````  | Any
 Set````a:Eq````  | (Collection a)
 Bool | Any
 Int | IntInf
