@@ -23,5 +23,6 @@ public import Collection.More
 public import Collection.Maybe
 public import Collection.List
 public import Collection.Dict
+public import Collection.Set
 
 public import Num.Nat
