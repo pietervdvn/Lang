@@ -22,6 +22,8 @@ import Languate.TypeTable.Checks.CheckFunction
 import Languate.TypeTable.Checks.CheckADT
 import Languate.TypeTable.Checks.CheckSubDef
 import Languate.TypeTable.Checks.CheckClassDef
+import Languate.TypeTable.Checks.CheckInstanceDef
+import Languate.TypeTable.Checks.CheckSynDef
 
 import Data.Char
 import Data.Maybe
@@ -57,6 +59,8 @@ validateStm tlt (FunctionStm f)	= validateFunction tlt f
 validateStm tlt (ADTDefStm adt)	= validateADTDef tlt adt
 validateStm tlt (SubDefStm subdef)	= validateSubDef tlt subdef
 validateStm tlt (ClassDefStm classDef)	= validateClassDef tlt classDef
+validateStm tlt (InstanceStm instanc)	= validateInstance tlt instanc
+validateStm tlt (SynDefStm synDef)	= validateSynDef tlt synDef
 
 -- No responsibilities here
 validateStm _ (LawStm _)	= pass
@@ -64,5 +68,3 @@ validateStm _ (AnnotationStm _)	= pass
 -- Building of a md table
 validateStm _ (Comments _)	= pass
 validateStm _ (DocStringStm _)	= pass
-
-validateStm tlts stm	= warn $ "Install checks for "++show stm
