@@ -47,7 +47,8 @@ Ord | Any
 Collection | Mappable
 Collection````a:Eq````  | Eq
 Collection````a````  | Monoid
-Dict````k````  ````v````  | Mappable, Monoid
+Dict````k````  | Mappable
+Dict````k````  ````v````  | Monoid
 Dict````k:Eq````  ````v````  | (Set k)
 List | Mappable
 List````a````  | Monoid, (Collection a)
@@ -60,10 +61,10 @@ Int | IntInf
 Int' | Int, IntInf'
 IntInf | BIInt, Eq
 IntInf' | IntInf
-Nat | NatInf
-Nat' | Nat, NatInf'
+Nat | Int, NatInf
+Nat' | Int', Nat
 NatInf | IntInf
-NatInf' | NatInf
+NatInf' | IntInf', NatInf
 Flip````x````  ````b````  ````a````  | ((x a) b)
 
 

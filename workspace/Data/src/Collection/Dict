@@ -24,6 +24,6 @@ cat Dict (k:Eq) v is Set k
 	head	: dict k v -> (k,v)
 	tail	: dict k v -> dict k v
 
-instance Dict k v is Mappable
+instance Dict k is Mappable
 
 instance Dict k v is Monoid
