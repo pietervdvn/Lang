@@ -28,7 +28,7 @@ import Languate.World
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD
 
-import Languate.TypeTable.FastBind
+import Languate.TypeTable.Bind
 
 import Languate.TypeTable
 import Languate.TAST
@@ -82,8 +82,6 @@ pr	= (||>> type2rtype) . snd . str2type
 -- Test binding of t0 in t1
 bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
 -- What are the supertypes of a type?
-supers t	= let shw	= (|> intercalate ", ") . (||>> st True) . (|> S.toList) in
-			shw $ test' (pt t) (fromList $ merge $ pr t)
 
 
 
@@ -92,7 +90,6 @@ supers t	= let shw	= (|> intercalate ", ") . (||>> st True) . (|> S.toList) in
 
 
 test t0 t1 reqs = bind tt reqs t0 t1
-test' t reqs	= superTypesOf tt reqs t
 
 -- basic test
 t0	= bnd "Nat" "(a:Eq)"
@@ -119,8 +116,8 @@ t9	= bnd "List Nat" "List a"
 
 -- Should be: Mappable, Collection
 -- TODO
-t10	= supers "List"
+-- t10	= supers "List"
 
 -- Should contain (Set a)
 -- Note: works correctly, but not with the current example code base
-t11	= supers "List (a:Eq)"
+-- t11	= supers "List (a:Eq)"

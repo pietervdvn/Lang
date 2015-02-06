@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.FastBind (superTypesOf, bind) where
+module Languate.TypeTable.Bind.FastBind (bind) where
 
 {--
 This module implements both bind and superTypesOf. Should be different modules, but ghc does not allow cyclic imports :(
@@ -69,7 +69,12 @@ bind' t0 t1
 {-
 The actual heavy lifting
 -}
+
 b	:: RType -> RType -> StMsg ()
+b t0@(RNormal fqn nm) t1@(RNormal _ _ )
+	= do	directSupers	<- supersOf (fqn,nm)
+		assert (t1 `S.member` directSupers) $ "Could not bind "++show t0++" in "++show t1
+		return ()
 b t0 t1@(RNormal fqn nm)
 	= todos $ "Can we write "++show t0++" as a "++show t1++"?"
 b t0 (RFree a)
@@ -101,132 +106,31 @@ b t0 t1		= fail $ "Could not bind "++show t0++" against "++ show t1
 
 
 
-----------------
--- SUPERTYPES --
-----------------
-
-
-{-
-Gives all the supertypes of the given rtype.
-Bindings might have happened under the hood, but are not given.
-
-Same as superTypesOf', but not within the monad
--}
-superTypesOf	:: TypeTable -> Map Name [RType] -> RType -> Either String (Set RType)
-superTypesOf tt reqs t
-	= let   ctx	= Context reqs tt noBinding M.empty M.empty
-		t'	= normalize t	in
-		runstateT (superTypesOf' t') ctx |> fst
-
-
-{-
-Gives all the supertypes of the given type.
-
-Sometimes, filled in frees cause a extra supertype to exist. E.g:
-MyList		is List
-List Char	is Showable
-=> MyList Char  is Showable
-This means a extra binding can be carried out, but these are not given.
-
--}
-superTypesOf'	:: RType -> StMsg (Set RType)
-superTypesOf' t
-		= do	cache	<- get' knownAllSuperTypes
-			if t `M.member` cache
-				then return $ findWithDefault (error "Huh?") t cache
-				else _superTypesOf' t S.empty
-
-
-
-{-
-This function recursively expands the supertypes and delegates the heavy work to _sto;
-A 'already seen' set of types is passed recursively, to prevent infinite loops
--}
-_superTypesOf'	:: RType -> Set RType -> StMsg (Set RType)
-_superTypesOf' t seen
-	= do	bound	<- get' frees |> M.keys	-- type variables which are used
-		supers	<- _sto' t	-- direct super types, with newly in substituted values
-		let supersOf t	= _superTypesOf' t (union seen supers)
-		let toGetSupers	= supers `S.difference` seen
-		indirectSupers	<- mapM supersOf (S.toList toGetSupers) |> unions
-		let allSupers	= union supers indirectSupers
-		ctx	<- get
-		cache	<- get' knownAllSuperTypes
-		put ctx { knownAllSuperTypes = M.insert t allSupers cache }
-		return allSupers
-
-
-
-_sto'	:: RType -> StMsg (Set RType)
-_sto' rt
-	= do	cache	<- get' knownDirectSuperTypes
-		if rt `M.member` cache
-			then return $ findWithDefault (error "Wut?") rt cache
-			else do	got	<- _sto rt
-				ctx	<- get
-				put $ ctx {knownDirectSuperTypes = M.insert rt got cache}
-				return got
-
-{-
-Gets the direct super types of the given type.
-
-Normally, all frees in the returned type should be uncaptured.
-
-E.g.
-
-MyList Char
-MyList is List
-=> We should check for supertypes of List Char too, and substitute out the first free of List.
--}
-_sto	:: RType -> StMsg (Set RType)
-_sto t@(RNormal _ _)
-	= fetchRSTTs t ||>> isA |> S.unions
-_sto (RFree a)
-	= requirementsOn a
-_sto t@(RApplied bt at)
-	= do	baseSupers	<- _sto' bt |> S.toList
-		argSupers	<- _sto' at |> S.toList
-		-- applied 'hybrid' supers
-		let appBaseSupers	= [RApplied bt at' | at' <- argSupers]
-		let appArgSupers	= [RApplied bt' at | bt' <- baseSupers]
-		let appSupers'	= S.fromList ( appBaseSupers ++ appArgSupers)
-		-- Instance supers, e.g. "Collection Eq" => Eq
-		supers	<- fetchRSTTs t ||>> isA
-		return $ S.unions (appSupers' : supers)
-_sto (RCurry bt rt)
-	= do	bSupers	<- _sto' bt |> S.toList
-		rSupers	<- _sto' rt |> S.toList
-		let possible	= S.fromList [RCurry bt' rt' | bt' <- bSupers, rt' <- rSupers]
-		return $ S.insert anyType possible
-_sto (RTuple tps)
-	= do	tps'	<- mapM (\t -> _sto' t |> S.toList |> (t:)) tps
-		-- all possible combinations of supertypes
-		let combinations	= perms tps'
-		let tpls	= combinations |> RTuple
-		return tpls |> S.fromList |> S.insert anyType
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -----------
 -- UTILS --
 -----------
 
 
 
-requirementsOn	:: Name -> StMsg (Set RType)
+requirementsOn'	:: Name -> StMsg (Set RType)
+requirementsOn' a
+	= requirementsOn a |> S.fromList
+
+
+
+requirementsOn	:: Name -> StMsg [RType]
 requirementsOn a
-	= get' frees |> findWithDefault [] a |> S.fromList
+	= get' frees |> findWithDefault [] a
+
+
+supersOf	:: TypeID -> StMsg (Set RType)
+supersOf tid
+	= do	sttf'	<- get' typeT |> supertypes |> M.lookup tid
+		assert (isJust sttf') $ "No super type table found for "++show tid
+		let (Just sttf)	= sttf'
+		let found	= S.map fst $ findWithDefault S.empty [] sttf
+		return found
+
 
 
 fetch		:: (Ord k) => k -> Map k (Set v) -> Set v
