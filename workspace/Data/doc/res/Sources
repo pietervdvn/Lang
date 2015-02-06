@@ -1,0 +1,20 @@
+Sources
+-------
+The ''res'' directory contains images and linked websites, which are downloaded once and cached here.
+
+This file, ''Sources'', contains meta-info about these downloaded files.
+---
+
+---
+Keeps track of the meta info of downloaded files.
+---
+data MetaInfo	= MetaInfo Name Type Source Date
+
+-- Type of resource
+data Type	= Img	| Document
+
+
+
+files	= {"Supertype.jpg" -->
+		MetaInfo "Supertype" Img "http://pcp-comics.com/?comic=2" (date (2015, 02, 02) + time (11, 26, 42))
+		}
