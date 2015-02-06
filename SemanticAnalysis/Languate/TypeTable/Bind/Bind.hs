@@ -1,4 +1,4 @@
-	module Languate.TypeTable.Bind.Bind (superTypesOf, bind) where
+module Languate.TypeTable.Bind.Bind (superTypesOf, bind) where
 
 {--
 This module implements both bind and superTypesOf. Should be different modules, but ghc does not allow cyclic imports :(
@@ -74,8 +74,8 @@ b t0 (RFree a)
 	= do	validateRequirement t0 a
 		addBinding (a,t0)
 b (RCurry t0 t0') (RCurry t1 t1')
-	= do	b t0  t1
-		b t0' t1'
+	= do	bind' t0  t1
+		bind' t0' t1'
 b t0@(RTuple tps0) t1@(RTuple tps1)
 	| length tps0 /= length tps1
 		= fail $ "Could not bind "++show t0++" and "++show t1++" as the tuples do not have the same length"
@@ -83,7 +83,7 @@ b t0@(RTuple tps0) t1@(RTuple tps1)
 		= mapM_ (uncurry b) $ zip tps0 tps1
 b t0@(RApplied bt at) t1@(RApplied bt' at')
 	= do	-- binding of the argument types
-		b at at'
+		bind' at at'
 		isSub	<- bt `isSubtypeOf` bt'	-- performs binding if succeeds
 		unless isSub $ do	-- we can not find a common ground immediatly: let's try a supertype of bt
 			-- All supertypes of the base type
@@ -92,10 +92,7 @@ b t0@(RApplied bt at) t1@(RApplied bt' at')
 			successFull	<- mapM (bt' `isSupertypeOf`) t0baseSupers
 			when (not $ or successFull)
 				$ fail $ "Could not bind "++show t0++" against "++show t1++", no common ground found"
-b t0 t1
- | t0 == t1	= return ()
- | otherwise
-	= do	t0Supers	<- superTypesOf' t0 |> S.toList
+b t0 t1		= do	t0Supers	<- superTypesOf' t0 |> S.toList
 		successFull	<- mapM (t1 `isSupertypeOf`) t0Supers
 		-- if a single supertype can be bound, then we can find a valid binding.
 		when (not $ or successFull)

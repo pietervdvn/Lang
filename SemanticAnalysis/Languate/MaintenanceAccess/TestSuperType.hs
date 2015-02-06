@@ -28,7 +28,7 @@ import Languate.World
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD
 
-import Languate.TypeTable.Bind
+import Languate.TypeTable.FastBind
 
 import Languate.TypeTable
 import Languate.TAST
