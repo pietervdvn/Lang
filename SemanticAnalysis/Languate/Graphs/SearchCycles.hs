@@ -21,7 +21,8 @@ cleanCycles	:: (Ord n, Eq n) => Map n (Set n) -> [[n]]
 cleanCycles dict
 	| M.null dict	= []
 	| otherwise	= let 	(start, _)	= findMax dict
-				cycles		= cleanCyclesFrom dict start	in
+				cycles		= filter (/= []) $
+							cleanCyclesFrom dict start	in
 				cycles ++ cleanCycles (delete start dict)
 
 cleanCyclesFrom	:: (Ord n, Eq n) => Map n (Set n) -> n -> [[n]]
@@ -31,7 +32,7 @@ cleanCyclesFrom dict n
 			selfCycles : (starts >>= flip (searchPaths dict) n ) |> (n:)
 
 {-
-Calculates the cycles in a given import graph
+Calculates the cycles in a given import graph, by deleting all leafs.
 Args:
 - Map of {n --> depends on these}
 - Returns a map of resting dependencies

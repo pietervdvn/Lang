@@ -9,6 +9,7 @@ import Languate.FQN
 import Data.Tuple
 import Data.Maybe
 import Data.Set (Set, fromList, member)
+import qualified Data.Set as S
 import Data.Map (Map, findWithDefault)
 import Data.List (nub)
 import Languate.Precedence.PrecedenceTable
@@ -95,7 +96,7 @@ checkClass	:: PrecedenceTable -> Int -> Exceptions String String ()
 checkClass (PrecedenceTable maxI _ i2op modifs) i
 		= do	haltIf (i > maxI) $ "Trying to check operator category "++show i++" on consistency, but only "++show maxI++" operator categories exists. This is a bug"
 			haltIf (i <= 0) $ "Trying to check operator category "++show i++" on consistency, but categories start numbering from 1 (and not 0). This is a bug"
-			let allOps	= findWithDefault [] i i2op
+			let allOps	= S.toList $ findWithDefault S.empty i i2op
 			let opsWithMod	= map (\op -> (op, findWithDefault PrecLeft op modifs)) allOps
 			let mods	= nub opsWithMod
 			let errMods	= merge $ map swap opsWithMod

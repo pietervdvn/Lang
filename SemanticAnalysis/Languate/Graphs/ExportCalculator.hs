@@ -3,7 +3,7 @@ module Languate.Graphs.ExportCalculator where
 {--
 This module implements calculateExports and calculateImports
 --}
-import StdDef
+import StdDef ((|>), (||>>))
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Prelude hiding (lookup)
@@ -15,13 +15,15 @@ import Data.Tuple
 import Control.Arrow
 import Control.Monad
 
+import Languate.Graphs.DirectedGraph
+
 import Languate.World hiding (importGraph)
 import qualified Languate.World as W
 import Languate.FQN
 
 calculateExports'	:: (Ord prop, Eq prop) => World -> (FQN -> Set prop) -> (FQN -> (FQN, prop) -> Bool) -> Map FQN (Set (prop, FQN))
 calculateExports' w	= let ig	= W.importGraph w in
- 				calculateExports ig (invertDict ig)
+ 				calculateExports ig (invert ig)
 
 calculateImports'	:: (Ord prop, Eq prop) => World -> (FQN -> Set prop) -> Map FQN (Set (prop, FQN)) -> Map FQN (Set (prop, FQN))
 calculateImports' w	= calculateImports (W.importGraph w)
@@ -93,9 +95,9 @@ rework n	=  do	-- The nodes which n imports
 			localExported	<- get' exps |> (\f -> f n)		-- Set prop
 			addExports n $ union reexported $ injectSet n localExported	-- add all the stuff!
 			let newExports	= localExported `union` reexported'
-			let oldExports	= S.map fst $lookup' n curExps
+			let oldExports	= S.map fst $ lookup' n curExps
 			if newExports == oldExports then return S.empty	-- no changes! hooray
-				else get' exportGraph |> lookup' n	-- Some new properties are reexported. We have to rework these nodes later
+				else get' exportGraph |> nodesFrom n	-- Some new properties are reexported. We have to rework these nodes later
 
 pop	:: Ord n => St n prop (Maybe n)
 pop	=  do	todo	<- get' worklist

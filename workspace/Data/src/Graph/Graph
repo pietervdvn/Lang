@@ -1,0 +1,45 @@
+Graph
+-----
+Definitions of all kinds of graphs!
+-----
+
+import Category.Monoid
+import Category.Eq
+import Category.Ord
+
+import Collection.Set
+
+---
+A generic, undirected graph (which might contain cycles).
+
+''n'' is some node identifier, and ''a'' is arbitrary data stored in the node.
+Might contain cycles.
+---
+cat Graph (n:Eq,Ord) a
+	-- Adds a node to the graph, without any connections
+	addNode	: n -> graph n a -> graph n a
+	--- Adds a vertex to the graph between the given nodes.
+	    Nodes which were not in the graph, are part of the graph now.---
+	addVertex : (n,n) -> graph n a -> graph n a
+	-- All the nodes in the graph
+	nodes	: graph n a -> {n}
+	-- All the vertexes in the graph, with the lowest node first
+	vertex	: {(n,n)}
+
+---
+A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.
+
+''n'' is some node identifier, ''w'' is the unit of weight, ''a'' is arbitrary data stored in the node.
+---
+cat Weighted (graph:Graph) n (w:Monoid,Ord,Eq) a	is graph (n:Ord,Eq) a
+	weightOf	: (n,n) -> weighted graph n w a -> w
+	setWeightOf	: (n,n) -> w -> weighted graph n w a -> weighted graph n w a
+
+
+
+
+
+---
+Set of disjunct sets
+---
+type Disjunct (n:Eq) = {{n}}
