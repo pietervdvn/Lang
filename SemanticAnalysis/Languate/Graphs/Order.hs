@@ -26,7 +26,7 @@ Loops are searched in advanced and are all returned.
 buildOrdering	:: (Ord n, Eq n) => DG n -> Either [[n]] [n]
 buildOrdering graph
 	= let	cycles	= cleanCycles graph in
-		if null cycles then Right $ _bo graph
+		if null cycles then Right $ _bo $ makeComplete graph
 			else Left cycles
 
 _bo		:: (Ord n, Eq n) => DG n -> [n]

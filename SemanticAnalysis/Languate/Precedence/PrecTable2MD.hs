@@ -10,17 +10,21 @@ import Languate.AST
 import Data.List hiding (lookup)
 import Prelude hiding (lookup)
 import Data.Map hiding (map)
+import Data.Set (Set)
+import qualified Data.Set as S
 import Data.Maybe
 
-precTable2md	:: Map Name Int -> Map Int [Name] -> Map Name PrecModifier -> MarkDown
+precTable2md	:: Map Name Int -> Map Int (Set Name) -> Map Name PrecModifier -> MarkDown
 precTable2md op2classes class2ops modifs
-		= let rows	= map (uncurry (class2md modifs)) $ toList class2ops in	-- assumes toList returns sorted
-		  let lastRow	= [show $ 1 + maximum (keys class2ops), "Other operators", show PrecLeft] in
-		  let lastRow'	= [lastRow] in
-		  let perClass	= table ["Precedence","Operators","Associativity"] (rows++lastRow') in
-		  let rows'	= map (uncurry (op2md modifs)) $ toList op2classes in
-		  let perOp	= table ["Operator","Precedence", "Associativity"] rows' in
-			title 1 "Precedences overview" ++ explanation ++ parag perClass++parag perOp
+	= let	rows	= map (uncurry (class2md modifs)) $ sort $ (toList class2ops ||>> S.toList)
+		mxm	= maximum (keys class2ops)
+		lastRw1	= [show $ 1 + mxm, "Other operators", show PrecLeft]
+		lastRw2	= [show $ 2 + mxm, "Function application", show PrecLeft]
+		lastRow	= [lastRw1, lastRw2]
+		perClss	= table ["Precedence","Operators","Associativity"] (rows++lastRow)
+		rows'	= map (uncurry (op2md modifs)) $ toList op2classes
+		perOp	= table ["Operator","Precedence", "Associativity"] rows' in
+		title 1 "Precedences overview" ++ explanation ++ parag perClss++parag perOp
 
 
 class2md	:: Map Name PrecModifier -> Int -> [Name] -> [MarkDown]

@@ -1,10 +1,12 @@
-module Languate.Graphs.DirectedGraph (DG, invert, addVertex, nodesFrom, leafs, dropNodes, isEmpty) where
+module Languate.Graphs.DirectedGraph (DG, invert, addVertex, nodesFrom, leafs, dropNodes, isEmpty, empty, addVertexes, addNode, addNodes, makeComplete) where
 
 import StdDef ((||>>),(|>))
 
-import Data.Map as M
-import Data.Set as S
-import Data.List as L (filter)
+import Data.Map (Map, findWithDefault)
+import qualified Data.Map as M
+import Data.Set (Set)
+import qualified Data.Set as S
+import qualified Data.List as L
 import Data.Tuple (swap)
 
 
@@ -23,6 +25,25 @@ addVertex	:: (Ord n, Eq n) => (n,n) -> DG n -> DG n
 addVertex (from, to) graph
 	= let newVertexes	= S.insert to $ nodesFrom from graph in
 		M.insert from newVertexes graph
+
+
+addVertexes	:: (Ord n, Eq n) => [(n,n)] -> DG n -> DG n
+addVertexes vertexes graph
+	= L.foldr addVertex graph vertexes
+
+addNode	:: (Ord n, Eq n) => n -> DG n -> DG n
+addNode n
+	= M.insert n S.empty
+
+addNodes	:: (Ord n, Eq n) => [n] -> DG n -> DG n
+addNodes ns graph
+	= L.foldr addNode graph ns
+
+-- Adds all nodes that occur. E.g. {a --> {b}} -> {a --> {b}, b --> {}}
+makeComplete	:: (Ord n, Eq n) => DG n -> DG n
+makeComplete graph
+	= let known	= S.toList $ S.unions $ M.elems graph in
+		addNodes known graph
 
 -- Nodes reachable from n with one hop
 nodesFrom	:: (Ord n, Eq n) => n -> DG n -> Set n
@@ -49,3 +70,5 @@ unmerge 	=  concatMap (\(a,bs) -> [(a,b) | b <- bs])
 
 isEmpty	:: DG n -> Bool
 isEmpty	= M.null
+
+empty	= M.empty

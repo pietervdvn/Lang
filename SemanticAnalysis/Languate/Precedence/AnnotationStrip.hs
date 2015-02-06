@@ -16,13 +16,21 @@ getPrecedenceInfo' _	= Nothing
 
 
 getPrecedenceInfo	:: Module -> ([(Name, PrecModifier)], [PrecRelation])
-getPrecedenceInfo mod	=  second concat $ unzip $ mapMaybe getPrecedenceInfo' $ statements mod
+getPrecedenceInfo	=  second concat . unzip . mapMaybe getPrecedenceInfo' . statements
 
 ltRelations	:: [PrecRelation] -> [(Name, Name)]
-ltRelations 	=  map (\(PrecLT o1 o2) -> (o1, o2)) . filter (not . isEqRel)
+ltRelations rls	=  filter (not . isEqRel) rls |> opsIn
 
 eqRelations	:: [PrecRelation] -> [(Name,Name)]
-eqRelations	=  map (\(PrecEQ o1 o2) -> (o1,o2)) . filter isEqRel
+eqRelations rls	=  filter isEqRel rls |> opsIn
+
+opsIn		:: PrecRelation -> (Name, Name)
+opsIn (PrecLT a b)	= (a,b)
+opsIn (PrecEQ a b)	= (a,b)
+
+opsIn'		:: PrecRelation -> [Name]
+opsIn' precR	=  let (a,b)	= opsIn precR in
+			[a,b]
 
 isEqRel		:: PrecRelation -> Bool
 isEqRel (PrecEQ _ _)
