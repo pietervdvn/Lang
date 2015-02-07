@@ -106,6 +106,10 @@ strip	= lstrip . rstrip
 stripnl('\n':str)	= stripnl str
 stripnl s	= s
 
+
+(&)	:: a -> (a -> b) -> b
+(&) a f	= f a
+
 (|>)	:: (Functor f)	=> f a -> (a -> b) -> f b
 (|>)	= flip fmap
 

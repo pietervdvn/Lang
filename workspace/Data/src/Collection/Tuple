@@ -1,0 +1,8 @@
+Tuple
+-----
+Some fun with tuples
+-----
+
+import Category.Eq
+
+instance Tuple (a:Eq) (b:Eq) is Eq

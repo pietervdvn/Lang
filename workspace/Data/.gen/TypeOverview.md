@@ -52,7 +52,7 @@ Collection````a:Eq````  | Eq
 Collection````a````  | Monoid
 Dict````k````  | Mappable
 Dict````k````  ````v````  | Monoid
-Dict````k:Eq````  ````v````  | (Set k)
+Dict````k:Eq````  ````v````  | (Collection (k, v))
 List | Mappable, Collection
 List````a````  | Monoid
 List````a:(k, v)````  | ((Dict k) v)
@@ -75,6 +75,198 @@ NatInf' | IntInf', NatInf
 Flip````x````  ````b````  ````a````  | ((x a) b)
 
 
+
+### Supertypes of Any
+
+No supertypes
+
+### Supertypes of BIInt
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of Eq
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of Associative
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+(a -> (a -> a)) | 1 | ````a```` 
+
+### Supertypes of Commutative
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+(a -> (a -> b)) | 2 | ````a````  ````b```` 
+
+### Supertypes of Curry
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+(a -> b) | 2 | ````a````  ````b```` 
+
+### Supertypes of Mappable
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 1 | ````a```` 
+
+### Supertypes of Monoid
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of Product
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Monoid | 0 | 
+
+### Supertypes of Sum
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Monoid | 0 | 
+
+### Supertypes of Ord
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of Collection
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Eq | 1 | ````a```` : {Eq}
+Mappable | 0 | 
+Monoid | 1 | ````a```` 
+
+### Supertypes of Dict
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Mappable | 1 | ````k```` 
+Monoid | 2 | ````k````  ````v```` 
+(Collection (k, v)) | 2 | ````k```` : {Eq} ````v```` 
+
+### Supertypes of List
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Mappable | 0 | 
+Monoid | 1 | ````a```` 
+Collection | 0 | 
+((Dict k) v) | 1 | ````a```` : {(k, v)}
+
+### Supertypes of Maybe
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 1 | ````a```` 
+
+### Supertypes of More
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 1 | ````a```` 
+Collection | 0 | 
+
+### Supertypes of Set
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+(Collection a) | 1 | ````a```` : {Eq}
+
+### Supertypes of Bool
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of Disjunct
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+(Set (Set n)) | 1 | ````n```` : {Eq}
+
+### Supertypes of Graph
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 2 | ````n````  ````a```` 
+
+### Supertypes of Weighted
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+(Graph n) | 3 | ````graph```` : {Graph} ````n```` : {Eq, Ord} ````w```` : {Eq, Monoid, Ord}
+(graph n) | 3 | ````graph```` : {Graph} ````n```` : {Eq, Ord} ````w```` : {Eq, Monoid, Ord}
+
+### Supertypes of Int
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+IntInf | 0 | 
+
+### Supertypes of Int'
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Int | 0 | 
+IntInf' | 0 | 
+
+### Supertypes of IntInf
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+BIInt | 0 | 
+Eq | 0 | 
+
+### Supertypes of IntInf'
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+IntInf | 0 | 
+
+### Supertypes of Nat
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Int | 0 | 
+NatInf | 0 | 
+
+### Supertypes of Nat'
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Int' | 0 | 
+Nat | 0 | 
+
+### Supertypes of NatInf
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+IntInf | 0 | 
+
+### Supertypes of NatInf'
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+IntInf' | 0 | 
+NatInf | 0 | 
+
+### Supertypes of Flip
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+((x a) b) | 3 | ````x````  ````b````  ````a```` 
 
 
 

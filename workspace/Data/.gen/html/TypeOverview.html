@@ -262,7 +262,7 @@
 </tr>
 <tr class="even">
 <td align="left">Dict<code>k:Eq</code> <code>v</code></td>
-<td align="left">(Set k)</td>
+<td align="left">(Collection (k, v))</td>
 </tr>
 <tr class="odd">
 <td align="left">List</td>
@@ -343,6 +343,547 @@
 <tr class="even">
 <td align="left">Flip<code>x</code> <code>b</code> <code>a</code></td>
 <td align="left">((x a) b)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-any">Supertypes of Any</h3>
+<p>No supertypes</p>
+<h3 id="supertypes-of-biint">Supertypes of BIInt</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-eq">Supertypes of Eq</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-associative">Supertypes of Associative</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(a -&gt; (a -&gt; a))</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-commutative">Supertypes of Commutative</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(a -&gt; (a -&gt; b))</td>
+<td align="left">2</td>
+<td align="left"><code>a</code> <code>b</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-curry">Supertypes of Curry</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(a -&gt; b)</td>
+<td align="left">2</td>
+<td align="left"><code>a</code> <code>b</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-mappable">Supertypes of Mappable</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-monoid">Supertypes of Monoid</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-product">Supertypes of Product</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Monoid</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-sum">Supertypes of Sum</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Monoid</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-ord">Supertypes of Ord</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-collection">Supertypes of Collection</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left">1</td>
+<td align="left"><code>a</code> : {Eq}</td>
+</tr>
+<tr class="even">
+<td align="left">Mappable</td>
+<td align="left">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Monoid</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-dict">Supertypes of Dict</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mappable</td>
+<td align="left">1</td>
+<td align="left"><code>k</code></td>
+</tr>
+<tr class="even">
+<td align="left">Monoid</td>
+<td align="left">2</td>
+<td align="left"><code>k</code> <code>v</code></td>
+</tr>
+<tr class="odd">
+<td align="left">(Collection (k, v))</td>
+<td align="left">2</td>
+<td align="left"><code>k</code> : {Eq} <code>v</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-list">Supertypes of List</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mappable</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">Monoid</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+<tr class="odd">
+<td align="left">Collection</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">((Dict k) v)</td>
+<td align="left">1</td>
+<td align="left"><code>a</code> : {(k, v)}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-maybe">Supertypes of Maybe</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-more">Supertypes of More</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+<tr class="even">
+<td align="left">Collection</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-set">Supertypes of Set</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Collection a)</td>
+<td align="left">1</td>
+<td align="left"><code>a</code> : {Eq}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-bool">Supertypes of Bool</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-disjunct">Supertypes of Disjunct</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Set (Set n))</td>
+<td align="left">1</td>
+<td align="left"><code>n</code> : {Eq}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-graph">Supertypes of Graph</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">2</td>
+<td align="left"><code>n</code> <code>a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-weighted">Supertypes of Weighted</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Graph n)</td>
+<td align="left">3</td>
+<td align="left"><code>graph</code> : {Graph} <code>n</code> : {Eq, Ord} <code>w</code> : {Eq, Monoid, Ord}</td>
+</tr>
+<tr class="even">
+<td align="left">(graph n)</td>
+<td align="left">3</td>
+<td align="left"><code>graph</code> : {Graph} <code>n</code> : {Eq, Ord} <code>w</code> : {Eq, Monoid, Ord}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-int">Supertypes of Int</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">IntInf</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-int-1">Supertypes of Int'</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Int</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">IntInf'</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-intinf">Supertypes of IntInf</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">BIInt</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">Eq</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-intinf-1">Supertypes of IntInf'</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">IntInf</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-nat">Supertypes of Nat</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Int</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">NatInf</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-nat-1">Supertypes of Nat'</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Int'</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">Nat</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-natinf">Supertypes of NatInf</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">IntInf</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-natinf-1">Supertypes of NatInf'</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">IntInf'</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td align="left">NatInf</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-flip">Supertypes of Flip</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">((x a) b)</td>
+<td align="left">3</td>
+<td align="left"><code>x</code> <code>b</code> <code>a</code></td>
 </tr>
 </tbody>
 </table>

@@ -47,6 +47,11 @@ modif str md
 	| strip md == "" =	 ""
 	| otherwise	= str ++ strip md ++ str ++ " "
 
+enclose	:: String -> String -> MarkDown -> MarkDown
+enclose op cp md
+	| strip md == ""	= ""
+	| otherwise	= op ++ md ++ cp
+
 
 when		:: MarkDown -> MarkDown -> MarkDown
 when a b

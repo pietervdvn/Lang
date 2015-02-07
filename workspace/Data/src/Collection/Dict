@@ -7,6 +7,7 @@ import Category.Eq
 import Category.Ord
 import Category.Mappable
 import Category.Monoid
+import Collection.Collection
 import Collection.Set
 
 
@@ -17,7 +18,7 @@ Keys are required to be unique. When a key-value pair ''(k,v)'' gets inserted, t
 
 The syntactic sugar ''{k --> v}'' desugars to ''Dict k v''
 ---
-cat Dict (k:Eq) v is Set k
+cat Dict (k:Eq) v is Collection (k,v)
 	empty	: dict k v
 	insert	: k -> v -> dict k v -> dict k v
 	lookup	: k -> dict k v -> v
