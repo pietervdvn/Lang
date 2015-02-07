@@ -59,27 +59,27 @@ type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
 
 {-
-Encodes the supertype relationship, but with a 'met type requirement approach'.
+A "FullSuperTypeTable" is saved for each typeId. It represents "This type is A if these conditions are met."
 
-E.g.
-List	is Mappable
-List a	is Collection a	=> gets written as List is Collection
-List Char is Show
-List Eq is Eq
+E.g. for list:
+Mappable 	--> []	-- thus if not applied to any free
+Collection 	--> []
+Monoid 		--> [{a}]-- thus: if applied to a single free (with no special requirements)
+Dict k v	--> [{"(k,v)"}]	-- It is a dict if applied to a tuple
 
-The 'typeId' points to a 'root' recursive table
-List -> isA {Mappable, Collection}, recursiveReqs: { (a,[Eq]) --> isA {Eq}, {} ; (a,[Char]) --> isA {Show}, {}}
+-- This table gets built recursively via the already known supertypes:
+-- added via collection:
 
-The 'Name' in the tuple of the keys denote what the name of the bound out free was
+Eq --> [{"Eq"}]	-- List Eq is Eq
+-- Monoid		--> [{}]	-- but already in the table
 
-Note that type application makes only sense on
--> Other applied types
--> Frees (a b, where 'a' has e.g. the requirements "collection, mappable")
--> Normals
+
+E.g. For "Weighted" (graph)
+We know that the first free should be a "Graph", thus:
+Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
 -}
-data RecursiveSuperTypeTable	= RTT { isA :: Set RType, recursiveReqs	:: Map (Name, Set RType) RecursiveSuperTypeTable }
-	deriving (Eq, Ord)
+type FullSuperTypeTable	= Map RType [(Name,Set RType)]
 
 
 -- The (implicit) supertype for every type
@@ -97,7 +97,7 @@ data TypeTable	= TypeTable	{ typeLookups	:: Map FQN TypeLookupTable
 				, kinds		:: KindLookupTable
 				, typeReqs	:: TypeReqTable
 				, supertypes	:: Map TypeID SuperTypeTableFor
-				, recSupertypes	:: Map TypeID RecursiveSuperTypeTable
+				, allSupertypes	:: Map TypeID FullSuperTypeTable
 				, docstrings	:: Map TypeID String
 				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
@@ -189,19 +189,3 @@ spth (nms, nm)	= intercalate "." $ nms ++ [nm]
 
 showTypeID (fqn,nm)
 		= show fqn ++"."++show nm
-
-instance Show RecursiveSuperTypeTable where
-	show	= srstt 0
-
-
-srstt	:: Int -> RecursiveSuperTypeTable -> String
-srstt indent rstt
-	= let	isa	= "{{" ++ intercalate ", " (S.toList (isA rstt) |> st True ) ++ "}"
-		showEntry (name, reqs) rstt	= name ++ ": " ++ (intercalate ", " (S.toList reqs |> st True)) ++ " --> "++srstt (indent + 3) rstt
-		entries	= fmap (uncurry showEntry) $ M.toList $ recursiveReqs rstt in
-		(intercalate ("\n" ++ replicate indent ' ' ) $ isa : entries) ++ "}"
-
-
-mergeRSTT	:: RecursiveSuperTypeTable -> RecursiveSuperTypeTable -> RecursiveSuperTypeTable
-mergeRSTT (RTT isa0 dict0) (RTT isa1 dict1)
-	= RTT (S.union isa0 isa1) $ M.unionWith mergeRSTT dict0 dict1

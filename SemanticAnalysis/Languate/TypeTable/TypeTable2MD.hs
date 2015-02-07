@@ -3,7 +3,7 @@ module Languate.TypeTable.TypeTable2MD where
 import StdDef
 import MarkDown
 
-import Data.Map (keys, Map, lookup, findWithDefault, empty)
+import Data.Map (keys, Map, lookup, findWithDefault, empty, toList)
 import qualified Data.Set as S
 import Prelude hiding (lookup)
 import Data.List (sort)
@@ -12,11 +12,14 @@ import Languate.FQN
 import Languate.TypeTable
 import Languate.TAST
 
+import Languate.TypeTable.FullSuperTypeTable2MD
+
 
 
 -- Build a simple markdown overview of the type table
 typeTable2md	:: TypeTable -> MarkDown
 typeTable2md tt	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)	++ title 2 "Supertypes " ++ parag (superTypeTable2md tt)
+			++ ((toList $ allSupertypes tt) >>= (uncurry fstt2md) )
 
 
 typeRow		:: TypeTable -> TypeID -> [MarkDown]
