@@ -160,3 +160,11 @@ foldRT f concat (RCurry at rt)
 foldRT f concat (RTuple tps)
 		= concat $ fmap (foldRT f concat) tps
 foldRT f _ t	= f t
+
+
+getBaseTID	:: RType -> Maybe (FQN, Name)
+getBaseTID (RNormal fqn nm)
+		= Just (fqn, nm)
+getBaseTID (RApplied bt _)
+		= getBaseTID bt
+getBaseTID _	= Nothing
