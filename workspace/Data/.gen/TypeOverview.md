@@ -19,6 +19,8 @@ Type | Declared in | Kind | Docstring
 **Maybe** ````a````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
 **More** ````a````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
+**Tuple** ````a````  ````b````  | Collection.Tuple | ````(* ~> (* ~> *))````  | The data structure representing tuples.
+**Void**  | Collection.Void | ````*````  | Type representing _no data_.
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
 **Disjunct** ````n:Eq````  | Graph.Graph | ````(* ~> *)````  | Set of disjunct sets
 **Graph** ````n:Eq,Ord````  ````a````  | Graph.Graph | ````(* ~> (* ~> *))````  | A generic, undirected graph (which might contain cycles).
@@ -55,11 +57,15 @@ Dict````k````  ````v````  | Monoid
 Dict````k:Eq````  ````v````  | (Set k)
 List | Mappable, Collection
 List````a````  | Monoid
-List````a:(k, v)````  | ((Dict k) v)
+List````a:((Tuple k) v)````  | ((Dict k) v)
 Maybe````a````  | Any
 More | Collection
 More````a````  | Any
 Set````a:Eq````  | (Collection a)
+Tuple````a````  | Mappable
+Tuple````a````  ````b````  | Any
+Tuple````a:Eq````  ````b:Eq````  | Eq
+Void | Any
 Bool | Any
 Disjunct````n:Eq````  | (Set (Set n))
 Graph````n````  ````a````  | Any

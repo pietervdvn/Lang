@@ -18,6 +18,8 @@ public import Category.Function
 
 public import Type.Function
 
+public import Collection.Void
+public import Collection.Tuple
 public import Collection.Collection
 public import Collection.More
 public import Collection.Maybe

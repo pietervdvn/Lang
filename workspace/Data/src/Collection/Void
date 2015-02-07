@@ -1,0 +1,11 @@
+Void
+----
+Implementation of ''Void''
+----
+
+---
+Type representing _no data_.
+
+The syntactic sugar ''()'' desugars to ''Void''
+---
+data Void	= Void

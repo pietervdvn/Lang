@@ -40,7 +40,6 @@ data ResolvedType	= RNormal FQN Name
 			| RFree String
 			| RApplied RType RType
 			| RCurry RType RType
-			| RTuple [RType]
 	deriving (Eq, Ord)
 type RType		= ResolvedType
 type RTypeReq		= (Name, ResolvedType)
@@ -78,8 +77,6 @@ st short (RApplied bt t)
 		=   "(" ++ st short bt ++ " " ++ st short t ++")"
 st short (RCurry at rt)
 		=  "(" ++ st short at ++ " -> " ++ st short rt ++")"
-st short (RTuple tps)
-		=  "(" ++ intercalate ", " (fmap (st short) tps) ++")"
 
 
 isApplied	:: RType -> Bool
@@ -101,8 +98,6 @@ instance Normalizable ResolvedType where
 nt	:: ResolvedType -> ResolvedType
 nt (RApplied t0 t1)	= RApplied (nt t0) $ nt t1
 nt (RCurry t0 t1)	= RCurry (nt t0) $ nt t1
-nt (RTuple [t])		= nt t
-nt (RTuple ts)		= RTuple $ fmap nt ts
 nt t			= t
 
 
@@ -148,8 +143,6 @@ traverseRT f (RApplied bt t)
 		= RApplied (traverseRT f bt) $ traverseRT f t
 traverseRT f (RCurry at rt)
 		= RCurry (traverseRT f at) $ traverseRT f rt
-traverseRT f (RTuple tps)
-		= RTuple $ fmap (traverseRT f) tps
 traverseRT f t	= f t
 
 foldRT	:: (RType -> a) -> ([a] -> a) -> RType -> a
@@ -157,6 +150,4 @@ foldRT f concat (RApplied bt t)
 		= concat [foldRT f concat bt, foldRT f concat t]
 foldRT f concat (RCurry at rt)
 		= concat [foldRT f concat at, foldRT f concat rt]
-foldRT f concat (RTuple tps)
-		= concat $ fmap (foldRT f concat) tps
 foldRT f _ t	= f t

@@ -29,12 +29,12 @@ Convert is used to add a conversion in the castin.
 
 GetLonely is used in pattern matching, to match patterns as "[a]", "{a}". It should return Nothing if here are zero or multiple elements. Dicts should implement two versions (: {a --> b} -> Maybe a; {a --> b} -> Maybe (a,b) )
 
-getLoneley list	= if isEmpty list then Nothing 
-			else if isEmpty $ tail list 
+getLoneley list	= if isEmpty list then Nothing
+			else if isEmpty $ tail list
 				then Just head list
-				else Nothing; 
+				else Nothing;
 
-just is used in pattern matching, to convert "(a,b) -> Maybe (a,b)" to deconstruct tuples. 
+just is used in pattern matching, to convert "(a,b) -> Maybe (a,b)" to deconstruct tuples.
 
 A constructor defines two functions: the constructor and deconstructor.
 
@@ -99,7 +99,7 @@ Built-in functions (recognized by the interpreter)
 #asADT	: Int -> a -> b -> c -> ... -> adt
 -- Deconstructs an ADT. Always returns a Just. The int is the constructor number
 #fromADT	: adt -> Maybe (Int, a, b, c, ...)
--- void if no args, id if one arg	
+-- void if no args, id if one arg
 #asTuple	: a -> b -> c -> ... -> (a,b,c,...)
 #plus
 #mul
@@ -112,3 +112,14 @@ Built-in functions (recognized by the interpreter)
 
 
 Functiondeclarations which contain a builtin type are considered as typecorrect
+
+
+Tuples
+------
+
+Tuples are a special data type:
+
+    (a,b)	= Tuple a b
+    (a,b,c)	= Tuple a (Tuple b c)
+
+This gets converted out in semantal, in "resolveType"

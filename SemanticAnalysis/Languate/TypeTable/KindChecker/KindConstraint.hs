@@ -61,7 +61,5 @@ dependsOn' (RApplied r rs)
 		= concatMap dependsOn' [r,rs]
 dependsOn' (RCurry bt t)
 		= concatMap dependsOn' [bt, t]
-dependsOn' (RTuple rs)
-		= concatMap dependsOn' rs
 dependsOn' (RFree _)
 		= []
