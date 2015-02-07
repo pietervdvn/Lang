@@ -86,6 +86,13 @@ type FullSuperTypeTable	= Map RType [(Name,Set RType)]
 anyType		= uncurry RNormal anyTypeID
 anyTypeID	= (toFQN' "pietervdvn:Data:Any", "Any")
 
+-- The representation of a tuple
+tupleType	= uncurry RNormal tupleTypeID
+tupleTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Tuple")
+
+voidType	= uncurry RNormal tupleTypeID
+voidTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Void")
+
 -- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
 
@@ -146,8 +153,15 @@ resolveType tlt (Curry (t:tps))
 		= do	t'	<- resolveType tlt t
 			tail	<- resolveType tlt (Curry tps)
 			return $ RCurry t' tail
-resolveType tlt e@(TupleType tps)
-		= _construct tlt e tps RTuple
+resolveType tlt (TupleType [])
+		= return voidType
+resolveType tlt (TupleType [t])
+		= resolveType tlt t
+resolveType tlt e@(TupleType (t:tps))
+		= do	rt	<- resolveType tlt t
+			tail	<- resolveType tlt (TupleType tps)
+			return $ (RApplied (RApplied tupleType rt) tail)
+
 resolveType _ Infer
 		= halt "Unresolved infer"
 

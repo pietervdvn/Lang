@@ -95,14 +95,6 @@ kindOf klt frees (RCurry at rt)
 		rk	<- kindOf klt frees rt	-- calculate the kind of the rest, which should be fully applied too
 		assert (rk == Kind) $ msg rt rk
 		return Kind
-kindOf klt frees (RTuple tps)
-	= do	kind	<- mapM (kindOf klt frees) tps
-		mapM (\(k,t) -> assert (k == Kind) $
-			"The type "++show t++" should be fully applied "++
-			"as it is used in a tuple, but it has the kind "++show k) $
-				zip kind tps
-		return Kind
-
 
 
 -- Applies the first kind to given arguments. e.g. (* ~> (* ~> *) ~> *) $ [(* ~> *), (* ~> *)] is a valid application giving *

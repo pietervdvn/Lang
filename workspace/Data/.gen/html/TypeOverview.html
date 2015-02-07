@@ -112,6 +112,18 @@
 <td align="left">A <code>Collection</code> without order and duplicates.</td>
 </tr>
 <tr class="even">
+<td align="left"><strong>Tuple</strong> <code>a</code> <code>b</code></td>
+<td align="left">Collection.Tuple</td>
+<td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
+<td align="left">The data structure representing tuples.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Void</strong></td>
+<td align="left">Collection.Void</td>
+<td align="left"><code>*</code></td>
+<td align="left">Type representing <em>no data</em>.</td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Bool</strong></td>
 <td align="left">Data.Bool</td>
 <td align="left"><code>*</code></td>
@@ -273,7 +285,7 @@
 <td align="left">Monoid</td>
 </tr>
 <tr class="odd">
-<td align="left">List<code>a:(k, v)</code></td>
+<td align="left">List<code>a:((Tuple k) v)</code></td>
 <td align="left">((Dict k) v)</td>
 </tr>
 <tr class="even">
@@ -291,6 +303,22 @@
 <tr class="odd">
 <td align="left">Set<code>a:Eq</code></td>
 <td align="left">(Collection a)</td>
+</tr>
+<tr class="even">
+<td align="left">Tuple<code>a</code></td>
+<td align="left">Mappable</td>
+</tr>
+<tr class="odd">
+<td align="left">Tuple<code>a</code> <code>b</code></td>
+<td align="left">Any</td>
+</tr>
+<tr class="even">
+<td align="left">Tuple<code>a:Eq</code> <code>b:Eq</code></td>
+<td align="left">Eq</td>
+</tr>
+<tr class="odd">
+<td align="left">Void</td>
+<td align="left">Any</td>
 </tr>
 <tr class="even">
 <td align="left">Bool</td>
