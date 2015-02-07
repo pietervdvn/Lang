@@ -1,0 +1,16 @@
+Test
+----
+Tests
+----
+
+import Any
+import Category.Mappable
+
+cat X a b is Mappable b
+	> True
+
+
+
+
+cat Y a	is X Any a
+	> True

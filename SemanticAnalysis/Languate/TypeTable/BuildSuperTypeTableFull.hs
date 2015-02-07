@@ -81,13 +81,12 @@ _e	= do	td	<- get' todo
 		unless (null td) $ do
 		let (tid, changedTids)	= M.findMin td
 		modify (\ctx -> ctx {todo = M.delete tid td})
-		return ()
+		_expandOne tid changedTids
 
 -- TODO
 
 {- We know that any Type passed in changed is a super type of tid.
 We take its super type table, and add all of those
-
 -}
 _expandOne	:: TypeID -> Set TypeID -> St ()
 _expandOne tid changed

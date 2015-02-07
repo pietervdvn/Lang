@@ -54,7 +54,7 @@ Collection````a:Eq````  | Eq
 Collection````a````  | Monoid
 Dict````k````  | Mappable
 Dict````k````  ````v````  | Monoid
-Dict````k:Eq````  ````v````  | (Collection (k, v))
+Dict````k:Eq````  ````v````  | (Collection ((Tuple k) v))
 List | Mappable, Collection
 List````a````  | Monoid
 List````a:((Tuple k) v)````  | ((Dict k) v)
@@ -160,7 +160,7 @@ Is type | #Frees | Requirements
 ------- | ------ | ------------
 Mappable | 1 | ````k```` 
 Monoid | 2 | ````k````  ````v```` 
-(Collection (k, v)) | 2 | ````k```` : {Eq} ````v```` 
+(Collection ((Tuple k) v)) | 2 | ````k```` : {Eq} ````v```` 
 
 ### Supertypes of List
 
@@ -169,7 +169,7 @@ Is type | #Frees | Requirements
 Mappable | 0 | 
 Monoid | 1 | ````a```` 
 Collection | 0 | 
-((Dict k) v) | 1 | ````a```` : {(k, v)}
+((Dict k) v) | 1 | ````a```` : {((Tuple k) v)}
 
 ### Supertypes of Maybe
 
@@ -189,6 +189,20 @@ Collection | 0 |
 Is type | #Frees | Requirements
 ------- | ------ | ------------
 (Collection a) | 1 | ````a```` : {Eq}
+
+### Supertypes of Tuple
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 2 | ````a````  ````b```` 
+Eq | 2 | ````a```` : {Eq} ````b```` : {Eq}
+Mappable | 1 | ````a```` 
+
+### Supertypes of Void
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
 
 ### Supertypes of Bool
 

@@ -274,7 +274,7 @@
 </tr>
 <tr class="even">
 <td align="left">Dict<code>k:Eq</code> <code>v</code></td>
-<td align="left">(Collection (k, v))</td>
+<td align="left">(Collection ((Tuple k) v))</td>
 </tr>
 <tr class="odd">
 <td align="left">List</td>
@@ -587,7 +587,7 @@
 <td align="left"><code>k</code> <code>v</code></td>
 </tr>
 <tr class="odd">
-<td align="left">(Collection (k, v))</td>
+<td align="left">(Collection ((Tuple k) v))</td>
 <td align="left">2</td>
 <td align="left"><code>k</code> : {Eq} <code>v</code></td>
 </tr>
@@ -619,7 +619,7 @@
 <tr class="even">
 <td align="left">((Dict k) v)</td>
 <td align="left">1</td>
-<td align="left"><code>a</code> : {(k, v)}</td>
+<td align="left"><code>a</code> : {((Tuple k) v)}</td>
 </tr>
 </tbody>
 </table>
@@ -675,6 +675,49 @@
 <td align="left">(Collection a)</td>
 <td align="left">1</td>
 <td align="left"><code>a</code> : {Eq}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-tuple">Supertypes of Tuple</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">2</td>
+<td align="left"><code>a</code> <code>b</code></td>
+</tr>
+<tr class="even">
+<td align="left">Eq</td>
+<td align="left">2</td>
+<td align="left"><code>a</code> : {Eq} <code>b</code> : {Eq}</td>
+</tr>
+<tr class="odd">
+<td align="left">Mappable</td>
+<td align="left">1</td>
+<td align="left"><code>a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-void">Supertypes of Void</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
 </tr>
 </tbody>
 </table>
