@@ -30,6 +30,7 @@ Type Requirements are passed when needed and implicit
 import StdDef
 import Exceptions
 import Languate.FQN
+import Languate.TAST
 import Languate.World
 import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
@@ -48,6 +49,8 @@ import Languate.CheckUtils
 
 import Data.Map
 import Data.Map as M
+import Data.Maybe
+import Data.Tuple
 
 
 buildTypeTable	:: World -> Exceptions' String TypeTable
@@ -62,5 +65,14 @@ buildTypeTable w
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
 			supers		<- buildSuperTypeTable w tlts
 			let allSupers	= expand $ fmap stt2fstt supers
+			let spareSupers	= allSupers |> buildSpareSuperTypeTable
 			validateReqTable freeNames klt typeReqs
-			return $ TypeTable tlts klt typeReqs supers allSupers docstrings freeNames
+			return $ TypeTable tlts klt typeReqs supers allSupers spareSupers docstrings freeNames
+
+
+
+buildSpareSuperTypeTable	:: Map RType a -> Map TypeID [RType]
+buildSpareSuperTypeTable dict
+	= dict & keys |> (\a -> (a,a)) ||>> getBaseTID
+		|> swap |> unpackMaybeTuple & catMaybes	-- removing failed lookups
+		& merge & M.fromList

@@ -91,33 +91,37 @@ bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
 
 test t0 t1 reqs = bind tt reqs t0 t1
 
+t	= [10..11] |> (\i -> (i,i)) ||>> _t |> (\(i,r) -> show i ++" "++ show r ++ "\n")
+		& unlines & putStrLn
+
+
 -- basic test
-t0	= bnd "Nat" "(a:Eq)"
+_t 0	= bnd "Nat" "(a:Eq)"
 -- fails
-t1	= bnd "Any" "(a:Eq)"
+_t 1	= bnd "Any" "(a:Eq)"
 -- no binding (but does not fail)
-t2	= bnd "Nat" "Any"
+_t 2	= bnd "Nat" "Any"
 -- fails
-t3	= bnd "Any" "Nat"
+_t 3	= bnd "Any" "Nat"
 -- binds {a --> natT, b --> intT} by recursive binding
-t4	= bnd "Curry Nat Int" "a -> b"
+_t 4	= bnd "Curry Nat Int" "a -> b"
 -- binds {a --> List Nat, b --> Nat}. The "b" is bound via the type requirements
-t5	= bnd "List Nat" "(a:List b)"
+_t 5	= bnd "List Nat" "(a:List b)"
 
 -- simple curry binding
-t6	= bnd "Nat -> Int" "a -> b"
+_t 6	= bnd "Nat -> Int" "a -> b"
 -- conflicting binding for a
-t7	= bnd "Nat -> Int" "a -> a"
+_t 7	= bnd "Nat -> Int" "a -> a"
 -- Binding in, a--> intT
-t8	= bnd "Nat -> Int" "Int -> a"
+_t 8	= bnd "Nat -> Int" "Int -> a"
 
 -- Binding via application
-t9	= bnd "List Nat" "List a"
+_t 9	= bnd "List Nat" "List a"
 
--- Should be: Mappable, Collection
--- TODO
--- t10	= supers "List"
+-- Advanced binding
+_t 10	= bnd "List (Nat, Bool)" "Dict a b"
+-- with set, as the requirement Eq applies
+_t 11	= bnd "{{IntInf}}" "(a*)*"
 
--- Should contain (Set a)
--- Note: works correctly, but not with the current example code base
--- t11	= supers "List (a:Eq)"
+
+--

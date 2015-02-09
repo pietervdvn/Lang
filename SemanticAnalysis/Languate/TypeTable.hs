@@ -80,7 +80,14 @@ Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
 -}
 type FullSuperTypeTable	= Map RType [(Name,Set RType)]
+{-
+Complement of the full super type table.
+E.g.
+Supertypes of list:
+(Dict k) v --if> a:{(k,v)}
 
+-}
+type SpareSuperTypeTable	= Map TypeID [RType]
 
 -- The (implicit) supertype for every type
 anyType		= uncurry RNormal anyTypeID
@@ -102,9 +109,11 @@ type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple
 
 data TypeTable	= TypeTable	{ typeLookups	:: Map FQN TypeLookupTable
 				, kinds		:: KindLookupTable
+				-- only used in 2MD
 				, typeReqs	:: TypeReqTable
 				, supertypes	:: Map TypeID SuperTypeTableFor
 				, allSupertypes	:: Map TypeID FullSuperTypeTable
+				, spareSuperTypes	:: Map TypeID SpareSuperTypeTable
 				, docstrings	:: Map TypeID String
 				, freeNames	:: Map TypeID (Map Int Name)}
 	deriving (Show, Ord, Eq)
