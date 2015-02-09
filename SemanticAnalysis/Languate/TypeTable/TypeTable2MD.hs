@@ -32,7 +32,7 @@ typeRow	tt (fqn, name)
 			]
 
 
--- Builds a string as k ````Eq```` v
+-- Builds a string as   ````a:Eq```` for Set a:Eq in supertypetable
 typeReqsFor	:: TypeTable -> TypeID -> MarkDown
 typeReqsFor tt id
 	= let	freeNmT	= findWithDefault empty id $ freeNames tt
