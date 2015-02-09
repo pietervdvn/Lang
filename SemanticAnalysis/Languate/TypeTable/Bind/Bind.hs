@@ -31,7 +31,7 @@ import Debug.Trace
 
 {-
 Binds t0 against t1. Gives a binding or a error message if the binding failed.
-
+This means that t0 is a subtype of t1
 -}
 bind	:: TypeTable -> Map Name [RType] -> RType -> RType ->
 		Either String Binding
@@ -75,7 +75,15 @@ b t0 t1
 
 
 
+{-
+Tries to make the same type out of both.
 
+-}
+unificate	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
+unificate tt reqs t0 t1
+	= case bind tt reqs t0 t1 of
+		Left _	-> bind tt reqs t0 t1
+		Right bnd	-> Right bnd
 {-
 
 Bind applied is quite special.
@@ -169,10 +177,14 @@ bapp	:: RType -> RType -> StMsg ()
 bapp t0 t1
 	= do	tid0		<- getBaseTID t0 ? ("No base type for "++show t0)
 		tid1		<- getBaseTID t1 ? ("No base type for "++show t1)
-		possSupers	<- sstt tid0 |> findWithDefault [] tid1
 		tt		<- get' typeT
+		fstt		<- fullstt tid0
+		possSupers	<- sstt tid0 |> findWithDefault [] tid1
+		let reqs	= possSupers |> (\t -> fstt & findWithDefault [] t)
+					|> M.fromList ||>> S.toList
 		-- TODO possSupers: frees should be renamed!
-		let interbinds	= possSupers |> bind tt M.empty t1
+		let reqs'	= zip possSupers reqs
+		let interbinds	= reqs' |> (\(supert, reqs) -> unificate tt reqs t1 supert)
 		fstt		<- fullstt tid0
 		let conditions	= possSupers |> (\t -> findWithDefault [] t fstt)
 		let apps	= appliedTypes t0
@@ -187,11 +199,13 @@ bapp t0 t1
 		-- mashed up intrabinds
 		let intraBinds	= intraBinds' |> joinEither |> (>>= unionBindings)
  		let merged	= zip interbinds intraBinds |> uncurry (mergeBinding' tt)
-		assert (not $ L.null $ rights merged) $ "Could not bind "++show t0++" in "++show t1 ++ " via the super type table."++
-			"\ninterbinds:"++show interbinds++
+		assert (not $ L.null $ rights merged) $ "Could not bind "++st True t0++" in "++st True t1 ++ " via the super type table."++
+			"\n\nPossSupers:"++show possSupers++
+			"\nt1="++show t1++
+			"\n\ninterbinds:"++show interbinds++
 			"\nintrabinds:"++show intraBinds++
 			"\nmerged:"++show merged
-		assert (1 == length (rights merged)) $ "Warning: multiple bindings possible for "++show t0++" and "++show t1++"\n"++show merged
+		assert (1 == length (rights merged)) $ "Warning: multiple bindings possible for "++st True t0++" and "++st True t1++"\n"++show merged
 		let (Binding resultBind)	= head $ rights merged
 		mapM_ addBinding $ M.toList resultBind
 
@@ -220,9 +234,8 @@ will attempt to bind "Nat" "k0"
 mergeBinding	:: TypeTable -> Binding -> Binding -> Either String Binding
 mergeBinding tt super@(Binding dict1) sub@(Binding dict0)	-- yes, reverse numbering
 	= do	let keys0	= L.sort $ M.keys dict0
-		let keys1	= L.sort $ M.keys dict1
-		unless (keys0 == keys1) $ Left $ "Merging bindings failed: not all keys match "++show (keys0,keys1)
-		bound	<- keys0 |> (\k -> (dict0 ! k, dict1 ! k))
+		let keys1	= L.sort $ M.keys dict1	-- needed interbinding. Each keys1 should be in keys0
+		bound	<- keys1 |> (\k -> (dict0 ! k, dict1 ! k))
 				|> uncurry (bind tt M.empty)
 				& joinEither
 		unionBindings bound
@@ -293,7 +306,6 @@ try first backup
  		case runstateT first ctx of
 			Left msg	-> backup
 			Right (a, ctx')	-> put ctx' >> return a
-
 
 (?)	:: Maybe a -> String -> StMsg a
 (?) Nothing

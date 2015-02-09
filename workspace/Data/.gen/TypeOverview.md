@@ -77,8 +77,8 @@ PrivateKey | Any
 PubPrivAlgo````a````  ````b````  | Any
 PublicKey | Any
 RSA | ((PubPrivAlgo RSAPrivKey) RSAPubKey)
-RSAPrivKey | Any
-RSAPubKey | Any
+RSAPrivKey | Any, PrivateKey
+RSAPubKey | Any, PublicKey
 Bool | Any
 Disjunct````n:Eq````  | (Set (Set n))
 Graph````n````  ````a````  | Any
@@ -248,12 +248,14 @@ Is type | #Frees | Requirements
 Is type | #Frees | Requirements
 ------- | ------ | ------------
 Any | 0 | 
+PrivateKey | 0 | 
 
 ### Supertypes of RSAPubKey
 
 Is type | #Frees | Requirements
 ------- | ------ | ------------
 Any | 0 | 
+PublicKey | 0 | 
 
 ### Supertypes of Bool
 
