@@ -42,6 +42,7 @@ import Languate.ParserStub
 import Data.Map (empty, fromList, findWithDefault)
 import qualified Data.Set as S
 import Data.List
+import Data.Either
 
 import qualified Bnf
 
@@ -91,9 +92,10 @@ bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
 
 test t0 t1 reqs = bind tt reqs t0 t1
 
-t	= [10..11] |> (\i -> (i,i)) ||>> _t |> (\(i,r) -> show i ++" "++ show r ++ "\n")
-		& unlines & putStrLn
+t'	= [10..13] |> (\i -> (i,i)) ||>> _t |> (\(i,r) -> r >>= (\v -> return (i,v)))
+--  show i ++" "++ show r ++ "\n") & unlines & putStrLn
 
+t	= mapM putStrLn (t' & lefts |> (++)"\n\n")
 
 -- basic test
 _t 0	= bnd "Nat" "(a:Eq)"
@@ -121,7 +123,8 @@ _t 9	= bnd "List Nat" "List a"
 -- Advanced binding
 _t 10	= bnd "List (Nat, Bool)" "Dict a b"
 -- with set, as the requirement Eq applies
-_t 11	= bnd "{{IntInf}}" "(a*)*"
-
+_t 11	= bnd "{IntInf}" "a0*"
+_t 12	= bnd "{{Eq}}" "(a*)*"
+_t 13	= bnd "RSA" "PubPrivAlgo a b"
 
 --

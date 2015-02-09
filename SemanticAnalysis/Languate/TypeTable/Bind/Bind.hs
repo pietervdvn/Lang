@@ -15,6 +15,7 @@ import qualified Data.Set as S
 import qualified Data.List as L
 import Data.Tuple
 import Data.Maybe
+import Data.Either
 import Prelude hiding (fail, lookup)
 
 import StateT
@@ -25,6 +26,8 @@ import Languate.TypeTable.Bind.Binding
 
 import Control.Monad hiding (fail)
 import Control.Monad.Trans
+
+import Debug.Trace
 
 {-
 Binds t0 against t1. Gives a binding or a error message if the binding failed.
@@ -55,26 +58,20 @@ b (RFree a) t1
 	= do	supers	<- requirementsOn a
 		-- Try out all super types, if one matches, we're fine
 		matches	<- mapM (\t -> catch False (b t t1 >> return True)) supers
-		assert (or matches) $ "Could not bind the free '"++a++"' against "++show t1++" as it does not have the right super types"
+		assert (or matches) $ "Could not bind the free '"++a++"' against "++show t1++" as it does not have the right super types\n"
 
 b (RCurry t0 t1) (RCurry t0' t1')
 	= do	b t0 t0'
 		b t1 t1'
-b t0@(RNormal fqn nm) t1
- | t0 == t1	= return ()
- | otherwise
-	= do	stpReqs	<- fstt (fqn, nm) |> lookup t1
-		let errMsg	= "Could not bind "++show t0++" against "++show t1++", no suitable super type found."
-		assert (isJust stpReqs) errMsg
 b t0@(RApplied bt at) t1@(RApplied bt' at')
-	= do	-- First, try binding to special values
+ 	=  do	-- First, try binding to special values
 		try (bapp t0 t1) $ do
 		-- then: try recursive binding
 		b bt bt'
 		b at at'
-b t0@(RApplied bt at) t1
-	= bapp t0 t1
-b t0 t1	= fail $ "Could not bind "++show t0++" in "++show t1
+b t0 t1
+ | t0 == t1	= return ()
+ | otherwise	= bapp t0 t1
 
 
 
@@ -136,31 +133,99 @@ binding succeeded!
 
 
 
--- Binding [[Nat]] against (a0*)*
-bapp "List (List Nat)" "Collection (Collection a0)"
+-- Binding {{Nat}} against (a0*)*
+bapp "Set (Set Nat)" "Collection (Collection a0)"
 getBaseTID "Coll (Coll a0)" -> Coll
-sst "Coll" (for List) -> [Collection a]
+sst "Coll" (for Set) -> [Collection a]
 b t1="(a0*)*" possSuper="a*")-- should be mapm + list, but only one supertype
 	 -> [{a --> a0*}]
-reqs: [a:.]
-b "List Nat" "a"
-	-> [{a --> List Nat}]
+reqs: [a:Eq]
+b at="Set Nat" "a"
+	-> [{a --> Set Nat}]
 
 merge bindings:
-bind "List Nat" "a0*"
+bind "Set Nat" "a0*"
 	=> {a0 --> Nat}
 Binding succeeded!
+
+
+-- Binding [Nat] against {(a0:Eq)}
+
+bapp "[Nat]" "{a0}"	-- typeReq: a0:Eq
+tid0	= List
+tid1	= Set
+possSupers	= [Set a]
+bind t1="Set a0" possSuper="Set a"	-- we "forgot" about the type req a:Eq --> no prob, checking for this happens elsewhere
+	-> [{a --> a0}]
+b at="Nat" "a"
+	-> [{a --> "Nat"}]
+merge bindings:
+	-> [{a0 --> Nat}]
 -}
 
 
 -- Bind applied. Special code which tries to find a supertype of a applied
 bapp	:: RType -> RType -> StMsg ()
 bapp t0 t1
-	= fail "TODO"
+	= do	tid0		<- getBaseTID t0 ? ("No base type for "++show t0)
+		tid1		<- getBaseTID t1 ? ("No base type for "++show t1)
+		possSupers	<- sstt tid0 |> findWithDefault [] tid1
+		tt		<- get' typeT
+		-- TODO possSupers: frees should be renamed!
+		let interbinds	= possSupers |> bind tt M.empty t1
+		fstt		<- fullstt tid0
+		let conditions	= possSupers |> (\t -> findWithDefault [] t fstt)
+		let apps	= appliedTypes t0
+		{- conditions =
+			[  [reqs on at1, reqs on at2], -- for poss super type 1
+			   [reqs on at1, reqs on at2]  -- for poss super type 2
+			] -}
+		let intraBindConds
+				= conditions |> (\conds -> zip apps conds)
+		-- intrabinds per applied variable
+		let intraBinds'	= intraBindConds ||>> uncurry (bindAppTypes tt)
+		-- mashed up intrabinds
+		let intraBinds	= intraBinds' |> joinEither |> (>>= unionBindings)
+ 		let merged	= zip interbinds intraBinds |> uncurry (mergeBinding' tt)
+		assert (not $ L.null $ rights merged) $ "Could not bind "++show t0++" in "++show t1 ++ " via the super type table."++
+			"\ninterbinds:"++show interbinds++
+			"\nintrabinds:"++show intraBinds++
+			"\nmerged:"++show merged
+		assert (1 == length (rights merged)) $ "Warning: multiple bindings possible for "++show t0++" and "++show t1++"\n"++show merged
+		let (Binding resultBind)	= head $ rights merged
+		mapM_ addBinding $ M.toList resultBind
+
+
+
+bindAppTypes	:: TypeTable -> RType -> (Name,Set RType) -> Either String Binding
+bindAppTypes tt t0 (free, reqs)
+	= bind tt (M.singleton free $ S.toList reqs) t0 (RFree free)
 
 
 
 
+mergeBinding'	:: TypeTable -> Either String Binding -> Either String Binding ->
+			Either String Binding
+mergeBinding' tt b0' b1'
+	= do	b0	<- b0'
+		b1	<- b1'
+		mergeBinding tt b0 b1
+
+{- Merges bindings in a key-wise way
+e.g.
+super = {k --> k0}
+sub = {k --> Nat}
+will attempt to bind "Nat" "k0"
+-}
+mergeBinding	:: TypeTable -> Binding -> Binding -> Either String Binding
+mergeBinding tt super@(Binding dict1) sub@(Binding dict0)	-- yes, reverse numbering
+	= do	let keys0	= L.sort $ M.keys dict0
+		let keys1	= L.sort $ M.keys dict1
+		unless (keys0 == keys1) $ Left $ "Merging bindings failed: not all keys match "++show (keys0,keys1)
+		bound	<- keys0 |> (\k -> (dict0 ! k, dict1 ! k))
+				|> uncurry (bind tt M.empty)
+				& joinEither
+		unionBindings bound
 
 
 -----------
@@ -173,11 +238,18 @@ requirementsOn a
 	= get' frees |> findWithDefault [] a
 
 
-fstt	:: TypeID -> StMsg FullSuperTypeTable
-fstt tid
+fullstt	:: TypeID -> StMsg FullSuperTypeTable
+fullstt tid
 	= do	mFstt	<- get' typeT |> allSupertypes |> lookup tid
 		assert (isJust mFstt) $ "No full super type table found for "++show tid
 		return $ fromJust mFstt
+
+
+sstt	:: TypeID -> StMsg SpareSuperTypeTable
+sstt tid
+	= do	spareSTT	<- get' typeT |> spareSuperTypes |> lookup tid
+		assert (isJust spareSTT) $ "No spare STT for "++show tid
+		return $ fromJust spareSTT
 
 
 addBinding	:: (Name, RType) -> StMsg ()
@@ -198,6 +270,7 @@ addFrees bound
 		put $ ctx {frees = frees'}
 
 
+
 fail		:: String -> StMsg a
 fail		=  lift . Left
 
@@ -216,8 +289,29 @@ catch backup stmsg
 
 try		:: StMsg a -> StMsg a -> StMsg a
 try first backup
-	= do	backup'	<- backup
-		catch backup' first
+	= do	ctx	<- get
+ 		case runstateT first ctx of
+			Left msg	-> backup
+			Right (a, ctx')	-> put ctx' >> return a
+
+
+(?)	:: Maybe a -> String -> StMsg a
+(?) Nothing
+	= fail
+(?) (Just a)
+	= const $ return a
+
+joinEither	:: [Either String b] -> Either String [b]
+joinEither []	= Right []
+joinEither (Left str:rest)
+	= case joinEither rest of
+		Left msg	-> Left $ str++"; "++msg
+		Right _		-> Left str
+joinEither (Right b:rest)
+	= case joinEither rest of
+		Left msg	-> Left msg
+		Right bs	-> Right (b:bs)
+
 
 -- Fails if requirements on the next type are returned. Assumes m return [], fails otherwise
 noReqs	:: StMsg [a] -> StMsg ()

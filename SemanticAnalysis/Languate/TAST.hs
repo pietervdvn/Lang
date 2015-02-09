@@ -1,3 +1,4 @@
+
 module Languate.TAST where
 
 {--
@@ -159,3 +160,11 @@ getBaseTID (RNormal fqn nm)
 getBaseTID (RApplied bt _)
 		= getBaseTID bt
 getBaseTID _	= Nothing
+
+
+
+appliedTypes	:: RType -> [RType]
+appliedTypes (RApplied bt at)
+	= appliedTypes bt ++ [at]
+appliedTypes _
+	= []

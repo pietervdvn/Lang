@@ -18,6 +18,11 @@ data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to al
 
 -- UTILS
 
+-- TODO check overlapping bindings
+unionBindings	:: [Binding] -> Either String Binding
+unionBindings bnds
+	= bnds |> (\(Binding dict) -> dict) & M.unions & Binding & Right
+
 instance Show Binding where
 	show	= sb
 
