@@ -57,7 +57,7 @@ Dict````k````  ````v````  | Monoid
 Dict````k:Eq````  ````v````  | (Collection ((Tuple k) v))
 List | Mappable, Collection
 List````a````  | Monoid
-List````a:((Tuple k) v)````  | ((Dict k) v)
+List````a:((Tuple k) v)````  | ((Dict k) v), ((Dict k) (List v))
 Maybe````a````  | Any
 More | Collection
 More````a````  | Any
@@ -170,6 +170,7 @@ Mappable | 0 |
 Monoid | 1 | ````a```` 
 Collection | 0 | 
 ((Dict k) v) | 1 | ````a```` : {((Tuple k) v)}
+((Dict k) (List v)) | 1 | ````a```` : {((Tuple k) v)}
 
 ### Supertypes of Maybe
 

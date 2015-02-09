@@ -30,6 +30,7 @@ instance List a is Monoid
 instance List is Mappable
 
 instance List (a:(k,v)) is (Dict k v)
+instance List (a:(k,v)) is (Dict k [v])
 
 
 map	: (a -> b) -> [a] -> [b]
