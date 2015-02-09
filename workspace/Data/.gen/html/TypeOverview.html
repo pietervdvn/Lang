@@ -124,6 +124,42 @@
 <td align="left">Type representing <em>no data</em>.</td>
 </tr>
 <tr class="even">
+<td align="left"><strong>PrivateKey</strong></td>
+<td align="left">Crypto.PubPrivAlgo</td>
+<td align="left"><code>*</code></td>
+<td align="left">The type representing the <em>private</em> key of a public-key encryption scheme</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>PubPrivAlgo</strong> <code>a:PrivateKey</code> <code>b:PublicKey</code></td>
+<td align="left">Crypto.PubPrivAlgo</td>
+<td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
+<td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>PublicKey</strong></td>
+<td align="left">Crypto.PubPrivAlgo</td>
+<td align="left"><code>*</code></td>
+<td align="left">The type representing the <em>public</em> key of a public-key encryption scheme</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>RSA</strong></td>
+<td align="left">Crypto.PubPrivAlgo</td>
+<td align="left"><code>*</code></td>
+<td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>RSAPrivKey</strong></td>
+<td align="left">Crypto.PubPrivAlgo</td>
+<td align="left"><code>*</code></td>
+<td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>RSAPubKey</strong></td>
+<td align="left">Crypto.PubPrivAlgo</td>
+<td align="left"><code>*</code></td>
+<td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Bool</strong></td>
 <td align="left">Data.Bool</td>
 <td align="left"><code>*</code></td>
@@ -285,90 +321,118 @@
 <td align="left">Monoid</td>
 </tr>
 <tr class="odd">
+<td align="left">List<code>a:Eq</code></td>
+<td align="left">(Set a)</td>
+</tr>
+<tr class="even">
 <td align="left">List<code>a:((Tuple k) v)</code></td>
 <td align="left">((Dict k) v), ((Dict k) (List v))</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Maybe<code>a</code></td>
 <td align="left">Any</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">More</td>
 <td align="left">Collection</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">More<code>a</code></td>
 <td align="left">Any</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Set<code>a:Eq</code></td>
 <td align="left">(Collection a)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Tuple<code>a</code></td>
 <td align="left">Mappable</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Tuple<code>a</code> <code>b</code></td>
 <td align="left">Any</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Tuple<code>a:Eq</code> <code>b:Eq</code></td>
 <td align="left">Eq</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Void</td>
 <td align="left">Any</td>
 </tr>
+<tr class="odd">
+<td align="left">PrivateKey</td>
+<td align="left">Any</td>
+</tr>
 <tr class="even">
+<td align="left">PubPrivAlgo<code>a</code> <code>b</code></td>
+<td align="left">Any</td>
+</tr>
+<tr class="odd">
+<td align="left">PublicKey</td>
+<td align="left">Any</td>
+</tr>
+<tr class="even">
+<td align="left">RSA</td>
+<td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
+</tr>
+<tr class="odd">
+<td align="left">RSAPrivKey</td>
+<td align="left">Any</td>
+</tr>
+<tr class="even">
+<td align="left">RSAPubKey</td>
+<td align="left">Any</td>
+</tr>
+<tr class="odd">
 <td align="left">Bool</td>
 <td align="left">Any</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Disjunct<code>n:Eq</code></td>
 <td align="left">(Set (Set n))</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Graph<code>n</code> <code>a</code></td>
 <td align="left">Any</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Weighted<code>graph:Graph</code> <code>n:Ord, Eq</code> <code>w:Monoid, Ord, Eq</code></td>
 <td align="left">(graph n)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Int</td>
 <td align="left">IntInf</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Int'</td>
 <td align="left">Int, IntInf'</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">IntInf</td>
 <td align="left">BIInt, Eq</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">IntInf'</td>
 <td align="left">IntInf</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Nat</td>
 <td align="left">Int, NatInf</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Nat'</td>
 <td align="left">Int', Nat</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">NatInf</td>
 <td align="left">IntInf</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">NatInf'</td>
 <td align="left">IntInf', NatInf</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Flip<code>x</code> <code>b</code> <code>a</code></td>
 <td align="left">((x a) b)</td>
 </tr>
@@ -617,11 +681,16 @@
 <td align="left">0</td>
 </tr>
 <tr class="even">
+<td align="left">(Set a)</td>
+<td align="left">1</td>
+<td align="left"><code>a</code> : {Eq}</td>
+</tr>
+<tr class="odd">
 <td align="left">((Dict k) v)</td>
 <td align="left">1</td>
 <td align="left"><code>a</code> : {((Tuple k) v)}</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">((Dict k) (List v))</td>
 <td align="left">1</td>
 <td align="left"><code>a</code> : {((Tuple k) v)}</td>
@@ -711,6 +780,103 @@
 </tbody>
 </table>
 <h3 id="supertypes-of-void">Supertypes of Void</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-privatekey">Supertypes of PrivateKey</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-pubprivalgo">Supertypes of PubPrivAlgo</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">2</td>
+<td align="left"><code>a</code> <code>b</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-publickey">Supertypes of PublicKey</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-rsa">Supertypes of RSA</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-rsaprivkey">Supertypes of RSAPrivKey</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">#Frees</th>
+<th align="left">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Any</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-rsapubkey">Supertypes of RSAPubKey</h3>
 <table>
 <thead>
 <tr class="header">

@@ -21,6 +21,12 @@ Type | Declared in | Kind | Docstring
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
 **Tuple** ````a````  ````b````  | Collection.Tuple | ````(* ~> (* ~> *))````  | The data structure representing tuples.
 **Void**  | Collection.Void | ````*````  | Type representing _no data_.
+**PrivateKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing the _private_ key of a public-key encryption scheme
+**PubPrivAlgo** ````a:PrivateKey````  ````b:PublicKey````  | Crypto.PubPrivAlgo | ````(* ~> (* ~> *))````  | The type representing a public-key encryption scheme, with fixed keys
+**PublicKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing the _public_ key of a public-key encryption scheme
+**RSA**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
+**RSAPrivKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
+**RSAPubKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
 **Disjunct** ````n:Eq````  | Graph.Graph | ````(* ~> *)````  | Set of disjunct sets
 **Graph** ````n:Eq,Ord````  ````a````  | Graph.Graph | ````(* ~> (* ~> *))````  | A generic, undirected graph (which might contain cycles).
@@ -57,6 +63,7 @@ Dict````k````  ````v````  | Monoid
 Dict````k:Eq````  ````v````  | (Collection ((Tuple k) v))
 List | Mappable, Collection
 List````a````  | Monoid
+List````a:Eq````  | (Set a)
 List````a:((Tuple k) v)````  | ((Dict k) v), ((Dict k) (List v))
 Maybe````a````  | Any
 More | Collection
@@ -66,6 +73,12 @@ Tuple````a````  | Mappable
 Tuple````a````  ````b````  | Any
 Tuple````a:Eq````  ````b:Eq````  | Eq
 Void | Any
+PrivateKey | Any
+PubPrivAlgo````a````  ````b````  | Any
+PublicKey | Any
+RSA | ((PubPrivAlgo RSAPrivKey) RSAPubKey)
+RSAPrivKey | Any
+RSAPubKey | Any
 Bool | Any
 Disjunct````n:Eq````  | (Set (Set n))
 Graph````n````  ````a````  | Any
@@ -169,6 +182,7 @@ Is type | #Frees | Requirements
 Mappable | 0 | 
 Monoid | 1 | ````a```` 
 Collection | 0 | 
+(Set a) | 1 | ````a```` : {Eq}
 ((Dict k) v) | 1 | ````a```` : {((Tuple k) v)}
 ((Dict k) (List v)) | 1 | ````a```` : {((Tuple k) v)}
 
@@ -200,6 +214,42 @@ Eq | 2 | ````a```` : {Eq} ````b```` : {Eq}
 Mappable | 1 | ````a```` 
 
 ### Supertypes of Void
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of PrivateKey
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of PubPrivAlgo
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 2 | ````a````  ````b```` 
+
+### Supertypes of PublicKey
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of RSA
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+((PubPrivAlgo RSAPrivKey) RSAPubKey) | 0 | 
+
+### Supertypes of RSAPrivKey
+
+Is type | #Frees | Requirements
+------- | ------ | ------------
+Any | 0 | 
+
+### Supertypes of RSAPubKey
 
 Is type | #Frees | Requirements
 ------- | ------ | ------------
