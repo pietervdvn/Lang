@@ -84,7 +84,6 @@ Any | 1 | ````a0````  | {} | _Native_
 Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 0 |  | {} | _Native_ 
-(X a0) | 1 | ````a0````  | {"a0" --> a0} | Y
 (Y Bool) | 0 |  | {"a0" --> pietervdvn:Data:Data.Bool.Bool} | _Native_ 
 
 ### Supertypes of Bool

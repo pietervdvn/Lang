@@ -40,6 +40,7 @@ import Languate.TypeTable.BuildDocstringTable
 import Languate.TypeTable.BuildFreeNameTable
 import Languate.TypeTable.BuildSuperTypeTable
 import Languate.TypeTable.BuildSuperTypeTableFull
+import Languate.TypeTable.ExpandFSTT
 
 import Languate.TypeTable.Checks.CheckWorld
 import Languate.TypeTable.Checks.CheckReqTable
@@ -64,7 +65,7 @@ buildTypeTable w
 			let knownTypes	= keys klt
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
 			supers		<- buildSuperTypeTable w tlts klt
-			let allSupers	= expand $ fmap stt2fstt supers
-			let spareSupers	= allSupers |> buildSpareSuperTypeTable
+			let (allSupers, spareSupers)
+					= expand $ fmap stt2fstt supers
 			validateReqTable freeNames klt typeReqs
 			return $ TypeTable tlts klt typeReqs supers allSupers spareSupers docstrings freeNames

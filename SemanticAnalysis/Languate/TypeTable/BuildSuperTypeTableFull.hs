@@ -16,13 +16,9 @@ import Data.Either (rights)
 import Data.Tuple
 import Data.Maybe
 
-import Languate.Graphs.DirectedGraph
-import State
-import Control.Monad
-
-import Debug.Trace
-
--- converts a simple super type table into a full super type table
+{-- converts a simple super type table into a (incomplete) full super type table
+These tables should still be ''expand''ed
+-}
 stt2fstt	:: SuperTypeTableFor -> FullSuperTypeTable
 stt2fstt sttf
 	= let tuples	= unmerge (M.toList sttf ||>> S.toList) |> conv in
@@ -66,21 +62,3 @@ expandFrees reqs (RFree a, rest)
 expandFrees reqs (RApplied bt at, rest)	-- the argument type (at) is always a free
 	= expandFrees reqs (bt, rest) |> swap ||>> (\bt -> RApplied bt at) |> swap
 expandFrees _ _	= []
-
-
-
-
-
-{-
-Makes the super type table complete, by recursively adding the supertypes of (known) super types.
--}
-expand	:: Map TypeID FullSuperTypeTable -> Map TypeID FullSuperTypeTable
-expand 	= id
-
-
-
-buildSpareSuperTypeTable	:: FullSuperTypeTable -> SpareSuperTypeTable
-buildSpareSuperTypeTable dict
-	= dict & keys |> (\a -> (a,a)) ||>> getBaseTID
-		|> swap |> unpackMaybeTuple & catMaybes	-- removing failed lookups
-		& merge & M.fromList
