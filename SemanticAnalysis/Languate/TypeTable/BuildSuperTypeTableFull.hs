@@ -30,7 +30,8 @@ stt2fstt sttf
 
 
 -- creates the base entries for the fstt
-conv	:: ([Name], (RType, Map Name [RType])) -> [(RType, ([(Name, Set RType)], Binding) )]
+conv	:: ([Name], (RType, Map Name [RType])) ->
+		[(RType, ([(Name, Set RType)], Binding, Maybe RType) )]
 conv (frees, (isTyp, reqs))
 	= let 	nativeS	= frees |> (\a -> findWithDefault [] a reqs) |> S.fromList
 		-- remove all frees which have been used from isTyp
@@ -38,9 +39,8 @@ conv (frees, (isTyp, reqs))
 		-- we want to bind "X Bool" against "X a", to derive {a --> Bool}
 		applied	= appliedTypes isTyp
 		binding	= Binding $ M.fromList $ zip ([0..] |> show |> ('a':)) applied
-		base	= (isTyp, (zip frees $ nativeS, binding)) in
+		base	= (isTyp, (zip frees $ nativeS, binding, Nothing)) in
 		base:expandFrees reqs base
-
 
 {-
 If the rtype is a free, and requirements are known about this free, we can say more about the supertype.
@@ -57,8 +57,9 @@ and give:
 [(Y, [graph:Graph, X, Y])]
 
 -}
-expandFrees	:: Map Name [RType] -> (RType, ([(Name, Set RType)], Binding)) ->
-			[(RType, ([(Name, Set RType)], Binding))]
+expandFrees	:: Map Name [RType] ->
+			 (RType, ([(Name, Set RType)], Binding, Maybe RType)) ->
+			[(RType, ([(Name, Set RType)], Binding, Maybe RType))]
 expandFrees reqs (RFree a, rest)
 	= let possible	= findWithDefault [] a reqs in
 		zip possible $ repeat rest
@@ -66,23 +67,30 @@ expandFrees reqs (RApplied bt at, rest)	-- the argument type (at) is always a fr
 	= expandFrees reqs (bt, rest) |> swap ||>> (\bt -> RApplied bt at) |> swap
 expandFrees _ _	= []
 
+
+
+
+
 {-
 Makes the super type table complete, by recursively adding the supertypes of (known) super types.
 -}
---expand	:: Map TypeID FullSuperTypeTable -> Map TypeID FullSuperTypeTable
+expand	:: Map TypeID FullSuperTypeTable -> Map TypeID FullSuperTypeTable
 expand all
 	= let	-- Each TypeId should initially be updated with it's supertypes
 		initialTodo	= all	|> keys
 					& M.filter (not . L.null)
 					||>> getBaseTID
 					|> catMaybes |> S.fromList
-		ctx	= Ctx M.empty initialTodo all in
+		initialSstt	= initialTodo |> buildSpareSuperTypeTable
+		-- updated node is empty at start, as it gets built while going
+		ctx	= Ctx M.empty initialTodo all initialSstt in
 		stt $ snd $ runstate _e ctx
 
 
 data Context	= Ctx	{ notify	:: DG TypeID	-- if a node gets updated, the nodes connected to it should get updated too
 			, todo		:: DG TypeID	-- These should get checked, because connected nodes were updated
 			, stt		:: Map TypeID FullSuperTypeTable
+			, sstt		:: Map TypeID SpareSuperTypeTable
 			}
 type St	= State Context
 
@@ -107,31 +115,38 @@ _expandOne tid changed
 _expandOne'	:: TypeID -> TypeID -> St Bool
 _expandOne' tid superT
 	= do	superSTT	<- get' stt |> findWithDefault M.empty superT |> M.toList
-		mapM (_addSuper tid) superSTT |> or
+		mapM (_addSuper tid $ asRType' superT) superSTT |> or
 
 
 
-_addSuper	:: TypeID -> (RType, ([(Name, Set RType)], Binding)) -> St Bool
-_addSuper base (super, (reqs, oldBind))
-	=  _addSuper' base super reqs oldBind
+_addSuper	:: TypeID -> RType ->  (RType, ([(Name, Set RType)], Binding, Maybe RType))
+			-> St Bool
+_addSuper base via (super, (reqs, binding, _))
+	= _addSuper' base via super reqs binding
 
 
 
 -- Returns a new FSTT if fstt has been changed
-_addSuper'	:: TypeID -> RType -> [(Name, Set RType)] -> Binding
+_addSuper'	:: TypeID -> RType -> RType -> [(Name, Set RType)] -> Binding
 			-> St Bool
-_addSuper' tid super reqs oldBind
+_addSuper' tid via super reqs binding
 	= do	fstt	<- get' stt |> findWithDefault M.empty tid
 		let unifiable	= keys fstt |> unificate super & rights
 		{- Assume: we can unify the super type against a already existing key.
 		   This means that the super type already exists exactly (% free names)
 			in the super type table, thus we do not have to do anything!
 		-}
-		let super'	= substitute oldBind super
+		let oldBind	=
+		let super'	= substitute binding super
 		if not $ L.null unifiable then return False	-- nothing changed
-		else do	let fstt'	= M.insert super' (reqs, oldBind) fstt
+		else do	let fstt'	= M.insert super' (reqs, oldBind, Just via) fstt
 			setSTTFor tid fstt'
 			return True
+
+-- Searches a matching tid in the fstt
+_oldBinding	:: FullSuperTypeTable -> TypeID -> Maybe Binding
+_oldBinding fstt tid
+	=
 
 
 -- Marks Tid as changed
@@ -143,9 +158,23 @@ notifychanged tid
 		modify (\ctx -> ctx {todo = td})
 
 
+notifyIfChanged	:: TypeID -> TypeID -> St ()
+notifyIfChanged tidToNotify tid
+	= do	graph	<- get' notify
+		let graph'	= insert
+
 
 setSTTFor	:: TypeID -> FullSuperTypeTable -> St ()
 setSTTFor tid stt'
 	= do	ctx	<- get
 		let ctx'	= ctx {stt = M.insert tid stt' $ stt ctx}
 		put ctx'
+
+
+
+
+buildSpareSuperTypeTable	:: Map RType a -> Map TypeID [RType]
+buildSpareSuperTypeTable dict
+	= dict & keys |> (\a -> (a,a)) ||>> getBaseTID
+		|> swap |> unpackMaybeTuple & catMaybes	-- removing failed lookups
+		& merge & M.fromList

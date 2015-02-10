@@ -81,8 +81,10 @@ Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
 The binding maps free type variables from the *supertypes* to *subtype*
 
+The last type is the "via" type, the supertype of T which caused the current supertype to be added
+
 -}
-type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Binding)
+type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Binding, Maybe RType)
 {-
 Complement of the full super type table.
 E.g.

@@ -16,14 +16,15 @@ fstt2md	:: TypeID -> FullSuperTypeTable -> MarkDown
 fstt2md (fqn, nm) fstt
 	= title 3 ("Supertypes of "++nm) ++
 		if M.null fstt then parag "No supertypes"
-		   else	table ["Is type","#Frees","Requirements","Binding"] (fmap rows $ toList fstt)
+		   else	table ["Is type","#Frees","Requirements","Binding","Via"] (fmap rows $ toList fstt)
 
 
-rows	:: (RType, ([(Name,Set RType)], Binding)) -> [MarkDown]
-rows (isA, (ifReq, bnd))
+rows	:: (RType, ([(Name,Set RType)], Binding, Maybe RType)) -> [MarkDown]
+rows (isA, (ifReq, bnd, via))
 	= [st True isA, show $ length ifReq,
 		unwords (ifReq |> showReqs),
-		show bnd ]
+		show bnd,
+		fromMaybe (ital "Native") $ (via |> st True) ]
 
 showReqs	:: (Name, Set RType) -> MarkDown
 showReqs (nm, reqs)

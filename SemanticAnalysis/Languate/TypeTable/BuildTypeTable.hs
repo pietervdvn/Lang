@@ -68,11 +68,3 @@ buildTypeTable w
 			let spareSupers	= allSupers |> buildSpareSuperTypeTable
 			validateReqTable freeNames klt typeReqs
 			return $ TypeTable tlts klt typeReqs supers allSupers spareSupers docstrings freeNames
-
-
-
-buildSpareSuperTypeTable	:: Map RType a -> Map TypeID [RType]
-buildSpareSuperTypeTable dict
-	= dict & keys |> (\a -> (a,a)) ||>> getBaseTID
-		|> swap |> unpackMaybeTuple & catMaybes	-- removing failed lookups
-		& merge & M.fromList
