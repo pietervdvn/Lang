@@ -25,13 +25,13 @@ cat List (y:Monoid) in Collection y
 	tail	: [a] -> [(b:a)]
 	empty	: Maybe ()
 
---instance List a is Monoid
+instance List a is Monoid
 
---instance List a is Mappable a
+instance List a is Mappable a
 
---instance List (a:(k,v)) is Dict k v
---instance List (a:(k,v)) is Dict k [v]
--- instance List (x:Eq)	is Set x
+instance List (a:(k,v)) is Dict k v
+instance List (a:(k,v)) is Dict k [v]
+instance List (x:Eq)	is Set x
 
 
 cat MyList (x:Eq) in List x
