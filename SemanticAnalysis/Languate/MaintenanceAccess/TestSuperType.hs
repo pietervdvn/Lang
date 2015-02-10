@@ -87,10 +87,6 @@ bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
 
 
 
-tpabb t0 t1	= let 	t0'	= pt t0
-			t1'	= pt t1	in
-			runstateT (bapp t0' t1') $ Context empty tt noBinding
-
 
 test t0 t1 reqs = bind tt reqs t0 t1
 

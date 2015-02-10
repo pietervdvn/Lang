@@ -139,6 +139,10 @@ asRType	:: FQN -> Type -> RType
 asRType fqn (Normal [] nm)
 	= RNormal fqn nm
 
+asRType'	:: (FQN, Name) -> RType
+asRType' (fqn, nm)
+		= RNormal fqn nm
+
 traverseRT	:: (RType -> RType) -> RType -> RType
 traverseRT f (RApplied bt t)
 		= RApplied (traverseRT f bt) $ traverseRT f t
@@ -160,6 +164,13 @@ getBaseTID (RNormal fqn nm)
 getBaseTID (RApplied bt _)
 		= getBaseTID bt
 getBaseTID _	= Nothing
+
+
+freesInRT	:: RType -> [Name]
+freesInRT	= foldRT frees concat
+			where 	frees	:: RType -> [Name]
+				frees (RFree a)	= [a]
+				frees _		= []
 
 
 

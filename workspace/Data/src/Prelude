@@ -6,7 +6,9 @@ Each program imports these by default
 
 public import Any
 
-public import Data.Bool
+public import Category.Mappable
+
+---public import Data.Bool
 
 public import ControlFlow
 
@@ -32,3 +34,4 @@ public import Graph.Graph
 public import Num.Nat
 
 public import Crypto.PubPrivAlgo
+---

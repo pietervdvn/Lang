@@ -24,6 +24,7 @@ import Languate.TAST
 import Languate.FQN
 import Languate.CheckUtils
 
+
 import Control.Arrow
 import Normalizable
 {-
@@ -64,8 +65,8 @@ A "FullSuperTypeTable" is saved for each typeId. It represents "This type is A i
 E.g. for list:
 Mappable 	--> []	-- thus if not applied to any free
 Collection 	--> []
-Monoid 		--> [{a}]-- thus: if applied to a single free (with no special requirements)
-Dict k v	--> [{"(k,v)"}]	-- It is a dict if applied to a tuple
+Monoid 		--> [a,{}]-- thus: if applied to a single free (with no special requirements)
+Dict k v	--> [a,{"(k,v)"}]	-- It is a dict if applied to a tuple
 
 -- This table gets built recursively via the already known supertypes:
 -- added via collection:
@@ -78,8 +79,10 @@ E.g. For "Weighted" (graph)
 We know that the first free should be a "Graph", thus:
 Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
+The binding maps free type variables from the *supertypes* to *subtype*
+
 -}
-type FullSuperTypeTable	= Map RType [(Name,Set RType)]
+type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Binding)
 {-
 Complement of the full super type table.
 E.g.
@@ -119,6 +122,8 @@ data TypeTable	= TypeTable	{ typeLookups	:: Map FQN TypeLookupTable
 	deriving (Show, Ord, Eq)
 
 
+data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to allow a custom show function
+	deriving (Eq, Ord)
 
 
 
@@ -212,3 +217,23 @@ spth (nms, nm)	= intercalate "." $ nms ++ [nm]
 
 showTypeID (fqn,nm)
 		= show fqn ++"."++show nm
+
+
+
+-- TODO check overlapping bindings
+unionBindings	:: [Binding] -> Either String Binding
+unionBindings bnds
+	= bnds |> (\(Binding dict) -> dict) & M.unions & Binding & Right
+
+instance Show Binding where
+	show	= sb
+
+sb (Binding b)
+	= sd b
+
+
+sd	:: (Show k, Show v) => Map k v -> String
+sd  d
+	= "{"++unwords (fmap (\(k, v) -> show k ++" --> "++show v) $ M.toList d)++"}"
+
+noBinding	= Binding M.empty
