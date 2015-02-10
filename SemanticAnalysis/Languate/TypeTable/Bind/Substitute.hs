@@ -1,10 +1,10 @@
-module Languate.TypeTable.Bind.Substitute (substitute, substitute') where
+module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding) where
 
 {--
 This module implements substitute and friends
 --}
 import StdDef
-import Languate.TypeTable.Bind.Binding
+import Languate.TypeTable
 import Data.Map hiding (filter)
 import qualified Data.Map as M
 

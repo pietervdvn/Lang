@@ -22,12 +22,90 @@ import StateT
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Bind.Binding
 
 import Control.Monad hiding (fail)
 import Control.Monad.Trans
 
 import Debug.Trace
+
+{-
+
+Binds t0 in t1. Gives a "free of super types --> Value in subtype" binding
+
+e.g.
+
+bind "List Nat" "List a"	-> {a --> Nat}
+
+
+-}
+bind	:: a -> b -> RType -> RType -> Either String Binding
+bind tt reqs t0 t1
+	= unificate t0 t1
+
+simpleBind	:: RType -> RType -> Either String Binding
+simpleBind	= bind M.empty M.empty
+
+
+bind'	:: RType -> RType -> StMsg ()
+bind' t0 (RFree a)
+	= addBinding (a,t0)
+bind' t0 t1
+	= fail $ "Could not bind "++st True t0++" against "++st True t1
+
+
+
+{- Tries to make two types the same, by filling in the frees in any of them.
+
+Unificate is associative.
+
+Type requirements and supertypes are **not** taken in account here.
+
+-}
+unificate	:: RType -> RType -> Either String Binding
+unificate t0 t1
+	| t0 == t1	= return noBinding
+	| otherwise	= let 	ctx	= Context M.empty (error "No tt needed for unify!") noBinding
+				res	= runstateT (unificate' t0 t1) ctx in
+				res |> snd |> binding
+
+unificate'	:: RType -> RType -> StMsg ()
+unificate' (RFree a) (RFree b)
+	= do	addBinding (a, RFree b)
+		addBinding (b, RFree a)
+unificate' (RFree a) t1
+	= addBinding (a,t1)
+unificate' t0 (RFree b)
+	= addBinding (b,t0)
+unificate' (RCurry t0 t1) (RCurry t0' t1')
+	= do	unificate' t0 t0'
+		unificate' t1 t1'
+unificate' (RApplied bt at) (RApplied bt' at')
+	= do	unificate' bt bt'
+		unificate' at at'
+unificate' t0 t1
+	= assert (t0 == t1) $ "Could not unify "++ st True t0 ++" and "++ st True t1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free. All bound frees should be included.
+				, typeT 	:: TypeTable
+				, binding 	:: Binding
+				}
+
+-- the monad we'll work with
+type StMsg a	= StateT Context (Either String) a
 
 
 
@@ -62,6 +140,7 @@ addBinding (n,t)
 		let (Binding b)	= binding ctx
 		-- check wether or not a conflicting binding exists
 		let previous	= M.lookup n b
+		when (isJust previous) $ unificate' (RFree n) (fromJust previous)
 		assert (isNothing previous || t == fromJust previous) $
 			"Conflicting bindings for '"++n++"' are found."++
 			" It could be both bound to "++show (fromJust previous)++" and "++show t
