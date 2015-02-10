@@ -34,6 +34,8 @@ import Control.Arrow
 import Data.Tuple
 import Data.Maybe
 
+import Debug.Trace
+
 type Reqs	= [(Name, [RType])]
 
 {-
@@ -110,7 +112,7 @@ superTypeFor (tlt,klt) path nm frees supers reqs
 			let unsplit4 ((a, b, c), d)	= (a, b, c, d)
 
 			let sttfs	= unmerge [((tId, frees, reqs'), supers')]
-			let normed	= sttfs |> normalizeSTF |> normalizeLength klt
+			let normed	= sttfs |> normalize klt
 			return $ (merge normed |> unsplit4)
 
 
@@ -121,12 +123,15 @@ normalize klt entry
 
 --  Transforms "List a is Collection a" into "List a0 is Collection a0"
 normalizeSTF	:: ((TypeID, [Name], Reqs), RType) -> ((TypeID, [Name], Reqs), RType)
-normalizeSTF entry@((_, frees, _), _)
+normalizeSTF entry@((tid, frees, reqs), super)
 	= let	nats	= take (length frees) $ [0..]
 		names	= nats |> show |> ('a':)
-		binding	= Binding $ fromList $ zip frees (names |> RFree)
-		((tid, _, reqs), super)	= subEntry binding entry	in
-		((tid, names, reqs), super)
+		binding	= fromList $ zip frees names
+		binding'	= Binding (binding |> RFree)
+		reqs'	= reqs	|> first (\n -> findWithDefault n n binding)
+				|> (||>> substitute binding')	in
+		((tid, names, reqs'), substitute binding' super)
+
 
 
 -- Adds dummy vars to the frees, so that it's type is fully applied
@@ -147,8 +152,6 @@ normalizeLength klt ((tid, frees, reqs), super)
 		((tid, frees ++ newFrees, reqs'), super')
 
 
-subEntry binding ((tid, frees, reqs), super)
-	= ((tid, frees, reqs ||>> (|> substitute binding)), substitute binding super)
 
 
 

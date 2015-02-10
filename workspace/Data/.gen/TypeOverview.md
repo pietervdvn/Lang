@@ -7,8 +7,8 @@ Type | Declared in | Kind | Docstring
 **Associative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
 **Commutative** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Functions for which the arguments can be swapped.
 **Curry** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Arbitrary functions from ````a```` to ````b````.
-**Mappable** ````b:Eq````  | Category.Mappable | ````(* ~> *)````  | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
-**X** ````a````  | Category.Mappable | ````(* ~> *)````  | TODO remove
+**Mappable** ````b````  | Category.Mappable | ````(* ~> *)````  | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
+**X** ````a:Eq````  | Category.Mappable | ````(* ~> *)````  | TODO remove
 **Y** ````b````  | Category.Mappable | ````(* ~> *)````  | TODO remove
 **Z**  | Category.Mappable | ````*````  | TODO remove
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
@@ -23,7 +23,7 @@ Associative````a0````  | (a0 -> (a0 -> a0))
 Commutative````a0````  ````a1````  | (a0 -> (a0 -> a1))
 Curry````a0````  ````a1````  | (a0 -> a1)
 Mappable````a0````  | Any
-X````a0````  | Any
+X````a0:Eq````  | Any
 Y````a0````  | Any, (X a0)
 Z | Any, (Y Bool)
 Bool | Any
@@ -70,7 +70,7 @@ Any | 1 | ````a0````  | {}
 
 Is type | #Frees | Requirements | Binding
 ------- | ------ | ------------ | -------
-Any | 1 | ````a0````  | {}
+Any | 1 | ````a0```` : {Eq} | {}
 
 ### Supertypes of Y
 

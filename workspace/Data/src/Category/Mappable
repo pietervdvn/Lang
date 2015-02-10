@@ -9,7 +9,7 @@ import Category.Eq
 ---
 A _container_ on which ''map'' is defined. Also known as ''Functor'' in most other functional programming languages.
 ---
-cat Mappable (b:Eq)
+cat Mappable b
 	~ identity: map id	= id
 	-- map takes a function and applies that function op the value(s) inside the functor
 	map	: (a -> b) -> functor a -> functor b
@@ -17,7 +17,7 @@ cat Mappable (b:Eq)
 
 -- TODO remove
 
-cat X a
+cat X (a:Eq)
 	> True
 
 cat Y b
