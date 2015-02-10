@@ -47,7 +47,7 @@ buildPrecTable' world
 			let faultyLT	= searchIllegalLT ltRels equivUnion
 			assert (null faultyLT) $ errorMsg faultyLT
 			-- graph representing ("*" should be done before "-","+")
-			let lowerThen	= addVertexes (withRepr equivUnion ltRels) DG.empty
+			let lowerThen	= addLinks (withRepr equivUnion ltRels) DG.empty
 			let totalOrder'		= buildOrdering lowerThen
 			totalOrder <- case totalOrder' of
 					Left loops	-> halt $ "Could not build the precedence table, as there is a loop in the precedences: "++ unwords (loops |> show)

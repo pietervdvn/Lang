@@ -53,7 +53,6 @@ bind' t0 t1
 	= fail $ "Could not bind "++st True t0++" against "++st True t1
 
 
-
 {- Tries to make two types the same, by filling in the frees in any of them.
 
 Unificate is associative.

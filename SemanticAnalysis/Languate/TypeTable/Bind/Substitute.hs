@@ -11,6 +11,12 @@ import qualified Data.Map as M
 import Languate.TAST
 
 
+-- execute substitution of b1 everywhere in b0
+concatBinds	:: Binding -> Binding -> Binding
+concatBinds (Binding dict) b1
+	= dict |> substitute b1 & Binding
+
+
 {- Substitutes all frees which name is already bound in a different context.
 The list 'nms' represents thos frees which are already bound
 e.g.

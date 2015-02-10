@@ -32,66 +32,66 @@ Bool | Any
 
 ### Supertypes of Any
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 0 |  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 0 |  | {} | _Native_ 
 
 ### Supertypes of Eq
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 0 |  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 0 |  | {} | _Native_ 
 
 ### Supertypes of Associative
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-(a0 -> (a0 -> a0)) | 1 | ````a0````  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+(a0 -> (a0 -> a0)) | 1 | ````a0````  | {} | _Native_ 
 
 ### Supertypes of Commutative
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-(a0 -> (a0 -> a1)) | 2 | ````a0````  ````a1````  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+(a0 -> (a0 -> a1)) | 2 | ````a0````  ````a1````  | {} | _Native_ 
 
 ### Supertypes of Curry
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-(a0 -> a1) | 2 | ````a0````  ````a1````  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+(a0 -> a1) | 2 | ````a0````  ````a1````  | {} | _Native_ 
 
 ### Supertypes of Mappable
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 1 | ````a0````  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 1 | ````a0````  | {} | _Native_ 
 
 ### Supertypes of X
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 1 | ````a0```` : {Eq} | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 1 | ````a0```` : {Eq} | {} | _Native_ 
 
 ### Supertypes of Y
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 1 | ````a0````  | {}
-(X a0) | 1 | ````a0````  | {"a0" --> a0}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 1 | ````a0````  | {} | _Native_ 
+(X a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
 
 ### Supertypes of Z
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 0 |  | {}
-(X a0) | 1 | ````a0````  | {"a0" --> a0}
-(Y Bool) | 0 |  | {"a0" --> pietervdvn:Data:Data.Bool.Bool}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 0 |  | {} | _Native_ 
+(X a0) | 1 | ````a0````  | {"a0" --> a0} | Y
+(Y Bool) | 0 |  | {"a0" --> pietervdvn:Data:Data.Bool.Bool} | _Native_ 
 
 ### Supertypes of Bool
 
-Is type | #Frees | Requirements | Binding
-------- | ------ | ------------ | -------
-Any | 0 |  | {}
+Is type | #Frees | Requirements | Binding | Via
+------- | ------ | ------------ | ------- | ---
+Any | 0 |  | {} | _Native_ 
 
 
 

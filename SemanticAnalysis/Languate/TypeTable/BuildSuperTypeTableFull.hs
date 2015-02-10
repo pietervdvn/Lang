@@ -81,7 +81,7 @@ expand all
 					& M.filter (not . L.null)
 					||>> getBaseTID
 					|> catMaybes |> S.fromList
-		initialSstt	= initialTodo |> buildSpareSuperTypeTable
+		initialSstt	= all	|> buildSpareSuperTypeTable
 		-- updated node is empty at start, as it gets built while going
 		ctx	= Ctx M.empty initialTodo all initialSstt in
 		stt $ snd $ runstate _e ctx
@@ -90,7 +90,7 @@ expand all
 data Context	= Ctx	{ notify	:: DG TypeID	-- if a node gets updated, the nodes connected to it should get updated too
 			, todo		:: DG TypeID	-- These should get checked, because connected nodes were updated
 			, stt		:: Map TypeID FullSuperTypeTable
-			, sstt		:: Map TypeID SpareSuperTypeTable
+			, sparestt		:: Map TypeID SpareSuperTypeTable
 			}
 type St	= State Context
 
@@ -129,39 +129,43 @@ _addSuper base via (super, (reqs, binding, _))
 -- Returns a new FSTT if fstt has been changed
 _addSuper'	:: TypeID -> RType -> RType -> [(Name, Set RType)] -> Binding
 			-> St Bool
-_addSuper' tid via super reqs binding
+_addSuper' tid via super reqs newBind
 	= do	fstt	<- get' stt |> findWithDefault M.empty tid
+		sstt	<- get' sparestt |> findWithDefault M.empty tid
 		let unifiable	= keys fstt |> unificate super & rights
 		{- Assume: we can unify the super type against a already existing key.
 		   This means that the super type already exists exactly (% free names)
 			in the super type table, thus we do not have to do anything!
 		-}
-		let oldBind	=
-		let super'	= substitute binding super
+		let oldBind'	= _oldBinding fstt sstt super
+		let oldBind	= fromMaybe noBinding oldBind'
+		let super'	= substitute newBind super
 		if not $ L.null unifiable then return False	-- nothing changed
-		else do	let fstt'	= M.insert super' (reqs, oldBind, Just via) fstt
+		else do	let fstt'	= M.insert super' (reqs, newBind, Just via) fstt
 			setSTTFor tid fstt'
 			return True
 
--- Searches a matching tid in the fstt
-_oldBinding	:: FullSuperTypeTable -> TypeID -> Maybe Binding
-_oldBinding fstt tid
-	=
+-- Searches the binding which should be applied on super, the "old binding"
+_oldBinding	:: FullSuperTypeTable -> SpareSuperTypeTable -> RType -> Maybe Binding
+_oldBinding fstt sstt super
+	= do	tid	<- getBaseTID super
+		poss	<- M.lookup tid sstt
+		Nothing
 
 
 -- Marks Tid as changed
 notifychanged	:: TypeID -> St ()
 notifychanged tid
 	= do	toChange	<- get' notify |> nodesFrom tid |> S.toList
-		let newVertexes	= [(tid, n) | n <- toChange]
-		td	<- get' todo |> addVertexes newVertexes
+		let newLinks	= [(tid, n) | n <- toChange]
+		td	<- get' todo |> addLinks newLinks
 		modify (\ctx -> ctx {todo = td})
 
 
 notifyIfChanged	:: TypeID -> TypeID -> St ()
 notifyIfChanged tidToNotify tid
-	= do	graph	<- get' notify
-		let graph'	= insert
+	= do	graph	<- get' notify |> addLink (tid, tidToNotify)
+		modify (\ctx -> ctx {notify = graph})
 
 
 setSTTFor	:: TypeID -> FullSuperTypeTable -> St ()
@@ -173,7 +177,7 @@ setSTTFor tid stt'
 
 
 
-buildSpareSuperTypeTable	:: Map RType a -> Map TypeID [RType]
+buildSpareSuperTypeTable	:: FullSuperTypeTable -> SpareSuperTypeTable
 buildSpareSuperTypeTable dict
 	= dict & keys |> (\a -> (a,a)) ||>> getBaseTID
 		|> swap |> unpackMaybeTuple & catMaybes	-- removing failed lookups

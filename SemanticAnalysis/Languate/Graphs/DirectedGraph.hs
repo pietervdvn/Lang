@@ -1,4 +1,4 @@
-module Languate.Graphs.DirectedGraph (DG, invert, addVertex, nodesFrom, leafs, dropNodes, isEmpty, empty, addVertexes, addNode, addNodes, makeComplete) where
+module Languate.Graphs.DirectedGraph (DG, invert, addLink, nodesFrom, leafs, dropNodes, isEmpty, empty, addLinks, addNode, addNodes, makeComplete) where
 
 import StdDef ((||>>),(|>))
 
@@ -21,15 +21,15 @@ invert	:: (Ord n, Eq n) => DG n -> DG n
 invert 	= fmap S.fromList . M.fromList . merge . fmap swap . unmerge . M.toList . fmap S.toList
 
 
-addVertex	:: (Ord n, Eq n) => (n,n) -> DG n -> DG n
-addVertex (from, to) graph
-	= let newVertexes	= S.insert to $ nodesFrom from graph in
-		M.insert from newVertexes graph
+addLink	:: (Ord n, Eq n) => (n,n) -> DG n -> DG n
+addLink (from, to) graph
+	= let newLinks	= S.insert to $ nodesFrom from graph in
+		M.insert from newLinks graph
 
 
-addVertexes	:: (Ord n, Eq n) => [(n,n)] -> DG n -> DG n
-addVertexes vertexes graph
-	= L.foldr addVertex graph vertexes
+addLinks	:: (Ord n, Eq n) => [(n,n)] -> DG n -> DG n
+addLinks links graph
+	= L.foldr addLink graph links
 
 addNode	:: (Ord n, Eq n) => n -> DG n -> DG n
 addNode n
@@ -50,7 +50,7 @@ nodesFrom	:: (Ord n, Eq n) => n -> DG n -> Set n
 nodesFrom	= findWithDefault S.empty
 
 
--- Gives all the leafs of the graph (nodes with no outgoing vertexes)
+-- Gives all the leafs of the graph (nodes with no outgoing links)
 leafs	:: (Ord n, Eq n) => DG n -> Set n
 leafs graph
 	= S.fromList . fmap fst . L.filter (S.null . snd) $ M.toList graph
