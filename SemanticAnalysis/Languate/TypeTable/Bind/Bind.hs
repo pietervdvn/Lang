@@ -55,11 +55,14 @@ b t0 (RFree a)
 		conds	<- requirementsOn a
 		mapM_ (b t0) conds
 b (RFree a) t1
-	= do	supers	<- requirementsOn a
+	= do	addBinding (a,t1)
+		conds	<- requirementsOn a
+		mapM_ (flip b t1) conds
+{- do	supers	<- requirementsOn a
 		-- Try out all super types, if one matches, we're fine
 		matches	<- mapM (\t -> catch False (b t t1 >> return True)) supers
 		assert (or matches) $ "Could not bind the free '"++a++"' against "++show t1++" as it does not have the right super types\n"
-
+-}
 b (RCurry t0 t1) (RCurry t0' t1')
 	= do	b t0 t0'
 		b t1 t1'
@@ -75,15 +78,6 @@ b t0 t1
 
 
 
-{-
-Tries to make the same type out of both.
-
--}
-unificate	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
-unificate tt reqs t0 t1
-	= case bind tt reqs t0 t1 of
-		Left _	-> bind tt reqs t0 t1
-		Right bnd	-> Right bnd
 {-
 
 Bind applied is quite special.
@@ -163,28 +157,41 @@ bapp "[Nat]" "{a0}"	-- typeReq: a0:Eq
 tid0	= List
 tid1	= Set
 possSupers	= [Set a]
-bind t1="Set a0" possSuper="Set a"	-- we "forgot" about the type req a:Eq --> no prob, checking for this happens elsewhere
+bind t1="Set a0" possSuper="Set a"
 	-> [{a --> a0}]
 b at="Nat" "a"
 	-> [{a --> "Nat"}]
 merge bindings:
 	-> [{a0 --> Nat}]
+
+
+-- Binding RSA against PubPrivAlgo a0 b0
+
+bapp "RSA" "PubPrivAlgo a b"
+tid0	= RSA
+tid1	= PubPrivAlgo
+possSupers	= [PubPrivAlgo RSAPubKey RSAPrivKey]
+bind t1="PubPrivAlgo a0 b0" possSuper="PubPrivAlgo RSAPubKey RSAPrivKey"
+	-> No binding
+b at=[]
+merge bindings
+	= {}
 -}
 
 
 -- Bind applied. Special code which tries to find a supertype of a applied
 bapp	:: RType -> RType -> StMsg ()
 bapp t0 t1
-	= do	tid0		<- getBaseTID t0 ? ("No base type for "++show t0)
-		tid1		<- getBaseTID t1 ? ("No base type for "++show t1)
-		tt		<- get' typeT
+	= do	tt		<- get' typeT
+		tid0		<- getBaseTID t0 ? ("No baseTID for "++st True t0)
 		fstt		<- fullstt tid0
-		possSupers	<- sstt tid0 |> findWithDefault [] tid1
+		possSupers	<- searchPossSupers t0 t1
+		assert (not $ L.null possSupers) $ "Could not bind "++st True t0++" against "++st True t1++", no suitable super types found."
 		let reqs	= possSupers |> (\t -> fstt & findWithDefault [] t)
 					|> M.fromList ||>> S.toList
 		-- TODO possSupers: frees should be renamed!
 		let reqs'	= zip possSupers reqs
-		let interbinds	= reqs' |> (\(supert, reqs) -> unificate tt reqs t1 supert)
+		let interbinds	= reqs' |> (\(supert, reqs) -> bind tt reqs t1 supert)
 		fstt		<- fullstt tid0
 		let conditions	= possSupers |> (\t -> findWithDefault [] t fstt)
 		let apps	= appliedTypes t0
@@ -202,13 +209,30 @@ bapp t0 t1
 		assert (not $ L.null $ rights merged) $ "Could not bind "++st True t0++" in "++st True t1 ++ " via the super type table."++
 			"\n\nPossSupers:"++show possSupers++
 			"\nt1="++show t1++
-			"\n\ninterbinds:"++show interbinds++
-			"\nintrabinds:"++show intraBinds++
+			"\n\nreqs: "++show reqs++
+			"\ninterbinds:"++show interbinds++
+			"\n\nintrabinds:"++show intraBinds++
 			"\nmerged:"++show merged
 		assert (1 == length (rights merged)) $ "Warning: multiple bindings possible for "++st True t0++" and "++st True t1++"\n"++show merged
 		let (Binding resultBind)	= head $ rights merged
 		mapM_ addBinding $ M.toList resultBind
 
+
+
+
+searchPossSupers	:: RType -> RType -> StMsg [RType]
+searchPossSupers t0 t1
+	= do	tid0		<- getBaseTID t0 ? ("No base type for "++show t0)
+		fstt		<- fullstt tid0
+		tt	<- get' typeT
+		reqs	<- get' frees
+		case getBaseTID t1 of
+			Just tid1	-> sstt tid0 |> findWithDefault [] tid1
+			Nothing -> do	let kys		= keys fstt
+					let bound	= kys |> bind tt reqs t1
+					let bindable	= zip kys bound
+								|> (\(t, eb) -> eb >> return t) & rights
+					return bindable
 
 
 bindAppTypes	:: TypeTable -> RType -> (Name,Set RType) -> Either String Binding

@@ -1,0 +1,28 @@
+PubPrivAlgo
+-----------
+Generic algorithm implementation
+-----------
+
+-- The type representing the _private_ key of a public-key encryption scheme
+cat PrivateKey
+	> True
+
+-- The type representing the _public_ key of a public-key encryption scheme
+cat PublicKey
+	> True
+
+-- The type representing a public-key encryption scheme, with fixed keys
+cat PubPrivAlgo (a:PrivateKey) (b:PublicKey)
+	> True
+
+
+cat RSA is PubPrivAlgo RSAPrivKey RSAPubKey
+	> True
+
+
+instance RSAPrivKey is PrivateKey
+instance RSAPubKey is PublicKey
+
+
+data RSAPrivKey	= A
+data RSAPubKey	= B

@@ -94,10 +94,14 @@ tpabb t0 t1	= let 	t0'	= pt t0
 
 test t0 t1 reqs = bind tt reqs t0 t1
 
-t'	= [10..13] |> (\i -> (i,i)) ||>> _t |> (\(i,r) -> r >>= (\v -> return (i,v)))
+t'	= [0..13] |> (\i -> (i,i)) ||>> _t |> (\(i,r) -> r >>= (\v -> return (i,v)))
 --  show i ++" "++ show r ++ "\n") & unlines & putStrLn
 
-t	= mapM_ putStrLn (t' & lefts |> (++)"\n\n")
+t_	= do	mapM_ putStrLn (t' & lefts |> (++)"\n\n")
+		putStrLn $ "Failed: " ++ show (length $ lefts t')
+
+t	= let (Left msg)	= _t 13 in
+		putStrLn msg
 
 -- basic test
 _t 0	= bnd "Nat" "(a:Eq)"
