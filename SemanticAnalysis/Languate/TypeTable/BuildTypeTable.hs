@@ -63,7 +63,7 @@ buildTypeTable w
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
 			let knownTypes	= keys klt
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
-			supers		<- buildSuperTypeTable w tlts
+			supers		<- buildSuperTypeTable w tlts klt
 			let allSupers	= expand $ fmap stt2fstt supers
 			let spareSupers	= allSupers |> buildSpareSuperTypeTable
 			validateReqTable freeNames klt typeReqs

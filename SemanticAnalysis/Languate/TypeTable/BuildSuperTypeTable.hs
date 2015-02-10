@@ -23,11 +23,13 @@ import Languate.TypeTable
 import Languate.TAST
 import Languate.AST
 import Languate.FQN
+import Languate.TypeTable.Bind.Substitute
 
 import Data.Map hiding (map, null)
 import Prelude hiding (lookup)
 import Data.Set (Set)
 import qualified Data.Set as S
+import Data.List (nub)
 import Control.Arrow
 import Data.Tuple
 import Data.Maybe
@@ -39,25 +41,28 @@ type SuperTypeTableFor	= Map [Set RType] (Set RType)
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 -}
 
-buildSuperTypeTable	:: World -> Map FQN TypeLookupTable -> Exc SuperTypeTable
-buildSuperTypeTable w tlts
-		= do	all	<- mapM (try' [] . superTypesIn' tlts w) $ keys $ modules w
-			return $ fixTable $ _buildTable $ concat all
+buildSuperTypeTable	:: World -> Map FQN TypeLookupTable -> KindLookupTable
+				-> Exc SuperTypeTable
+buildSuperTypeTable w tlts klt
+		= do	all	<- mapM (try' [] . superTypesIn' tlts klt w) $
+					keys $ modules w
+			return $ _buildTable $ concat all
 
 
-superTypesIn'	:: Map FQN TypeLookupTable -> World -> FQN ->
+superTypesIn'	:: Map FQN TypeLookupTable ->  KindLookupTable -> World -> FQN ->
 			Exc [(TypeID, [Name], Reqs, [RType] )]
-superTypesIn' tlts w fqn
+superTypesIn' tlts klt w fqn
 	= do	modul	<- lookup fqn (modules w) ? ("Bug: no module found for "++show fqn)
 		tlt	<- lookup fqn tlts ? ("Bug: no tlt found for "++show fqn)
 		let inOne stm coor	= onLocation (fqn, coor) $ try' [] $
-						superTypeIn tlt stm
+						superTypeIn (tlt,klt) stm
 		mapM (uncurry inOne) (statements' modul) |> concat
 
 
 
 -- Returns: (type id which is instance, applied free names, requirements on the frees, supertypes)
-superTypeIn	:: TypeLookupTable ->  Statement -> Exc [(TypeID, [Name], Reqs, [RType] )]
+superTypeIn	:: (TypeLookupTable, KindLookupTable) ->  Statement ->
+			Exc [(TypeID, [Name], Reqs, [RType] )]
 superTypeIn tlt (SubDefStm (SubDef nm _ frees supers reqs))
 		= superTypeFor tlt [] nm frees supers reqs
 superTypeIn tlt (InstanceStm (Instance (path,nm) frees super reqs))
@@ -66,10 +71,12 @@ superTypeIn tlt (SynDefStm (SynDef nm frees super reqs))
 		= superTypeFor tlt [] nm frees [super] reqs
 superTypeIn tlt (ClassDefStm cd)
 		= superTypeFor tlt [] (name cd) (frees cd) (subclassFrom cd) (classReqs cd)
-superTypeIn tlt (ADTDefStm (ADTDef nm frees reqs _))
+superTypeIn (tlt, klt) (ADTDefStm (ADTDef nm frees reqs _))
 		= do	fqn	<- findTypeOrigin tlt ([], nm)
 			reqs'	<- resolveReqs tlt reqs
-			return [((fqn, nm), frees, reqs', [anyType])]
+			let ((tid, frees', reqs''), t)	= normalize klt
+				(((fqn, nm), frees, reqs'), anyType)
+			return [(tid, frees', reqs'', [t])]
 superTypeIn _ _	= return []
 
 
@@ -89,34 +96,60 @@ Returns:
 It gets passed through normalizeSTF, which transforms "List a is Collection a" into "List is Collection"
 
 -}
-superTypeFor	:: TypeLookupTable ->
-			[Name] -> Name -> [Name] -> [Type] -> [TypeRequirement]
-			-> Exc [(TypeID, [Name], Reqs, [RType] )]
-superTypeFor tlt path nm frees supers reqs
+superTypeFor	:: (TypeLookupTable, KindLookupTable) ->
+			[Name] -> Name ->
+			[Name] -> [Type] -> [TypeRequirement]
+			-> Exc [(TypeID, [Name], Reqs, [RType])]
+superTypeFor (tlt,klt) path nm frees supers reqs
 		= do	fqn	<- findTypeOrigin tlt (path,nm)
+			-- no directly known supertypes: add any as supertype
 			let tId	= (fqn, nm)
-			supers'	<- resolveTypes tlt supers
+			_supers'	<- resolveTypes tlt supers
+			let supers'	= if null _supers' then [anyType] else _supers'
 			reqs'	<- resolveReqs  tlt reqs
 			let unsplit4 ((a, b, c), d)	= (a, b, c, d)
 
 			let sttfs	= unmerge [((tId, frees, reqs'), supers')]
-			let normed	= merge (sttfs |> normalizeSTF) |> unsplit4
-			return $ if null normed then [(tId, frees, reqs', [])]
-					else normed
+			let normed	= sttfs |> normalizeSTF |> normalizeLength klt
+			return $ (merge normed |> unsplit4)
 
 
---  Transforms "List a is Collection a" into "List is Collection"
+normalize	:: KindLookupTable -> ((TypeID, [Name], Reqs), RType) ->
+			((TypeID, [Name], Reqs), RType)
+normalize klt entry
+	= entry & normalizeSTF & normalizeLength klt
+
+--  Transforms "List a is Collection a" into "List a0 is Collection a0"
 normalizeSTF	:: ((TypeID, [Name], Reqs), RType) -> ((TypeID, [Name], Reqs), RType)
-normalizeSTF s@((tid, [], reqs), super)
-		= s
+normalizeSTF entry@((_, frees, _), _)
+	= let	nats	= take (length frees) $ [0..]
+		names	= nats |> show |> ('a':)
+		binding	= Binding $ fromList $ zip frees (names |> RFree)
+		((tid, _, reqs), super)	= subEntry binding entry	in
+		((tid, names, reqs), super)
 
-normalizeSTF s@((tid, frees, reqs), super@(RApplied bt (RFree a)))
- | last frees == a &&	-- the last free is the applied free
-   not (a `elem` (reqs |> fst))	-- no requirements on this free
-		= normalizeSTF ((tid, init frees, reqs), bt)
- | otherwise	= s
 
-normalizeSTF s	= s
+-- Adds dummy vars to the frees, so that it's type is fully applied
+normalizeLength	:: KindLookupTable -> ((TypeID, [Name], Reqs), RType) ->
+			((TypeID, [Name], Reqs), RType)
+normalizeLength klt ((tid, frees, reqs), super)
+	= let	kind		= findWithDefault Kind tid klt
+		needed		= numberOfKindArgs kind
+		newFrees	= [1 + length frees .. needed] |> show |> ('b':)
+		freesInReqs	= reqs |> snd & concat |> freesInRT & concat
+		freesInSuper	= super & freesInRT
+		usedFrees	= S.fromList $ (freesInReqs ++ freesInSuper ++ newFrees)
+		-- these are the frees that should be renamed
+		reboundFrees	= usedFrees S.\\ (S.fromList frees)
+		prebinding	= buildBinding $ S.toList reboundFrees
+		reqs'		= reqs ||>> (|> substitute prebinding)
+		super'		= substitute prebinding super	in
+		((tid, frees ++ newFrees, reqs'), super')
+
+
+subEntry binding ((tid, frees, reqs), super)
+	= ((tid, frees, reqs ||>> (|> substitute binding)), substitute binding super)
+
 
 
 resolveReqs	:: TypeLookupTable -> [(Name, Type)] -> Exc Reqs
@@ -126,21 +159,6 @@ resolveReqs tlt reqs
 			return $ merge $ zip names rtypes
 
 -- my cat's contribution to the project: frrrrrrrrrrrrrrrùD£+
-
--- Adds ''Any'' supertype where needed
-fixTable	:: SuperTypeTable -> SuperTypeTable
-fixTable	=  mapWithKey fixTableFor
-
-
-fixTableFor	:: TypeID -> SuperTypeTableFor -> SuperTypeTableFor
-fixTableFor tid sttf
-		= let	key	= longest $ keys sttf	-- the keys are the 'applied free' names. The longest chain = the defined chain, and should have at least one supertype
-			err	= error $ "Huh? No supertype for "++show tid++" "++show key++" while fixing the supertypes?"
-			known	= findWithDefault err key sttf
-			known'	= if S.null known && tid /= anyTypeID
-					then S.singleton (anyType, empty)
-					else known		in
-			insert key known' sttf
 
 
 
