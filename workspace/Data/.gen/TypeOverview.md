@@ -56,24 +56,20 @@ Monoid | Any
 Product | Any, Monoid
 Sum | Any, Monoid
 Ord | Any
-Collection````a0````  | Any, Monoid
+Collection````a0````  | Any, Monoid, (Mappable a0)
 Collection````a0:Eq````  | Eq
-Collection````b1````  | Mappable
-Dict````a0````  ````a1````  | Monoid
+Dict````a0````  ````a1````  | Monoid, (Mappable a1)
 Dict````a0:Eq````  ````a1````  | (Collection ((Tuple a0) a1))
-Dict````a0````  ````b2````  | Mappable
 List````a0````  | Monoid, (Mappable a0)
 List````a0:Monoid````  | (Collection a0)
 List````a0:Eq````  | (Set a0)
 List````a0:((Tuple k1) v1)````  | ((Dict k1) v1), ((Dict k1) (List v1))
 MyList````a0:Eq````  | (List a0)
 Maybe````a0````  | Any
-More````a0````  | Any
-More````b1````  | Collection
+More````a0````  | Any, (Collection a0)
 Set````a0:Eq````  | (Collection a0)
-Tuple````a0````  ````a1````  | Any
+Tuple````a0````  ````a1````  | Any, (Mappable a1)
 Tuple````a0:Eq````  ````a1:Eq````  | Eq
-Tuple````a0````  ````b2````  | Mappable
 Void | Any
 PrivateKey | Any
 PubPrivAlgo````a0:PrivateKey````  ````a1:PublicKey````  | Any
@@ -165,17 +161,18 @@ Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 1 | ````a0````  | {} | _Native_ 
 Eq | 1 | ````a0```` : {Eq} | {} | _Native_ 
-Mappable | 1 | ````b1````  | {} | _Native_ 
 Monoid | 1 | ````a0````  | {} | _Native_ 
+(Mappable a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
 
 ### Supertypes of Dict
 
 Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | Mappable
+Any | 0 |  | {} | Monoid
 Eq | 0 |  | {"a0" --> ((pietervdvn:Data:Collection.Tuple.Tuple a0) a1)} | (Collection ((Tuple a0) a1))
-Mappable | 2 | ````a0````  ````b2````  | {} | _Native_ 
 Monoid | 2 | ````a0````  ````a1````  | {} | _Native_ 
+(Mappable a1) | 2 | ````a0````  ````a1````  | {"a0" --> a1} | _Native_ 
+(Mappable ((Tuple a0) a1)) | 0 |  | {"a0" --> ((pietervdvn:Data:Collection.Tuple.Tuple a0) a1)} | (Collection ((Tuple a0) a1))
 (Collection ((Tuple a0) a1)) | 2 | ````a0```` : {Eq} ````a1````  | {"a0" --> ((pietervdvn:Data:Collection.Tuple.Tuple a0) a1)} | _Native_ 
 
 ### Supertypes of List
@@ -184,9 +181,12 @@ Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 0 |  | {} | Monoid
 Eq | 0 |  | {"a0" --> a0} | (Collection a0)
-Mappable | 0 |  | {"a0" --> a0} | (Collection a0)
 Monoid | 1 | ````a0````  | {} | _Native_ 
 (Mappable a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
+(Mappable v1) | 0 |  | {"a0" --> k1 "a1" --> v1} | ((Dict k1) v1)
+(Mappable (List v1)) | 0 |  | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | ((Dict k1) (List v1))
+(Mappable ((Tuple k1) v1)) | 0 |  | {"a0" --> k1 "a1" --> v1} | ((Dict k1) v1)
+(Mappable ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | ((Dict k1) (List v1))
 (Collection a0) | 1 | ````a0```` : {Monoid} | {"a0" --> a0} | _Native_ 
 (Collection ((Tuple k1) v1)) | 0 |  | {"a0" --> k1 "a1" --> v1} | ((Dict k1) v1)
 (Collection ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | ((Dict k1) (List v1))
@@ -200,9 +200,12 @@ Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 0 |  | {"a0" --> a0} | (List a0)
 Eq | 0 |  | {"a0" --> a0} | (List a0)
-Mappable | 0 |  | {"a0" --> a0} | (List a0)
 Monoid | 0 |  | {"a0" --> a0} | (List a0)
 (Mappable a0) | 0 |  | {"a0" --> a0} | (List a0)
+(Mappable v1) | 0 |  | {"a0" --> k1} | (List a0)
+(Mappable (List v1)) | 0 |  | {"a0" --> k1} | (List a0)
+(Mappable ((Tuple k1) v1)) | 0 |  | {"a0" --> k1} | (List a0)
+(Mappable ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1} | (List a0)
 (Collection a0) | 0 |  | {"a0" --> a0} | (List a0)
 (Collection ((Tuple k1) v1)) | 0 |  | {"a0" --> k1} | (List a0)
 (Collection ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1} | (List a0)
@@ -222,10 +225,10 @@ Any | 1 | ````a0````  | {} | _Native_
 Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 1 | ````a0````  | {} | _Native_ 
-Eq | 0 |  | {} | Collection
-Mappable | 0 |  | {} | Collection
-Monoid | 0 |  | {} | Collection
-Collection | 1 | ````b1````  | {} | _Native_ 
+Eq | 0 |  | {"a0" --> a0} | (Collection a0)
+Monoid | 0 |  | {"a0" --> a0} | (Collection a0)
+(Mappable a0) | 0 |  | {"a0" --> a0} | (Collection a0)
+(Collection a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
 
 ### Supertypes of Set
 
@@ -233,8 +236,8 @@ Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 0 |  | {"a0" --> a0} | (Collection a0)
 Eq | 0 |  | {"a0" --> a0} | (Collection a0)
-Mappable | 0 |  | {"a0" --> a0} | (Collection a0)
 Monoid | 0 |  | {"a0" --> a0} | (Collection a0)
+(Mappable a0) | 0 |  | {"a0" --> a0} | (Collection a0)
 (Collection a0) | 1 | ````a0```` : {Eq} | {"a0" --> a0} | _Native_ 
 
 ### Supertypes of Tuple
@@ -243,7 +246,7 @@ Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 2 | ````a0````  ````a1````  | {} | _Native_ 
 Eq | 2 | ````a0```` : {Eq} ````a1```` : {Eq} | {} | _Native_ 
-Mappable | 2 | ````a0````  ````b2````  | {} | _Native_ 
+(Mappable a1) | 2 | ````a0````  ````a1````  | {"a0" --> a1} | _Native_ 
 
 ### Supertypes of Void
 
@@ -302,8 +305,8 @@ Is type | #Frees | Requirements | Binding | Via
 ------- | ------ | ------------ | ------- | ---
 Any | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
 Eq | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
-Mappable | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
 Monoid | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
+(Mappable (Set a0)) | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
 (Collection (Set a0)) | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
 (Set (Set a0)) | 1 | ````a0```` : {Eq} | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | _Native_ 
 

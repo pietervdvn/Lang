@@ -29,6 +29,7 @@ import Data.Map hiding (map, null)
 import Prelude hiding (lookup)
 import Data.Set (Set)
 import qualified Data.Set as S
+import qualified Data.List as L
 import Data.List (nub)
 import Control.Arrow
 import Data.Tuple
@@ -140,7 +141,7 @@ normalizeLength	:: KindLookupTable -> ((TypeID, [Name], Reqs), RType) ->
 normalizeLength klt ((tid, frees, reqs), super)
 	= let	kind		= findWithDefault Kind tid klt
 		needed		= numberOfKindArgs kind
-		newFrees	= [1 + length frees .. needed] |> show |> ('b':)
+		newFrees	= [length frees .. needed - 1] |> show |> ('a':)
 		freesInReqs	= reqs |> snd & concat |> freesInRT & concat
 		freesInSuper	= super & freesInRT
 		usedFrees	= S.fromList $ (freesInReqs ++ freesInSuper ++ newFrees)
@@ -148,8 +149,10 @@ normalizeLength klt ((tid, frees, reqs), super)
 		reboundFrees	= usedFrees S.\\ (S.fromList frees)
 		prebinding	= buildBinding $ S.toList reboundFrees
 		reqs'		= reqs ||>> (|> substitute prebinding)
-		super'		= substitute prebinding super	in
-		((tid, frees ++ newFrees, reqs'), super')
+		super'		= substitute prebinding super
+		-- these new frees should be applied to the super type!
+		appSuper	= L.foldl RApplied super' (newFrees |> RFree) in
+		((tid, frees ++ newFrees, reqs'), appSuper)
 
 
 
