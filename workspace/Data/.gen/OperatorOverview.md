@@ -8,21 +8,38 @@ To test precedence, invoke ````--p <expression>```` in the interpreter, which co
 
 Precedence | Operators | Associativity
 ---------- | --------- | -------------
-0 | ``!=``, ``==`` | left
-1 | ``&&``, ``||`` | left
-2 | ``!`` | prefix
-3 | Other operators | left
-4 | Function application | left
+0 | ``!`` | prefix
+1 | ``!=``, ``==`` | left
+2 | ``%``, ``*``, ``/``, ``//`` | left (default)
+3 | ``&&``, ``||`` | left
+4 | ``+``, ``-`` | left
+5 | ``:`` | left (default)
+6 | ``<``, ``>`` | left
+7 | ``?`` | right
+8 | ``^`` | left
+9 | Other operators | left
+10 | Function application | left
 
 
 
 Operator | Precedence | Associativity
 -------- | ---------- | -------------
-``!`` | 2 | prefix
-``!=`` | 0 | left
-``&&`` | 1 | left
-``==`` | 0 | left
-``||`` | 1 | left
+``!`` | 0 | prefix
+``!=`` | 1 | left
+``%`` | 2 | left (default)
+``&&`` | 3 | left
+``*`` | 2 | left
+``+`` | 4 | left
+``-`` | 4 | left (default)
+``/`` | 2 | left (default)
+``//`` | 2 | left (default)
+``:`` | 5 | left (default)
+``<`` | 6 | left
+``==`` | 1 | left
+``>`` | 6 | left (default)
+``?`` | 7 | right
+``^`` | 8 | left
+``||`` | 3 | left
 
 
 
