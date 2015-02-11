@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding) where
+module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, concatBindings) where
 
 {--
 This module implements substitute and friends
@@ -12,8 +12,8 @@ import Languate.TAST
 
 
 -- execute substitution of b1 everywhere in b0
-concatBinds	:: Binding -> Binding -> Binding
-concatBinds (Binding dict) b1
+concatBindings	:: Binding -> Binding -> Binding
+concatBindings (Binding dict) b1
 	= dict |> substitute b1 & Binding
 
 

@@ -28,31 +28,6 @@ import Control.Monad.Trans
 
 import Debug.Trace
 
-{-
-
-Binds t0 in t1. Gives a "free of super types --> Value in subtype" binding
-
-e.g.
-
-bind "List Nat" "List a"	-> {a --> Nat}
-
-
--}
-bind	:: a -> b -> RType -> RType -> Either String Binding
-bind tt reqs t0 t1
-	= unificate t0 t1
-
-simpleBind	:: RType -> RType -> Either String Binding
-simpleBind	= bind M.empty M.empty
-
-
-bind'	:: RType -> RType -> StMsg ()
-bind' t0 (RFree a)
-	= addBinding (a,t0)
-bind' t0 t1
-	= fail $ "Could not bind "++st True t0++" against "++st True t1
-
-
 {- Tries to make two types the same, by filling in the frees in any of them.
 
 Unificate is associative.

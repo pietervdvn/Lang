@@ -65,7 +65,8 @@ buildTypeTable w
 			let knownTypes	= keys klt
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
 			supers		<- buildSuperTypeTable w tlts klt
-			let (allSupers, spareSupers)
-					= expand $ fmap stt2fstt supers
+			-- TODO
+			let (allSupers, _)	= expand $ fmap stt2fstt supers
+			let spareSupers	= allSupers |> buildSpareSuperTypeTable
 			validateReqTable freeNames klt typeReqs
 			return $ TypeTable tlts klt typeReqs supers allSupers spareSupers docstrings freeNames

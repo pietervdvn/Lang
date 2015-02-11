@@ -4,8 +4,6 @@ import StdDef hiding (todo)
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Bind.Bind (unificate, simpleBind, joinEither)
-import Languate.TypeTable.Bind.Substitute
 
 import Prelude hiding (null)
 import Data.Set as S hiding (null, filter)

@@ -107,7 +107,7 @@ superTypeFor (tlt,klt) path nm frees supers reqs
 			-- no directly known supertypes: add any as supertype
 			let tId	= (fqn, nm)
 			_supers'	<- resolveTypes tlt supers
-			let supers'	= if null _supers' then [anyType] else _supers'
+			let supers'	= if null _supers' && tId /= anyTypeID then [anyType] else _supers'
 			reqs'	<- resolveReqs  tlt reqs
 			let unsplit4 ((a, b, c), d)	= (a, b, c, d)
 
