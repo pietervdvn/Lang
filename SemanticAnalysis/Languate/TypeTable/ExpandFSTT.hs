@@ -65,7 +65,7 @@ data Context
 
 
 
--- Do all the stuff! Main loop of the TODOS-list
+-- Do all the stuff! Main loop of the todos-list
 _expandAll	:: St ()
 _expandAll
 	= do	isDone	<- done
@@ -126,7 +126,7 @@ _addEntry base via oldBinding superToAdd newBinding
 
 
 subReq	:: Binding -> (Name, Set RType) -> Maybe (Name, Set RType)
-subReq	= Just	-- TODO
+subReq _	= Just	-- TODO
 
 
 -----------
