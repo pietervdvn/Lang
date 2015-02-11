@@ -20,7 +20,7 @@ import Data.Char
 import Data.List
 
 keywords	= ["todo","fixme","fix me","fix-me","wtf"]
--- Table per module, what type ("TODO","FIXME") and message. Todos consist of one line!
+-- Table per module, what type ("todo","fixme") and message. Todos consist of one line!
 type TodoTable	= Map FQN [(Coor, Name, String)]
 
 buildTodoTable	:: World -> TodoTable
