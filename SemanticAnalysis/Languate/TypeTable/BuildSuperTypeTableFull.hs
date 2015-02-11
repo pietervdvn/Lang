@@ -4,6 +4,7 @@ import StdDef hiding (todo)
 
 import Languate.TAST
 import Languate.TypeTable
+import Languate.TypeTable.Extended
 
 import Prelude hiding (null)
 import Data.Set as S hiding (null, filter)
@@ -24,8 +25,7 @@ stt2fstt sttf
 
 
 -- creates the base entries for the fstt
-conv	:: ([Name], (RType, Map Name [RType])) ->
-		[(RType, ([(Name, Set RType)], Binding, Maybe RType) )]
+conv	:: ([Name], (RType, Map Name [RType])) -> [FullSTTKeyEntry]
 conv (frees, (isTyp, reqs))
 	= let 	nativeS	= frees |> (\a -> findWithDefault [] a reqs) |> S.fromList
 		-- remove all frees which have been used from isTyp
@@ -33,7 +33,7 @@ conv (frees, (isTyp, reqs))
 		-- we want to bind "X Bool" against "X a", to derive {a --> Bool}
 		applied	= appliedTypes isTyp
 		binding	= Binding $ M.fromList $ zip ([0..] |> show |> ('a':)) applied
-		base	= (isTyp, (zip frees $ nativeS, binding, Nothing)) in
+		base	= (isTyp, (zip frees $ nativeS, Nothing, (isTyp, binding))) in
 		base:expandFrees reqs base
 
 {-
@@ -51,9 +51,7 @@ and give:
 [(Y, [graph:Graph, X, Y])]
 
 -}
-expandFrees	:: Map Name [RType] ->
-			 (RType, ([(Name, Set RType)], Binding, Maybe RType)) ->
-			[(RType, ([(Name, Set RType)], Binding, Maybe RType))]
+expandFrees	:: Map Name [RType] -> FullSTTKeyEntry -> [FullSTTKeyEntry]
 expandFrees reqs (RFree a, rest)
 	= let possible	= findWithDefault [] a reqs in
 		zip possible $ repeat rest

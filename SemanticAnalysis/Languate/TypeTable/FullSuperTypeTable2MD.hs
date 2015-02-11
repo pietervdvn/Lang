@@ -11,21 +11,25 @@ import Data.Maybe
 
 import Languate.TAST
 import Languate.TypeTable
+import Languate.TypeTable.Extended
+
 
 fstt2md	:: TypeID -> FullSuperTypeTable -> MarkDown
 fstt2md (fqn, nm) fstt
 	= title 3 ("Supertypes of "++nm) ++
 		if M.null fstt then parag "No supertypes"
-		   else	table ["Is type","#Frees","Requirements","Binding","Via"] (fmap rows $ toList fstt)
+		   else	table ["Is type","#Frees","Requirements","Via","Orig type","Binding"] (fmap rows $ toList fstt)
 
 
-rows	:: (RType, ([(Name,Set RType)], Binding, Maybe RType)) -> [MarkDown]
-rows (isA, (ifReq, bnd, via))
+rows	:: FullSTTKeyEntry -> [MarkDown]
+rows (isA, (ifReq, via, (super, bnd)))
 	= [st True isA, show $ length ifReq,
 		unwords (ifReq |> showReqs),
-		show bnd,
-		fromMaybe (ital "Native") $ (via |> st True) ]
+		fromMaybe (ital "Native") $ (via |> st True),
+		st True super,
+		show bnd
+		]
 
 showReqs	:: (Name, Set RType) -> MarkDown
 showReqs (nm, reqs)
-	= code nm ++ enclose ": {" "}" (intercal ", " (S.toList reqs |> st True))
+	= code nm ++ enclose ": {" "}" (intercal ", " (S.toList reqs |> st True |> code))

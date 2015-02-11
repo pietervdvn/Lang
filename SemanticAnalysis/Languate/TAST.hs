@@ -18,6 +18,30 @@ import Normalizable
 import Languate.FQN
 
 import Data.Map
+import Data.Maybe
+
+
+
+
+-- The (implicit) supertype for every type
+anyType		= uncurry RNormal anyTypeID
+anyTypeID	= (toFQN' "pietervdvn:Data:Any", "Any")
+
+-- The representation of a tuple
+tupleType	= uncurry RNormal tupleTypeID
+tupleTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Tuple")
+
+voidType	= uncurry RNormal voidTypeID
+voidTypeID	= (toFQN' "pietervdvn:Data:Collection.Void","Void")
+
+listType	= uncurry RNormal listTypeID
+listTypeID	= (toFQN' "pietervdvn:Data:Collection.List","List")
+
+setType	= uncurry RNormal setTypeID
+setTypeID	= (toFQN' "pietervdvn:Data:Collection.Set","Set")
+
+
+
 
 {- Each type has a kind. You can think of those as the 'type of the type'
 E.g. a 'Maybe' is always in function of a second argument, e.g. 'Maybe Int' or 'Maybe String'.
@@ -70,15 +94,40 @@ instance Show ResolvedType where
 	show	= st False
 
 st		:: Bool -> RType -> String
-st short (RNormal fqn str)
+st short t0@(RNormal fqn str)
+	| anyType == t0
+		= ". "
+	| voidType == t0
+		= "() "
+	| otherwise
 		=  (if short then "" else show fqn++ "." ) ++ str
 st short (RFree str)
 		=  str
-st short (RApplied bt t)
-		=   "(" ++ st short bt ++ " " ++ st short t ++")"
+st short t0@(RApplied bt t)
+	| bt == listType
+		= "[" ++ showCommaSep short t ++ "]"
+	| bt == setType
+		= "{"++ showCommaSep short t ++"}"
+	| otherwise
+	= "("++ showCommaSep short t0 ++")"
 st short (RCurry at rt)
 		=  "(" ++ st short at ++ " -> " ++ st short rt ++")"
 
+
+showCommaSep short t0@(RApplied bt at)
+	= let 	btid	= getBaseTID bt
+		special	= isJust btid && tupleTypeID == fromJust btid in
+		if special then stuple short t0 else st short bt++" "++st short at
+showCommaSep short t
+	= st short t
+
+
+stuple short t0@(RApplied (RApplied bt a) b)
+	| bt	== tupleType
+		= st short a ++", "++stuple short b
+	| otherwise
+		= st short t0
+stuple short t	= st short t
 
 isApplied	:: RType -> Bool
 isApplied (RApplied _ _)	= True

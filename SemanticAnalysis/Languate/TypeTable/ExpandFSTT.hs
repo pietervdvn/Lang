@@ -8,6 +8,7 @@ import StdDef hiding (todos)
 
 import Languate.TAST
 import Languate.TypeTable
+import Languate.TypeTable.Extended
 import Languate.TypeTable.Bind.Substitute
 
 import Prelude hiding (null)
@@ -89,25 +90,43 @@ _expand base changedSuper
 		oldBinding = {a0 --> Bool} and will take the super "Y a0" to
 			the applied form "Y Bool", which "Z" is
 		-}
-		let oldBinding	= fetch (show via) "fstt" via fstt & (\(_,b,_) -> b)
+		let getBinding (_,_,tb)	= snd tb
+		let oldBinding	= fetch (show via) "fstt" via fstt & getBinding
+					:: Binding
 		-- the supers FSTT, which we will tear apart and add to base
 		supersToAdd	<- get' fstt_ |> findWithDefault M.empty viaTid
-		let supersTA	= supersToAdd & M.toList |> (\(s,(_,b,_)) -> (s,b))
+		let supersTA	= supersToAdd & M.toList |> (\(s,b) -> (s,getBinding b))
 		mapM (uncurry $ _addEntry base via oldBinding) supersTA |> or
 
 _addEntry	:: TypeID -> RType -> Binding -> RType -> Binding -> St Bool
 _addEntry base via oldBinding superToAdd newBinding
-	= do	-- the fstt that has to be changed
-		fstts		<- get' fstt_
+	= do	fstts		<- get' fstt_
+		-- the fstt that has to be changed
 		let fstt	= findWithDefault M.empty base fstts
+		-- the new, combined binding ...
 		let binding	= concatBindings oldBinding newBinding
+		-- ... aplied on the super
 		let super	= substitute binding superToAdd
 		if super `M.member` fstt then return False else do
-		let entry	= ([], binding, Just via)
+		-- we just use the reqs of the via type ...
+		let reqs	= M.lookup via fstt |> (\(reqs, _, _) -> reqs) & fromMaybe []
+		{- .. on which we substitute binding. Some requirements can dissapear.
+		 e.g. List (a:Eq) -> Eq
+			X is List Bool
+			-> X is Eq <-> Bool is Eq -> ok
+			We check those later, when we can bind
+
+		-}
+		let reqs'	= reqs |> subReq binding & catMaybes
+		let entry	= (reqs, Just via, (superToAdd, binding))
 		let fstt'	= M.insert super entry fstt
 		let fstts'	= M.insert base fstt' fstts
 		modify (\ctx -> ctx {fstt_ = fstts'})
 		return True
+
+
+subReq	:: Binding -> (Name, Set RType) -> Maybe (Name, Set RType)
+subReq	= Just	-- TODO
 
 
 -----------

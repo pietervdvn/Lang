@@ -28,8 +28,6 @@ import Languate.World
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD
 
-import Languate.TypeTable.Bind
-
 import Languate.TypeTable
 import Languate.TAST
 
@@ -74,7 +72,7 @@ pt	= type2rtype . fst . str2type
 -- parse reqs
 pr	= (||>> type2rtype) . snd . str2type
 
-
+{-
 
 ---------------
 -- TEST HERE --
@@ -129,4 +127,4 @@ _t 11	= bnd "{IntInf}" "a0*"
 _t 12	= bnd "{{Eq}}" "(a*)*"
 _t 13	= bnd "RSA" "PubPrivAlgo (a:PrivateKey) (b:PublicKey)"
 
---
+--}

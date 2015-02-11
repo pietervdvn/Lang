@@ -79,12 +79,12 @@ E.g. For "Weighted" (graph)
 We know that the first free should be a "Graph", thus:
 Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
-The binding maps free type variables from the *supertypes* to *subtype*
 
-The last type is the "via" type, the supertype of T which caused the current supertype to be added
+The type in the maybe is thee "via" type, the supertype of T which caused the current supertype to be added (and is in the list)
 
+The binding maps free type variables from the *supertype* (given) to *subtype*
 -}
-type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Binding, Maybe RType)
+type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Maybe RType, (RType, Binding))
 {-
 Complement of the full super type table.
 E.g.
@@ -93,17 +93,6 @@ Supertypes of list:
 
 -}
 type SpareSuperTypeTable	= Map TypeID [RType]
-
--- The (implicit) supertype for every type
-anyType		= uncurry RNormal anyTypeID
-anyTypeID	= (toFQN' "pietervdvn:Data:Any", "Any")
-
--- The representation of a tuple
-tupleType	= uncurry RNormal tupleTypeID
-tupleTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Tuple")
-
-voidType	= uncurry RNormal tupleTypeID
-voidTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Void")
 
 -- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!

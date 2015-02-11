@@ -15,8 +15,7 @@ Type | Declared in | Kind | Docstring
 **Ord**  | Category.Ord | ````*````  | The category which defines _lower then_ and _higher then_.
 **Collection** ````a````  | Collection.Collection | ````(* ~> *)````  | A ````Collection```` is a data structure which contains zero or more elements.
 **Dict** ````k:Eq````  ````v````  | Collection.Dict | ````(* ~> (* ~> *))````  | A ````Collection```` which maps a key onto a value.
-**List** ````y:Monoid````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
-**MyList** ````x:Eq````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
+**List** ````a````  | Collection.List | ````(* ~> *)````  | TODO  in Collection a
 **Maybe** ````a````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
 **More** ````a````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
@@ -46,40 +45,37 @@ Type | Declared in | Kind | Docstring
 
 Type | Is subtype of
 ---- | -------------
-BIInt | Any
-Eq | Any
+BIInt | . 
+Eq | . 
 Associative````a0````  | (a0 -> (a0 -> a0))
 Commutative````a0````  ````a1````  | (a0 -> (a0 -> a1))
 Curry````a0````  ````a1````  | (a0 -> a1)
-Mappable````a0````  | Any
-Monoid | Any
-Product | Any, Monoid
-Sum | Any, Monoid
-Ord | Any
-Collection````a0````  | Any, Monoid, (Mappable a0)
+Mappable````a0````  | . 
+Monoid | . 
+Product | . , Monoid
+Sum | . , Monoid
+Ord | . 
+Collection````a0````  | . , Monoid, (Mappable a0)
 Collection````a0:Eq````  | Eq
 Dict````a0````  ````a1````  | Monoid, (Mappable a1)
-Dict````a0:Eq````  ````a1````  | (Collection ((Tuple a0) a1))
-List````a0````  | Monoid, (Mappable a0)
-List````a0:Monoid````  | (Collection a0)
-List````a0:Eq````  | (Set a0)
-List````a0:((Tuple k1) v1)````  | ((Dict k1) v1), ((Dict k1) (List v1))
-MyList````a0:Eq````  | (List a0)
-Maybe````a0````  | Any
-More````a0````  | Any, (Collection a0)
+Dict````a0:Eq````  ````a1````  | (Collection (a0, a1))
+List````a0````  | . 
+List````a0:Eq````  | {a0}
+Maybe````a0````  | . 
+More````a0````  | . , (Collection a0)
 Set````a0:Eq````  | (Collection a0)
-Tuple````a0````  ````a1````  | Any, (Mappable a1)
+Tuple````a0````  ````a1````  | . , (Mappable a1)
 Tuple````a0:Eq````  ````a1:Eq````  | Eq
-Void | Any
-PrivateKey | Any
-PubPrivAlgo````a0:PrivateKey````  ````a1:PublicKey````  | Any
-PublicKey | Any
+Void | . 
+PrivateKey | . 
+PubPrivAlgo````a0:PrivateKey````  ````a1:PublicKey````  | . 
+PublicKey | . 
 RSA | ((PubPrivAlgo RSAPrivKey) RSAPubKey)
-RSAPrivKey | Any, PrivateKey
-RSAPubKey | Any, PublicKey
-Bool | Any
-Disjunct````a0:Eq````  | (Set (Set a0))
-Graph````a0:Eq, Ord````  ````a1````  | Any
+RSAPrivKey | . , PrivateKey
+RSAPubKey | . , PublicKey
+Bool | . 
+Disjunct````a0:Eq````  | {Set a0}
+Graph````a0:Eq, Ord````  ````a1````  | . 
 Weighted````a0:Graph````  ````a1:Ord, Eq````  ````a2:Monoid, Ord, Eq````  ````a3````  | ((a0 a1) a3)
 Int | IntInf
 Int' | Int, IntInf'
@@ -95,322 +91,294 @@ Flip````a0````  ````a1````  ````a2````  | ((a0 a2) a1)
 
 ### Supertypes of BIInt
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of Eq
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of Associative
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-(a0 -> (a0 -> a0)) | 1 | ````a0````  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+(a0 -> (a0 -> a0)) | 1 | ````a0````  | _Native_  | (a0 -> (a0 -> a0)) | {}
 
 ### Supertypes of Commutative
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-(a0 -> (a0 -> a1)) | 2 | ````a0````  ````a1````  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+(a0 -> (a0 -> a1)) | 2 | ````a0````  ````a1````  | _Native_  | (a0 -> (a0 -> a1)) | {}
 
 ### Supertypes of Curry
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-(a0 -> a1) | 2 | ````a0````  ````a1````  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+(a0 -> a1) | 2 | ````a0````  ````a1````  | _Native_  | (a0 -> a1) | {}
 
 ### Supertypes of Mappable
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 1 | ````a0````  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0````  | _Native_  | .  | {}
 
 ### Supertypes of Monoid
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of Product
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
-Monoid | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
+Monoid | 0 |  | _Native_  | Monoid | {}
 
 ### Supertypes of Sum
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
-Monoid | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
+Monoid | 0 |  | _Native_  | Monoid | {}
 
 ### Supertypes of Ord
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of Collection
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 1 | ````a0````  | {} | _Native_ 
-Eq | 1 | ````a0```` : {Eq} | {} | _Native_ 
-Monoid | 1 | ````a0````  | {} | _Native_ 
-(Mappable a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0````  | _Native_  | .  | {}
+Eq | 1 | ````a0```` : {````Eq```` } | _Native_  | Eq | {}
+Monoid | 1 | ````a0````  | _Native_  | Monoid | {}
+(Mappable a0) | 1 | ````a0````  | _Native_  | (Mappable a0) | {"a0" --> a0}
 
 ### Supertypes of Dict
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | Monoid
-Eq | 0 |  | {"a0" --> ((pietervdvn:Data:Collection.Tuple.Tuple a0) a1)} | (Collection ((Tuple a0) a1))
-Monoid | 2 | ````a0````  ````a1````  | {} | _Native_ 
-(Mappable a1) | 2 | ````a0````  ````a1````  | {"a0" --> a1} | _Native_ 
-(Mappable ((Tuple a0) a1)) | 0 |  | {"a0" --> ((pietervdvn:Data:Collection.Tuple.Tuple a0) a1)} | (Collection ((Tuple a0) a1))
-(Collection ((Tuple a0) a1)) | 2 | ````a0```` : {Eq} ````a1````  | {"a0" --> ((pietervdvn:Data:Collection.Tuple.Tuple a0) a1)} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 2 | ````a0````  ````a1````  | Monoid | .  | {}
+Eq | 2 | ````a0```` : {````Eq```` } ````a1````  | (Collection (a0, a1)) | Eq | {"a0" --> (a0, a1)}
+Monoid | 2 | ````a0````  ````a1````  | _Native_  | Monoid | {}
+(Mappable a1) | 2 | ````a0````  ````a1````  | _Native_  | (Mappable a1) | {"a0" --> a1}
+(Mappable (a0, a1)) | 2 | ````a0```` : {````Eq```` } ````a1````  | (Collection (a0, a1)) | (Mappable a0) | {"a0" --> (a0, a1)}
+(Collection (a0, a1)) | 2 | ````a0```` : {````Eq```` } ````a1````  | _Native_  | (Collection (a0, a1)) | {"a0" --> (a0, a1)}
 
 ### Supertypes of List
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | Monoid
-Eq | 0 |  | {"a0" --> a0} | (Collection a0)
-Monoid | 1 | ````a0````  | {} | _Native_ 
-(Mappable a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
-(Mappable v1) | 0 |  | {"a0" --> k1 "a1" --> v1} | ((Dict k1) v1)
-(Mappable (List v1)) | 0 |  | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | ((Dict k1) (List v1))
-(Mappable ((Tuple k1) v1)) | 0 |  | {"a0" --> k1 "a1" --> v1} | ((Dict k1) v1)
-(Mappable ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | ((Dict k1) (List v1))
-(Collection a0) | 1 | ````a0```` : {Monoid} | {"a0" --> a0} | _Native_ 
-(Collection ((Tuple k1) v1)) | 0 |  | {"a0" --> k1 "a1" --> v1} | ((Dict k1) v1)
-(Collection ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | ((Dict k1) (List v1))
-(Set a0) | 1 | ````a0```` : {Eq} | {"a0" --> a0} | _Native_ 
-((Dict k1) v1) | 1 | ````a0```` : {((Tuple k1) v1)} | {"a0" --> k1 "a1" --> v1} | _Native_ 
-((Dict k1) (List v1)) | 1 | ````a0```` : {((Tuple k1) v1)} | {"a0" --> k1 "a1" --> (pietervdvn:Data:Collection.List.List v1)} | _Native_ 
-
-### Supertypes of MyList
-
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {"a0" --> a0} | (List a0)
-Eq | 0 |  | {"a0" --> a0} | (List a0)
-Monoid | 0 |  | {"a0" --> a0} | (List a0)
-(Mappable a0) | 0 |  | {"a0" --> a0} | (List a0)
-(Mappable v1) | 0 |  | {"a0" --> k1} | (List a0)
-(Mappable (List v1)) | 0 |  | {"a0" --> k1} | (List a0)
-(Mappable ((Tuple k1) v1)) | 0 |  | {"a0" --> k1} | (List a0)
-(Mappable ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1} | (List a0)
-(Collection a0) | 0 |  | {"a0" --> a0} | (List a0)
-(Collection ((Tuple k1) v1)) | 0 |  | {"a0" --> k1} | (List a0)
-(Collection ((Tuple k1) (List v1))) | 0 |  | {"a0" --> k1} | (List a0)
-(List a0) | 1 | ````a0```` : {Eq} | {"a0" --> a0} | _Native_ 
-(Set a0) | 0 |  | {"a0" --> a0} | (List a0)
-((Dict k1) v1) | 0 |  | {"a0" --> k1} | (List a0)
-((Dict k1) (List v1)) | 0 |  | {"a0" --> k1} | (List a0)
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0````  | _Native_  | .  | {}
+Eq | 1 | ````a0```` : {````Eq```` } | {a0} | Eq | {"a0" --> a0}
+Monoid | 1 | ````a0```` : {````Eq```` } | {a0} | Monoid | {"a0" --> a0}
+(Mappable a0) | 1 | ````a0```` : {````Eq```` } | {a0} | (Mappable a0) | {"a0" --> a0}
+(Collection a0) | 1 | ````a0```` : {````Eq```` } | {a0} | (Collection a0) | {"a0" --> a0}
+{a0} | 1 | ````a0```` : {````Eq```` } | _Native_  | {a0} | {"a0" --> a0}
 
 ### Supertypes of Maybe
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 1 | ````a0````  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0````  | _Native_  | .  | {}
 
 ### Supertypes of More
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 1 | ````a0````  | {} | _Native_ 
-Eq | 0 |  | {"a0" --> a0} | (Collection a0)
-Monoid | 0 |  | {"a0" --> a0} | (Collection a0)
-(Mappable a0) | 0 |  | {"a0" --> a0} | (Collection a0)
-(Collection a0) | 1 | ````a0````  | {"a0" --> a0} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0````  | _Native_  | .  | {}
+Eq | 1 | ````a0````  | (Collection a0) | Eq | {"a0" --> a0}
+Monoid | 1 | ````a0````  | (Collection a0) | Monoid | {"a0" --> a0}
+(Mappable a0) | 1 | ````a0````  | (Collection a0) | (Mappable a0) | {"a0" --> a0}
+(Collection a0) | 1 | ````a0````  | _Native_  | (Collection a0) | {"a0" --> a0}
 
 ### Supertypes of Set
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {"a0" --> a0} | (Collection a0)
-Eq | 0 |  | {"a0" --> a0} | (Collection a0)
-Monoid | 0 |  | {"a0" --> a0} | (Collection a0)
-(Mappable a0) | 0 |  | {"a0" --> a0} | (Collection a0)
-(Collection a0) | 1 | ````a0```` : {Eq} | {"a0" --> a0} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0```` : {````Eq```` } | (Collection a0) | .  | {"a0" --> a0}
+Eq | 1 | ````a0```` : {````Eq```` } | (Collection a0) | Eq | {"a0" --> a0}
+Monoid | 1 | ````a0```` : {````Eq```` } | (Collection a0) | Monoid | {"a0" --> a0}
+(Mappable a0) | 1 | ````a0```` : {````Eq```` } | (Collection a0) | (Mappable a0) | {"a0" --> a0}
+(Collection a0) | 1 | ````a0```` : {````Eq```` } | _Native_  | (Collection a0) | {"a0" --> a0}
 
 ### Supertypes of Tuple
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 2 | ````a0````  ````a1````  | {} | _Native_ 
-Eq | 2 | ````a0```` : {Eq} ````a1```` : {Eq} | {} | _Native_ 
-(Mappable a1) | 2 | ````a0````  ````a1````  | {"a0" --> a1} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 2 | ````a0````  ````a1````  | _Native_  | .  | {}
+Eq | 2 | ````a0```` : {````Eq```` } ````a1```` : {````Eq```` } | _Native_  | Eq | {}
+(Mappable a1) | 2 | ````a0````  ````a1````  | _Native_  | (Mappable a1) | {"a0" --> a1}
 
 ### Supertypes of Void
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of PrivateKey
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of PubPrivAlgo
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 2 | ````a0```` : {PrivateKey} ````a1```` : {PublicKey} | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 2 | ````a0```` : {````PrivateKey```` } ````a1```` : {````PublicKey```` } | _Native_  | .  | {}
 
 ### Supertypes of PublicKey
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of RSA
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey} | ((PubPrivAlgo RSAPrivKey) RSAPubKey)
-((PubPrivAlgo RSAPrivKey) RSAPubKey) | 0 |  | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | .  | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
+((PubPrivAlgo RSAPrivKey) RSAPubKey) | 0 |  | _Native_  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
 
 ### Supertypes of RSAPrivKey
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
-PrivateKey | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
+PrivateKey | 0 |  | _Native_  | PrivateKey | {}
 
 ### Supertypes of RSAPubKey
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
-PublicKey | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
+PublicKey | 0 |  | _Native_  | PublicKey | {}
 
 ### Supertypes of Bool
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | _Native_  | .  | {}
 
 ### Supertypes of Disjunct
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
-Eq | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
-Monoid | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
-(Mappable (Set a0)) | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
-(Collection (Set a0)) | 0 |  | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | (Set (Set a0))
-(Set (Set a0)) | 1 | ````a0```` : {Eq} | {"a0" --> (pietervdvn:Data:Collection.Set.Set a0)} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 1 | ````a0```` : {````Eq```` } | {Set a0} | .  | {"a0" --> {a0}}
+Eq | 1 | ````a0```` : {````Eq```` } | {Set a0} | Eq | {"a0" --> {a0}}
+Monoid | 1 | ````a0```` : {````Eq```` } | {Set a0} | Monoid | {"a0" --> {a0}}
+(Mappable {a0}) | 1 | ````a0```` : {````Eq```` } | {Set a0} | (Mappable a0) | {"a0" --> {a0}}
+(Collection {a0}) | 1 | ````a0```` : {````Eq```` } | {Set a0} | (Collection a0) | {"a0" --> {a0}}
+{Set a0} | 1 | ````a0```` : {````Eq```` } | _Native_  | {Set a0} | {"a0" --> {a0}}
 
 ### Supertypes of Graph
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 2 | ````a0```` : {Eq, Ord} ````a1````  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 2 | ````a0```` : {````Eq```` , ````Ord```` } ````a1````  | _Native_  | .  | {}
 
 ### Supertypes of Weighted
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {"a0" --> a1 "a1" --> a3} | ((Graph a1) a3)
-((Graph a1) a3) | 4 | ````a0```` : {Graph} ````a1```` : {Eq, Ord} ````a2```` : {Eq, Monoid, Ord} ````a3````  | {"a0" --> a1 "a1" --> a3} | _Native_ 
-((a0 a1) a3) | 4 | ````a0```` : {Graph} ````a1```` : {Eq, Ord} ````a2```` : {Eq, Monoid, Ord} ````a3````  | {"a0" --> a1 "a1" --> a3} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 4 | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | ((Graph a1) a3) | .  | {"a0" --> a1 "a1" --> a3}
+((Graph a1) a3) | 4 | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | ((a0 a1) a3) | {"a0" --> a1 "a1" --> a3}
+((a0 a1) a3) | 4 | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | ((a0 a1) a3) | {"a0" --> a1 "a1" --> a3}
 
 ### Supertypes of Int
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | IntInf
-BIInt | 0 |  | {} | IntInf
-Eq | 0 |  | {} | IntInf
-IntInf | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | IntInf | .  | {}
+BIInt | 0 |  | IntInf | BIInt | {}
+Eq | 0 |  | IntInf | Eq | {}
+IntInf | 0 |  | _Native_  | IntInf | {}
 
 ### Supertypes of Int'
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | Int
-BIInt | 0 |  | {} | Int
-Eq | 0 |  | {} | Int
-Int | 0 |  | {} | _Native_ 
-IntInf | 0 |  | {} | Int
-IntInf' | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | Int | .  | {}
+BIInt | 0 |  | Int | BIInt | {}
+Eq | 0 |  | Int | Eq | {}
+Int | 0 |  | _Native_  | Int | {}
+IntInf | 0 |  | Int | IntInf | {}
+IntInf' | 0 |  | _Native_  | IntInf' | {}
 
 ### Supertypes of IntInf
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | BIInt
-BIInt | 0 |  | {} | _Native_ 
-Eq | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | BIInt | .  | {}
+BIInt | 0 |  | _Native_  | BIInt | {}
+Eq | 0 |  | _Native_  | Eq | {}
 
 ### Supertypes of IntInf'
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | IntInf
-BIInt | 0 |  | {} | IntInf
-Eq | 0 |  | {} | IntInf
-IntInf | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | IntInf | .  | {}
+BIInt | 0 |  | IntInf | BIInt | {}
+Eq | 0 |  | IntInf | Eq | {}
+IntInf | 0 |  | _Native_  | IntInf | {}
 
 ### Supertypes of Nat
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | Int
-BIInt | 0 |  | {} | Int
-Eq | 0 |  | {} | Int
-Int | 0 |  | {} | _Native_ 
-IntInf | 0 |  | {} | Int
-NatInf | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | Int | .  | {}
+BIInt | 0 |  | Int | BIInt | {}
+Eq | 0 |  | Int | Eq | {}
+Int | 0 |  | _Native_  | Int | {}
+IntInf | 0 |  | Int | IntInf | {}
+NatInf | 0 |  | _Native_  | NatInf | {}
 
 ### Supertypes of Nat'
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | Int'
-BIInt | 0 |  | {} | Int'
-Eq | 0 |  | {} | Int'
-Int | 0 |  | {} | Int'
-Int' | 0 |  | {} | _Native_ 
-IntInf | 0 |  | {} | Int'
-IntInf' | 0 |  | {} | Int'
-Nat | 0 |  | {} | _Native_ 
-NatInf | 0 |  | {} | Nat
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | Int' | .  | {}
+BIInt | 0 |  | Int' | BIInt | {}
+Eq | 0 |  | Int' | Eq | {}
+Int | 0 |  | Int' | Int | {}
+Int' | 0 |  | _Native_  | Int' | {}
+IntInf | 0 |  | Int' | IntInf | {}
+IntInf' | 0 |  | Int' | IntInf' | {}
+Nat | 0 |  | _Native_  | Nat | {}
+NatInf | 0 |  | Nat | NatInf | {}
 
 ### Supertypes of NatInf
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | IntInf
-BIInt | 0 |  | {} | IntInf
-Eq | 0 |  | {} | IntInf
-IntInf | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | IntInf | .  | {}
+BIInt | 0 |  | IntInf | BIInt | {}
+Eq | 0 |  | IntInf | Eq | {}
+IntInf | 0 |  | _Native_  | IntInf | {}
 
 ### Supertypes of NatInf'
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-Any | 0 |  | {} | IntInf'
-BIInt | 0 |  | {} | IntInf'
-Eq | 0 |  | {} | IntInf'
-IntInf | 0 |  | {} | IntInf'
-IntInf' | 0 |  | {} | _Native_ 
-NatInf | 0 |  | {} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+.  | 0 |  | IntInf' | .  | {}
+BIInt | 0 |  | IntInf' | BIInt | {}
+Eq | 0 |  | IntInf' | Eq | {}
+IntInf | 0 |  | IntInf' | IntInf | {}
+IntInf' | 0 |  | _Native_  | IntInf' | {}
+NatInf | 0 |  | _Native_  | NatInf | {}
 
 ### Supertypes of Flip
 
-Is type | #Frees | Requirements | Binding | Via
-------- | ------ | ------------ | ------- | ---
-((a0 a2) a1) | 3 | ````a0````  ````a1````  ````a2````  | {"a0" --> a2 "a1" --> a1} | _Native_ 
+Is type | #Frees | Requirements | Via | Orig type | Binding
+------- | ------ | ------------ | --- | --------- | -------
+((a0 a2) a1) | 3 | ````a0````  ````a1````  ````a2````  | _Native_  | ((a0 a2) a1) | {"a0" --> a2 "a1" --> a1}
 
 
 
