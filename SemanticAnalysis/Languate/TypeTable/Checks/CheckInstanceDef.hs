@@ -16,5 +16,7 @@ validateInstance tlt (Instance t@(path, nm) frees super reqs)
 	= do	inside ("In the instance declaration '"++show t++ " is "++show super) $ try err $ do
 		fqn	<- findTypeOrigin tlt (path, nm)
 		let baseType	= RNormal fqn nm
-		validateType tlt frees super
-		validateReqs tlt frees reqs
+		let extraFrees	= reqs |> snd >>= freesIn
+		let frees'	= extraFrees ++ frees
+		validateType tlt frees' super
+		validateReqs tlt frees' reqs

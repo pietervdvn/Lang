@@ -58,13 +58,13 @@ buildTypeTable	:: World -> Exceptions' String TypeTable
 buildTypeTable w
 		= inside "While building the type table" $
 		   do	tlts		<-  buildTLTs w
-			validateWorld0 tlts w
+			inside "While prechecking" $ validateWorld0 tlts w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
 			let knownTypes	= keys klt
 			docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
-			supers		<- buildSuperTypeTable w tlts klt
+			supers		<- inside "While building the super type table" $ buildSuperTypeTable w tlts klt
 			let (allSupers, spareSupers)	= expand $ fmap stt2fstt supers
 			inside "While checking the requirements table" $ validateReqTable freeNames klt typeReqs
 			return $ TypeTable tlts klt typeReqs supers allSupers spareSupers docstrings freeNames
