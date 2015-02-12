@@ -26,17 +26,36 @@ import Languate.Graphs.SearchCycles
 
 
 {-Validates wether the 'HaveSameKind'-constraints are met-}
-validateSameKindConstraints	:: KindLookupTable -> ((RType, RType), Location) -> Check
-validateSameKindConstraints klt ((rt0, rt1),loc)
+validateSameKindConstraints	:: KindLookupTable -> TypeReqTable -> ((RType, RType), Location) -> Check
+validateSameKindConstraints klt treqt ((rt0, rt1),loc)
       = onLocation loc $ inside ("Kind constraint error on "++ st True rt0 ++ " and "++st True rt1) $ try err $ do
 	bk0	<- lookupBaseKind klt rt0
 	bk1	<- lookupBaseKind klt rt1
+	-- TODO calculate the kind of the frees, found in the reqs of the type
+	kinds1	<- _bindReqKinds klt treqt rt0
+	kinds2	<- _bindReqKinds klt treqt rt1
 	binding	<- bindKind klt rt0 bk0
 	k0	<- kindOf klt binding rt0
 	k1	<- kindOf klt binding rt1
 	assert (k0 == k1) $ "The types "++ st True rt0++" and "++st True rt1++" should have the same kinds.\n"++
 		st True rt0++"::"++show k0 ++ "\n"++
 		st True rt1++"::"++show k1
+
+-- calculates kinds for things bound via the type reqs
+_bindReqKinds	:: KindLookupTable -> TypeReqTable -> RType -> Exc (Map Name Kind)
+_bindReqKinds klt treqt rt
+		= do	mtid(Just tid)	= getBaseTID rt
+			when (isJust tid) $ do
+			kind	<- lookup tid klt ? "No klt-entry for "++show tid
+			nrFrees	= numberOfKindArgs kind
+			-- we now have the actual requirements for each type var of rt
+			frees	= [0..nrFrees] |> (\i -> findWithDefault S.empty i treqt)
+			-- we bind to each index the kind of the type variable
+			kindOf	= appliedKinds kind
+			binds	= mapM (uncurry $ bindKind klt) $ zip frees kindOf
+
+
+
 
 {-Code to report cycles-}
 reportCycles	:: Map (FQN, Name) (Set (FQN, Name)) -> Check

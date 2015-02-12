@@ -18,4 +18,3 @@ validateInstance tlt (Instance t@(path, nm) frees super reqs)
 		let baseType	= RNormal fqn nm
 		validateType tlt frees super
 		validateReqs tlt frees reqs
-		validateReqsFreeOrder reqs frees

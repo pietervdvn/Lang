@@ -4,7 +4,7 @@
 
 [Operator Overview](OperatorOverview.md)
 
-[four todos](Todo.md)
+[two todos](Todo.md)
 
 
 

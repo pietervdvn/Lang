@@ -20,7 +20,6 @@ import Control.Arrow
 validateADTDef tlt (ADTDef nm frees reqs sums)
 		= inside ("In the definition of ADT-type "++show nm) $ do
 			validateReqs tlt frees reqs
-			validateReqsFreeOrder reqs frees
 			mapM_ (validateADTSum tlt frees) sums
 			let cons = map (\(ADTSum nm _ _) -> nm) sums
 			crossValidate tlt frees sums

@@ -38,9 +38,9 @@ import Languate.TypeTable.KindChecker.BuildKindTable
 import Languate.TypeTable.BuildRequirementTable
 import Languate.TypeTable.BuildDocstringTable
 import Languate.TypeTable.BuildFreeNameTable
-import Languate.TypeTable.BuildSuperTypeTable
-import Languate.TypeTable.BuildSuperTypeTableFull
-import Languate.TypeTable.ExpandFSTT
+import Languate.TypeTable.BuildSuperTT.BuildSuperTypeTable
+import Languate.TypeTable.BuildSuperTT.BuildSuperTypeTableFull
+import Languate.TypeTable.BuildSuperTT.ExpandFSTT
 
 import Languate.TypeTable.Checks.CheckWorld
 import Languate.TypeTable.Checks.CheckReqTable

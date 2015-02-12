@@ -15,7 +15,7 @@ Type | Declared in | Kind | Docstring
 **Ord**  | Category.Ord | ````*````  | The category which defines _lower then_ and _higher then_.
 **Collection** ````a````  | Collection.Collection | ````(* ~> *)````  | A ````Collection```` is a data structure which contains zero or more elements.
 **Dict** ````k:Eq````  ````v````  | Collection.Dict | ````(* ~> (* ~> *))````  | A ````Collection```` which maps a key onto a value.
-**List** ````a````  | Collection.List | ````(* ~> *)````  | TODO  in Collection a
+**List** ````a````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
 **Maybe** ````a````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
 **More** ````a````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
 **Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
@@ -59,8 +59,9 @@ Collection````a0````  | . , Monoid, (Mappable a0)
 Collection````a0:Eq````  | Eq
 Dict````a0````  ````a1````  | Monoid, (Mappable a1)
 Dict````a0:Eq````  ````a1````  | (Collection (a0, a1))
-List````a0````  | . 
+List````a0````  | Monoid, (Mappable a0), (Collection a0)
 List````a0:Eq````  | {a0}
+List````a0:(k1, v1)````  | ((Dict k1) v1), ((Dict k1) [v1])
 Maybe````a0````  | . 
 More````a0````  | . , (Collection a0)
 Set````a0:Eq````  | (Collection a0)
@@ -175,12 +176,20 @@ Monoid | ````a0````  ````a1````  | _Native_  | Monoid | {}
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0````  | _Native_  | .  | {}
-Eq | ````a0```` : {````Eq```` } | {a0} | Eq | {"a0" --> a0}
-Monoid | ````a0```` : {````Eq```` } | {a0} | Monoid | {"a0" --> a0}
-(Mappable a0) | ````a0```` : {````Eq```` } | {a0} | (Mappable a0) | {"a0" --> a0}
-(Collection a0) | ````a0```` : {````Eq```` } | {a0} | (Collection a0) | {"a0" --> a0}
+.  | ````a0````  | Monoid | .  | {}
+Eq | ````a0````  | (Collection a0) | Eq | {"a0" --> a0}
+Monoid | ````a0````  | _Native_  | Monoid | {}
+(Mappable a0) | ````a0````  | _Native_  | (Mappable a0) | {"a0" --> a0}
+(Mappable v1) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) v1) | (Mappable a1) | {"a0" --> k1 "a1" --> v1}
+(Mappable [v1]) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) [v1]) | (Mappable a1) | {"a0" --> k1 "a1" --> [v1]}
+(Mappable (k1, v1)) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) v1) | (Mappable (a0, a1)) | {"a0" --> k1 "a1" --> v1}
+(Mappable (k1, [v1])) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) [v1]) | (Mappable (a0, a1)) | {"a0" --> k1 "a1" --> [v1]}
+(Collection a0) | ````a0````  | _Native_  | (Collection a0) | {"a0" --> a0}
+(Collection (k1, v1)) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) v1) | (Collection (a0, a1)) | {"a0" --> k1 "a1" --> v1}
+(Collection (k1, [v1])) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) [v1]) | (Collection (a0, a1)) | {"a0" --> k1 "a1" --> [v1]}
 {a0} | ````a0```` : {````Eq```` } | _Native_  | {a0} | {"a0" --> a0}
+((Dict k1) v1) | ````a0```` : {````(k1, v1)```` } | _Native_  | ((Dict k1) v1) | {"a0" --> k1 "a1" --> v1}
+((Dict k1) [v1]) | ````a0```` : {````(k1, v1)```` } | _Native_  | ((Dict k1) [v1]) | {"a0" --> k1 "a1" --> [v1]}
 
 ### Supertypes of Maybe a0
 

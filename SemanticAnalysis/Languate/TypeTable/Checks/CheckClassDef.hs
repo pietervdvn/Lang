@@ -17,4 +17,3 @@ validateClassDef tlt cd
 			do	let supers	= subclassFrom cd
 				validateTypes tlt (frees cd) supers
 				validateReqs tlt (frees cd) (classReqs cd)
-				validateReqsFreeOrder (classReqs cd) (frees cd)

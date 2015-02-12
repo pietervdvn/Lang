@@ -1,4 +1,4 @@
-module Languate.TypeTable.BuildSuperTypeTable where
+module Languate.TypeTable.BuildSuperTT.BuildSuperTypeTable where
 
 {--
 

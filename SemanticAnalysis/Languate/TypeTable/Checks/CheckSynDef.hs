@@ -16,4 +16,3 @@ validateSynDef tlt (SynDef nm frees super reqs)
 	= do	inside ("In the synonym declaration 'type "++show nm++ " = "++show super) $ try err $ do
 		validateType tlt frees super
 		validateReqs tlt frees reqs
-		validateReqsFreeOrder reqs frees

@@ -37,6 +37,5 @@ _bo graph
 		leafs'	= S.toList leaves in
 		leafs' ++ _bo (dropNodes leaves graph)
 
-
 testGraph	=
 	fmap S.fromList $ M.fromList [("a",["b","c"]),("b",["c"]), ("c",[])]

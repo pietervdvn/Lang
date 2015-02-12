@@ -1,4 +1,4 @@
-module Languate.TypeTable.ExpandFSTT where
+module Languate.TypeTable.BuildSuperTT.ExpandFSTT where
 
 {--
 This module implements the FSTT expansion

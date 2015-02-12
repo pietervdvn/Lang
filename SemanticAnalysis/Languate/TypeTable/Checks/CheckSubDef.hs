@@ -14,4 +14,3 @@ validateSubDef tlt (SubDef nm _ frees superTps trex)	-- RAR! T-Rexes are allowed
 		= inside ("In the subtype declaration of "++nm) $
 			do	validateTypes tlt frees superTps
 				validateReqs tlt frees trex
-				validateReqsFreeOrder trex frees

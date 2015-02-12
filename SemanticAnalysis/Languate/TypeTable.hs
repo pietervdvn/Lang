@@ -210,13 +210,6 @@ showTypeID (fqn,nm)
 		= show fqn ++"."++show nm
 
 
-
--- TODO check overlapping bindings
-unionBindings	:: [Binding] -> Either String Binding
-unionBindings bnds
-	= bnds |> (\(Binding dict) -> dict) & M.unions & Binding & Right
-
-
 instance Show Binding where
 	show	= sb
 

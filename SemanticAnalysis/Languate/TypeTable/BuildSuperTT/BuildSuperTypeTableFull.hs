@@ -1,4 +1,4 @@
-module Languate.TypeTable.BuildSuperTypeTableFull where
+module Languate.TypeTable.BuildSuperTT.BuildSuperTypeTableFull where
 
 import StdDef hiding (todo)
 

@@ -33,6 +33,14 @@ bindKind' klt tid frees
 		_bk kind frees
 
 
+appliedKinds	:: Kind -> [Kind]
+appliedKinds Kind
+		= []
+appliedKinds (KindCurry k tail)
+		= k : appliedKinds tail
+
+
+
 _bk 		:: Kind -> [Name] -> Exc (Kind, Map Name Kind)
 _bk k []	= return (k, M.empty)
 _bk (KindCurry ka rest) (a:as)

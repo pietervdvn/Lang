@@ -5,6 +5,7 @@ Each program imports these by default
 -------
 
 public import Any
+public import Category.Eq
 
 public import Data.Bool
 

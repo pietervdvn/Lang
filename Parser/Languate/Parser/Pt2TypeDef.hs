@@ -72,4 +72,4 @@ ssyn _ [TypeT, syn]
 		= syn
 
 convSyn (Syn (nm, frees,t, reqs))
-		= SynDef nm frees t reqs	-- TODO #63
+		= SynDef nm frees t reqs
