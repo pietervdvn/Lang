@@ -14,21 +14,26 @@ import Languate.TypeTable
 import Languate.TypeTable.Extended
 
 
-fstt2md	:: TypeID -> FullSuperTypeTable -> MarkDown
-fstt2md (fqn, nm) fstt
-	= title 3 ("Supertypes of "++nm) ++
+fstt2md	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkDown
+fstt2md klt tid@(fqn, nm) fstt
+	= title 3 ("Supertypes of "++nm++" "++sfrees (findWithDefault Kind tid klt)) ++
 		if M.null fstt then parag "No supertypes"
-		   else	table ["Is type","#Frees","Requirements","Via","Orig type","Binding"] (fmap rows $ toList fstt)
+		   else	table ["Is type","Requirements","Via","Orig type","Binding"] (fmap rows $ toList fstt)
 
 
 rows	:: FullSTTKeyEntry -> [MarkDown]
 rows (isA, (ifReq, via, (super, bnd)))
-	= [st True isA, show $ length ifReq,
+	= [st True isA,
 		unwords (ifReq |> showReqs),
 		fromMaybe (ital "Native") $ (via |> st True),
 		st True super,
 		show bnd
 		]
+
+
+sfrees	:: Kind -> MarkDown
+sfrees k
+	= [0..numberOfKindArgs k - 1] |> show |> ('a':) & unwords
 
 showReqs	:: (Name, Set RType) -> MarkDown
 showReqs (nm, reqs)
