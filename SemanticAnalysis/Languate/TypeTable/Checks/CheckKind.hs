@@ -13,7 +13,8 @@ import Data.Map hiding (map, filter)
 import Prelude hiding (lookup)
 import Data.Set (Set)
 import qualified Data.Set as S
-import Data.List (intercalate)
+import Data.List (intercalate, nub)
+import Data.Maybe
 
 import Languate.AST
 import Languate.TAST
@@ -31,12 +32,12 @@ validateSameKindConstraints klt treqt ((rt0, rt1),loc)
       = onLocation loc $ inside ("Kind constraint error on "++ st True rt0 ++ " and "++st True rt1) $ try err $ do
 	bk0	<- lookupBaseKind klt rt0
 	bk1	<- lookupBaseKind klt rt1
-	-- TODO calculate the kind of the frees, found in the reqs of the type
 	kinds1	<- _bindReqKinds klt treqt rt0
 	kinds2	<- _bindReqKinds klt treqt rt1
 	binding	<- bindKind klt rt0 bk0
-	k0	<- kindOf klt binding rt0
-	k1	<- kindOf klt binding rt1
+	bind'	<- _mergeBind [kinds1, kinds2, binding]
+	k0	<- kindOf klt bind' rt0
+	k1	<- kindOf klt bind' rt1
 	assert (k0 == k1) $ "The types "++ st True rt0++" and "++st True rt1++" should have the same kinds.\n"++
 		st True rt0++"::"++show k0 ++ "\n"++
 		st True rt1++"::"++show k1
@@ -44,16 +45,32 @@ validateSameKindConstraints klt treqt ((rt0, rt1),loc)
 -- calculates kinds for things bound via the type reqs
 _bindReqKinds	:: KindLookupTable -> TypeReqTable -> RType -> Exc (Map Name Kind)
 _bindReqKinds klt treqt rt
-		= do	mtid(Just tid)	= getBaseTID rt
-			when (isJust tid) $ do
-			kind	<- lookup tid klt ? "No klt-entry for "++show tid
-			nrFrees	= numberOfKindArgs kind
-			-- we now have the actual requirements for each type var of rt
-			frees	= [0..nrFrees] |> (\i -> findWithDefault S.empty i treqt)
-			-- we bind to each index the kind of the type variable
-			kindOf	= appliedKinds kind
-			binds	= mapM (uncurry $ bindKind klt) $ zip frees kindOf
+	= inside ("While calculating the kinds of free type requirements in the requirements on "++st True rt) $ do
+		let mtid	= getBaseTID rt
+		if (isNothing mtid) then return empty else do
+		let tid	= fromJust mtid
+		kind	<- lookup tid klt ? ("No klt-entry for "++show tid)
+		let nrFrees	= numberOfKindArgs kind
+		-- we now have the actual requirements for each type var of rt
+		let frees	= [0..nrFrees]
+			|> (\i -> lookup (tid, i) treqt)
+			||>> S.elems |> (>>= listToMaybe)
+		-- we bind to each index the kind of the type variable
+		let kindOf	= appliedKinds kind
+		let kindFrees	= zip frees kindOf |> unpackMaybeTuple & catMaybes
+		binds	<- mapM (uncurry $ bindKind klt) kindFrees
+		_mergeBind binds
 
+_mergeBind	:: [Map Name Kind] -> Exc (Map Name Kind)
+_mergeBind dicts
+	= do 	let dicts'	= dicts |> toList & concat & merge ||>> nub
+		let faulty	= dicts' & filter ((/=) 1 . length . snd)
+		let showErr (name, kinds) =
+			err $ "The free type variable '"++name++"'"++
+			" can have multiple kinds: "++show kinds
+		mapM_ showErr faulty
+		let dict	= dicts' ||>> head & fromList
+		return dict
 
 
 

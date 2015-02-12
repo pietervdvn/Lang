@@ -43,8 +43,9 @@ appliedKinds (KindCurry k tail)
 
 _bk 		:: Kind -> [Name] -> Exc (Kind, Map Name Kind)
 _bk k []	= return (k, M.empty)
-_bk (KindCurry ka rest) (a:as)
-	= do	(k, binding)	<- _bk rest as
+_bk k@(KindCurry ka rest) (a:as)
+	= inside ("In the binding of "++show k++" against "++show (a:as))	$ do
+		(k, binding)	<- _bk rest as
 		let (Just prevA)	= lookup a binding
 		assert (a `M.notMember` binding || prevA == ka) $
 			"Conflicting kinds for '"++a++"' found, both "++
@@ -91,13 +92,15 @@ kindOf _ frees (RFree a)
 		("Free type variable '"++a++"' was not found.\n"++
 			"Make sure it is declared before used (thus left of it's usage)")
 kindOf klt frees t@(RApplied bt at)
-	= do	bk	<- kindOf klt frees bt
+	= inside ("In the kind calculation of "++show t) $ do
+		bk	<- kindOf klt frees bt
 		ak	<- kindOf klt frees at
 		let msg	= "In the type application "++ pars (show t) ++" "++ pars (show at)
 		inside msg $ applyKind t bk (ak, at)
-kindOf klt frees (RCurry at rt)
-	= do	let msg t k 	= "The type "++show t++" should be fully applied "++
-					"as it is used in a curry, but it has the kind "++ 						show k
+kindOf klt frees t@(RCurry at rt)
+	= inside ("In the kind calculation of "++show t) $ do
+		let msg t k 	= "The type "++show t++" should be fully applied "++
+					"as it is used in a curry, but it has the kind "++show k
 		ak	<- kindOf klt frees at
 		assert (ak == Kind) $ msg at ak
 		rk	<- kindOf klt frees rt	-- calculate the kind of the rest, which should be fully applied too
