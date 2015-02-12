@@ -29,7 +29,7 @@ checkReqsFor freeNms klt treqs typeId i
 	= inside ("While checking the type requirements of "++show typeId) $ try err $
 	   do	let name	= nameFor freeNms typeId i
 		let shouldBeT	= reqsFor treqs typeId i
-		inside ("While checking the "++count i++" type variable, namely '"++name++"'") $ do
+		inside ("While checking the "++(count $ 1 +i)++" type variable, namely '"++name++"'") $ do
 			freeTable	<- buildFreeTable klt freeNms treqs typeId [0..i] empty
 			kinds	<- mapM (kindOf klt freeTable) shouldBeT
 			assert (allSame kinds) $ indent' ("The free type variable '"++name++"' has requirements of different kinds: ") $

@@ -3,6 +3,9 @@ Void
 Implementation of ''Void''
 ----
 
+import Category.Monoid
+import Category.Mappable
+
 ---
 Type representing _no data_.
 
