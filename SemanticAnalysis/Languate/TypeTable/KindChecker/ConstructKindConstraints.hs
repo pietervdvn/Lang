@@ -18,11 +18,11 @@ import Languate.CheckUtils
 
 import Data.Map (mapWithKey, findWithDefault, Map)
 import qualified Data.Map as M
+import Data.Set (Set)
+import qualified Data.Set as S
 import Data.Maybe
 import Control.Monad.Reader
 import Control.Arrow
-
-
 
 
 buildKindConstraints	:: Map FQN TypeLookupTable -> World -> Exc [(KindConstraint, Location)]
@@ -60,32 +60,35 @@ kindConstraintIn (ClassDefStm classDef)
 			let frees	=  AST.frees classDef
 			let reqs	=  classReqs classDef
 			baseConstrs	<- baseTypeConstr id frees reqs
-			constraints	<- subtypeConstraints (RNormal fqn nm) frees $ subclassFrom classDef
+			constraints	<- subtypeConstraints (RNormal fqn nm) frees reqs $ subclassFrom classDef
 			return $ baseConstrs:constraints
 kindConstraintIn (InstanceStm (Instance pathId@(path, nm) frees super reqs))
 		= do	superT	<- resolve super
 			subT	<- resolve $ Applied (Normal path nm) $ map Free frees
-			returnOne $ HaveSameKind subT superT
+			reqs'	<- resolveReqs reqs
+			returnOne $ HaveSameKind reqs' subT superT
 kindConstraintIn (SubDefStm (SubDef name _ frees superTypes reqs))
 		= do	id@(fqn,_)	<- getId name
 			baseConstrs	<- baseTypeConstr id frees reqs
-			constraints 	<- subtypeConstraints (RNormal fqn name) frees superTypes
+			constraints 	<- subtypeConstraints (RNormal fqn name) frees reqs superTypes
 			return $ baseConstrs:constraints
 kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
 		= do	synonym		<- resolve sameAs
 			id@(fqn, _)	<- getId nm
 			baseConstrs	<- baseTypeConstr id frees reqs
 			let base	= foldl RApplied (RNormal fqn nm) (frees |> RFree)
-			let same	= HaveSameKind base synonym
+			reqs'		<- resolveReqs reqs
+			let same	= HaveSameKind reqs' base synonym
 			return $ [same, baseConstrs]
 kindConstraintIn _	= return []
 
 
-subtypeConstraints	:: RType -> [Name] -> [Type] -> RI [KindConstraint]
-subtypeConstraints base frees superClasses
+subtypeConstraints	:: RType -> [Name] -> [TypeRequirement] -> [Type] -> RI [KindConstraint]
+subtypeConstraints base frees reqs superClasses
 		= do 	superClasses	<- mapM resolve superClasses
 			let appliedBase	= foldl RApplied base $ map RFree frees
-			return $ zipWith HaveSameKind (repeat appliedBase) superClasses
+			reqs'		<- resolveReqs reqs
+			return $ zipWith (HaveSameKind reqs') (repeat appliedBase) superClasses
 
 -- Constructs a basic 'has kind' relation, for the given (declared) name with it frees
 baseTypeConstr	:: TypeID -> [Name] -> [TypeRequirement] -> RI KindConstraint

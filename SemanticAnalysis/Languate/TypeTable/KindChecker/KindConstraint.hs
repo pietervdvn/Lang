@@ -8,6 +8,9 @@ import StdDef
 import Languate.AST (Coor)
 import Languate.TAST
 import Languate.FQN
+import Languate.TypeTable
+
+import Data.Set (Set)
 
 
 -- reprsesents a kind where details should be still filled in.
@@ -18,8 +21,19 @@ data UnresolvedKind	= UKind	-- normal, simple kind
 
 
 -- actual constraints which should be checked in the end
-data KindConstraint	= HaveSameKind RType RType	-- used for e.g. subtypes. ''' subtype Nat' = Nat & NatInf'  ''' makes sense, but ''' subtype Set = Collection a ''' does not ''' subtype Set a = Collection a ''' however does. These are requirements that should be checked independantly
-			| HasKind (FQN, Name) UnresolvedKind
+data KindConstraint	= HasKind (FQN, Name) UnresolvedKind
+			| HaveSameKind [RTypeReq] RType RType
+			{- Have Same Kind is used for e.g. subtypes.
+				''' subtype Nat' = Nat & NatInf'  ''' makes sense, but
+			''' subtype Set = Collection a ''' does not.
+			 ''' subtype Set a = Collection a ''' however does.
+			 These are requirements that should be checked independently
+			This constraint is also applicable on free type variable constraints:
+			data X (a:Eq, Mappable) does not make sense, as ''Eq::*'' and ''Mappable :: * ~> *''
+			There is however a catch to this: X might, through binding, define more frees:
+			''instance List (a:(k,v))'' will define the frees 'k' and 'v'. This is why a list of typereqs is saved.
+			-}
+
 	deriving (Show, Eq)
 
 type SimpleConstraint	= ((FQN, Name), UnresolvedKind)
@@ -31,7 +45,7 @@ isHasKind _		= False
 getHasKind (HasKind id uk)	= Just (id, uk)
 getHasKind _		= Nothing
 
-haveSameKinds (HaveSameKind r1 r2)	= Just (r1, r2)
+haveSameKinds (HaveSameKind reqs r1 r2)	= Just (reqs, r1, r2)
 haveSameKinds _	= Nothing
 
 numberOfArgs	:: UnresolvedKind -> Maybe Int

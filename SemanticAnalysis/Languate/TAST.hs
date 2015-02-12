@@ -109,7 +109,7 @@ st short t0@(RApplied bt t)
 	| bt == setType
 		= "{"++ showCommaSep short t ++"}"
 	| otherwise
-		= "("++ showCommaSep short t ++")"
+		= "("++ showCommaSep short t0 ++")"
 st short (RCurry at rt)
 		=  "(" ++ st short at ++ " -> " ++ st short rt ++")"
 
@@ -117,7 +117,7 @@ st short (RCurry at rt)
 showCommaSep short t0@(RApplied bt at)
 	= let 	btid	= getBaseTID bt
 		special	= isJust btid && tupleTypeID == fromJust btid in
-		if special then stuple short t0 else st short t0
+		if special then stuple short t0 else st short bt ++ " "++st short at
 showCommaSep short t
 	= st short t
 

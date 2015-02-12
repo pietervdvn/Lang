@@ -55,29 +55,29 @@ Monoid | .
 Product | . , Monoid
 Sum | . , Monoid
 Ord | . 
-Collection````a0````  | . , Monoid, (a0)
+Collection````a0````  | . , Monoid, (Mappable a0)
 Collection````a0:Eq````  | Eq
-Dict````a0````  ````a1````  | Monoid, (a1)
-Dict````a0:Eq````  ````a1````  | (a0, a1)
-List````a0````  | Monoid, (a0), (a0)
+Dict````a0````  ````a1````  | Monoid, (Mappable a1)
+Dict````a0:Eq````  ````a1````  | (Collection (a0, a1))
+List````a0````  | Monoid, (Mappable a0), (Collection a0)
 List````a0:Eq````  | {a0}
-List````a0:(v1)````  | (v1), ([v1])
+List````a0:(k1, v1)````  | ((Dict k1) v1), ((Dict k1) [v1])
 Maybe````a0````  | . 
-More````a0````  | . , (a0)
-Set````a0:Eq````  | (a0)
-Tuple````a0````  ````a1````  | . , (a1)
+More````a0````  | . , (Collection a0)
+Set````a0:Eq````  | (Collection a0)
+Tuple````a0````  ````a1````  | . , (Mappable a1)
 Tuple````a0:Eq````  ````a1:Eq````  | Eq
 Void | . 
 PrivateKey | . 
 PubPrivAlgo````a0:PrivateKey````  ````a1:PublicKey````  | . 
 PublicKey | . 
-RSA | (RSAPubKey)
+RSA | ((PubPrivAlgo RSAPrivKey) RSAPubKey)
 RSAPrivKey | . , PrivateKey
 RSAPubKey | . , PublicKey
 Bool | . 
-Disjunct````a0:Eq````  | {{a0}}
+Disjunct````a0:Eq````  | {Set a0}
 Graph````a0:Eq, Ord````  ````a1````  | . 
-Weighted````a0:Graph````  ````a1:Ord, Eq````  ````a2:Monoid, Ord, Eq````  ````a3````  | (a3)
+Weighted````a0:Graph````  ````a1:Ord, Eq````  ````a2:Monoid, Ord, Eq````  ````a3````  | ((a0 a1) a3)
 Int | IntInf
 Int' | Int, IntInf'
 IntInf | BIInt, Eq
@@ -86,7 +86,7 @@ Nat | Int, NatInf
 Nat' | Int', Nat
 NatInf | IntInf
 NatInf' | IntInf', NatInf
-Flip````a0````  ````a1````  ````a2````  | (a1)
+Flip````a0````  ````a1````  ````a2````  | ((a0 a2) a1)
 
 
 
@@ -159,37 +159,37 @@ Is type | Requirements | Via | Orig type | Binding
 .  | ````a0````  | _Native_  | .  | {}
 Eq | ````a0```` : {````Eq```` } | _Native_  | Eq | {}
 Monoid | ````a0````  | _Native_  | Monoid | {}
-(a0) | ````a0````  | _Native_  | (a0) | {"a0" --> a0}
+(Mappable a0) | ````a0````  | _Native_  | (Mappable a0) | {"a0" --> a0}
 
 ### Supertypes of Dict a0 a1
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  | ````a0````  ````a1````  | Monoid | .  | {}
-Eq | ````a0```` : {````Eq```` } ````a1````  | (a0, a1) | Eq | {"a0" --> (a1)}
+Eq | ````a0```` : {````Eq```` } ````a1````  | (Collection (a0, a1)) | Eq | {"a0" --> (a0, a1)}
 Monoid | ````a0````  ````a1````  | _Native_  | Monoid | {}
-(a1) | ````a0````  ````a1````  | _Native_  | (a1) | {"a0" --> a1}
-(a0, a1) | ````a0```` : {````Eq```` } ````a1````  | (a0, a1) | (a0) | {"a0" --> (a1)}
-(a0, a1) | ````a0```` : {````Eq```` } ````a1````  | _Native_  | (a0, a1) | {"a0" --> (a1)}
+(Mappable a1) | ````a0````  ````a1````  | _Native_  | (Mappable a1) | {"a0" --> a1}
+(Mappable (a0, a1)) | ````a0```` : {````Eq```` } ````a1````  | (Collection (a0, a1)) | (Mappable a0) | {"a0" --> (a0, a1)}
+(Collection (a0, a1)) | ````a0```` : {````Eq```` } ````a1````  | _Native_  | (Collection (a0, a1)) | {"a0" --> (a0, a1)}
 
 ### Supertypes of List a0
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  | ````a0````  | Monoid | .  | {}
-Eq | ````a0````  | (a0) | Eq | {"a0" --> a0}
+Eq | ````a0````  | (Collection a0) | Eq | {"a0" --> a0}
 Monoid | ````a0````  | _Native_  | Monoid | {}
-(a0) | ````a0````  | _Native_  | (a0) | {"a0" --> a0}
-(v1) | ````a0```` : {````(v1)```` } | (v1) | (a1) | {"a0" --> k1 "a1" --> v1}
-([v1]) | ````a0```` : {````(v1)```` } | ([v1]) | (a1) | {"a0" --> k1 "a1" --> [v1]}
-(k1, v1) | ````a0```` : {````(v1)```` } | (v1) | (a0, a1) | {"a0" --> k1 "a1" --> v1}
-(k1, [v1]) | ````a0```` : {````(v1)```` } | ([v1]) | (a0, a1) | {"a0" --> k1 "a1" --> [v1]}
-(a0) | ````a0````  | _Native_  | (a0) | {"a0" --> a0}
-(k1, v1) | ````a0```` : {````(v1)```` } | (v1) | (a0, a1) | {"a0" --> k1 "a1" --> v1}
-(k1, [v1]) | ````a0```` : {````(v1)```` } | ([v1]) | (a0, a1) | {"a0" --> k1 "a1" --> [v1]}
+(Mappable a0) | ````a0````  | _Native_  | (Mappable a0) | {"a0" --> a0}
+(Mappable v1) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) v1) | (Mappable a1) | {"a0" --> k1 "a1" --> v1}
+(Mappable [v1]) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) [v1]) | (Mappable a1) | {"a0" --> k1 "a1" --> [v1]}
+(Mappable (k1, v1)) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) v1) | (Mappable (a0, a1)) | {"a0" --> k1 "a1" --> v1}
+(Mappable (k1, [v1])) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) [v1]) | (Mappable (a0, a1)) | {"a0" --> k1 "a1" --> [v1]}
+(Collection a0) | ````a0````  | _Native_  | (Collection a0) | {"a0" --> a0}
+(Collection (k1, v1)) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) v1) | (Collection (a0, a1)) | {"a0" --> k1 "a1" --> v1}
+(Collection (k1, [v1])) | ````a0```` : {````(k1, v1)```` } | ((Dict k1) [v1]) | (Collection (a0, a1)) | {"a0" --> k1 "a1" --> [v1]}
 {a0} | ````a0```` : {````Eq```` } | _Native_  | {a0} | {"a0" --> a0}
-(v1) | ````a0```` : {````(v1)```` } | _Native_  | (v1) | {"a0" --> k1 "a1" --> v1}
-([v1]) | ````a0```` : {````(v1)```` } | _Native_  | ([v1]) | {"a0" --> k1 "a1" --> [v1]}
+((Dict k1) v1) | ````a0```` : {````(k1, v1)```` } | _Native_  | ((Dict k1) v1) | {"a0" --> k1 "a1" --> v1}
+((Dict k1) [v1]) | ````a0```` : {````(k1, v1)```` } | _Native_  | ((Dict k1) [v1]) | {"a0" --> k1 "a1" --> [v1]}
 
 ### Supertypes of Maybe a0
 
@@ -202,20 +202,20 @@ Is type | Requirements | Via | Orig type | Binding
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  | ````a0````  | _Native_  | .  | {}
-Eq | ````a0````  | (a0) | Eq | {"a0" --> a0}
-Monoid | ````a0````  | (a0) | Monoid | {"a0" --> a0}
-(a0) | ````a0````  | (a0) | (a0) | {"a0" --> a0}
-(a0) | ````a0````  | _Native_  | (a0) | {"a0" --> a0}
+Eq | ````a0````  | (Collection a0) | Eq | {"a0" --> a0}
+Monoid | ````a0````  | (Collection a0) | Monoid | {"a0" --> a0}
+(Mappable a0) | ````a0````  | (Collection a0) | (Mappable a0) | {"a0" --> a0}
+(Collection a0) | ````a0````  | _Native_  | (Collection a0) | {"a0" --> a0}
 
 ### Supertypes of Set a0
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0```` : {````Eq```` } | (a0) | .  | {"a0" --> a0}
-Eq | ````a0```` : {````Eq```` } | (a0) | Eq | {"a0" --> a0}
-Monoid | ````a0```` : {````Eq```` } | (a0) | Monoid | {"a0" --> a0}
-(a0) | ````a0```` : {````Eq```` } | (a0) | (a0) | {"a0" --> a0}
-(a0) | ````a0```` : {````Eq```` } | _Native_  | (a0) | {"a0" --> a0}
+.  | ````a0```` : {````Eq```` } | (Collection a0) | .  | {"a0" --> a0}
+Eq | ````a0```` : {````Eq```` } | (Collection a0) | Eq | {"a0" --> a0}
+Monoid | ````a0```` : {````Eq```` } | (Collection a0) | Monoid | {"a0" --> a0}
+(Mappable a0) | ````a0```` : {````Eq```` } | (Collection a0) | (Mappable a0) | {"a0" --> a0}
+(Collection a0) | ````a0```` : {````Eq```` } | _Native_  | (Collection a0) | {"a0" --> a0}
 
 ### Supertypes of Tuple a0 a1
 
@@ -223,7 +223,7 @@ Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  | ````a0````  ````a1````  | _Native_  | .  | {}
 Eq | ````a0```` : {````Eq```` } ````a1```` : {````Eq```` } | _Native_  | Eq | {}
-(a1) | ````a0````  ````a1````  | _Native_  | (a1) | {"a0" --> a1}
+(Mappable a1) | ````a0````  ````a1````  | _Native_  | (Mappable a1) | {"a0" --> a1}
 
 ### Supertypes of Void 
 
@@ -253,8 +253,8 @@ Is type | Requirements | Via | Orig type | Binding
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  |  | (RSAPubKey) | .  | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
-(RSAPubKey) |  | _Native_  | (RSAPubKey) | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
+.  |  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | .  | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
+((PubPrivAlgo RSAPrivKey) RSAPubKey) |  | _Native_  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
 
 ### Supertypes of RSAPrivKey 
 
@@ -280,12 +280,12 @@ Is type | Requirements | Via | Orig type | Binding
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0```` : {````Eq```` } | {{a0}} | .  | {"a0" --> {a0}}
-Eq | ````a0```` : {````Eq```` } | {{a0}} | Eq | {"a0" --> {a0}}
-Monoid | ````a0```` : {````Eq```` } | {{a0}} | Monoid | {"a0" --> {a0}}
-({a0}) | ````a0```` : {````Eq```` } | {{a0}} | (a0) | {"a0" --> {a0}}
-({a0}) | ````a0```` : {````Eq```` } | {{a0}} | (a0) | {"a0" --> {a0}}
-{{a0}} | ````a0```` : {````Eq```` } | _Native_  | {{a0}} | {"a0" --> {a0}}
+.  | ````a0```` : {````Eq```` } | {Set a0} | .  | {"a0" --> {a0}}
+Eq | ````a0```` : {````Eq```` } | {Set a0} | Eq | {"a0" --> {a0}}
+Monoid | ````a0```` : {````Eq```` } | {Set a0} | Monoid | {"a0" --> {a0}}
+(Mappable {a0}) | ````a0```` : {````Eq```` } | {Set a0} | (Mappable a0) | {"a0" --> {a0}}
+(Collection {a0}) | ````a0```` : {````Eq```` } | {Set a0} | (Collection a0) | {"a0" --> {a0}}
+{Set a0} | ````a0```` : {````Eq```` } | _Native_  | {Set a0} | {"a0" --> {a0}}
 
 ### Supertypes of Graph a0 a1
 
@@ -297,9 +297,9 @@ Is type | Requirements | Via | Orig type | Binding
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | (a3) | .  | {"a0" --> a1 "a1" --> a3}
-(a3) | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | (a3) | {"a0" --> a1 "a1" --> a3}
-(a3) | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | (a3) | {"a0" --> a1 "a1" --> a3}
+.  | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | ((Graph a1) a3) | .  | {"a0" --> a1 "a1" --> a3}
+((Graph a1) a3) | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | ((a0 a1) a3) | {"a0" --> a1 "a1" --> a3}
+((a0 a1) a3) | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | ((a0 a1) a3) | {"a0" --> a1 "a1" --> a3}
 
 ### Supertypes of Int 
 
@@ -387,7 +387,7 @@ NatInf |  | _Native_  | NatInf | {}
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-(a1) | ````a0````  ````a1````  ````a2````  | _Native_  | (a1) | {"a0" --> a2 "a1" --> a1}
+((a0 a2) a1) | ````a0````  ````a1````  ````a2````  | _Native_  | ((a0 a2) a1) | {"a0" --> a2 "a1" --> a1}
 
 
 

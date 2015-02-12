@@ -27,15 +27,16 @@ import Languate.Graphs.SearchCycles
 
 
 {-Validates wether the 'HaveSameKind'-constraints are met-}
-validateSameKindConstraints	:: KindLookupTable -> TypeReqTable -> ((RType, RType), Location) -> Check
-validateSameKindConstraints klt treqt ((rt0, rt1),loc)
+validateSameKindConstraints	:: KindLookupTable -> TypeReqTable -> (([RTypeReq], RType, RType), Location) -> Check
+validateSameKindConstraints klt treqt ((reqs, rt0, rt1),loc)
       = onLocation loc $ inside ("Kind constraint error on "++ st True rt0 ++ " and "++st True rt1) $ try err $ do
 	bk0	<- lookupBaseKind klt rt0
 	bk1	<- lookupBaseKind klt rt1
+	kindsR	<- mapM (\rt -> bindKind klt rt Kind) (reqs |> snd)
 	kinds1	<- _bindReqKinds klt treqt rt0
 	kinds2	<- _bindReqKinds klt treqt rt1
 	binding	<- bindKind klt rt0 bk0
-	bind'	<- _mergeBind [kinds1, kinds2, binding]
+	bind'	<- _mergeBind $ [kinds1, kinds2, binding]++kindsR
 	k0	<- kindOf klt bind' rt0
 	k1	<- kindOf klt bind' rt1
 	assert (k0 == k1) $ "The types "++ st True rt0++" and "++st True rt1++" should have the same kinds.\n"++

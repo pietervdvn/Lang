@@ -290,7 +290,7 @@
 </tr>
 <tr class="odd">
 <td align="left">Collection<code>a0</code></td>
-<td align="left">. , Monoid, (a0)</td>
+<td align="left">. , Monoid, (Mappable a0)</td>
 </tr>
 <tr class="even">
 <td align="left">Collection<code>a0:Eq</code></td>
@@ -298,23 +298,23 @@
 </tr>
 <tr class="odd">
 <td align="left">Dict<code>a0</code> <code>a1</code></td>
-<td align="left">Monoid, (a1)</td>
+<td align="left">Monoid, (Mappable a1)</td>
 </tr>
 <tr class="even">
 <td align="left">Dict<code>a0:Eq</code> <code>a1</code></td>
-<td align="left">(a0, a1)</td>
+<td align="left">(Collection (a0, a1))</td>
 </tr>
 <tr class="odd">
 <td align="left">List<code>a0</code></td>
-<td align="left">Monoid, (a0), (a0)</td>
+<td align="left">Monoid, (Mappable a0), (Collection a0)</td>
 </tr>
 <tr class="even">
 <td align="left">List<code>a0:Eq</code></td>
 <td align="left">{a0}</td>
 </tr>
 <tr class="odd">
-<td align="left">List<code>a0:(v1)</code></td>
-<td align="left">(v1), ([v1])</td>
+<td align="left">List<code>a0:(k1, v1)</code></td>
+<td align="left">((Dict k1) v1), ((Dict k1) [v1])</td>
 </tr>
 <tr class="even">
 <td align="left">Maybe<code>a0</code></td>
@@ -322,15 +322,15 @@
 </tr>
 <tr class="odd">
 <td align="left">More<code>a0</code></td>
-<td align="left">. , (a0)</td>
+<td align="left">. , (Collection a0)</td>
 </tr>
 <tr class="even">
 <td align="left">Set<code>a0:Eq</code></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 </tr>
 <tr class="odd">
 <td align="left">Tuple<code>a0</code> <code>a1</code></td>
-<td align="left">. , (a1)</td>
+<td align="left">. , (Mappable a1)</td>
 </tr>
 <tr class="even">
 <td align="left">Tuple<code>a0:Eq</code> <code>a1:Eq</code></td>
@@ -354,7 +354,7 @@
 </tr>
 <tr class="odd">
 <td align="left">RSA</td>
-<td align="left">(RSAPubKey)</td>
+<td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
 </tr>
 <tr class="even">
 <td align="left">RSAPrivKey</td>
@@ -370,7 +370,7 @@
 </tr>
 <tr class="odd">
 <td align="left">Disjunct<code>a0:Eq</code></td>
-<td align="left">{{a0}}</td>
+<td align="left">{Set a0}</td>
 </tr>
 <tr class="even">
 <td align="left">Graph<code>a0:Eq, Ord</code> <code>a1</code></td>
@@ -378,7 +378,7 @@
 </tr>
 <tr class="odd">
 <td align="left">Weighted<code>a0:Graph</code> <code>a1:Ord, Eq</code> <code>a2:Monoid, Ord, Eq</code> <code>a3</code></td>
-<td align="left">(a3)</td>
+<td align="left">((a0 a1) a3)</td>
 </tr>
 <tr class="even">
 <td align="left">Int</td>
@@ -414,7 +414,7 @@
 </tr>
 <tr class="even">
 <td align="left">Flip<code>a0</code> <code>a1</code> <code>a2</code></td>
-<td align="left">(a1)</td>
+<td align="left">((a0 a2) a1)</td>
 </tr>
 </tbody>
 </table>
@@ -676,10 +676,10 @@
 <td align="left">{}</td>
 </tr>
 <tr class="even">
-<td align="left">(a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left"><code>a0</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 </tbody>
@@ -706,9 +706,9 @@
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> } <code>a1</code></td>
-<td align="left">(a0, a1)</td>
+<td align="left">(Collection (a0, a1))</td>
 <td align="left">Eq</td>
-<td align="left">{&quot;a0&quot; --&gt; (a1)}</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
@@ -718,25 +718,25 @@
 <td align="left">{}</td>
 </tr>
 <tr class="even">
-<td align="left">(a1)</td>
+<td align="left">(Mappable a1)</td>
 <td align="left"><code>a0</code> <code>a1</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a1)</td>
+<td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1}</td>
 </tr>
 <tr class="odd">
-<td align="left">(a0, a1)</td>
+<td align="left">(Mappable (a0, a1))</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> } <code>a1</code></td>
-<td align="left">(a0, a1)</td>
-<td align="left">(a0)</td>
-<td align="left">{&quot;a0&quot; --&gt; (a1)}</td>
+<td align="left">(Collection (a0, a1))</td>
+<td align="left">(Mappable a0)</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 </tr>
 <tr class="even">
-<td align="left">(a0, a1)</td>
+<td align="left">(Collection (a0, a1))</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> } <code>a1</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a0, a1)</td>
-<td align="left">{&quot;a0&quot; --&gt; (a1)}</td>
+<td align="left">(Collection (a0, a1))</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 </tr>
 </tbody>
 </table>
@@ -762,7 +762,7 @@
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left"><code>a0</code></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">Eq</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
@@ -774,59 +774,59 @@
 <td align="left">{}</td>
 </tr>
 <tr class="even">
-<td align="left">(a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left"><code>a0</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="odd">
-<td align="left">(v1)</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
-<td align="left">(v1)</td>
-<td align="left">(a1)</td>
+<td align="left">(Mappable v1)</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="even">
-<td align="left">([v1])</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
-<td align="left">([v1])</td>
-<td align="left">(a1)</td>
+<td align="left">(Mappable [v1])</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
+<td align="left">((Dict k1) [v1])</td>
+<td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
 </tr>
 <tr class="odd">
-<td align="left">(k1, v1)</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
-<td align="left">(v1)</td>
-<td align="left">(a0, a1)</td>
+<td align="left">(Mappable (k1, v1))</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">(Mappable (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="even">
-<td align="left">(k1, [v1])</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
-<td align="left">([v1])</td>
-<td align="left">(a0, a1)</td>
+<td align="left">(Mappable (k1, [v1]))</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
+<td align="left">((Dict k1) [v1])</td>
+<td align="left">(Mappable (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
 </tr>
 <tr class="odd">
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left"><code>a0</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="even">
-<td align="left">(k1, v1)</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
-<td align="left">(v1)</td>
-<td align="left">(a0, a1)</td>
+<td align="left">(Collection (k1, v1))</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">(Collection (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="odd">
-<td align="left">(k1, [v1])</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
-<td align="left">([v1])</td>
-<td align="left">(a0, a1)</td>
+<td align="left">(Collection (k1, [v1]))</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
+<td align="left">((Dict k1) [v1])</td>
+<td align="left">(Collection (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
 </tr>
 <tr class="even">
@@ -837,17 +837,17 @@
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="odd">
-<td align="left">(v1)</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
 <td align="left"><em>Native</em></td>
-<td align="left">(v1)</td>
+<td align="left">((Dict k1) v1)</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="even">
-<td align="left">([v1])</td>
-<td align="left"><code>a0</code> : {<code>(v1)</code> }</td>
+<td align="left">((Dict k1) [v1])</td>
+<td align="left"><code>a0</code> : {<code>(k1, v1)</code> }</td>
 <td align="left"><em>Native</em></td>
-<td align="left">([v1])</td>
+<td align="left">((Dict k1) [v1])</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
 </tr>
 </tbody>
@@ -895,29 +895,29 @@
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left"><code>a0</code></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">Eq</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
 <td align="left"><code>a0</code></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">Monoid</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="even">
-<td align="left">(a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left"><code>a0</code></td>
-<td align="left">(a0)</td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="odd">
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left"><code>a0</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 </tbody>
@@ -937,36 +937,36 @@
 <tr class="odd">
 <td align="left">.</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">Eq</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">Monoid</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="even">
-<td align="left">(a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">(a0)</td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
+<td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 <tr class="odd">
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a0)</td>
+<td align="left">(Collection a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
 </tr>
 </tbody>
@@ -998,10 +998,10 @@
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
-<td align="left">(a1)</td>
+<td align="left">(Mappable a1)</td>
 <td align="left"><code>a0</code> <code>a1</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a1)</td>
+<td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1}</td>
 </tr>
 </tbody>
@@ -1105,15 +1105,15 @@
 <tr class="odd">
 <td align="left">.</td>
 <td align="left"></td>
-<td align="left">(RSAPubKey)</td>
+<td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPrivKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPrivKey</a> &quot;a1&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPubKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPubKey</a>}</td>
 </tr>
 <tr class="even">
-<td align="left">(RSAPubKey)</td>
+<td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(RSAPubKey)</td>
+<td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
 <td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPrivKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPrivKey</a> &quot;a1&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPubKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPubKey</a>}</td>
 </tr>
 </tbody>
@@ -1210,43 +1210,43 @@
 <tr class="odd">
 <td align="left">.</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">{{a0}}</td>
+<td align="left">{Set a0}</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">{{a0}}</td>
+<td align="left">{Set a0}</td>
 <td align="left">Eq</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">{{a0}}</td>
+<td align="left">{Set a0}</td>
 <td align="left">Monoid</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="even">
-<td align="left">({a0})</td>
+<td align="left">(Mappable {a0})</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">{{a0}}</td>
-<td align="left">(a0)</td>
+<td align="left">{Set a0}</td>
+<td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="odd">
-<td align="left">({a0})</td>
+<td align="left">(Collection {a0})</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
-<td align="left">{{a0}}</td>
-<td align="left">(a0)</td>
+<td align="left">{Set a0}</td>
+<td align="left">(Collection a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="even">
-<td align="left">{{a0}}</td>
+<td align="left">{Set a0}</td>
 <td align="left"><code>a0</code> : {<code>Eq</code> }</td>
 <td align="left"><em>Native</em></td>
-<td align="left">{{a0}}</td>
+<td align="left">{Set a0}</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 </tbody>
@@ -1287,22 +1287,22 @@
 <tr class="odd">
 <td align="left">.</td>
 <td align="left"><code>a0</code> : {<code>Graph</code> } <code>a1</code> : {<code>Eq</code> , <code>Ord</code> } <code>a2</code> : {<code>Eq</code> , <code>Monoid</code> , <code>Ord</code> } <code>a3</code></td>
-<td align="left">(a3)</td>
+<td align="left">((Graph a1) a3)</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
 </tr>
 <tr class="even">
-<td align="left">(a3)</td>
+<td align="left">((Graph a1) a3)</td>
 <td align="left"><code>a0</code> : {<code>Graph</code> } <code>a1</code> : {<code>Eq</code> , <code>Ord</code> } <code>a2</code> : {<code>Eq</code> , <code>Monoid</code> , <code>Ord</code> } <code>a3</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a3)</td>
+<td align="left">((a0 a1) a3)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
 </tr>
 <tr class="odd">
-<td align="left">(a3)</td>
+<td align="left">((a0 a1) a3)</td>
 <td align="left"><code>a0</code> : {<code>Graph</code> } <code>a1</code> : {<code>Eq</code> , <code>Ord</code> } <code>a2</code> : {<code>Eq</code> , <code>Monoid</code> , <code>Ord</code> } <code>a3</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a3)</td>
+<td align="left">((a0 a1) a3)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
 </tr>
 </tbody>
@@ -1726,10 +1726,10 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">(a1)</td>
+<td align="left">((a0 a2) a1)</td>
 <td align="left"><code>a0</code> <code>a1</code> <code>a2</code></td>
 <td align="left"><em>Native</em></td>
-<td align="left">(a1)</td>
+<td align="left">((a0 a2) a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; a2 &quot;a1&quot; --&gt; a1}</td>
 </tr>
 </tbody>
