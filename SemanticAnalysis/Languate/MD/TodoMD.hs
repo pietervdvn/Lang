@@ -18,6 +18,7 @@ import ConsumerL
 import Data.Maybe
 import Data.Char
 import Data.List
+import Data.Either
 
 keywords	= ["todo","fixme","fix me","fix-me","wtf"]
 -- Table per module, what type ("todo","fixme") and message. Todos consist of one line!
@@ -30,7 +31,9 @@ buildTodoTable w
 
 
 todoFor		:: FQN -> Module -> [(Coor, Name, String)]
-todoFor fqn m	=  statements' m >>= uncurry todoIn
+todoFor fqn m	=  let  importTodo	= imports m & lefts & Comments & flip todoIn (0,0)
+			stmTodo		= statements' m >>= uncurry todoIn in
+			importTodo ++ stmTodo
 
 todoIn		:: Statement -> Coor -> [(Coor, Name, String)]
 todoIn (DocStringStm docs) coor
