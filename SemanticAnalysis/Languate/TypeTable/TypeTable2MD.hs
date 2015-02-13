@@ -22,7 +22,7 @@ typeTable2md tt
 	= let	overviewTable	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)
 		sttTitle	= title 2 "Supertypes " ++ parag (superTypeTable2md tt)
 		perType	= ((toList $ allSupertypes tt) >>= (uncurry (fstt2md $ kinds tt)))
-		in overviewTable ++ sttTitle ++ perType
+		in overviewTable ++ sttTitle ++ title 2 "Supertypetable per type" ++ explanation ++ perType
 
 
 typeRow		:: TypeTable -> TypeID -> [MarkDown]

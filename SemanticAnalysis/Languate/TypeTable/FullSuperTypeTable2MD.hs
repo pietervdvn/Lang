@@ -1,4 +1,4 @@
-module Languate.TypeTable.FullSuperTypeTable2MD (fstt2md) where
+module Languate.TypeTable.FullSuperTypeTable2MD (fstt2md,explanation) where
 
 import StdDef
 import MarkDown
@@ -12,6 +12,22 @@ import Data.Maybe
 import Languate.TAST
 import Languate.TypeTable
 import Languate.TypeTable.Extended
+
+
+
+explanation	:: MarkDown
+explanation	= title 3 "How to read a 'Supertypetable of T a0 a1'" ++
+			[code "T a0 a1 " ++ "is the type given in "++bold "Is Type" ++ ", if the "++bold "requirements" ++ "on the free type variables (in the second column) are met."++
+				"This table contains always the same number of frees, but a certain supertype can demand extra requirements.",
+			"The "++ bold "Via" ++ " column codes via what type this specific supertype was added. "++
+				"This means that, if "++code "List"++" has supertype "++code "Collection"++", and "++code "Collection"++" has supertype "++code"Mappable"++
+					", that "++code "List" ++"has the suppertype"++code "Mappable"++", which has been added via"++code "Collection"++". "++
+				ital "Native" ++ "denotes that this supertype was added via the code."
+			, "A "++bold "Binding"++"might have happened on this supertype. E.g "++code "List (k,v)"++"has the supertype"++code "Dict k v"++"."++
+				code "Dict a0 a1"++"has the supertype"++code "Collection a0 a1"++"."++
+				"So if we want to add the supertype"++code "Collection a0 a1"++"to"++code "List (k,v)"++", we have to substitute"++code "a0 --> k, a1 --> v"++
+					"in the"++code"Collection a0 a1"++"example, if we want it to be correct."++
+			"The "++bold "Orig Type"++"show this type before the substitution."] |> parag & concat
 
 
 fstt2md	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkDown

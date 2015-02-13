@@ -418,6 +418,11 @@
 </tr>
 </tbody>
 </table>
+<h2 id="supertypetable-per-type">Supertypetable per type</h2>
+<h3 id="how-to-read-a-supertypetable-of-t-a0-a1">How to read a 'Supertypetable of T a0 a1'</h3>
+<p><code>T a0 a1</code> is the type given in <strong>Is Type</strong> , if the <strong>requirements</strong> on the free type variables (in the second column) are met.This table contains always the same number of frees, but a certain supertype can demand extra requirements.</p>
+<p>The <strong>Via</strong> column codes via what type this specific supertype was added. This means that, if <code>List</code> has supertype <code>Collection</code> , and <code>Collection</code> has supertype <code>Mappable</code> , that <code>List</code> has the suppertype<code>Mappable</code> , which has been added via<code>Collection</code> . <em>Native</em> denotes that this supertype was added via the code.</p>
+<p>A <strong>Binding</strong> might have happened on this supertype. E.g <code>List (k,v)</code> has the supertype<code>Dict k v</code> .<code>Dict a0 a1</code> has the supertype<code>Collection a0 a1</code> .So if we want to add the supertype<code>Collection a0 a1</code> to<code>List (k,v)</code> , we have to substitute<code>a0 --&gt; k, a1 --&gt; v</code> in the<code>Collection a0 a1</code> example, if we want it to be correct.The <strong>Orig Type</strong> show this type before the substitution.</p>
 <h3 id="supertypes-of-biint">Supertypes of BIInt</h3>
 <table>
 <thead>
