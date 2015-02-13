@@ -36,6 +36,7 @@ conv (frees, (isTyp, reqs))
 		base	= (isTyp, (zip frees $ nativeS, Nothing, (isTyp, binding))) in
 		base:expandFrees reqs base
 
+
 {-
 If the rtype is a free, and requirements are known about this free, we can say more about the supertype.
 

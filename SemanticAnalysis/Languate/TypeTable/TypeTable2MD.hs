@@ -20,9 +20,9 @@ import Languate.TypeTable.FullSuperTypeTable2MD
 typeTable2md	:: TypeTable -> MarkDown
 typeTable2md tt
 	= let	overviewTable	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)
-		sttTitle	= title 2 "Supertypes " ++ parag (superTypeTable2md tt)
+		stts	= title 2 "Supertypes " ++ parag (superTypeTable2md tt)
 		perType	= ((toList $ allSupertypes tt) >>= (uncurry (fstt2md $ kinds tt)))
-		in overviewTable ++ sttTitle ++ title 2 "Supertypetable per type" ++ explanation ++ perType
+		in overviewTable ++ title 2 "Supertypetables per type" ++ explanation ++ perType
 
 
 typeRow		:: TypeTable -> TypeID -> [MarkDown]

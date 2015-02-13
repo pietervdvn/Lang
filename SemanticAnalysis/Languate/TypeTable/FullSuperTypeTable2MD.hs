@@ -17,7 +17,7 @@ import Languate.TypeTable.Extended
 
 explanation	:: MarkDown
 explanation	= title 3 "How to read a 'Supertypetable of T a0 a1'" ++
-			[code "T a0 a1 " ++ "is the type given in "++bold "Is Type" ++ ", if the "++bold "requirements" ++ "on the free type variables (in the second column) are met."++
+			[code "T a0 a1 " ++ "is the type given in "++bold "Is Type" ++ ", if the "++bold "requirements" ++ "on the free type variables are met. "++
 				"This table contains always the same number of frees, but a certain supertype can demand extra requirements.",
 			"The "++ bold "Via" ++ " column codes via what type this specific supertype was added. "++
 				"This means that, if "++code "List"++" has supertype "++code "Collection"++", and "++code "Collection"++" has supertype "++code"Mappable"++
@@ -34,7 +34,7 @@ fstt2md	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkDown
 fstt2md klt tid@(fqn, nm) fstt
 	= title 3 ("Supertypes of "++nm++" "++sfrees (findWithDefault Kind tid klt)) ++
 		if M.null fstt then parag "No supertypes"
-		   else	table ["Is type","Requirements","Via","Orig type","Binding"] (fmap rows $ toList fstt)
+		   else	table ["Is type","Requirements","Via","Orig type","Orig type reqs","Binding"] (fmap rows $ toList fstt)
 
 
 rows	:: FullSTTKeyEntry -> [MarkDown]
@@ -43,6 +43,7 @@ rows (isA, (ifReq, via, (super, bnd)))
 		unwords (ifReq |> showReqs),
 		fromMaybe (ital "Native") $ (via |> st True),
 		st True super,
+		"Todo",
 		show bnd
 		]
 

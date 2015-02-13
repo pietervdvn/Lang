@@ -32,7 +32,8 @@ instance List a is Mappable a
 instance List (a:(k,v)) is Dict k v
 instance List (a:(k,v)) is Dict k [v]
 ---
-instance List (x:Eq)	is Set x
+instance List a is Set a
+
 
 
 map	: (a -> b) -> [a] -> [b]
