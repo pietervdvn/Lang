@@ -32,6 +32,7 @@ validateSameKindConstraints klt treqt ((reqs, rt0, rt1),loc)
       = onLocation loc $ inside ("Kind constraint error on "++ st True rt0 ++ " and "++st True rt1) $ try err $ do
 	bk0	<- lookupBaseKind klt rt0
 	bk1	<- lookupBaseKind klt rt1
+	-- TODO this kind should not be hardcoded
 	kindsR	<- mapM (\rt -> bindKind klt rt Kind) (reqs |> snd)
 	kinds1	<- _bindReqKinds klt treqt rt0
 	kinds2	<- _bindReqKinds klt treqt rt1
