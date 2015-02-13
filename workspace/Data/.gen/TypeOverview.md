@@ -45,48 +45,36 @@ Type | Declared in | Kind | Docstring
 
 Type | Is subtype of
 ---- | -------------
-BIInt | . 
-Eq | . 
-Associative````a0````  | (a0 -> (a0 -> a0))
-Commutative````a0````  ````a1````  | (a0 -> (a0 -> a1))
-Curry````a0````  ````a1````  | (a0 -> a1)
-Mappable````a0````  | . 
-Monoid | . 
-Product | . , Monoid
-Sum | . , Monoid
-Ord | . 
-Collection````a0````  | . , Monoid, (Mappable a0)
-Collection````a0:Eq````  | Eq
-Dict````a0````  ````a1````  | Monoid, (Mappable a1)
-Dict````a0:Eq````  ````a1````  | (Collection (a0, a1))
-List````a0````  | Monoid, (Mappable a0), (Collection a0)
-List````a0:Eq````  | {a0}
-List````a0:(k1, v1)````  | ((Dict k1) v1), ((Dict k1) [v1])
-Maybe````a0````  | . 
-More````a0````  | . , (Collection a0)
-Set````a0:Eq````  | (Collection a0)
-Tuple````a0````  ````a1````  | . , (Mappable a1)
-Tuple````a0:Eq````  ````a1:Eq````  | Eq
-Void | . 
-PrivateKey | . 
-PubPrivAlgo````a0:PrivateKey````  ````a1:PublicKey````  | . 
-PublicKey | . 
-RSA | ((PubPrivAlgo RSAPrivKey) RSAPubKey)
-RSAPrivKey | . , PrivateKey
-RSAPubKey | . , PublicKey
-Bool | . 
-Disjunct````a0:Eq````  | {Set a0}
-Graph````a0:Eq, Ord````  ````a1````  | . 
-Weighted````a0:Graph````  ````a1:Ord, Eq````  ````a2:Monoid, Ord, Eq````  ````a3````  | ((a0 a1) a3)
-Int | IntInf
-Int' | Int, IntInf'
-IntInf | BIInt, Eq
-IntInf' | IntInf
-Nat | Int, NatInf
-Nat' | Int', Nat
-NatInf | IntInf
-NatInf' | IntInf', NatInf
-Flip````a0````  ````a1````  ````a2````  | ((a0 a2) a1)
+Associative````a0````  | ````(a0 -> (a0 -> a0))```` 
+Commutative````a0````  ````a1````  | ````(a0 -> (a0 -> a1))```` 
+Curry````a0````  ````a1````  | ````(a0 -> a1)```` 
+Product | ````Monoid```` 
+Sum | ````Monoid```` 
+Collection````a0````  | ````Monoid```` , ````(Mappable a0)```` 
+Collection````a0:Eq````  | ````Eq```` 
+Dict````a0````  ````a1````  | ````Monoid```` , ````(Mappable a1)```` 
+Dict````a0:Eq````  ````a1````  | ````(Collection (a0, a1))```` 
+List````a0````  | ````Monoid```` , ````(Mappable a0)```` , ````(Collection a0)```` 
+List````a0:Eq````  | ````{a0}```` 
+List````a0:(k1, v1)````  | ````((Dict k1) v1)```` , ````((Dict k1) [v1])```` 
+More````a0````  | ````(Collection a0)```` 
+Set````a0:Eq````  | ````(Collection a0)```` 
+Tuple````a0````  ````a1````  | ````(Mappable a1)```` 
+Tuple````a0:Eq````  ````a1:Eq````  | ````Eq```` 
+RSA | ````((PubPrivAlgo RSAPrivKey) RSAPubKey)```` 
+RSAPrivKey | ````PrivateKey```` 
+RSAPubKey | ````PublicKey```` 
+Disjunct````a0:Eq````  | ````{Set a0}```` 
+Weighted````a0:Graph````  ````a1:Ord, Eq````  ````a2:Monoid, Ord, Eq````  ````a3````  | ````((a0 a1) a3)```` 
+Int | ````IntInf```` 
+Int' | ````Int```` , ````IntInf'```` 
+IntInf | ````BIInt```` , ````Eq```` 
+IntInf' | ````IntInf```` 
+Nat | ````Int```` , ````NatInf```` 
+Nat' | ````Int'```` , ````Nat```` 
+NatInf | ````IntInf```` 
+NatInf' | ````IntInf'```` , ````NatInf```` 
+Flip````a0````  ````a1````  ````a2````  | ````((a0 a2) a1)```` 
 
 
 

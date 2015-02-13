@@ -53,10 +53,6 @@ typeReqFor tt id names i
 showShort	:: RType -> String
 showShort	=  st True
 
-showShorts 	:: String -> [RType] -> String
-showShorts comma tps
-		= intercal ", " $ map showShort tps
-
 
 -- Supertypetable --
 --------------------
@@ -68,9 +64,10 @@ superTypeTable2md tt	=  let	all	= keys $ supertypes tt	in
 superType2md	:: TypeTable -> TypeID -> [[MarkDown]]
 superType2md tt tid
 		= let 	all	= superTypesFor tt tid
-			merged	= merge $ map (showEntry tid) all	::  [(MarkDown, [MarkDown])]
-			mix (t, tps)	= [t, intercal ", " tps]	in
-			map mix merged
+			showTps	tps	= intercal ", " $ (tps & filter (/= ". ") |> code) 	:: MarkDown
+			entries	= all |> showEntry tid & merge ||>> showTps & filter (not . null . snd) |> (\(t,tps) -> [t,tps]) in
+			entries
+
 
 
 showEntry	:: TypeID -> ([Name], RType, Map Name [RType]) -> (MarkDown, MarkDown)
