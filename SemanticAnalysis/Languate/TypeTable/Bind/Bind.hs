@@ -29,8 +29,14 @@ import Control.Monad.Trans
 import Debug.Trace
 
 
+{-
 
+Binds t0 in t1. If binding succeeds, this means t0 is a subtype (or equal type) of t1.
 
+For each applied type, at most one supertypetable convert can happen.
+-}
+bind	:: TypeTable -> RType -> RType -> Either String Binding
+bind	= todo
 
 
 

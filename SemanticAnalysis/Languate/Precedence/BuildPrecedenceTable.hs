@@ -19,7 +19,7 @@ import Languate.FQN
 import Languate.AST
 import Languate.World
 
-import Languate.Precedence.AnnotationStrip
+import Languate.Precedence.Utils
 import Languate.Precedence.PrecTable2MD
 import Languate.Precedence.CheckPrecStatements
 import Languate.Precedence.PrecedenceTable

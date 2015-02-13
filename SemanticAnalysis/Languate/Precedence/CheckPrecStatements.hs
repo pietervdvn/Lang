@@ -11,8 +11,10 @@ import Data.Maybe
 import Data.Set (Set, fromList, member)
 import qualified Data.Set as S
 import Data.Map (Map, findWithDefault)
-import Data.List (nub)
+import Data.List (nub, sort, intercalate)
 import Languate.Precedence.PrecedenceTable
+import Languate.Precedence.Utils
+
 
 
 -------------------
@@ -43,7 +45,18 @@ checkPrecStms available p@(PrecAnnot {operator = op, relations = rels})
 
 checkPrecRels	:: [PrecRelation] -> Check
 checkPrecRels rels
-	= pass	-- TODO
+	= do	let eqs	= eqRelations rels |> normalize
+		let showEq (op0, op1)	= op0 ++ " = "++ op1
+		assert' (unique eqs) $ "You stated a same precedence relationship multiple times: " ++ intercalate ", " (dubbles eqs |> showEq)
+		let lts	= ltRelations rels
+		let showLt (op0, op1)	= op0 ++ " < "++ op1
+		assert' (unique lts) $ "You stated a lower precedence relationship multiple times: " ++ intercalate ", " (dubbles lts |> showLt)
+		inside "Contradictory precedence statement:" $ do
+		let checkOne f lt	= assert (f lt `notElem` eqs) $ "You defined both "++ showEq (f lt) ++" and "++ showEq lt
+		mapM_ (checkOne id)   lts
+		mapM_ (checkOne swap) lts
+		let checkOne' lt	= assert (swap lt `notElem` lts) $ "You defined both "++ showLt (swap lt) ++" and "++ showLt lt
+		mapM_ checkOne' lts
 
 
 
