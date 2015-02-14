@@ -122,6 +122,9 @@ _addEntry base via oldBinding superToAdd newBinding
 		let fstt'	= M.insert super entry fstt
 		let fstts'	= M.insert base fstt' fstts
 		modify (\ctx -> ctx {fstt_ = fstts'})
+		let mSuperTid	= getBaseTID superToAdd
+		-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
+		when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
 		return True
 
 subReq	:: Binding -> (Name, Set RType) -> Maybe (Name, Set RType)
