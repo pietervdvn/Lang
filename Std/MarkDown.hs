@@ -18,7 +18,10 @@ itemize 	=  parag . unlines . map ("- "++)
 
 table		:: [String] -> [[String]] -> MarkDown
 table header conts
-		= intercalate "\n" ([bars header, bars $ map (map $ const '-') header] ++ map bars $ filter notNull conts) ++ "\n\n"
+	= let 	header'	= bars header
+		lines	= header ||>> const '-' & bars
+		conts'	= conts & filter (not . null) |> bars in
+		unlines (header':lines:conts') ++ "\n\n"
 
 parag ""	= ""
 parag str	= str ++ "\n\n"
