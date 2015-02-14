@@ -192,6 +192,9 @@ asRType'	:: (FQN, Name) -> RType
 asRType' (fqn, nm)
 		= RNormal fqn nm
 
+isRFree (RFree _)	= True
+isRFree _	= False
+
 traverseRT	:: (RType -> RType) -> RType -> RType
 traverseRT f (RApplied bt t)
 		= RApplied (traverseRT f bt) $ traverseRT f t

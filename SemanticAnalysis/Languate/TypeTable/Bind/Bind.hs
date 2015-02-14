@@ -70,7 +70,7 @@ bind' (RCurry t0 t1) (RCurry t0' t1')
  = do	bind' t0 t0'
 	bind' t1 t1'
 bind' t0@(RNormal fqn nm) t1
- = do	when (t0 /= t1) $ do	-- if they are the same, nothing should happen
+ = when (t0 /= t1) $ do	-- if they are the same, nothing should happen
 	-- we search if t1 is a supertype of t0
 	inside ("Could not bind") $ do
 	let tid0	= (fqn, nm)
@@ -83,9 +83,18 @@ bind' t0@(RNormal fqn nm) t1
 	-- if all types have failed, length failed = length posSups
 	assert (length failed /= length posSups) $
 		"No possible supertypes could be bound in "++show t1++".\nTried types:\n"++indent (show posSups)
-bind' t0 t1
-	| t0 == t1	= return ()
-	| otherwise	= fail "TODO"
+bind' t0@(RApplied bt at) t1@(RApplied bt' at')
+ = do	bind' bt bt'
+	bind' at at'
+
+
+
+{- Tries to bind the (bt,at) of a applied type against a given rtype, by using the full super type table
+
+-}
+bapp	:: (RType, RType) -> RType -> St ()
+bapp (bt,at) t1
+	= todo
 
 
 {- Tries to make two types the same, by filling in the frees in any of them.
@@ -106,7 +115,8 @@ unificate t0 t1
 
 unificate'	:: RType -> RType -> StMsg ()
 unificate' (RFree a) (RFree b)
-	= do	addBinding (a, RFree b)
+	= unless (a == b) $ do
+		addBinding (a, RFree b)
 		addBinding (b, RFree a)
 unificate' (RFree a) t1
 	= addBinding (a,t1)
@@ -164,7 +174,6 @@ addBinding (n,t)
 		let (Binding b)	= binding ctx
 		-- check wether or not a conflicting binding exists
 		let previous	= M.lookup n b
-		when (isJust previous) $ unificate' (RFree n) (fromJust previous)
 		assert (isNothing previous || t == fromJust previous) $
 			"Conflicting bindings for '"++n++"' are found."++
 			" It could be both bound to "++show (fromJust previous)++" and "++show t

@@ -109,3 +109,5 @@ t8	= bnd "Nat -> Int" "Int -> a"
 
 -- Binding via application
 t9	= bnd "List Nat" "List a"
+
+t10	= bnd "Int -> Bool" "a -> a"
