@@ -22,6 +22,7 @@ Precedence | Operators | Associativity
 
 
 
+
 Operator | Precedence | Associativity
 -------- | ---------- | -------------
 ``!`` | 0 | prefix
@@ -40,6 +41,7 @@ Operator | Precedence | Associativity
 ``?`` | 7 | right
 ``^`` | 8 | left
 ``||`` | 3 | left
+
 
 
 
