@@ -1,4 +1,7 @@
-module TestRender where
+module Languate.MaintenanceAccess.TestRender where
 
+import StdDef
 
-t = Bold (Normal "Abc") & renderHTML
+import Languate.MarkUp.MarkUp
+
+mu = Emph (Base "Abc")
