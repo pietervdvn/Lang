@@ -14,3 +14,8 @@ cabal.config
 pickup.txt
 
 workspace/Data/.gen/*
+
+# temporary files
+*~
+.swp
+.swo

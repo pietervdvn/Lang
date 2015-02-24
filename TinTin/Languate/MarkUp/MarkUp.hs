@@ -7,7 +7,8 @@ import StdDef
 -- Represents a snippet of markUpped code
 data MarkUp	= Base String	-- Embeds a plaintext in markup
 		| Emph MarkUp	-- Emphasized markup
-
+		| Titling MarkUp MarkUp --Embedded titeling [title, markup]
+ 
 
 type MarkDown	= String
 type HTML	= String
@@ -16,8 +17,10 @@ renderMD	:: MarkUp -> MarkDown
 renderMD (Base str)
 		= str
 renderMD (Emph mu)
-		= "**"++renderMD mu++"**"
+		= renderMD mu & between "_"
 
+between	:: String -> MarkDown -> MarkDown
+between str md = str++md++str
 
 
 renderHTML	:: MarkUp -> HTML
