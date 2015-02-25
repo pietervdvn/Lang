@@ -217,6 +217,10 @@ getBaseTID (RApplied bt _)
 		= getBaseTID bt
 getBaseTID _	= Nothing
 
+-- Means a base tid exists
+isNormal	:: RType -> Bool
+isNormal 	= isJust . getBaseTID
+
 
 freesInRT	:: RType -> [Name]
 freesInRT	= foldRT frees concat

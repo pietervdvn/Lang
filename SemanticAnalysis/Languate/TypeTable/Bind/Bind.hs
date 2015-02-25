@@ -71,30 +71,57 @@ bind' (RCurry t0 t1) (RCurry t0' t1')
 	bind' t1 t1'
 bind' t0@(RNormal fqn nm) t1
  = when (t0 /= t1) $ do	-- if they are the same, nothing should happen
-	-- we search if t1 is a supertype of t0
-	inside ("Could not bind") $ do
-	let tid0	= (fqn, nm)
-	tid1	<- getBaseTID t1 ? (show t1 ++ " is not a simple type.")
-	sst	<- get' typeT |> spareSuperTypes |> findWithDefault M.empty tid0
-	-- possibleSupers	:: [RType]
-	posSups	<- lookup tid1 sst ? (show t1++" is not a supertype of "++show t0++"\n"++show sst)
-	-- we try to match any supertype. All tried and failed types are returned.
-	failed	<- whileM (\posSup -> fmap not $ succeeded $ bind' posSup t1) posSups
-	-- if all types have failed, length failed = length posSups
-	assert (length failed /= length posSups) $
-		"No possible supertypes could be bound in "++show t1++".\nTried types:\n"++indent (show posSups)
+	-- we search if t1 is a supertype of t0 that matches
+	superBind t0 t1
 bind' t0@(RApplied bt at) t1@(RApplied bt' at')
  = do	bind' bt bt'
 	bind' at at'
+bind' t0@(RApplied bt at) t1
+ = superBind t0 t1
 
 
+{- Tries to bind t0 in t1 via a super type table lookup
 
-{- Tries to bind the (bt,at) of a applied type against a given rtype, by using the full super type table
+At most one lookup happens per recursive layer.
 
 -}
-bapp	:: (RType, RType) -> RType -> St ()
-bapp (bt,at) t1
-	= todo
+superBind	:: RType -> RType -> StMsg ()
+superBind t0 t1
+ | (not $ isNormal t0) && (not $ isNormal t1)
+	= fail $ "Could not bind the special types "++show t0++" and "++show t1++" through a super type table lookup"
+ | not $ isNormal t1	-- t1 is something special, like a curry; t0 is normal
+	= do	tidBt	<- getBaseTID t0 ? ("No basetid for "++show t0++"; this is weird")
+		fstt	<- get' typeT |> allSupertypes |> findWithDefault M.empty tidBt
+		let possible	= keys fstt & L.filter (not . isNormal)
+		failed	<- tryBind possible t1
+		assert (length failed /= length possible) $
+			"No possible supertypes could be bound in "++show t1++".\nTried (abnormal) types:\n"++show failed
+		-- if no type failed, a binding has happened.
+ | not $ isNormal t0
+	= fail $ "The base type is not a normal type. Could not bind "++show t0++" against "++show t1
+ | otherwise	-- both are normal types!
+	= do	tid0	<- getBaseTID t0 ? "Huh? T0 should be normal!"
+		tid1	<- getBaseTID t1 ? "Huh? T1 should be normal!"
+		sstt	<- get' typeT |> spareSuperTypes |> findWithDefault M.empty tid0
+		-- possible super types, as given by the sstt
+		let possSups	= sstt & findWithDefault [] tid1
+		-- we do now know what types are possible, given the bases
+		-- we bind t0 against the first that is possible, in a recursive way that repects applied types
+		-- TODO what should happen with the requirements?
+		-- TODO fix possible free leaks
+		failed 	<- mapM (\possSup -> succeeded $ bapp t0 possSup) possSups
+		assert (length failed /= length possSups)
+			$ "Binding of "++show t0++" against a possible supertype failed\nTried supers:\n"++show possSups
+
+bapp	:: RType -> RType -> StMsg ()
+bapp t0 t1
+	= fail "hi"
+
+
+-- Tries to bind any t0 against the given t0. Returns the failed types
+tryBind	:: [RType] -> RType -> StMsg [RType]
+tryBind possSups t1
+	= whileM (\possSup -> (succeeded $ bind' possSup t1) |> not) possSups
 
 
 {- Tries to make two types the same, by filling in the frees in any of them.
