@@ -13,7 +13,7 @@ import Languate.TAST
 import Languate.AST as AST
 import Languate.FQN
 import Languate.TypeTable
-import Languate.World
+import Languate.Package
 import Languate.CheckUtils
 
 import Data.Map (mapWithKey, findWithDefault, Map)
@@ -25,7 +25,7 @@ import Control.Monad.Reader
 import Control.Arrow
 
 
-buildKindConstraints	:: Map FQN TypeLookupTable -> World -> Exc [(KindConstraint, Location)]
+buildKindConstraints	:: Map FQN TypeLookupTable -> Package -> Exc [(KindConstraint, Location)]
 buildKindConstraints tlts w
 	= do	let mods	= M.toList $ modules w
 		mapM (uncurry $ kindConstraints tlts) mods |> concat
@@ -79,7 +79,7 @@ kindConstraintIn (SynDefStm (SynDef nm frees sameAs reqs))
 			let base	= foldl RApplied (RNormal fqn nm) (frees |> RFree)
 			reqs'		<- resolveReqs reqs
 			let same	= HaveSameKind reqs' base synonym
-			return $ [same, baseConstrs]
+			return [same, baseConstrs]
 kindConstraintIn _	= return []
 
 

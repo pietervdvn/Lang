@@ -10,7 +10,7 @@ import qualified Bnf
 import Languate.FQN
 import Languate.AST
 import Languate.File2AST
-import Languate.World
+import Languate.Package
 import Data.Map hiding (null, map, filter, foldr, foldl)
 import StateT
 import Control.Monad
@@ -22,7 +22,7 @@ import qualified Data.Set as S
 
 
 -- loadpackage, but crashes when imports are not found
-loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO World
+loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO Package
 loadPackage' world fqn fp
 		= do	(package, notFound)	<- loadPackage world fqn fp
 			unless (null notFound) $ printErr notFound

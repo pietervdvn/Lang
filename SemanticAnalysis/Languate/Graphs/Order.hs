@@ -6,6 +6,8 @@ import Languate.Graphs.SearchCycles
 import qualified Data.Set as S
 import qualified Data.Map as M
 
+import Control.Applicative
+
 
 {-
 
@@ -38,4 +40,4 @@ _bo graph
 		leafs' ++ _bo (dropNodes leaves graph)
 
 testGraph	=
-	fmap S.fromList $ M.fromList [("a",["b","c"]),("b",["c"]), ("c",[])]
+	S.fromList <$> M.fromList [("a",["b","c"]),("b",["c"]), ("c",[])]

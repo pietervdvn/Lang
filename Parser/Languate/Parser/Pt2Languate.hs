@@ -34,7 +34,7 @@ convert cpt
 			applyAll annotCpts (Module "" (BlackList []) [] [])
 
 applyAll	:: [(CPT, (Line,Column))] -> Module -> Module
-applyAll stms	=  flip (foldr toMod) stms
+applyAll	=  flip (foldr toMod)
 
 
 toMod		:: (CPT,(Line,Column)) -> Module -> Module

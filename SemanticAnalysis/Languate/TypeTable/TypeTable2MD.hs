@@ -21,7 +21,7 @@ typeTable2md	:: TypeTable -> MarkDown
 typeTable2md tt
 	= let	overviewTable	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)
 		stts	= title 2 "Supertypes " ++ parag (superTypeTable2md tt)
-		perType	= ((toList $ allSupertypes tt) >>= (uncurry (fstt2md $ kinds tt)))
+		perType	= toList (allSupertypes tt) >>= uncurry (fstt2md $ kinds tt)
 		in overviewTable ++ title 2 "Supertypetables per type" ++ explanation ++ perType
 
 
@@ -64,7 +64,7 @@ superTypeTable2md tt	=  let	all	= keys $ supertypes tt	in
 superType2md	:: TypeTable -> TypeID -> [[MarkDown]]
 superType2md tt tid
 		= let 	all	= superTypesFor tt tid
-			showTps	tps	= intercal ", " $ (tps & filter (/= ". ") |> code) 	:: MarkDown
+			showTps	tps	= intercal ", " (tps & filter (/= ". ") |> code) 	:: MarkDown
 			entries	= all |> showEntry tid & merge ||>> showTps & filter (not . null . snd) |> (\(t,tps) -> [t,tps]) in
 			entries
 

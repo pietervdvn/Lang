@@ -18,7 +18,7 @@ import StdDef
 import Exceptions
 import Languate.CheckUtils
 
-import Languate.World
+import Languate.Package
 import Languate.TypeTable
 import Languate.TAST
 import Languate.AST
@@ -44,7 +44,7 @@ type SuperTypeTableFor	= Map [Set RType] (Set RType)
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 -}
 
-buildSuperTypeTable	:: World -> Map FQN TypeLookupTable -> KindLookupTable
+buildSuperTypeTable	:: Package -> Map FQN TypeLookupTable -> KindLookupTable
 				-> Exc SuperTypeTable
 buildSuperTypeTable w tlts klt
 		= do	all	<- mapM (try' [] . superTypesIn' tlts klt w) $
@@ -52,7 +52,7 @@ buildSuperTypeTable w tlts klt
 			return $ _buildTable $ concat all
 
 
-superTypesIn'	:: Map FQN TypeLookupTable ->  KindLookupTable -> World -> FQN ->
+superTypesIn'	:: Map FQN TypeLookupTable ->  KindLookupTable -> Package -> FQN ->
 			Exc [(TypeID, [Name], Reqs, [RType] )]
 superTypesIn' tlts klt w fqn
 	= do	modul	<- lookup fqn (modules w) ? ("Bug: no module found for "++show fqn)
@@ -114,7 +114,7 @@ superTypeFor (tlt,klt) path nm frees supers reqs
 
 			let sttfs	= unmerge [((tId, frees, reqs'), supers')]
 			let normed	= sttfs |> normalize klt
-			return $ (merge normed |> unsplit4)
+			return (merge normed |> unsplit4)
 
 
 normalize	:: KindLookupTable -> ((TypeID, [Name], Reqs), RType) ->
@@ -125,7 +125,7 @@ normalize klt entry
 --  Transforms "List a is Collection a" into "List a0 is Collection a0"
 normalizeSTF	:: ((TypeID, [Name], Reqs), RType) -> ((TypeID, [Name], Reqs), RType)
 normalizeSTF entry@((tid, frees, reqs), super)
-	= let	nats	= take (length frees) $ [0..]
+	= let	nats	= take (length frees) [0..]
 		names	= nats |> show |> ('a':)
 		binding	= fromList $ zip frees names
 		binding'	= Binding (binding |> RFree)
@@ -144,9 +144,9 @@ normalizeLength klt ((tid, frees, reqs), super)
 		newFrees	= [length frees .. needed - 1] |> show |> ('a':)
 		freesInReqs	= reqs |> snd & concat |> freesInRT & concat
 		freesInSuper	= super & freesInRT
-		usedFrees	= S.fromList $ (freesInReqs ++ freesInSuper ++ newFrees)
+		usedFrees	= S.fromList (freesInReqs ++ freesInSuper ++ newFrees)
 		-- these are the frees that should be renamed
-		reboundFrees	= usedFrees S.\\ (S.fromList frees)
+		reboundFrees	= usedFrees S.\\ S.fromList frees
 		prebinding	= buildBinding $ S.toList reboundFrees
 		reqs'		= reqs ||>> (|> substitute prebinding)
 		super'		= substitute prebinding super

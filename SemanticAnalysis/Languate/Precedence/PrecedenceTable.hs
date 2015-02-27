@@ -16,7 +16,6 @@ import Data.Maybe
 
 import Languate.FQN
 import Languate.AST
-import Languate.World
 
 import Languate.Precedence.PrecTable2MD
 

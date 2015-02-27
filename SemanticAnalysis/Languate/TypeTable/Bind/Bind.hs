@@ -70,9 +70,9 @@ bind' (RCurry t0 t1) (RCurry t0' t1')
  = do	bind' t0 t0'
 	bind' t1 t1'
 bind' t0@(RNormal fqn nm) t1
- = when (t0 /= t1) $ do	-- if they are the same, nothing should happen
+ = when (t0 /= t1) $	-- if they are the same, nothing should happen
 	-- we search if t1 is a supertype of t0
-	inside ("Could not bind") $ do
+	inside "Could not bind" $ do
 	let tid0	= (fqn, nm)
 	tid1	<- getBaseTID t1 ? (show t1 ++ " is not a simple type.")
 	sst	<- get' typeT |> spareSuperTypes |> findWithDefault M.empty tid0
@@ -92,7 +92,7 @@ bind' t0@(RApplied bt at) t1@(RApplied bt' at')
 {- Tries to bind the (bt,at) of a applied type against a given rtype, by using the full super type table
 
 -}
-bapp	:: (RType, RType) -> RType -> St ()
+bapp	:: (RType, RType) -> RType -> StMsg ()
 bapp (bt,at) t1
 	= todo
 

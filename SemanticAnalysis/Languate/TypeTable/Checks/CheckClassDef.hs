@@ -13,7 +13,7 @@ import Languate.TypeTable
 
 
 validateClassDef tlt cd
-	= do	 inside ("In the category declaration of "++name cd) $
-			do	let supers	= subclassFrom cd
-				validateTypes tlt (frees cd) supers
-				validateReqs tlt (frees cd) (classReqs cd)
+	= inside ("In the category declaration of "++name cd) $
+		do	let supers	= subclassFrom cd
+			validateTypes tlt (frees cd) supers
+			validateReqs tlt (frees cd) (classReqs cd)

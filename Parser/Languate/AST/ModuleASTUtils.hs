@@ -10,6 +10,8 @@ import Normalizable
 
 import Data.Either
 import Data.Maybe (mapMaybe, listToMaybe)
+import Control.Arrow
+import Control.Applicative
 
 setname	:: Name -> Module -> Module
 setname name (Module _ restrict imps stms)
@@ -32,7 +34,7 @@ addStm coor stm (Module name restrict imps stms)
 
 addStms		:: [(Statement,Coor)] -> Module -> Module
 addStms stms mod
-		= foldr (uncurry $ flip $ addStm) mod stms
+		= foldr (uncurry $ flip addStm) mod stms
 
 isAllowed	:: Restrict -> Name -> Bool
 isAllowed (BlackList items)
@@ -62,7 +64,7 @@ _unpackF	:: Statement -> [(Name,[Type], [TypeRequirement])]
 _unpackF (FunctionStm f)
 		= signs f
 _unpackF (ClassDefStm cd)
-		= fmap (\(nm,ts,tr) -> (nm,ts,tr)) $ decls cd
+		= (\(nm,ts,tr) -> (nm,ts,tr)) <$> decls cd
 _unpackF _	= []
 
 
@@ -78,7 +80,7 @@ docStrings	=  concatMap isDocstr . statements
 
 isDocstr	:: Statement -> [((Name, Name), Comment)]
 isDocstr (DocStringStm docs)
-		= map (\d -> (about d, comment d)) docs
+		= map (about &&& comment) docs
 isDocstr _	= []
 
 -- Docstrings for consructors in ADTs, or for functions within categories
@@ -111,7 +113,7 @@ declaresType nm (SynDefStm (SynDef nm' _ _ _))
 declaresType nm (SubDefStm (SubDef nm' _ _ _ _))
 		= nm == nm'
 declaresType nm (ClassDefStm cd)
-		= nm == (name cd)
+		= nm == name cd
 declaresType _ _
 		= False
 

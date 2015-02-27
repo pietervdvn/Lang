@@ -52,7 +52,7 @@ checkAllNodes	=  do	all	<- get
 
 -- Checks dependencies of a node. If no dependencies remain, the node is removed.
 checkNode	:: (Ord n) => n -> State (Map n (Set n)) ()
-checkNode n	=  do	directDeps	<- (get' $ findWithDefault S.empty n) |> S.toList
+checkNode n	=  do	directDeps	<- get' (findWithDefault S.empty n) |> S.toList
 			depCount	<- mapM numberOfDeps directDeps
 			let resting	= map snd $ filter ((> 0) . fst ) $ zip depCount directDeps
 			modify $ if null resting then 	delete n
