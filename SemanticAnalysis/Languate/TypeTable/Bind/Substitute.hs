@@ -31,8 +31,8 @@ substitute' nms t
 {- Replaces frees in the given rtype. Unknown types are ignored
  e.g. {"a" -> Nat, "b" -> Bool} (RApplied Tuple [RFree a, RFree b, RFree c]) -> RApplied Dict [Nat, Bool, RFree c].     -}
 substitute	:: Binding -> RType -> RType
-substitute (Binding dict) t
-		= traverseRT (_substitute dict) t
+substitute (Binding dict)
+		= traverseRT (_substitute dict)
 
 
 _substitute	:: Map Name RType -> RType -> RType

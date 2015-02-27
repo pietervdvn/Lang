@@ -34,14 +34,14 @@ fstt2md	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkDown
 fstt2md klt tid@(fqn, nm) fstt
 	= title 3 ("Supertypes of "++nm++" "++sfrees (findWithDefault Kind tid klt)) ++
 		if M.null fstt then parag "No supertypes"
-		   else	table ["Is type","Requirements","Via","Orig type","Orig type reqs","Binding"] (fmap rows $ toList fstt)
+		   else	table ["Is type","Requirements","Via","Orig type","Orig type reqs","Binding"] (toList fstt |> rows)
 
 
 rows	:: FullSTTKeyEntry -> [MarkDown]
 rows (isA, (ifReq, via, (super, bnd)))
 	= [st True isA,
 		unwords (ifReq |> showReqs),
-		fromMaybe (ital "Native") $ (via |> st True),
+		fromMaybe (ital "Native") (via |> st True),
 		st True super,
 		"Todo",
 		show bnd

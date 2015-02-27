@@ -17,7 +17,7 @@ import Data.Maybe
 import Data.Tuple (swap)
 import Languate.FQN
 import Languate.AST
-import Languate.World
+import Languate.Package
 
 import Languate.Precedence.Utils
 import Languate.Precedence.PrecTable2MD
@@ -34,10 +34,10 @@ import State
 
 buildPrecTable	= stack' (indent' "Building Precedence table: ") . buildPrecTable'
 
-buildPrecTable' 	:: World -> Exceptions String String PrecedenceTable
-buildPrecTable' world
-		= do	let mods		= elems $ modules world
-			mapM (uncurry checkPrecStmsIn) $ M.toList $ modules world
+buildPrecTable' 	:: Package -> Exceptions String String PrecedenceTable
+buildPrecTable' package
+		= do	let mods		= elems $ modules package
+			mapM_ (uncurry checkPrecStmsIn) $ M.toList $ modules package
 			let (nameMod, rels)	= mergeTwo $ map getPrecedenceInfo mods
 		  	let eqs			= eqRelations rels
 			let ltRels		= ltRelations rels

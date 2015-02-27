@@ -70,9 +70,19 @@ bind' (RCurry t0 t1) (RCurry t0' t1')
  = do	bind' t0 t0'
 	bind' t1 t1'
 bind' t0@(RNormal fqn nm) t1
- = when (t0 /= t1) $ do	-- if they are the same, nothing should happen
-	-- we search if t1 is a supertype of t0 that matches
-	superBind t0 t1
+ = when (t0 /= t1) $	-- if they are the same, nothing should happen
+	-- we search if t1 is a supertype of t0
+	inside "Could not bind" $ do
+	let tid0	= (fqn, nm)
+	tid1	<- getBaseTID t1 ? (show t1 ++ " is not a simple type.")
+	sst	<- get' typeT |> spareSuperTypes |> findWithDefault M.empty tid0
+	-- possibleSupers	:: [RType]
+	posSups	<- lookup tid1 sst ? (show t1++" is not a supertype of "++show t0++"\n"++show sst)
+	-- we try to match any supertype. All tried and failed types are returned.
+	failed	<- whileM (\posSup -> fmap not $ succeeded $ bind' posSup t1) posSups
+	-- if all types have failed, length failed = length posSups
+	assert (length failed /= length posSups) $
+		"No possible supertypes could be bound in "++show t1++".\nTried types:\n"++indent (show posSups)
 bind' t0@(RApplied bt at) t1@(RApplied bt' at')
  = do	bind' bt bt'
 	bind' at at'
@@ -122,7 +132,6 @@ bapp t0 t1
 tryBind	:: [RType] -> RType -> StMsg [RType]
 tryBind possSups t1
 	= whileM (\possSup -> (succeeded $ bind' possSup t1) |> not) possSups
-
 
 {- Tries to make two types the same, by filling in the frees in any of them.
 

@@ -57,12 +57,12 @@ leafs graph
 
 dropNodes	:: (Ord n, Eq n) => Set n -> DG n -> DG n
 dropNodes ns graph
-	= S.foldr M.delete graph ns |> (S.filter (`S.notMember` ns))
+	= S.foldr M.delete graph ns |> S.filter (`S.notMember` ns)
 
 merge		:: Eq a => [(a,b)] -> [(a,[b])]
 merge []	= []
 merge ((a,b):ls)
-		= let bs	= fmap snd $ L.filter ((==) a . fst) ls in
+		= let bs	= L.filter ((==) a . fst) ls |> snd in
 			(a,b:bs): merge (L.filter ((/=) a . fst) ls)
 
 unmerge		:: [(a,[b])] -> [(a,b)]

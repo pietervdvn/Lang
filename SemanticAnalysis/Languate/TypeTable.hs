@@ -165,7 +165,7 @@ resolveType tlt (TupleType [t])
 resolveType tlt e@(TupleType (t:tps))
 		= do	rt	<- resolveType tlt t
 			tail	<- resolveType tlt (TupleType tps)
-			return $ (RApplied (RApplied tupleType rt) tail)
+			return $ RApplied (RApplied tupleType rt) tail
 
 resolveType _ Infer
 		= halt "Unresolved infer"
@@ -197,10 +197,9 @@ superTypesFor tt t
 superTypesFor'	:: SuperTypeTableFor -> [Name] -> [([Name], RType, Map Name [RType])]
 superTypesFor' sttf appliedFrees
 		= let	all	= S.toList $ findWithDefault S.empty appliedFrees sttf	:: [(RType, Map Name [RType])] in
-			fmap (\(a,(b,c)) -> (a,b,c)) $ unmerge [(appliedFrees , all)]
+			unmerge [(appliedFrees , all)] |>  (\(a,(b,c)) -> (a,b,c))
 
-
-showTLT dict	=  intercalate "; " $  fmap sitem $ M.toList dict
+showTLT dict	= dict & M.toList |> sitem & intercalate "; "
 
 sitem (k, possib)	= spth k ++ " --> {"++intercalate ", " (fmap shwFQN possib)  ++ "}"
 shwFQN (fqn, _)	= intercalate "." $ modulePath fqn
@@ -219,6 +218,6 @@ sb (Binding b)
 
 sd	:: (Show k, Show v) => Map k v -> String
 sd  d
-	= "{"++unwords (fmap (\(k, v) -> show k ++" --> "++show v) $ M.toList d)++"}"
+	= "{"++unwords (M.toList d |> (\(k, v) -> show k ++" --> "++show v))++"}"
 
 noBinding	= Binding M.empty

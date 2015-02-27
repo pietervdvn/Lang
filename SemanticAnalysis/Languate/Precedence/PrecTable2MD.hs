@@ -16,7 +16,7 @@ import Data.Maybe
 
 precTable2md	:: Map Name Int -> Map Int (Set Name) -> Map Name PrecModifier -> MarkDown
 precTable2md op2classes class2ops modifs
-	= let	rows	= map (uncurry (class2md modifs)) $ sort $ (toList class2ops ||>> S.toList)
+	= let	rows	= map (uncurry (class2md modifs)) $ sort (toList class2ops ||>> S.toList)
 		mxm	= if M.null class2ops then 0 else maximum (keys class2ops)
 		lastRw1	= [show $ 1 + mxm, "Other operators", show PrecLeft]
 		lastRw2	= [show $ 2 + mxm, "Function application", show PrecLeft]

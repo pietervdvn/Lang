@@ -7,7 +7,7 @@ Creates a TO DO-list!
 import StdDef
 import MarkDown
 import Languate.FQN
-import Languate.World
+import Languate.Package
 import Languate.AST
 import Data.Map hiding (mapMaybe, map, null)
 import qualified Data.Map as M
@@ -24,7 +24,7 @@ keywords	= ["todo","fixme","fix me","fix-me","wtf"]
 -- Table per module, what type ("todo","fixme") and message. Todos consist of one line!
 type TodoTable	= Map FQN [(Coor, Name, String)]
 
-buildTodoTable	:: World -> TodoTable
+buildTodoTable	:: Package -> TodoTable
 buildTodoTable w
 		=  M.filter (not . null) $ mapWithKey todoFor $ modules w
 
@@ -55,7 +55,7 @@ actualTodo str	=  do	kw	<- keywords
 
 actualTodo'	:: String -> String -> [String]
 actualTodo' keyword comment
-	=let	caseIns	str	= concatMap (\c -> '[':toLower c:toUpper c : "]") str
+	=let	caseIns = concatMap (\c -> '[':toLower c:toUpper c : "]")
 		rgx	= regex $ caseIns keyword ++"!\n*" in
 		mapMaybe (longestMatch rgx) $ lines comment
 

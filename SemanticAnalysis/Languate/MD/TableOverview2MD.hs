@@ -6,7 +6,7 @@ import MarkDown
 import Data.Map (Map, elems)
 
 import Languate.FQN
-import Languate.World
+import Languate.Package
 import Languate.TypeTable
 import Languate.TableOverview
 import Languate.TypeTable.TypeTable2MD
@@ -19,7 +19,7 @@ import Languate.MD.MDGen
 import Languate.CheckUtils
 
 -- Writes the overview tables to the relevant .md and .html
-writeTables	:: World -> TableOverview -> FilePath -> IO ()
+writeTables	:: Package -> TableOverview -> FilePath -> IO ()
 writeTables w to packagePath
 		=  do	let path	= packagePath++"/.gen/"
 			let save nm mdGen table	= saveTo path (nm++"Overview") $ generate (nm++" overview") $ mdGen $ table to

@@ -49,7 +49,7 @@ _bindReqKinds	:: KindLookupTable -> TypeReqTable -> RType -> Exc (Map Name Kind)
 _bindReqKinds klt treqt rt
 	= inside ("While calculating the kinds of free type requirements in the requirements on "++st True rt) $ do
 		let mtid	= getBaseTID rt
-		if (isNothing mtid) then return empty else do
+		if isNothing mtid then return empty else do
 		let tid	= fromJust mtid
 		kind	<- lookup tid klt ? ("No klt-entry for "++show tid)
 		let nrFrees	= numberOfKindArgs kind
@@ -97,7 +97,7 @@ cyclesIn	:: [SimpleConstraint] -> Map (FQN, Name) (Set (FQN, Name))
 cyclesIn	=  searchCycles . fromList . map buildDeps
 
 
-buildDeps	:: SimpleConstraint -> ((FQN, Name), (Set (FQN, Name)))
+buildDeps	:: SimpleConstraint -> ((FQN, Name), Set (FQN, Name))
 buildDeps (id, uk)
 		= (id, S.fromList $ dependsOn uk)
 
