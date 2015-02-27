@@ -1,4 +1,4 @@
-	module Languate.TypeTable.Checks.CheckWorld (validateWorld0) where
+module Languate.TypeTable.Checks.CheckPackage (validatePackage) where
 
 {--
 
@@ -16,7 +16,7 @@ import Languate.TypeTable
 import Languate.AST
 import Languate.TAST
 import Languate.FQN
-import Languate.World
+import Languate.Package
 import Languate.CheckUtils
 import Languate.TypeTable.Checks.CheckFunction
 import Languate.TypeTable.Checks.CheckADT
@@ -33,14 +33,14 @@ import Data.List
 
 
 
-validateWorld0	:: Map FQN TypeLookupTable -> World -> Check
-validateWorld0 tlts w
+validatePackage	:: Map FQN TypeLookupTable -> Package -> Check
+validatePackage tlts w
 		=  mapM_ (validateModule' tlts w) $ M.keys $ modules w
 
-validateModule' :: Map FQN TypeLookupTable -> World -> FQN -> Check
+validateModule' :: Map FQN TypeLookupTable -> Package -> FQN -> Check
 validateModule' tlts w fqn
 		= do	let tlt	= findWithDefault M.empty fqn tlts
-			mod <- M.lookup fqn (modules w) ? (show fqn ++ " not found in modules world")
+			mod <- M.lookup fqn (modules w) ? (show fqn ++ " not found in modules of package")
 			inFile fqn $ validateModule tlt fqn mod
 
 validateModule	:: TypeLookupTable -> FQN -> Module -> Check

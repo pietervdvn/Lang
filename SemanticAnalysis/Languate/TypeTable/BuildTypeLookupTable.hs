@@ -1,4 +1,4 @@
- module Languate.TypeTable.BuildTypeLookupTable where
+module Languate.TypeTable.BuildTypeLookupTable where
 
 {-
 This module provides functions to
@@ -22,7 +22,7 @@ import qualified Exceptions as E
 import Exceptions hiding (err)
 import Languate.CheckUtils
 
-import Languate.World
+import Languate.Package
 import Languate.FQN
 import Languate.TypeTable
 import Languate.Graphs.ExportCalculator
@@ -46,9 +46,9 @@ Building of a type lookup table:
 type Exports	= Map FQN (Map FQN (FQN, Name))
 
 
-buildTLTs	:: World -> Exc (Map FQN TypeLookupTable)
+buildTLTs	:: Package -> Exc (Map FQN TypeLookupTable)
 buildTLTs world
-	=  do 	let modules	= Languate.World.modules world
+	=  do 	let modules	= Languate.Package.modules world
 		let injectSet a	= S.map (\b -> (a,b))
 		let injectSetFunc f fqn	= injectSet fqn $ f fqn
 		let pubLocDecl	= injectSetFunc $ publicLocallyDeclared world
@@ -81,7 +81,7 @@ List.List, List : ambiguous to both idiots and data.
 The package is named Idiots, as EVERYONE SHOULD ALWAYS USE STANDARD LISTS FOR CONSISTENCY AND CODE REUSABILITY!
 
 -}
-buildTLT	:: World -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
+buildTLT	:: Package -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
 			-> FQN {-What we have to build TLT for-}
 			-> AliasTable
 			-> TypeLookupTable
@@ -99,7 +99,7 @@ addLookupEntry at tlt (declaredIn, name)
 
 
 -- A type is publicly declared if: 1) at least one public function uses it or 2) not a single private function uses it. (e.g. declaration without usage in the module)
-publicLocallyDeclared	:: World -> FQN -> Set Name
+publicLocallyDeclared	:: Package -> FQN -> Set Name
 publicLocallyDeclared w fqn
 		= let	mod 		= fwd "modules" fqn $ modules w
 			localDeclared	= locallyDeclared w fqn
@@ -109,7 +109,7 @@ publicLocallyDeclared w fqn
 				S.filter isPublic localDeclared
 
 -- All locally declared types, as a set
-locallyDeclared	:: World -> FQN -> Set Name
+locallyDeclared	:: Package -> FQN -> Set Name
 locallyDeclared	w fqn
 		=  S.fromList $ Data.Maybe.mapMaybe declaredType $ statements $ fwd "modules" fqn $ modules w
 
@@ -141,7 +141,7 @@ args:
 A type is publicly REexported if: 1) at least one public function uses it or 2) the import was public (and the type not restricted)
 
 -}
-reexportType	:: World -> FQN -> (FQN, (FQN, Name)) -> Bool
+reexportType	:: Package -> FQN -> (FQN, (FQN, Name)) -> Bool
 reexportType w curMod (impFrom, (_,typeName))
 		= let	-- current module
 			modul	= fwd "modules" curMod $ modules w

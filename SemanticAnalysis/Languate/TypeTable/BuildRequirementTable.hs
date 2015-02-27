@@ -15,7 +15,7 @@ import Languate.AST
 import Languate.TAST
 import Languate.FQN
 import Languate.TypeTable
-import Languate.World
+import Languate.Package
 
 import Control.Arrow
 
@@ -34,7 +34,7 @@ Type requirements should be explicit in type declarations.
 Mentally keeping track of where each requirement comes from is not user-friendly.
 -}
 
-buildRequirementTables	:: Map FQN TypeLookupTable -> World -> Exc (Map FQN RequirementTable)
+buildRequirementTables	:: Map FQN TypeLookupTable -> Package -> Exc (Map FQN RequirementTable)
 buildRequirementTables tlts w
 			= do	tables <- mapM (\(fqn, mod) -> buildRequirementTable tlts fqn (statements mod)) $ M.toList $ modules w
 				return $ M.fromList tables

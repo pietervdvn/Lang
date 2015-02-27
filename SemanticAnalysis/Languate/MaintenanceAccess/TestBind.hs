@@ -23,7 +23,7 @@ import Exceptions
 import Languate.File2Package
 import Languate.FQN
 import Languate.AST
-import Languate.World
+import Languate.Package
 
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD

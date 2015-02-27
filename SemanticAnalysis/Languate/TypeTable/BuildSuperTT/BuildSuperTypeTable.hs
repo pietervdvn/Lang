@@ -18,7 +18,7 @@ import StdDef
 import Exceptions
 import Languate.CheckUtils
 
-import Languate.World
+import Languate.Package
 import Languate.TypeTable
 import Languate.TAST
 import Languate.AST
@@ -44,7 +44,7 @@ type SuperTypeTableFor	= Map [Set RType] (Set RType)
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 -}
 
-buildSuperTypeTable	:: World -> Map FQN TypeLookupTable -> KindLookupTable
+buildSuperTypeTable	:: Package -> Map FQN TypeLookupTable -> KindLookupTable
 				-> Exc SuperTypeTable
 buildSuperTypeTable w tlts klt
 		= do	all	<- mapM (try' [] . superTypesIn' tlts klt w) $
@@ -52,7 +52,7 @@ buildSuperTypeTable w tlts klt
 			return $ _buildTable $ concat all
 
 
-superTypesIn'	:: Map FQN TypeLookupTable ->  KindLookupTable -> World -> FQN ->
+superTypesIn'	:: Map FQN TypeLookupTable ->  KindLookupTable -> Package -> FQN ->
 			Exc [(TypeID, [Name], Reqs, [RType] )]
 superTypesIn' tlts klt w fqn
 	= do	modul	<- lookup fqn (modules w) ? ("Bug: no module found for "++show fqn)

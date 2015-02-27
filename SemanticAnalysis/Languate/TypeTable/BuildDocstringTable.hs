@@ -11,7 +11,7 @@ import Languate.CheckUtils
 
 import Languate.AST hiding (docstringFor)
 import Languate.FQN
-import Languate.World
+import Languate.Package
 import Languate.TypeTable
 
 import Data.Map hiding (mapMaybe, map, isJust)
@@ -20,18 +20,18 @@ import Data.Set (Set)
 import Data.Maybe
 import Data.Tuple
 
-buildDocstringTable	:: World -> [TypeID] -> Exc (Map TypeID String)
+buildDocstringTable	:: Package -> [TypeID] -> Exc (Map TypeID String)
 buildDocstringTable w typeIds
 		= docstringsFor w typeIds |> fromList
 
 
-docstringsFor	:: World -> [TypeID] -> Exc [(TypeID, String)]
+docstringsFor	:: Package -> [TypeID] -> Exc [(TypeID, String)]
 docstringsFor w typeIds
 		= do	docs	<- mapM (try' Nothing . docstringFor w) typeIds
 			return $ map swap $ mapMaybe unpackMaybeTuple $ zip docs typeIds
 
 
-docstringFor	:: World -> TypeID -> Exc (Maybe Comment)
+docstringFor	:: Package -> TypeID -> Exc (Maybe Comment)
 docstringFor w (fqn, name)
 	= do	modul		<- lookup fqn (modules w) ?
 					("Bug: Module "++show fqn ++" not found.")
