@@ -51,7 +51,7 @@ calculateImports importGraph local exports
 
 calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => Set n -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
 calculateImportsFor importsFrom local exports n
-			=  let	imported	= fmap (\n -> lookup' n exports) $ S.toList importsFrom
+			=  let	imported	= S.toList importsFrom |> (`lookup'` exports)
 				localDecls	= local n in
 				union localDecls $ unions imported
 

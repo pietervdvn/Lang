@@ -219,6 +219,6 @@ sb (Binding b)
 
 sd	:: (Show k, Show v) => Map k v -> String
 sd  d
-	= "{"++unwords (fmap (\(k, v) -> show k ++" --> "++show v) $ M.toList d)++"}"
+	= "{"++unwords (M.toList d |> (\(k, v) -> show k ++" --> "++show v))++"}"
 
 noBinding	= Binding M.empty

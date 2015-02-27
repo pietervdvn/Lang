@@ -24,7 +24,7 @@ searchPath	:: (Eq n, Ord n) => Map n (Set n) -> n -> n -> [[n]]
 searchPath links start target =
 	let	isValid		= endsOn target
 		foundPaths	= until (any isValid <||> null) (>>= expandPath links) [[start]] in
-		fmap reverse $ filter isValid foundPaths
+		filter isValid foundPaths |> reverse
 
 endsOn target	= (== target) . head
 
@@ -39,8 +39,8 @@ expandPath 	:: (Eq n, Ord n) => Map n (Set n) -> [n] -> [[n]]
 expandPath links path	=
         let	foundLinks      =  getLinks (head path) links
             	nonCyclicLinks  =  S.filter (not . (`elem` path)) foundLinks in
-        -- append node to path
-            	 fmap (:path) $ S.toList nonCyclicLinks
+    		   -- append node to path
+            	 S.toList nonCyclicLinks |> (:path)
 
 getLinks 	:: (Eq n, Ord n) => n -> Map n (Set n) -> Set n
 getLinks	= findWithDefault S.empty

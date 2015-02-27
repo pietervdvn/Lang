@@ -55,7 +55,7 @@ actualTodo str	=  do	kw	<- keywords
 
 actualTodo'	:: String -> String -> [String]
 actualTodo' keyword comment
-	=let	caseIns	str	= concatMap (\c -> '[':toLower c:toUpper c : "]") str
+	=let	caseIns = concatMap (\c -> '[':toLower c:toUpper c : "]")
 		rgx	= regex $ caseIns keyword ++"!\n*" in
 		mapMaybe (longestMatch rgx) $ lines comment
 
