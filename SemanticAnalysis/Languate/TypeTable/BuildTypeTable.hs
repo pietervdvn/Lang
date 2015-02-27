@@ -48,7 +48,6 @@ import Languate.TypeTable.Checks.CheckReqTable
 import Languate.CheckUtils
 
 
-import Data.Map
 import Data.Map as M
 import Data.Maybe
 import Data.Tuple

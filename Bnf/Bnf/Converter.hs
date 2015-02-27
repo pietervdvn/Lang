@@ -56,7 +56,7 @@ advancedConvert h t s pt
 lft2	:: (a -> b -> c) -> a -> b -> (Maybe d,c)
 lft2 f a b	= (Nothing, f a b)
 
-noAnnotations	= (\(_,cpt, _) -> cpt)
+noAnnotations (_,cpt, _)	= cpt
 
 
 convert	:: (Name -> ParseTree -> Maybe (Writer Errors cpt)) ->

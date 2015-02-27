@@ -1,4 +1,4 @@
-module Languate.TypeTable.BuildTypeLookupTable where
+ module Languate.TypeTable.BuildTypeLookupTable where
 
 {-
 This module provides functions to
@@ -174,8 +174,8 @@ checkDouble	:: Name -> [Coor] -> Check
 checkDouble _ []	= pass
 checkDouble _ [_]	= pass
 checkDouble t coors
-	= do	E.err $ "The type '"++t++"' has been declared multiple times:\n"++
-			intercalate ", " (coors |> fst |> show |> ("on line "++))
+	= E.err $ "The type '"++t++"' has been declared multiple times:\n"++
+		intercalate ", " (coors |> fst |> show |> ("on line "++))
 
 -----------
 -- UTILS --

@@ -65,7 +65,7 @@ _isFull str pt	=  if getParseLength pt == length str then Right pt
 parse	:: World -> FQN -> Name -> String -> Maybe (Either Exception ParseTree)
 parse world fqn name str
 	| name == ""	=  error "You should not pass the empty string as a rulename"
-	| otherwise	=  fmap (fmap (normalize . fst)) $ runPr (runstateT (p (Call name)) (_startState world fqn name)) str
+	| otherwise	=  runPr (runstateT (p (Call name)) (_startState world fqn name)) str ||>> fst ||>> normalize
 
 -- lastParsePos	:: World -> FQN -> Name -> String -> Pos
 lastParsePos world fqn name
@@ -166,7 +166,7 @@ pWs		=  do	(ctx,mode)	<- get
 
 _seq		:: [St ParseTree] -> St ParseTree
 _seq rules	=  do	i <- getInfo
-			pts	<- mapM id rules
+			pts	<- sequence rules
 			return $ S i pts
 
 _seq'		:: St [ParseTree] -> St ParseTree

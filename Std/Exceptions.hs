@@ -7,6 +7,7 @@ This module implements a exception monad and tools
 import Control.Monad hiding (fail)
 import Debug.Trace
 import StdDef
+import MarkDown hiding (when)
 
 runExceptions	:: Exceptions w e a -> ([w], [e], Either e a)
 runExceptions (Exceptions ws es ea)	= (ws, es, ea)
@@ -22,7 +23,7 @@ runExceptionsIO exc
 
 runExceptionsIO'	:: Exceptions String String a -> IO a
 runExceptionsIO' exc
-		= do	_runExceptionsIO' $ runExceptions exc
+		= _runExceptionsIO' $ runExceptions exc
 
 _runExceptionsIO'	:: ([String], [String], Either String a) -> IO a
 _runExceptionsIO' (ws, es, eOrA)
@@ -30,9 +31,7 @@ _runExceptionsIO' (ws, es, eOrA)
 			let lWs	= length ws
 			when (lWs > 0) $ putStrLn $ concatMap (indent' "\n\nWarning: ") ws
 			when (lEs > 0) $ putStrLn $ concatMap (indent' "\n\nError: "  ) es
-			let multi ls	= if (length ls == 0 || length ls >1) then "s" else ""
-			let cnt ls word	= show (length ls) ++" "++ word ++ multi ls
-			when (lWs + lEs > 0) $ putStrLn $ cnt ws "warning"++", "++cnt es "error"++"."
+			when (lWs + lEs > 0) $ putStrLn $ plural lWs "warning"++", "++plural lEs "error"++"."
 			case eOrA of
 				Left e	-> putStrLn "Fatal error:\n" >> error  e
 				Right a	-> return a

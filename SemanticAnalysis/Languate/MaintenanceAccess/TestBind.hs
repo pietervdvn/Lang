@@ -43,8 +43,6 @@ import Data.Map (empty, fromList, findWithDefault)
 import qualified Data.Set as S
 import Data.List
 
-import qualified Bnf
-
 -- So we can rebuild the docs
 import Languate.MaintenanceAccess.TestBuild (t)
 

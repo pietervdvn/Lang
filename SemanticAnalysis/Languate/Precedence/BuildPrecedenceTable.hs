@@ -37,7 +37,7 @@ buildPrecTable	= stack' (indent' "Building Precedence table: ") . buildPrecTable
 buildPrecTable' 	:: World -> Exceptions String String PrecedenceTable
 buildPrecTable' world
 		= do	let mods		= elems $ modules world
-			mapM (uncurry checkPrecStmsIn) $ M.toList $ modules world
+			mapM_ (uncurry checkPrecStmsIn) $ M.toList $ modules world
 			let (nameMod, rels)	= mergeTwo $ map getPrecedenceInfo mods
 		  	let eqs			= eqRelations rels
 			let ltRels		= ltRelations rels

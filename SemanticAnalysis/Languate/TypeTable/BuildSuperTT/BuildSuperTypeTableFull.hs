@@ -33,7 +33,7 @@ conv (frees, (isTyp, reqs))
 		-- we want to bind "X Bool" against "X a", to derive {a --> Bool}
 		applied	= appliedTypes isTyp
 		binding	= Binding $ M.fromList $ zip ([0..] |> show |> ('a':)) applied
-		base	= (isTyp, (zip frees $ nativeS, Nothing, (isTyp, binding))) in
+		base	= (isTyp, (zip frees nativeS, Nothing, (isTyp, binding))) in
 		base:expandFrees reqs base
 
 
@@ -57,5 +57,5 @@ expandFrees reqs (RFree a, rest)
 	= let possible	= findWithDefault [] a reqs in
 		zip possible $ repeat rest
 expandFrees reqs (RApplied bt at, rest)	-- the argument type (at) is always a free
-	= expandFrees reqs (bt, rest) |> swap ||>> (\bt -> RApplied bt at) |> swap
+	= expandFrees reqs (bt, rest) |> swap ||>> (`RApplied` at) |> swap
 expandFrees _ _	= []

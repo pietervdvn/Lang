@@ -40,7 +40,7 @@ validateWorld0 tlts w
 validateModule' :: Map FQN TypeLookupTable -> World -> FQN -> Check
 validateModule' tlts w fqn
 		= do	let tlt	= findWithDefault M.empty fqn tlts
-			mod <- (M.lookup fqn $ modules w) ? (show fqn ++ " not found in modules world")
+			mod <- M.lookup fqn (modules w) ? (show fqn ++ " not found in modules world")
 			inFile fqn $ validateModule tlt fqn mod
 
 validateModule	:: TypeLookupTable -> FQN -> Module -> Check

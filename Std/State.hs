@@ -52,5 +52,4 @@ stabilize_	:: (Eq s) => State s a -> State s ()
 stabilize_ act	=  do	s	<- get
 			act
 			s'	<- get
-			if s == s' then return ()
-				else stabilize_ act
+			when (s /= s') $ stabilize_ act

@@ -24,7 +24,7 @@ buildFreeNameTable w	= do	let fqnMods	= toList $ modules w
 				return $ fromList $ concat table
 
 
-buildTables		:: FQN -> Module -> Exc [(TypeID, (Map Int Name))]
+buildTables		:: FQN -> Module -> Exc [(TypeID, Map Int Name)]
 buildTables fqn m	=  do	let stms	= statements' m
 				docstrs	<- mapM (declaredType' fqn) stms
 				return $ catMaybes docstrs
@@ -44,7 +44,7 @@ declaredType fqn (SubDefStm (SubDef name _ frees _ _))
 		= unpack fqn name frees
 declaredType fqn (ClassDefStm classDef)
 		= unpack fqn (name classDef) (frees classDef)
-declaredType _ _	= return $ Nothing
+declaredType _ _	= return Nothing
 
 
 unpack		:: FQN -> Name -> [String] -> Exc (Maybe (TypeID, Map Int String))

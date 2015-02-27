@@ -33,7 +33,7 @@ docstringsFor w typeIds
 
 docstringFor	:: World -> TypeID -> Exc (Maybe Comment)
 docstringFor w (fqn, name)
-	= do	modul		<- (lookup fqn $ modules w) ?
+	= do	modul		<- lookup fqn (modules w) ?
 					("Bug: Module "++show fqn ++" not found.")
 		let mDocstr	= searchCommentAbove modul (declaresType name)
 		assert' (isJust mDocstr) $ "No docstring found for "++show fqn ++"." ++ show name

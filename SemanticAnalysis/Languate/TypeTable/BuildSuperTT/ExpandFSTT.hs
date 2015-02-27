@@ -21,12 +21,11 @@ import Data.Either (rights)
 import Data.Tuple
 import Data.Maybe
 
-import Languate.TypeTable.Bind.Substitute
-
 import Languate.Graphs.DirectedGraph
 
 import State
 import Control.Monad
+import Control.Arrow
 
 import Debug.Trace
 
@@ -49,7 +48,7 @@ expand fstt
 		initNotifTable	= initSstt	|> keys |> S.fromList & invertDict
 		initTodo	= fstt 		|> keys |> S.fromList
 		ctx	= Ctx fstt initNotifTable initSstt initTodo	in
-		runstate _expandAll ctx & snd & (\ctx -> (fstt_ ctx, sstt_ ctx))
+		runstate _expandAll ctx & snd & (fstt_ &&& sstt_)
 
 
 type St	a = State Context a
@@ -78,25 +77,25 @@ _expandAll
 -- Adds the supertype of changedSuper to the FSTT of base
 _expand	:: TypeID -> RType -> St Bool
 _expand base changedSuper
-	= do	if (base == anyTypeID) then return False else do
-		fstt	<- get' fstt_ |> fetch (show base) "fstt_" base
-		let via	= changedSuper
-		let viaTid'	= getBaseTID via
-		if isNothing viaTid' then return False else do	-- the via is some strange case of "a -> b" or so. We ignore it, as it can not be added anyway
-		let viaTid	= fromJust viaTid'
-		{- oldBinding converts via/changedSuper to the basetype
-		Z	is Y Bool
-		_expand "Z" "Y Bool"
-		oldBinding = {a0 --> Bool} and will take the super "Y a0" to
-			the applied form "Y Bool", which "Z" is
-		-}
-		let getBinding (_,_,tb)	= snd tb
-		let oldBinding	= fetch (show via) "fstt" via fstt & getBinding
-					:: Binding
-		-- the supers FSTT, which we will tear apart and add to base
-		supersToAdd	<- get' fstt_ |> findWithDefault M.empty viaTid
-		let supersTA	= supersToAdd & M.toList |> (\(s,b) -> (s,getBinding b))
-		mapM (uncurry $ _addEntry base via oldBinding) supersTA |> or
+     = 	if base == anyTypeID then return False else do
+	fstt	<- get' fstt_ |> fetch (show base) "fstt_" base
+	let via	= changedSuper
+	let viaTid'	= getBaseTID via
+	if isNothing viaTid' then return False else do	-- the via is some strange case of "a -> b" or so. We ignore it, as it can not be added anyway
+	let viaTid	= fromJust viaTid'
+	{- oldBinding converts via/changedSuper to the basetype
+	Z	is Y Bool
+	_expand "Z" "Y Bool"
+	oldBinding = {a0 --> Bool} and will take the super "Y a0" to
+		the applied form "Y Bool", which "Z" is
+	-}
+	let getBinding (_,_,tb)	= snd tb
+	let oldBinding	= fetch (show via) "fstt" via fstt & getBinding
+				:: Binding
+	-- the supers FSTT, which we will tear apart and add to base
+	supersToAdd	<- get' fstt_ |> findWithDefault M.empty viaTid
+	let supersTA	= supersToAdd & M.toList |> second getBinding
+	mapM (uncurry $ _addEntry base via oldBinding) supersTA |> or
 
 _addEntry	:: TypeID -> RType -> Binding -> RType -> Binding -> St Bool
 _addEntry base via oldBinding superToAdd newBinding

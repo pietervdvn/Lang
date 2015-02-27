@@ -56,7 +56,7 @@ requirementsIn tlt fqn (SynDefStm (SynDef name frees _ reqs))
 requirementsIn tlt fqn (SubDefStm (SubDef name _ frees _ reqs))
 		= buildReqs tlt (fqn, name) frees reqs
 requirementsIn tlt fqn (ClassDefStm classDef)
-		= buildReqs tlt (fqn, (name classDef)) (frees classDef) (classReqs classDef)
+		= buildReqs tlt (fqn, name classDef) (frees classDef) (classReqs classDef)
 requirementsIn _ _ _
 		= return []
 
