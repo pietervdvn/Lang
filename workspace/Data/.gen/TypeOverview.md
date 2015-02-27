@@ -1,4 +1,4 @@
-	> Back to [index](Index.md)
+> Back to [index](Index.md)
 
 # Type overview
 
@@ -54,14 +54,14 @@ The **Via**  column codes via what type this specific supertype was added. This 
 
 A **Binding** might have happened on this supertype. E.g ````List (k,v)```` has the supertype````Dict k v```` .````Dict a0 a1```` has the supertype````Collection a0 a1```` .So if we want to add the supertype````Collection a0 a1```` to````List (k,v)```` , we have to substitute````a0 --> k, a1 --> v```` in the````Collection a0 a1```` example, if we want it to be correct.The **Orig Type** show this type before the substitution.
 
-### Supertypes of BIInt
+### Supertypes of BIInt 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
 .  |  | _Native_  | .  | Todo | {}
 
 
-### Supertypes of Eq
+### Supertypes of Eq 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -96,22 +96,14 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 .  | ````a0````  | _Native_  | .  | Todo | {}
 
 
-### Supertypes of Monoid
+### Supertypes of Monoid 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
 .  |  | _Native_  | .  | Todo | {}
 
 
-### Supertypes of Product
-
-Is type | Requirements | Via | Orig type | Orig type reqs | Binding
-------- | ------------ | --- | --------- | -------------- | -------
-.  |  | _Native_  | .  | Todo | {}
-Monoid |  | _Native_  | Monoid | Todo | {}
-
-
-### Supertypes of Sum
+### Supertypes of Product 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -119,7 +111,15 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 Monoid |  | _Native_  | Monoid | Todo | {}
 
 
-### Supertypes of Ord
+### Supertypes of Sum 
+
+Is type | Requirements | Via | Orig type | Orig type reqs | Binding
+------- | ------------ | --- | --------- | -------------- | -------
+.  |  | _Native_  | .  | Todo | {}
+Monoid |  | _Native_  | Monoid | Todo | {}
+
+
+### Supertypes of Ord 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -206,14 +206,14 @@ Eq | ````a0```` : {````Eq```` } ````a1```` : {````Eq```` } | _Native_  | Eq | To
 (Mappable a1) | ````a0````  ````a1````  | _Native_  | (Mappable a1) | Todo | {"a0" --> a1}
 
 
-### Supertypes of Void
+### Supertypes of Void 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
 .  |  | _Native_  | .  | Todo | {}
 
 
-### Supertypes of PrivateKey
+### Supertypes of PrivateKey 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -227,14 +227,14 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 .  | ````a0```` : {````PrivateKey```` } ````a1```` : {````PublicKey```` } | _Native_  | .  | Todo | {}
 
 
-### Supertypes of PublicKey
+### Supertypes of PublicKey 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
 .  |  | _Native_  | .  | Todo | {}
 
 
-### Supertypes of RSA
+### Supertypes of RSA 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -242,7 +242,7 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ((PubPrivAlgo RSAPrivKey) RSAPubKey) |  | _Native_  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | Todo | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
 
 
-### Supertypes of RSAPrivKey
+### Supertypes of RSAPrivKey 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -250,7 +250,7 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 PrivateKey |  | _Native_  | PrivateKey | Todo | {}
 
 
-### Supertypes of RSAPubKey
+### Supertypes of RSAPubKey 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -258,7 +258,7 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 PublicKey |  | _Native_  | PublicKey | Todo | {}
 
 
-### Supertypes of Bool
+### Supertypes of Bool 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -293,7 +293,7 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ((a0 a1) a3) | ````a0```` : {````Graph```` } ````a1```` : {````Eq```` , ````Ord```` } ````a2```` : {````Eq```` , ````Monoid```` , ````Ord```` } ````a3````  | _Native_  | ((a0 a1) a3) | Todo | {"a0" --> a1 "a1" --> a3}
 
 
-### Supertypes of Int
+### Supertypes of Int 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -303,7 +303,7 @@ Eq |  | IntInf | Eq | Todo | {}
 IntInf |  | _Native_  | IntInf | Todo | {}
 
 
-### Supertypes of Int'
+### Supertypes of Int' 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -315,7 +315,7 @@ IntInf |  | Int | IntInf | Todo | {}
 IntInf' |  | _Native_  | IntInf' | Todo | {}
 
 
-### Supertypes of IntInf
+### Supertypes of IntInf 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -324,7 +324,7 @@ BIInt |  | _Native_  | BIInt | Todo | {}
 Eq |  | _Native_  | Eq | Todo | {}
 
 
-### Supertypes of IntInf'
+### Supertypes of IntInf' 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -334,7 +334,7 @@ Eq |  | IntInf | Eq | Todo | {}
 IntInf |  | _Native_  | IntInf | Todo | {}
 
 
-### Supertypes of Nat
+### Supertypes of Nat 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -346,7 +346,7 @@ IntInf |  | Int | IntInf | Todo | {}
 NatInf |  | _Native_  | NatInf | Todo | {}
 
 
-### Supertypes of Nat'
+### Supertypes of Nat' 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -361,7 +361,7 @@ Nat |  | _Native_  | Nat | Todo | {}
 NatInf |  | Nat | NatInf | Todo | {}
 
 
-### Supertypes of NatInf
+### Supertypes of NatInf 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -371,7 +371,7 @@ Eq |  | IntInf | Eq | Todo | {}
 IntInf |  | _Native_  | IntInf | Todo | {}
 
 
-### Supertypes of NatInf'
+### Supertypes of NatInf' 
 
 Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 ------- | ------------ | --- | --------- | -------------- | -------
@@ -393,9 +393,9 @@ Is type | Requirements | Via | Orig type | Orig type reqs | Binding
 
 
 > This page was automatically generated.
->
->
+> 
+> 
 > Do not edit it, as regeneration will overwrite your changes.
->
->
+> 
+> 
 > Back to [index](Index.md)
