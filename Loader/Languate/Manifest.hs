@@ -1,4 +1,4 @@
-module Manifest where
+module Languate.Manifest where
 
 {--
 This module implements the meta-info package of a manifest

@@ -12,7 +12,7 @@ import Languate.AliasLookupTable
 import Languate.AliasTable
 import Data.Set as S
 import qualified Data.Map as M
-import Manifest (Manifest)
+import Languate.Manifest (Manifest)
 
 data Package	= Package 	{ manifest	:: Manifest
 				, modules	:: Map FQN Module
@@ -34,6 +34,6 @@ buildWorld dict	= let 	modules		= fmap fst dict
 			importSet	= fmap (S.fromList . M.toList) importGr'
 			aliastLookupTables	= buildAliasLookupTables importSet
 			aliasTables	= buildAliasTables importSet in
-			Package modules importGr' aliastLookupTables aliasTables
+			Package todo modules importGr' aliastLookupTables aliasTables
 	where 	unp	(fqn, [imp])	= (fqn, imp)
 		unp	(fqn, imps)	= error $ "Warning: double import. "++show fqn++" is imported by two or more import statements"
