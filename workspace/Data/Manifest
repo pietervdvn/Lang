@@ -6,8 +6,8 @@ This package defines ''Bool'', ''Int'', basic data structures, ...
 ----
 
 version		= 0.0.1
-authors		= ["Pietervdvn"]
-maintainers	= ["Pietervdvn"]
+author		= "Pietervdvn"
+maintainer	= "Pietervdvn"
 
 dependencies	= {"pietervdvn:Builtins" --> 0.1 }
 

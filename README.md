@@ -12,18 +12,18 @@ Code examples
 
     map (1+) [1,2,3]
     [1,2,3].map(1+)
-    
+
     -- docstring for function, the compiler automatically generates the docs; parsed in **markdown**
     > myFun 0 1 2   = 3     -- example embedded in the source code, acts as testcase (error if incorrect)
     ~ myFun with zero: myFun 0  = (+)       -- laws, checked by compiler; included in docs
     myFun   : Int -> Int -> Int
     0 a b   = a + b
     x a b   = x*a + b
-    
+
     --- multiline
     comment
     with ---
-    
+
     --## Literate programming features for docs
 
 Getting started
@@ -34,7 +34,7 @@ Install the Haskell platform (ghc+cabal) and mtl.
     sudo apt-get install ghc cabal-install
     cabal update
     cabal install mtl
-    
+
 
 Clone the repo and install all
 
@@ -44,7 +44,7 @@ Clone the repo and install all
 
 Play around by starting the interpreter:
     ./Main
-    
+
 You will now get a lot of text (with some instructions). Try out boolean operators:
     True && False
     !False
@@ -93,7 +93,7 @@ Best help in case of parse error: take the bnf files and have a look where someh
 Loader
 ------
 
-Loads from file, checks imports and thus loads multiple sources at once. This 'cluster' is then ready for semantic analysis.
+The loader is responsible for reading the manifest and reading all the needed modules from file. This cluster is then passed to the semantic analysis.
 
 Semantic Analysis
 -----------------
@@ -119,7 +119,7 @@ A working version of an interpreter. X denotes which increment it is.
 BinArch
 -------
 
-Binary archive, which keeps all versions. 
+Binary archive, which keeps all versions.
 
 Experiments
 -----------
