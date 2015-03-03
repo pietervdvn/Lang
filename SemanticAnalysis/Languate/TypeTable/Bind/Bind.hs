@@ -18,6 +18,8 @@ import Data.Maybe
 import Data.Either
 import Prelude hiding (fail, lookup)
 
+import Data.List (intercalate)
+
 import StateT
 
 import Languate.TAST
@@ -25,6 +27,7 @@ import Languate.TypeTable
 
 import Control.Monad hiding (fail)
 import Control.Monad.Trans
+
 
 import Debug.Trace
 
@@ -72,19 +75,11 @@ bind' (RCurry t0 t1) (RCurry t0' t1')
 bind' t0@(RNormal fqn nm) t1
  = when (t0 /= t1) $	-- if they are the same, nothing should happen
 	-- we search if t1 is a supertype of t0
-	inside "Could not bind" $ do
-	let tid0	= (fqn, nm)
-	tid1	<- getBaseTID t1 ? (show t1 ++ " is not a simple type.")
-	sst	<- get' typeT |> spareSuperTypes |> findWithDefault M.empty tid0
-	-- possibleSupers	:: [RType]
-	posSups	<- lookup tid1 sst ? (show t1++" is not a supertype of "++show t0++"\n"++show sst)
-	-- we try to match any supertype. All tried and failed types are returned.
-	failed	<- whileM (\posSup -> fmap not $ succeeded $ bind' posSup t1) posSups
-	-- if all types have failed, length failed = length posSups
-	assert (length failed /= length posSups) $
-		"No possible supertypes could be bound in "++show t1++".\nTried types:\n"++indent (show posSups)
+	superBind t0 t1
 bind' t0@(RApplied bt at) t1@(RApplied bt' at')
- = do	bind' bt bt'
+ = try (superBind t0 t1) $	-- first try binding via the supertype, if not just recursive
+	inside ("In the binding of "++show t0++" in "++show t1) $ do
+	bind' bt bt'
 	bind' at at'
 bind' t0@(RApplied bt at) t1
  = superBind t0 t1
@@ -98,7 +93,7 @@ At most one lookup happens per recursive layer.
 superBind	:: RType -> RType -> StMsg ()
 superBind t0 t1
  | (not $ isNormal t0) && (not $ isNormal t1)
-	= fail $ "Could not bind the special types "++show t0++" and "++show t1++" through a super type table lookup"
+	= fail $ "Can not bind the special types "++show t0++" and "++show t1++" through a super type table lookup"
  | not $ isNormal t1	-- t1 is something special, like a curry; t0 is normal
 	= do	tidBt	<- getBaseTID t0 ? ("No basetid for "++show t0++"; this is weird")
 		fstt	<- get' typeT |> allSupertypes |> findWithDefault M.empty tidBt
@@ -121,10 +116,10 @@ superBind t0 t1
 		-- TODO fix possible free leaks
 		failed 	<- mapM (\possSup -> succeeded $ bapp t0 possSup) possSups
 		assert (length failed /= length possSups)
-			$ "Binding of "++show t0++" against a possible supertype failed\nTried supers:\n"++show possSups
+			$ "Binding of "++show t0++" against a possible supertype failed\nTried supers:\n"++ intercalate "; " (possSups |> show)
 
 bapp	:: RType -> RType -> StMsg ()
-bapp t0 t1
+bapp t0 posSup
 	= fail "hi"
 
 
