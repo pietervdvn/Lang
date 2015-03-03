@@ -6,4 +6,23 @@ desc		"The syntaxis of Manifest files. Also see the manifest example.
 		 Manifests consist mainly of 'key = value' pairs, which contain all info.
 		 The synopsis and description is read from the first comment"
 
- manifest	= ""
+ manifest	= globalIdent "\n" line synopsis "\n" description line (field "\n")+
+
+ field		= localIdent "\t*=" metaValue
+
+ metaValue	= nat | string | localIdent | moduleName | license | version | dict | set | list
+
+ moduleName	= (localIdent ".")* globalIdent
+ license	= globalIdent string string | globalIdent
+ version	= nat ("." nat)+
+
+
+ commaSepValue	= (metaValue ",")* metaValue
+ list		= "\[" commaSepValue "\]"
+ set		= "\{" commaSepValue "\}"
+ dictValue	= metaValue "-->" metaValue
+ dict		= "\{" dictValue ("," dictValue)+ "\}"
+
+ synopsis	= "!\n"+
+ description	= (!"---" "!\n"* "\n")*
+ line		= "--" "-"+
