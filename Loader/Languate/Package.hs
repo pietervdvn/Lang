@@ -12,8 +12,10 @@ import Languate.AliasLookupTable
 import Languate.AliasTable
 import Data.Set as S
 import qualified Data.Map as M
+import Manifest (Manifest)
 
-data Package	= Package 	{ modules	:: Map FQN Module
+data Package	= Package 	{ manifest	:: Manifest
+				, modules	:: Map FQN Module
 				, importGraph'	:: Map FQN (Map FQN Import)	-- this means: {module --> imports these, caused by this import statement}
 				, aliasLookupTables	:: Map FQN AliasLookupTable	-- Alias table for each module. The aliastable contains what name maps on what module, e.g. "S" --> "Data.Set"; "AliasTable" --> "Languate.AliasTable", ... See aliastTable for more doc
 				, aliasTables	:: Map FQN AliasTable
