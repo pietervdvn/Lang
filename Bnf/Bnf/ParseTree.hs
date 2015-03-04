@@ -81,7 +81,7 @@ cleanAll	:: [Name] -> ParseTree -> ParseTree
 cleanAll ls	= cleanPt (`elem` ls)
 
 cleanPt	:: (Name -> Bool) -> ParseTree -> ParseTree
-cleanPt f	= filterPt (not . f)
+cleanPt f	= normalize . filterPt (not . f)
 
 filterPt	:: (Name -> Bool) -> ParseTree -> ParseTree
 filterPt f (S inf subs)
