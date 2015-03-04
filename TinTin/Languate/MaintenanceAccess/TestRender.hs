@@ -4,4 +4,5 @@ import StdDef
 
 import Languate.MarkUp.MarkUp
 
-mu = Emph (Base "Abc")
+mu = Link (Base "Abc") (Base "Link")
+code = Code (Base "Dit is code")
