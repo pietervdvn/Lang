@@ -8,9 +8,14 @@ import StdDef
 import Languate.Manifest.Manifest
 
 import qualified Bnf
+import Bnf.ParseTree
+
+import Languate.Manifest.Pt2Manifest
 
 import Data.Maybe
 import Data.Either
+
+import Control.Arrow
 
 bnfFile	= "bnf/Manifest.bnf"
 bnfFQN	= Bnf.toFQN ["Manifest"]
@@ -18,11 +23,19 @@ bnfFQN	= Bnf.toFQN ["Manifest"]
 parse'	:: FilePath -> IO Manifest
 parse' fp
 	= do	bnf	<- Bnf.load bnfFile
-		readFile fp |> parse bnf
+		manif	<- readFile fp |> parse bnf
+		case manif of
+			Left msg	-> do	putStrLn $ errMsg fp msg
+						error "Could not parse manifest. See stdout for details"
+			Right manifest	-> return manifest
 
-parse	:: Bnf.World -> String -> Manifest
+errMsg fp msg
+	= "Parse error on manifest "++fp++"\n"
+
+parse	:: Bnf.World -> String -> Either String Manifest
 parse bnf str
-	= let	pt	= Bnf.parseFull bnf bnfFQN "manifest" str
-		pt'	= fromMaybe (error $ "The manifest could not be parsed") pt
-		pt''	= either (error . (++) "Error: no parse result: " . show) id pt'  in
-		todos $ show pt''
+	= do	let pt	= Bnf.parseFull bnf bnfFQN "manifest" str
+		pt'	<- maybe (Left "The manifest could not be parsed at all") Right pt
+		case pt' of
+			Left msg	-> Left $ show msg
+			Right pt	-> Right $ pt2manifest pt

@@ -15,16 +15,19 @@ desc		"The syntaxis of Manifest files. Also see the manifest example.
 
  metaValue	::= version | nat | string | localIdent | moduleName | license | dict | set | list
 
- moduleName	::= (localIdent "\.")* globalIdent
+ moduleName	::= (localIdent dot)* globalIdent
  license	::= globalIdent string string | globalIdent
- version	::= nat ("\." nat)*
+ version	::= nat (dot nat)*
 
- commaSepValue	::= metaValue ("," metaValue)*
+ commaSepValue	::= metaValue (comma metaValue)*
  list		::= "\[" commaSepValue "\]"
  set		::= "\{" commaSepValue "\}"
  dictValue	::= metaValue "-->" metaValue
- dict		::= "\{" dictValue ("," dictValue)* "\}"
+ dict		::= "\{" dictValue (comma dictValue)* "\}"
 
 $synopsis	::= %"![\n]"+
 $description	::= %(("!(---)" "!\n"* "\n")*)
 $line		::= "--" "-"+ "\n"*
+
+dot		::= "\."
+comma		::= ","

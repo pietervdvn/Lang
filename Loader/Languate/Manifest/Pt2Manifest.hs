@@ -1,11 +1,12 @@
-module Languate.Manifest.Pt2MetaValue (pt2metaValue) where
+module Languate.Manifest.Pt2Manifest (pt2manifest) where
 
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
 import Languate.Parser.Utils
-
 import Languate.Manifest.Manifest
+
+import Languate.Manifest.Pt2MetaValue
 
 {--
 
@@ -13,20 +14,20 @@ This module converts the ParseTree into a metavalue
 
 --}
 
-modName	= "Pt2MetaValue"
+modName	= "Pt2Manifest"
 
-pt2metaValue	:: ParseTree -> MetaValue
-pt2metaValue	=  const (Int 42)-- pt2a h t s convert . cleanAll ["dot","comma","line"]
+pt2manifest	:: ParseTree -> Manifest
+pt2manifest	=  pt2a h t s convert
 
-convert		:: AST -> MetaValue
+convert		:: AST -> Manifest
 convert ast	=  todos $ show ast
 
 
-data AST	= AInt Int
+data AST	= MetaV MetaValue
 	deriving (Show)
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  []
+h		=  [("metaValue", MetaV . pt2metaValue)]
 
 t		:: Name -> String -> AST
 t nm cont	=  tokenErr modName nm cont
