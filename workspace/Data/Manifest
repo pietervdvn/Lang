@@ -5,8 +5,8 @@ The most basic types and functions, which each program needs.
 This package defines ''Bool'', ''Int'', basic data structures, ...
 ----
 
-version		= 0.0.1
 author		= "Pietervdvn"
+version		= 0.1
 maintainer	= "Pietervdvn"
 
 dependencies	= {"pietervdvn:Builtins" --> 0.1 }
@@ -14,5 +14,4 @@ dependencies	= {"pietervdvn:Builtins" --> 0.1 }
 language	= 0.1
 
 license		= GPL
-
 exposes		= {Bool}

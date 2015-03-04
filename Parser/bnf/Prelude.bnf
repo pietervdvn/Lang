@@ -27,4 +27,4 @@ _normalChar	::= "'!['\\]'"
 _escapedChar	::= "'\\[ntr'\\]'"
 _numericChar	::= "'\\" nat "'"
 char		::= normalChar | escapedChar | numericChar
-string		::= "\"" "(\\[\\\"]|![\\\"])"* "\""
+string		::= "\"" $("(\\[\\\"]|![\\\"])"*) "\""

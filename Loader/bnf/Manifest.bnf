@@ -19,7 +19,7 @@ desc		"The syntaxis of Manifest files. Also see the manifest example.
  license	::= globalIdent string string | globalIdent
  version	::= nat ("\." nat)*
 
- commaSepValue	::= metaValue ("," metaValue)+
+ commaSepValue	::= metaValue ("," metaValue)*
  list		::= "\[" commaSepValue "\]"
  set		::= "\{" commaSepValue "\}"
  dictValue	::= metaValue "-->" metaValue
