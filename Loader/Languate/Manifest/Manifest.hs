@@ -31,7 +31,8 @@ data Manifest = Manifest {name :: Name, synopsis :: String, description :: Strin
 data MetaValue	= Int Int
 		| String String
 		| FuncName String
-		| ModuleName FQN
+		| GlobId String
+		| ModuleName [Name]
 		| License License
 		| Version Version
 		| St   [MetaValue]
@@ -102,6 +103,7 @@ smv (Lst vals)	= "["++ commaSepSmv vals ++ "]"
 smv (Dict vals)	= let contents	= vals |> (\(a,b) -> show a ++" --> "++show b)
 					& intercalate ", " in
 			"{"++ contents ++ "}"
+smv (GlobId s)	= s
 commaSepSmv vals	= vals |> show & intercalate ", "
 
 
@@ -115,7 +117,7 @@ sman m
 	f v m	= FuncName $ v m
 	v v m	= Version $ v m
 	lst v m	= Lst . map String $ v m
-	st v m	= St . map ModuleName . S.toList $ v m in
+	st v m	= St . map (String . show) . S.toList $ v m in
 	[ s name
 	, lines
 	, s synopsis
@@ -155,7 +157,7 @@ metaValue' key v
 		= M.findWithDefault v key . rest
 
 showDeps	:: Map FQN Version -> MetaValue
-showDeps dict	= dict & M.toList |> (first ModuleName) |> (second Version) & Dict
+showDeps dict	= dict & M.toList |> (first (String . show)) |> (second Version) & Dict
 
 
 

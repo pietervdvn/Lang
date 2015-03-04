@@ -89,6 +89,17 @@ filterPt f (S inf subs)
 filterPt _ token
 		= token
 
+cleanStrs	:: [String] -> ParseTree -> ParseTree
+cleanStrs strs	= filterToken (`notElem` strs)
+
+filterToken	:: (String -> Bool) -> ParseTree -> ParseTree
+filterToken f (S inf subs)
+		= normalize $ S inf $ map (filterToken f) $ filter filt subs
+			where 	filt (T inf str)= f str
+				filt _		= True
+filterToken f token
+		= token
+
 instance Show ParseTree where
 	show = _s
 

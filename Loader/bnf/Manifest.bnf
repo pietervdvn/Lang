@@ -9,14 +9,14 @@ desc		"The syntaxis of Manifest files. Also see the manifest example.
 
  import Prelude
 
- manifest	::= globalIdent "\n" line synopsis "\n"+ description "\n"* line (field "\n"+)+
+ manifest	::= globalIdent nl line synopsis nl+ description nl* line (field nl+)+
 
- field		::= localIdent "\t*=" metaValue
+ field		::= fieldName eq metaValue
 
- metaValue	::= version | nat | string | localIdent | moduleName | license | dict | set | list
+ metaValue	::= version | nat | string | localIdent | license | moduleName | dict | set | list
 
- moduleName	::= (localIdent dot)* globalIdent
- license	::= globalIdent string string | globalIdent
+ moduleName	::= (globalIdent dot)* globalIdent
+ license	::= globalIdent "-->" string
  version	::= nat (dot nat)*
 
  commaSepValue	::= metaValue (comma metaValue)*
@@ -28,6 +28,9 @@ desc		"The syntaxis of Manifest files. Also see the manifest example.
 $synopsis	::= %"![\n]"+
 $description	::= %(("!(---)" "!\n"* "\n")*)
 $line		::= "--" "-"+ "\n"*
+$fieldName	::= localIdent
 
 dot		::= "\."
 comma		::= ","
+nl		::= "\n"
+eq		::= "\t*="

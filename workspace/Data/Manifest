@@ -14,4 +14,4 @@ dependencies	= {"pietervdvn:Builtins" --> 0.1 }
 language	= 0.1
 
 license		= GPL
-exposes		= {Bool}
+exposes		= {Data.Bool, Data.Int}
