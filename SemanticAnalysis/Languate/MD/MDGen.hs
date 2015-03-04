@@ -53,11 +53,11 @@ footer	:: (String -> String -> String) -> IO MarkDown
 footer link
 	= do	time	<- getCurrentTime
 		zone	<- getCurrentTimeZone
-		let remNanos	= fst . break (=='.')
+		let remNanos	= takeWhile ('.' /=)
 		let date	= remNanos $ show time
 		let dateLocal	= remNanos . show $ utcToLocalTime zone time
-		let p =  [parag $ "This page was automatically generated." -- " on "++date++" UTC ("++dateLocal++" "++show zone++")"
-			, parag $ "Do not edit it, as regeneration will overwrite your changes."
+		let p =  [parag "This page was automatically generated." -- " on "++date++" UTC ("++dateLocal++" "++show zone++")"
+			, parag "Do not edit it, as regeneration will overwrite your changes."
 			, "Back to "++link "index" "Index"
 			]
 		return $ qoute $ unlines p

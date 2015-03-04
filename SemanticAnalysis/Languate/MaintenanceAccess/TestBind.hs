@@ -23,7 +23,7 @@ import Exceptions
 import Languate.File2Package
 import Languate.FQN
 import Languate.AST
-import Languate.World
+import Languate.Package
 
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD
@@ -42,8 +42,6 @@ import Languate.ParserStub
 import Data.Map (empty, fromList, findWithDefault)
 import qualified Data.Set as S
 import Data.List
-
-import qualified Bnf
 
 -- So we can rebuild the docs
 import Languate.MaintenanceAccess.TestBuild (t)

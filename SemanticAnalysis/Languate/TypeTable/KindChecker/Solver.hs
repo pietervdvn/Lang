@@ -42,8 +42,8 @@ Type requirements are all given withing the constraints. This means we have free
 
 solve		:: TypeReqTable -> Map TypeID (Map Int Name) -> [(KindConstraint, Location)] -> Exc KindLookupTable
 solve treqt freenmt allConstr
-		= inside ("While building the kind table") $ do
-			klt 	<- solveAll $ mapMaybe (unpackMaybeTuple . (first getHasKind)) allConstr
+		= inside "While building the kind table" $ do
+			klt 	<- solveAll $ mapMaybe (unpackMaybeTuple . first getHasKind) allConstr
 			let sameKindConstraints	= map (first haveSameKinds) allConstr
 			let sameKinds	= mapMaybe unpackMaybeTuple sameKindConstraints
 			mapM_ (validateSameKindConstraints klt treqt) sameKinds
@@ -62,7 +62,7 @@ solveAll' 	:: [SimpleConstraint'] -> State KindLookupTable [SimpleConstraint']
 solveAll' []	=  return []
 solveAll' constrs
 		= do	failed	<- mapM addConstraint constrs |> catMaybes
-			if length failed == (length constrs)
+			if length failed == length constrs
 				then return failed
 				else solveAll' failed	-- progress has been made, we retry the failed constraints. Some might be solvable now!
 

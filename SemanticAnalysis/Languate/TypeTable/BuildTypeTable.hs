@@ -31,7 +31,7 @@ import StdDef
 import Exceptions
 import Languate.FQN
 import Languate.TAST
-import Languate.World
+import Languate.Package
 import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
 import Languate.TypeTable.KindChecker.BuildKindTable
@@ -42,23 +42,22 @@ import Languate.TypeTable.BuildSuperTT.BuildSuperTypeTable
 import Languate.TypeTable.BuildSuperTT.BuildSuperTypeTableFull
 import Languate.TypeTable.BuildSuperTT.ExpandFSTT
 
-import Languate.TypeTable.Checks.CheckWorld
+import Languate.TypeTable.Checks.CheckPackage
 import Languate.TypeTable.Checks.CheckReqTable
 
 import Languate.CheckUtils
 
 
-import Data.Map
 import Data.Map as M
 import Data.Maybe
 import Data.Tuple
 
 
-buildTypeTable	:: World -> Exceptions' String TypeTable
+buildTypeTable	:: Package -> Exceptions' String TypeTable
 buildTypeTable w
 		= inside "While building the type table" $
 		   do	tlts		<-  buildTLTs w
-			inside "While prechecking" $ validateWorld0 tlts w
+			inside "While prechecking" $ validatePackage tlts w
 			typeReqs	<- inside "While building the requirements table" $ buildRequirementTables tlts w |> M.elems |> M.unions
 			freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
 			klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames

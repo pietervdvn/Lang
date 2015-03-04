@@ -19,7 +19,7 @@ validateTypes tlt frees	= mapM (validateType tlt frees)
 validateType tlt frees t
 		= do	rt 	<- catch (resolveType tlt t) (recover t)
 			let foundFrees	= freesIn t
-			mapM (\a -> assert (a `elem` frees) $ "The free type variable "++show a++" was not declared") foundFrees
+			mapM_ (\a -> assert (a `elem` frees) $ "The free type variable "++show a++" was not declared") foundFrees
 			return rt
 			where 		recover	t e	= do	err $ "Failed lookup of the type "++show t++".\nContinuing with checks anyway.\nThe error was:\n" ++ e
 								return $ RFree "FAILED lookup"

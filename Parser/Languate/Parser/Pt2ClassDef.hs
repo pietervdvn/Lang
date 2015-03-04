@@ -168,7 +168,7 @@ si		:: Name -> [ASTi] -> ASTi
 si _ [InstanceT, TypeId id, Frees frees treqs, SubT, TypeT super treqs']
 		= Inst id frees super $ treqs++treqs'
 si _ [InstanceT, TypeId id, SubT, TypeT super treqs']
-		= Inst id [] super $ treqs'
+		= Inst id [] super treqs'
 si _ all@(FreeIT n reqs:_)
 		= uncurry Frees $ concatFrees all
 si _ [ast]	= ast

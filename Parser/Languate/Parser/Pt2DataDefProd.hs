@@ -81,9 +81,7 @@ makeDocsFor c sums alreadyHave
 
 makeDocstringIf	:: [Name] -> Comment -> ADTSum -> [DocString Name]
 makeDocstringIf alreadyHave c (ADTSum nm _ _)
-		= if nm `notElem` alreadyHave then [DocString c nm]
-			else []
-
+		= [DocString c nm | nm `notElem` alreadyHave]
 
 accSums		:: [AST] -> ([ADTSum], [TypeRequirement], [DocString Name])
 accSums []	=  ([],[],[])

@@ -27,7 +27,7 @@ data AST    	= Print Expr
 	deriving (Show)
 
 h       :: Name -> ParseTree -> Maybe (Writer Errors AST)
-h "expr" pt = Just $ fmap Expr $ parseExpr pt
+h "expr" pt = parseExpr pt |> Expr & Just
 h _ _       = Nothing
 
 t       :: Name -> String -> AST

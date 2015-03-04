@@ -13,7 +13,7 @@ import Languate.TypeTable
 
 
 validateInstance tlt (Instance t@(path, nm) frees super reqs)
-	= do	inside ("In the instance declaration '"++show t++ " is "++show super) $ try err $ do
+	= inside ("In the instance declaration '"++show t++ " is "++show super) $ try err $ do
 		fqn	<- findTypeOrigin tlt (path, nm)
 		let baseType	= RNormal fqn nm
 		let extraFrees	= reqs |> snd >>= freesIn
