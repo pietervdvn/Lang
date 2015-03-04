@@ -4,8 +4,6 @@ author		"Pieter Vander Vennet"
 date		[2014, 5, 29, 21, 48, 42]
 desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and floats; basic identifiers, string notations. This is a copy of the Prelude in Parser/bnf"
 
-import Comments
-
 $localIdent	::= "[a..z][A..Za..z0..9]*'?"
 $globalIdent	::= "[A..Z][A..Za..z0..9]*"
 $ident		::= globalIdent | localIdent
@@ -18,7 +16,7 @@ moduleSep	::= %"\."
 _hex		::= "0x[0..9a..fA..F]('?[0..9a..fA..F])*"
 _binary		::= "0b[01]('?[01])*"
 _decimal	::= "[0..9]('?[0..9])*"
-nat		::= decimal
+nat		::= hex | binary | decimal
 -- no need for int, this is an operator (minus) followed by a nat
 float		::= "[0..9]('?[0..9])*\.[0..9]('?[0..9])*"
 
@@ -27,4 +25,4 @@ _normalChar	::= "'!['\\]'"
 _escapedChar	::= "'\\[ntr'\\]'"
 _numericChar	::= "'\\" nat "'"
 char		::= normalChar | escapedChar | numericChar
-string		::= "\"(\\[\\\"]|![\\\"])*\""
+string		::= "\"" "(\\[\\\"]|![\\\"])"* "\""
