@@ -3,8 +3,14 @@ module Languate.MaintenanceAccess.TestRender where
 import StdDef
 import State
 import Languate.MarkUp.MarkUp
-t = do  putStrLn $ runstate (renderMD mu) 1 & fst
-        putStrLn $ runstate (renderHTML mu) 1 & fst
+
+fp	= "test/"
+
+t = do  writeFile (fp ++ "md/file0.md") $ runstate (renderMD mu) 1 & fst
+	writeFile (fp ++ "md/file1.md") $ runstate (renderMD mu0) 1 & fst
+	writeFile (fp ++ "md/file0.html") $ runstate (renderHTML mu) 1 & fst
+	writeFile (fp ++ "md/file1.html") $ runstate (renderHTML mu0) 1 & fst
+
 
 mu = Seq    [ Base "Hallo"
             , Emph $ Base "Test"
@@ -16,5 +22,8 @@ mu = Seq    [ Base "Hallo"
 			, Parag $ Base "More information"
 			, Titling (Base "SubItem") $ Base "Hi"
 			, Titling (Base "SubItem 2") $ Base "Hi again"]
-            , Link (Seq [Base "Some", Emph $ Base "link"]) "Link"
+            , Link (Seq [Base "Some", Emph $ Base "link"]) "file1"
             ]
+
+
+mu0	= Base "Hallo!"
