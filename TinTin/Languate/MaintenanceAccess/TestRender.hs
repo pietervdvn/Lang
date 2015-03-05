@@ -10,11 +10,11 @@ mu = Seq    [ Base "Hallo"
             , Emph (Base "Test")
             , Imp "important"
             , Code "x = \"code\""
-            , Incorr "wrong info"
+            , Incorr $ Base "wrong info"
             , Titling "Main item" $ Seq
-			[ Parag "Information"
-			, Parag "More information"
-			, Titling "SubItem" "Hi"
-			, Titling "SubItem 2" "Hi again"]
-            , Link (Seq [Base "Some", Emph "link"]) "Link"
+			[ Parag $ Base "Information"
+			, Parag $ Base "More information"
+			, Titling (Base "SubItem") $ Base "Hi"
+			, Titling (Base "SubItem 2") $ Base "Hi again"]
+            , Link (Seq [Base "Some", Emph $ Base "link"]) "Link"
             ]
