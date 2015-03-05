@@ -1,4 +1,4 @@
-module Languate.Manifest.ParseManifest (parse, parse') where
+module Languate.Manifest.ParseManifest (parse, parseManifest) where
 
 {--
 This module implements the parser
@@ -6,7 +6,7 @@ This module implements the parser
 
 import StdDef
 import Languate.Manifest.Manifest
-
+import Exceptions
 import qualified Bnf
 import Bnf.ParseTree
 
@@ -20,22 +20,17 @@ import Control.Arrow
 bnfFile	= "bnf/Manifest.bnf"
 bnfFQN	= Bnf.toFQN ["Manifest"]
 
-parse'	:: FilePath -> IO Manifest
-parse' fp
+parseManifest	:: FilePath -> IO Manifest
+parseManifest fp
 	= do	bnf	<- Bnf.load bnfFile
 		manif	<- readFile fp |> parse bnf
-		case manif of
-			Left msg	-> do	putStrLn $ errMsg fp msg
-						error "Could not parse manifest. See stdout for details"
-			Right manifest	-> return manifest
+		runExceptionsIO' manif
 
 errMsg fp msg
 	= "Parse error on manifest "++fp++"\n"
 
-parse	:: Bnf.World -> String -> Either String Manifest
+parse	:: Bnf.World -> String -> Exceptions' String Manifest
 parse bnf str
 	= do	let pt	= Bnf.parseFull bnf bnfFQN "manifest" str
-		pt'	<- maybe (Left "The manifest could not be parsed at all") Right pt
-		case pt' of
-			Left msg	-> Left $ show msg
-			Right pt	-> Right $ pt2manifest pt
+		pt'	<- maybe (halt "The manifest could not be parsed at all") return pt
+		either (halt . show) pt2manifest pt' 

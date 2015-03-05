@@ -13,17 +13,19 @@ import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.List
+import Data.Maybe
 
 import Control.Arrow
 
 type Version	= [Int]
 data Manifest = Manifest {name :: Name, synopsis :: String, description :: String,
-				version :: Version, language	:: Version,
+				version :: Version,
+				language:: Version,
 				authors :: [Name],
-				depends :: Map FQN Version,
-				prelude	:: Set FQN,
-				exposes	:: Set FQN,
-				execute	:: Name,
+				depends :: Map FQPN Version,
+				prelude	:: Set [Name],
+				exposes	:: Set [Name],
+				execute	:: Maybe Name,
 				rest	:: Map Name MetaValue
 				}
 
@@ -39,20 +41,25 @@ data MetaValue	= Int Int
 		| Lst  [MetaValue]
 		| Dict [(MetaValue,MetaValue)]
 
-data License	= GPL
-		| Mit
-		| None
+data KnownLicense
+		= None
+		| MIT
+		| GPL
+	deriving (Show, Enum, Bounded)
+
+data License	= Known KnownLicense
 		| File Name FilePath
-	deriving (Show)
 
 {- Some values (e.g. 'author') may automatically become a new key ('authors').
 This function says which these are
 -}
-toMultiple	:: Map String (String, MetaValue -> MetaValue)
-toMultiple = M.fromList [ ("author",("authors", asList))
+preProcess	:: Map String (String, MetaValue -> MetaValue)
+preProcess = M.fromList [ ("author",("authors", asList))
 			, ("maintainer",("maintainers", asList))
+			, ("depends",("dependencies", id))
 			]
 		where asList	= Lst . (:[])
+
 
 {- Some keys should have a certain type, given here in the form of a meta value.
 All other fields are free in format, and might be used by other tools.
@@ -63,7 +70,7 @@ typeOf	= M.fromList	[ ("version", Version [])
 			, ("maintainers", Lst [String ""])
 			, ("dependencies", Dict [(String "", Version [])])
 			, ("prelude", St [fqnT])
-			, ("license", License None)
+			, ("license", License $ Known None)
 			, ("exposes", St [fqnT])
 			, ("execute", FuncName "")
 			, ("aliases", Dict [(String "", FuncName "")])
@@ -88,6 +95,10 @@ typeOf	= M.fromList	[ ("version", Version [])
  -- Utils --
  -----------
 
+instance Show License where
+	show (Known kl)	= show kl
+	show (File n fp)= n++" --> "++fp
+
 instance Show MetaValue where
 	show	= smv
 
@@ -107,6 +118,21 @@ smv (GlobId s)	= s
 commaSepSmv vals	= vals |> show & intercalate ", "
 
 
+
+showMetaType		:: MetaValue	-> String
+showMetaType (Int i)	= "Int"
+showMetaType (String s)	= "String"
+showMetaType (FuncName str)	= "Function"
+showMetaType (ModuleName fqn)	= "ModuleName"
+showMetaType (License l)	= "License"
+showMetaType (Version v)	= "Version"
+showMetaType (St (v:_))		= "{"++ showMetaType v ++"}"
+showMetaType (Lst (v:_))	= "["++ showMetaType v ++ "]"
+showMetaType (Dict ((k,v):_))
+		=  "{"++ showMetaType k ++ " --> "++showMetaType v ++ "}"
+showMetaType (GlobId s)	= "Identifier"
+
+
 instance Show Manifest where
 	show	= sman
 
@@ -117,29 +143,38 @@ sman m
 	f v m	= FuncName $ v m
 	v v m	= Version $ v m
 	lst v m	= Lst . map String $ v m
-	st v m	= St . map (String . show) . S.toList $ v m in
-	[ s name
+	st v m	= St . map (String . intercalate "." ) . S.toList $ v m
+	vals	= replicate 7 "" ++ ["authors", "maintainers","version","license","","","language","dependencies","prelude","exposes","execute","","",""]
+	vals'	= vals |> (\str -> if null str then "" else str++ (if length str < 8 then "\t" else "") ++ "\t= ")
+	seen	= filter (/="") vals ++ ["name","synopsis","description"]	in
+	[ f name
 	, lines
-	, s synopsis
+	, f synopsis
 	, nl
-	, s description
+	, f description
 	, lines
 	, nl
 	, lst authors
 	, metaValue' "maintainers" $ Lst []
 	, v version
-	, metaValue' "license" (License None)
+	, metaValue' "license" (License $ Known None)
 	, nl
 	, nl
 	, v language
 	, showDeps . depends
 	, st prelude
 	, st exposes
-	, f execute
-	, s (showDict . rest)
-	] |> (\f -> f m) |> show & unlines
+	, f $ fromMaybe "" . execute
+	, nl
+	, nl
+	, f (showDict . deleteList seen . rest)
+	] |> (\f -> f m) |> show & zipWith (++) vals' & unlines
 
 --}
+
+deleteList	:: (Ord k) => [k] -> Map k v -> Map k v
+deleteList ks dict
+		=  foldr (\k d -> M.delete k d) dict ks
 
 
 showDict	:: Map String MetaValue -> String
@@ -156,8 +191,8 @@ metaValue'	:: String -> MetaValue -> Manifest -> MetaValue
 metaValue' key v
 		= M.findWithDefault v key . rest
 
-showDeps	:: Map FQN Version -> MetaValue
-showDeps dict	= dict & M.toList |> (first (String . show)) |> (second Version) & Dict
+showDeps	:: Map FQPN Version -> MetaValue
+showDeps dict	= dict & M.toList |> (first (FuncName . show)) |> (second Version) & Dict
 
 
 
@@ -169,8 +204,8 @@ hasType (FuncName _)	(FuncName _)	= True
 hasType (License _)	(License _)	= True
 hasType (Version _)	(Version _)	= True
 hasType (ModuleName _)	(ModuleName _)	= True
-hasType (St vals)	(St [val])	= all (`hasType` val) vals
-hasType (Lst vals)	(Lst [val])	= all (`hasType` val) vals
-hasType (Dict vals)	(Dict [val])	= all (`hasType` fst val) (vals |> fst) &&
-					  all (`hasType` snd val) (vals |> snd)
+hasType (St vals)	(St (val:_))	= all (`hasType` val) vals
+hasType (Lst vals)	(Lst (val:_))	= all (`hasType` val) vals
+hasType (Dict vals)	(Dict ((k,v):_))= all (`hasType` k) (vals |> fst) &&
+					  all (`hasType` v) (vals |> snd)
 hasType _ _	= False

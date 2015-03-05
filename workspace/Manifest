@@ -10,7 +10,7 @@ authors		= ["Pietervdvn"]		-- obligated
 maintainers	= ["Pietervdvn"]
 --- Predifined license, or ''File <string>''
    If no license is given, None is used		 ---
-license		= File "Name" "File"
+license		= Name --> "File"
 
 
 

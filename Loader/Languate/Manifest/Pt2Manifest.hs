@@ -15,10 +15,10 @@ This module converts the ParseTree into a metavalue
 
 modName	= "Pt2Manifest"
 
-pt2manifest	:: ParseTree -> Manifest
+pt2manifest	:: ParseTree -> Exc Manifest
 pt2manifest	=  pt2a h t s convert . cleanAll ["nl","line","eq"]
 
-convert		:: AST -> Manifest
+convert		:: AST -> Exc Manifest
 convert (Man m)	=  m
 
 
@@ -28,8 +28,7 @@ data AST	= PackName String
 		| MetaV MetaValue
 		| FieldName String
 		| Fields [(String, MetaValue)]
-		| Man Manifest
-	deriving (Show)
+		| Man (Exc Manifest)
 
 h		:: [(Name, ParseTree -> AST)]
 h		=  [("metaValue", MetaV . pt2metaValue)]
@@ -55,4 +54,4 @@ s "manifest" (Fields heads:asts)
 		= let Fields tails	= s "manifest" asts in
 			Fields $ heads ++ tails
 
-s nm asts	=  seqErr modName nm asts
+s nm asts	=  seqErr modName nm ""

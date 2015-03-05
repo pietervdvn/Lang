@@ -27,13 +27,14 @@ importGraph	:: Package -> Map FQN (Set FQN)
 importGraph	=  M.map (S.fromList . keys) . importGraph'
 
 
-buildWorld	:: Map FQN (Module, Set (FQN, Import)) -> Package
-buildWorld dict	= let 	modules		= fmap fst dict
+buildWorld	:: Manifest -> Map FQN (Module, Set (FQN, Import)) -> Package
+buildWorld manifest dict
+		= let 	modules		= fmap fst dict
 			importGr	= fmap (merge . S.toList . snd) dict	:: Map FQN [(FQN, [Import])]
 			importGr'	= fmap (M.fromList . fmap unp) importGr	:: Map FQN (Map FQN Import)
 			importSet	= fmap (S.fromList . M.toList) importGr'
 			aliastLookupTables	= buildAliasLookupTables importSet
 			aliasTables	= buildAliasTables importSet in
-			Package todo modules importGr' aliastLookupTables aliasTables
+			Package manifest modules importGr' aliastLookupTables aliasTables
 	where 	unp	(fqn, [imp])	= (fqn, imp)
 		unp	(fqn, imps)	= error $ "Warning: double import. "++show fqn++" is imported by two or more import statements"
