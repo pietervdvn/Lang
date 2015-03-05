@@ -20,10 +20,9 @@ import Control.Arrow
 bnfFile	= "bnf/Manifest.bnf"
 bnfFQN	= Bnf.toFQN ["Manifest"]
 
-parseManifest	:: FilePath -> IO Manifest
-parseManifest fp
-	= do	bnf	<- Bnf.load bnfFile
-		manif	<- readFile fp |> parse bnf
+parseManifest	:: Bnf.World -> FilePath -> IO Manifest
+parseManifest bnf fp
+	= do	manif	<- readFile fp |> parse bnf
 		runExceptionsIO' manif
 
 errMsg fp msg
