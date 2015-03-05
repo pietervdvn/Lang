@@ -7,11 +7,11 @@ t = do  putStrLn $ runstate (renderMD mu) 1 & fst
         putStrLn $ runstate (renderHTML mu) 1 & fst
 
 mu = Seq    [ Base "Hallo"
-            , Emph (Base "Test")
-            , Imp "important"
-            , Code "x = \"code\""
+            , Emph $ Base "Test"
+            , Imp $ Base "important"
+            , Code $ Base "x = \"code\""
             , Incorr $ Base "wrong info"
-            , Titling "Main item" $ Seq
+            , Titling (Base "Main item") $ Seq
 			[ Parag $ Base "Information"
 			, Parag $ Base "More information"
 			, Titling (Base "SubItem") $ Base "Hi"
