@@ -13,7 +13,7 @@ data MarkUp
         | Imp MarkUp 		-- Important markup
         | Code MarkUp 		-- Code section
         | Incorr MarkUp 	-- Incorrect code
-	    | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
+        | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
         | Link MarkUp String 	-- A link with overlay text
 
 
@@ -23,6 +23,8 @@ type HTML	= String
 renderMD	:: MarkUp -> MarkDown
 renderMD (Base str)
 		= str
+renderMD (Parag mu)
+        = renderMD mu ++ "\n"
 renderMD (Seq mus)
         = mus |> renderMD & unwords
 renderMD (Emph mu)
@@ -39,6 +41,8 @@ renderMD (Link mu s)
 renderHTML	:: MarkUp -> HTML
 renderHTML (Base str)
 		= str
+renderHTML (Parag mu)
+        = mu & renderHTML & inTag "p"
 renderHTML (Seq mus)
         = mus |> renderHTML & unwords
 renderHTML (Emph mu)
