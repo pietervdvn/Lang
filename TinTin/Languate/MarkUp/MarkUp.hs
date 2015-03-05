@@ -7,6 +7,7 @@ import StdDef
 -- Represents a snippet of markUpped code
 data MarkUp
         = Base String		-- Embeds a plaintext in markup
+        | Parag MarkUp      -- Paragraph for markup
         | Seq [MarkUp]      -- Sequence of markup
 	    | Emph MarkUp		-- Emphasized markup
         | Imp MarkUp 		-- Important markup

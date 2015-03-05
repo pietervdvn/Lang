@@ -8,3 +8,4 @@ t = do  putStrLn $ renderMD mu
  
 mu = Seq [Link (Base "Abc") "Link"
             , Emph (Base "Test")]
+    
