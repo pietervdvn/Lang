@@ -3,6 +3,8 @@ module Languate.MaintenanceAccess.TestRender where
 import StdDef
 
 import Languate.MarkUp.MarkUp
-
-mu = Link (Base "Abc") (Base "Link")
-code = Code (Base "Dit is code")
+t = do  putStrLn $ renderMD mu
+        putStrLn $ renderHTML mu
+ 
+mu = Seq [Link (Base "Abc") "Link"
+            , Emph (Base "Test")]
