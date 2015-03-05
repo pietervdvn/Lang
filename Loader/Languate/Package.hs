@@ -12,8 +12,10 @@ import Languate.AliasLookupTable
 import Languate.AliasTable
 import Data.Set as S
 import qualified Data.Map as M
+import Languate.Manifest (Manifest)
 
-data Package	= Package 	{ modules	:: Map FQN Module
+data Package	= Package 	{ manifest	:: Manifest
+				, modules	:: Map FQN Module
 				, importGraph'	:: Map FQN (Map FQN Import)	-- this means: {module --> imports these, caused by this import statement}
 				, aliasLookupTables	:: Map FQN AliasLookupTable	-- Alias table for each module. The aliastable contains what name maps on what module, e.g. "S" --> "Data.Set"; "AliasTable" --> "Languate.AliasTable", ... See aliastTable for more doc
 				, aliasTables	:: Map FQN AliasTable
@@ -25,13 +27,14 @@ importGraph	:: Package -> Map FQN (Set FQN)
 importGraph	=  M.map (S.fromList . keys) . importGraph'
 
 
-buildWorld	:: Map FQN (Module, Set (FQN, Import)) -> Package
-buildWorld dict	= let 	modules		= fmap fst dict
+buildWorld	:: Manifest -> Map FQN (Module, Set (FQN, Import)) -> Package
+buildWorld manifest dict
+		= let 	modules		= fmap fst dict
 			importGr	= fmap (merge . S.toList . snd) dict	:: Map FQN [(FQN, [Import])]
 			importGr'	= fmap (M.fromList . fmap unp) importGr	:: Map FQN (Map FQN Import)
 			importSet	= fmap (S.fromList . M.toList) importGr'
 			aliastLookupTables	= buildAliasLookupTables importSet
 			aliasTables	= buildAliasTables importSet in
-			Package modules importGr' aliastLookupTables aliasTables
+			Package manifest modules importGr' aliastLookupTables aliasTables
 	where 	unp	(fqn, [imp])	= (fqn, imp)
 		unp	(fqn, imps)	= error $ "Warning: double import. "++show fqn++" is imported by two or more import statements"

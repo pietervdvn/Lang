@@ -1,0 +1,36 @@
+Manifest
+
+author		"Pieter Vander Vennet"
+date		[2015, 03, 03, 22, 22, 42]
+desc		"The syntaxis of Manifest files. Also see the manifest example.
+		 Manifests consist mainly of 'key ::= value' pairs, which contain all info.
+		 The synopsis and description is read from the first comment"
+
+
+ import Prelude
+
+ manifest	::= globalIdent nl line synopsis nl+ description nl* line (field nl+)+
+
+ field		::= fieldName eq metaValue
+
+ metaValue	::= version | nat | string | localIdent | license | moduleName | dict | set | list
+
+ moduleName	::= (globalIdent dot)* globalIdent
+ license	::= globalIdent "-->" string
+ version	::= nat (dot nat)*
+
+ commaSepValue	::= metaValue (comma metaValue)*
+ list		::= "\[" commaSepValue "\]"
+ set		::= "\{" commaSepValue "\}"
+ dictValue	::= metaValue "-->" metaValue
+ dict		::= "\{" dictValue (comma dictValue)* "\}"
+
+$synopsis	::= %"![\n]"+
+$description	::= %(("!(---)" "!\n"* "\n")*)
+$line		::= "--" "-"+ "\n"*
+$fieldName	::= localIdent
+
+dot		::= "\."
+comma		::= ","
+nl		::= "\n"
+eq		::= "\t*="
