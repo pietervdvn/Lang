@@ -26,51 +26,51 @@ renderMD	:: MarkUp -> State Int MarkDown
 renderMD (Base str)
 		= return str
 renderMD (Parag mu)
-        = return $ renderMD mu ++ "\n"
+        = renderMD mu |> (++ "\n")
 renderMD (Seq mus)
-        = mus |> renderMD & unwords & return
+        = mus & mapM renderMD |> unwords
 renderMD (Emph mu)
-		= renderMD mu & between "_" & return
+		= renderMD mu |> between "_"
 renderMD (Imp mu)
-        = renderMD mu & between "**" & return
+        = renderMD mu |> between "**"
 renderMD (Code mu)
-        = renderMD mu & between "```" & return
+        = renderMD mu |> between "```"
 renderMD (Incorr mu)
-        = renderMD mu & between "~~" & return
+        = renderMD mu |> between "~~"
 renderMD (Titling mu text)
         = do i <- get
-             let title = replicate i "#" ++renderMD mu 
+             title <- renderMD mu |> (replicate i '#' ++) 
              put $ i + 1
              text' <- renderMD text
              put i
-             return $ title ++ "\n\n"++text'
+             return (title ++ "\n\n"++text')
 renderMD (Link mu s)
-        = renderMD mu & between' "[" "]" ++ between' "(" ")" s & return
+        = renderMD mu |> between' "[" "]" |> (++ between' "(" ")" s)
 
 renderHTML	:: MarkUp -> State Int HTML
 renderHTML (Base str)
 		= return str
 renderHTML (Parag mu)
-        = return $ mu & renderHTML & inTag "p"
+        = mu & renderHTML |> inTag "p"
 renderHTML (Seq mus)
-        = mus |> renderHTML & unwords & return
+        = mus & mapM renderHTML |> unwords 
 renderHTML (Emph mu)
-		= mu & renderHTML & inDiv "emph" & return 
+		= mu & renderHTML |> inDiv "emph"
 renderHTML (Imp mu)
-        = mu & renderHTML & inDiv "imp" & return
+        = mu & renderHTML |> inDiv "imp"
 renderHTML (Code mu)
-        = mu & renderHTML & inDiv "code" & return 
+        = mu & renderHTML |> inDiv "code"
 renderHTML (Incorr mu)
-        = mu & renderHTML & inDiv "incorr" & return 
-renderHTML (Titeling mu text)
+        = mu & renderHTML |> inDiv "incorr"
+renderHTML (Titling mu text)
         = do i <- get
-            let title = renderHTML mu & inDiv ("title" ++ show i)
-            put $ i + 1
-            text' <- renderHTML text
-            put i
-            return $ title ++ text'
+             title <- renderHTML mu |> inDiv ("title" ++ show i)
+             put $ i + 1
+             text' <- renderHTML text
+             put i
+             return $ title ++ text'
 renderHTML (Link text link)
-        = inTag' "a" ["href="++show link] $ renderHTML text & return
+        = renderHTML text |> inTag' "a" ["href="++show link]
 
 
 

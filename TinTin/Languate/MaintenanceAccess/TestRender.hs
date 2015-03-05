@@ -1,10 +1,10 @@
 module Languate.MaintenanceAccess.TestRender where
 
 import StdDef
-
+import State
 import Languate.MarkUp.MarkUp
-t = do  putStrLn $ renderMD mu
-        putStrLn $ renderHTML mu
+t = do  putStrLn $ runstate (renderMD mu) 1 & fst
+        putStrLn $ runstate (renderHTML mu) 1 & fst
 
 mu = Seq    [ Base "Hallo"
             , Emph (Base "Test")
