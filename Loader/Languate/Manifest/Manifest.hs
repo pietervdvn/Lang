@@ -74,6 +74,7 @@ typeOf	= M.fromList	[ ("version", Version [])
 			, ("exposes", St [fqnT])
 			, ("execute", FuncName "")
 			, ("aliases", Dict [(String "", FuncName "")])
+			, ("language", Version [])
 		   	  ]
 		where fqnT	= ModuleName $ error "pietervdvn is upset"
 
