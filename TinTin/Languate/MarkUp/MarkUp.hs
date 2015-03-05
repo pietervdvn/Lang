@@ -1,22 +1,50 @@
-module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link), renderMD, renderHTML) where
+module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link), rewrite, renderMD, renderHTML) where
 
 -- This module implements the base definitions of the markup data structure
 
 import StdDef
-
 import State
 
+import Data.Maybe
 -- Represents a snippet of markUpped code
 data MarkUp
-        = Base String		-- Embeds a plaintext in markup
-        | Parag MarkUp      -- Paragraph for markup
-        | Seq [MarkUp]      -- Sequence of markup
-	    | Emph MarkUp		-- Emphasized markup
-        | Imp MarkUp 		-- Important markup
-        | Code MarkUp 		-- Code section
-        | Incorr MarkUp 	-- Incorrect code
+        = Base String		    -- Embeds a plaintext in markup
+        | Parag MarkUp          -- Paragraph for markup
+        | Seq [MarkUp]          -- Sequence of markup
+	    | Emph MarkUp		    -- Emphasized markup
+        | Imp MarkUp 		    -- Important markup
+        | Code MarkUp 		    -- Code section
+        | Incorr MarkUp 	    -- Incorrect code
         | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
-        | Link MarkUp String 	-- A link with overlay text
+        | Link MarkUp URL       -- A link with overlay text [markup, url]
+
+type URL = String
+
+rewrite     :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
+rewrite f mu = fromMaybe (rw f mu) (f mu)
+
+rw          :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
+rw f (Base str)
+            = Base str
+rw f (Parag mu)
+            = Parag $ rewrite f mu
+rw f (Seq mus) 
+            = Seq $ mus |> rewrite f
+rw f (Emph mu)
+            = Emph $ rewrite f mu
+rw f (Imp mu)
+            = Imp $ rewrite f mu
+rw f (Code mu)
+            = Code $ rewrite f mu
+rw f (Incorr mu)
+            = Incorr $ rewrite f mu
+rw f (Titling title mu)
+            = Titling (rewrite f title) $ rewrite f mu
+rw f (Link mu url)
+            =  Link (rewrite f mu) url
+
+
+
 
 
 type MarkDown	= String

@@ -6,4 +6,4 @@ Information
 
 Hi ##SubItem 2
 
-Hi again [Some _link_](file1)
+Hi again [Some _link_](file1.md)
