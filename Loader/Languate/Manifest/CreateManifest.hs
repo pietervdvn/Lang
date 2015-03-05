@@ -18,6 +18,9 @@ import qualified Data.Set as S
 import Data.Maybe
 
 import Control.Monad
+import Control.Arrow
+
+import Debug.Trace
 
 type Exc a	= Exceptions' String a
 
@@ -26,13 +29,15 @@ createFromDict	:: Name -> String -> String -> [(String, MetaValue)] -> Exc Manif
 createFromDict name synopsis description pairs
 	= stack' ((++) "While building the manifest\n") $
 	  do	pairs'	<- pairs |> preProc & preProcs'
-		dict	<- mapM typeCheck pairs'
+		(typesOk, dict)	<- mapM typeCheck pairs' |> unzip |> first and
+		haltIf (not typesOk) $ "Not all fields have the correct type"
 		let description'	= description & stripnl & reverse & stripnl & reverse
 		let fetch str	= lookup str dict ? ("The field '"++str++"' was not found")
 		let get def str	= return $ fromMaybe def $ lookup str dict
 		let unp (Lst nms)	= nms |> (\(String s) -> s)
-		(Version version)	<- fetch "version"
-		(Version language)	<- fetch "language"
+		let unpv (Version v)	= v
+		version		<- fetch "version" |> unpv
+		language	<- fetch "language" |> unpv
 		authors		<- fetch "authors" |> unp
 		depends'	<- fetch "dependencies"
 		depends		<- fetchDeps depends'
@@ -67,11 +72,12 @@ preProc (k, v)
 		(k', f v)
 
 -- typechecks against given types in manifest.hs
-typeCheck	:: (String, MetaValue) -> Exc (String, MetaValue)
+typeCheck	:: (String, MetaValue) -> Exc (Bool, (String, MetaValue))
 typeCheck (k, v)
  	= do	let t	= findWithDefault v k typeOf	-- typeOf is defined in manifest.hs
-		unless (v `hasType` t) $ err $ "The field '"++k++"' should be of the type "++showMetaType t++",\nbut it is of the type "++showMetaType v
-		return (k,v)
+		let typeOk	= v `hasType` t
+		unless typeOk $ err $ "The field '"++k++"' should be of the type "++showMetaType t++",\nbut it is of the type "++showMetaType v
+		return (typeOk, (k,v))
 
 -- extension of preProcess from manifest.hs
 preProcess'	= fromList [("license",("license", (|> License) . parseLicense))]
