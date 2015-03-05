@@ -71,7 +71,7 @@ renderMD (Titling mu text)
              put $ i + 1
              text' <- renderMD text
              put i
-             return (title ++ "\n\n"++text')
+             return ("\n\n" ++ title ++ "\n\n"++text')
 renderMD (Link mu s)
         = renderMD mu |> between' "[" "]" |> (++ between' "(" ")" s)
 
