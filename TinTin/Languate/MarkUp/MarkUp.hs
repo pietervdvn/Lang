@@ -7,12 +7,12 @@ import StdDef
 -- Represents a snippet of markUpped code
 data MarkUp
         = Base String		-- Embeds a plaintext in markup
-        | Seq [MarkUp]      -- Sequence of markup
-	    | Emph MarkUp		-- Emphasized markup
+        | Seq [MarkUp]     	-- Sequence of markup
+        | Emph MarkUp		-- Emphasized markup
         | Imp MarkUp 		-- Important markup
         | Code MarkUp 		-- Code section
         | Incorr MarkUp 	-- Incorrect code
-	    | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
+        | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
         | Link MarkUp String 	-- A link with overlay text
 
 
