@@ -5,13 +5,14 @@ module Languate.MarkUp.MarkUp (MarkUp (Base, Emph, Imp, Code, Incorr, Link), ren
 import StdDef
 
 -- Represents a snippet of markUpped code
-data MarkUp	= Base String	-- Embeds a plaintext in markup
-		| Emph MarkUp	-- Emphasized markup
-        | Imp MarkUp --Important markup
-        | Code MarkUp --Code section
-        | Incorr MarkUp --Incorrect code
-		| Titling MarkUp MarkUp --Embedded titeling [title, markup]
-        | Link MarkUp MarkUp --A link
+data MarkUp
+	= Base String		-- Embeds a plaintext in markup
+	| Emph MarkUp		-- Emphasized markup
+        | Imp MarkUp 		-- Important markup
+        | Code MarkUp 		-- Code section
+        | Incorr MarkUp 	-- Incorrect code
+	| Titling MarkUp MarkUp -- Embedded titeling [title, markup]
+        | Link MarkUp String 	-- A link with overlay text
 
 
 type MarkDown	= String
@@ -29,9 +30,6 @@ renderMD (Code mu)
 renderMD (Incorr mu)
         = renderMD mu & between "~~"
 
-between	:: String -> MarkDown -> MarkDown
-between str md = str++md++str
-
 
 renderHTML	:: MarkUp -> HTML
 renderHTML (Base str)
@@ -44,6 +42,14 @@ renderHTML (Code mu)
         = mu & renderHTML & inDiv "code"
 renderHTML (Incorr mu)
         = mu & renderHTML & inDiv "incorr"
+
+
+
+--------- TOOLS -------------
+
+between	:: String -> MarkDown -> MarkDown
+between str md = str++md++str
+
 
 inTag	:: String -> HTML -> HTML
 inTag tagN html
