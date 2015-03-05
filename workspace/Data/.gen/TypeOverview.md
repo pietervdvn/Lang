@@ -1,3 +1,5 @@
+> Back to [index](Index.md)
+
 # Type overview
 
 Type | Declared in | Kind | Docstring

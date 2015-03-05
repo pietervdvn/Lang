@@ -81,7 +81,11 @@ pr	= (||>> type2rtype) . snd . str2type
 ---------------
 
 -- Test binding of t0 in t1
-bnd t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
+bnd' t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
+
+bnd t0 t1	= case bnd' t0 t1 of
+			Left msg	-> putStrLn msg
+			Right bnd	-> print bnd
 
 test t0 t1 reqs = bind tt reqs t0 t1
 
@@ -109,3 +113,6 @@ t8	= bnd "Nat -> Int" "Int -> a"
 t9	= bnd "List Nat" "List a"
 
 t10	= bnd "Int -> Bool" "a -> a"
+
+-- binding via the super type tables
+t11	= bnd "[Nat]" "{a}"

@@ -1,20 +1,20 @@
-package:	Data
+Data
+----
+The most basic types and functions, which each program needs.
 
--- see documentation for all options (well, this file is the documentation...)
+This package defines ''Bool'', ''Int'', basic data structures, ...
+----
 
-version		: 0.0.1
+author		= "Pietervdvn"
+version		= 0.1
+maintainer	= "Pietervdvn"
 
-author		: Pieter Vander Vennet
---maintainer	: Pieter Vander Vennet
+dependencies	= {"pietervdvn:Builtins" --> 0.1 }
 
-language	: Built-in	-- built in value means that this package is compiled against the built-in types, without prelude
+language	= 0.1
+license		= GPL
 
-synopsis 	: Basic data types and functions
-description 	: Basic data types and functions, such as Bool, Int, Nat, Maybe, Either, String, ...
-license		: GPL
+exposes		= {Data.Bool, Data.Int}
 
-build-depends	: pietervdvn:Builins
 
-prelude		: Builtins
--- can be imported as Data.Bool
-exposes		: Bool
+bugtracker	= "github.com/Lang/issues/"

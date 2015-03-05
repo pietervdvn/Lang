@@ -1,0 +1,39 @@
+Manifest
+--------
+This is a example manifest, of a package called "Manifest"
+
+You will find documentation of the fields here. Field names should not contain upper case letters (and if they do, they will be treated as lowercase)
+--------
+
+version		= 0.0.1				-- obligated
+authors		= ["Pietervdvn"]		-- obligated
+maintainers	= ["Pietervdvn"]
+--- Predifined license, or ''File <string>''
+   If no license is given, None is used		 ---
+license		= Name --> "File"
+
+
+
+-- The language version it is compiled against
+language	= 0.1
+
+
+--- Build dependencies, thus all needed packages.
+   If not given: empty is assumed	---
+dependencies	= {"pietervdvn:Builtins" --> 0.1
+			"pietervdvn:Data" --> 0.1 }
+
+-- Specify here what files are imported by default in each module
+prelude		= {}
+
+--- Modules which get exported
+   String syntax is not needed, as these are known entities ---
+exposes		= {Bool}
+
+--- The function which gets executed/calculated if the program is started
+    If this function is IO, it is executed, the returned value is printed/piped
+    If it's a normal function, the arguments of the program are parsed (according to the types), it get's executed and the result printed ---
+execute		= function
+
+--- Command line aliases. These are used when the program is actually installed on a system ---
+aliases		= {"plc" --> compile, "plci" --> interactiveMode}

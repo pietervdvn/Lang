@@ -2,9 +2,7 @@ Prelude
 
 author		"Pieter Vander Vennet"
 date		[2014, 5, 29, 21, 48, 42]
-desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and floats; basic identifiers, string notations"
-
-import Comments
+desc		"The syntaxis of primitives and basic stuff in languate: Strings, ints and floats; basic identifiers, string notations. This is a copy of the Prelude in Parser/bnf"
 
 $localIdent	::= "[a..z][A..Za..z0..9]*'?"
 $globalIdent	::= "[A..Z][A..Za..z0..9]*"

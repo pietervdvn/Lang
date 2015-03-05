@@ -35,7 +35,6 @@ substitute (Binding dict)
 		= traverseRT (_substitute dict)
 
 
-
 _substitute	:: Map Name RType -> RType -> RType
 _substitute dict (RFree a)
 		= findWithDefault (RFree a) a dict

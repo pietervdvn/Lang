@@ -20,13 +20,16 @@ import System.Directory
 import Data.Set (Set)
 import qualified Data.Set as S
 
+import Languate.Manifest.ParseManifest (parseManifest)
+
 
 -- loadpackage, but crashes when imports are not found
 loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO Package
 loadPackage' world fqn fp
-		= do	(package, notFound)	<- loadPackage world fqn fp
+		= do	manifest		<- parseManifest $ fp ++ "Manifest"
+			(package, notFound)	<- loadPackage world fqn $ fp ++ "src/"
 			unless (null notFound) $ printErr notFound
-			return $ buildWorld package
+			return $ buildWorld manifest package
 
 printErr	:: [(FQN,FQN)] -> IO ()
 printErr notFound

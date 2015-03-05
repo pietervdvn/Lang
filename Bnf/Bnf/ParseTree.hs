@@ -81,12 +81,23 @@ cleanAll	:: [Name] -> ParseTree -> ParseTree
 cleanAll ls	= cleanPt (`elem` ls)
 
 cleanPt	:: (Name -> Bool) -> ParseTree -> ParseTree
-cleanPt f	= filterPt (not . f)
+cleanPt f	= normalize . filterPt (not . f)
 
 filterPt	:: (Name -> Bool) -> ParseTree -> ParseTree
 filterPt f (S inf subs)
 		= S inf $ map (filterPt f) $ filter (f . getName . getInf) subs
 filterPt _ token
+		= token
+
+cleanStrs	:: [String] -> ParseTree -> ParseTree
+cleanStrs strs	= filterToken (`notElem` strs)
+
+filterToken	:: (String -> Bool) -> ParseTree -> ParseTree
+filterToken f (S inf subs)
+		= normalize $ S inf $ map (filterToken f) $ filter filt subs
+			where 	filt (T inf str)= f str
+				filt _		= True
+filterToken f token
 		= token
 
 instance Show ParseTree where

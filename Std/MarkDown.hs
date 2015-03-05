@@ -7,6 +7,12 @@ import StdDef
 
 import Data.Maybe
 
+
+data MarkUp	= Normal String
+		| Bold MarkUp
+		| Italic MarkUp
+
+
 type MarkDown	= String
 
 

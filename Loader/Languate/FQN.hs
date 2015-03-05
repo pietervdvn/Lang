@@ -57,7 +57,7 @@ relativePath (FQN _ mods mod)
 
 toFQPN		:: String -> Maybe FQPN
 toFQPN fqpn	=  do	let (auth,pack)	= break (==':') fqpn
-			toFqpn auth $ drop 1 pack
+			if null pack then Nothing else toFqpn auth $ drop 1 pack
 
 toFQN'		:: String -> FQN
 toFQN'		=  fromJust . toFQN
