@@ -17,8 +17,8 @@ import Languate.TypeTable.Extended
 
 explanation	:: MarkDown
 explanation	= title 3 "How to read a 'Supertypetable of T a0 a1'" ++
-			[code "T a0 a1 " ++ "is the type given in "++bold "Is Type" ++ ", if the "++bold "requirements" ++ "on the free type variables are met. "++
-				"This table contains always the same number of frees, but a certain supertype can demand extra requirements.",
+			[ [code "T a0 a1", "is the type given in", bold "Is Type", ", if the", bold "requirements", "on the free type variables are met.",
+				"This table contains always the same number of frees, but a certain supertype can demand extra requirements."] & unwords,
 			"The "++ bold "Via" ++ " column codes via what type this specific supertype was added. "++
 				"This means that, if "++code "List"++" has supertype "++code "Collection"++", and "++code "Collection"++" has supertype "++code"Mappable"++
 					", that "++code "List" ++"has the suppertype"++code "Mappable"++", which has been added via"++code "Collection"++". "++

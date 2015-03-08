@@ -27,7 +27,7 @@ bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 
-t	= do	world	<- packageIO $ path++"/src/"
+t	= do	world	<- packageIO $ path
 		to	<- runExceptionsIO' $ buildAllTables world
 		writeTables world to path
 		wd	<- getCurrentDirectory
