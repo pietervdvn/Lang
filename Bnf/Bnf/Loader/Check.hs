@@ -97,8 +97,8 @@ checkAmbigueImports ctx iom@(IOM fqn _ imps _)
 				-- all contains the raw imports in a (ioimport, [name, fqn]) fashion
 				-- we can scrub it four doubles now
 				let ambigue	= ambigueImports all
-				unless (null ambigue) $ addErr fqn (0,0) "Ambigue import" $
-					"Some terms can refer to multiple declarations: "++ prep ambigue
+				unless (null ambigue) $ addErr fqn (0,0) "Ambigous import" $
+					"Some terms can refer to multiple declarations: "++ prep ambigue++".\nTry using 'import <module> showing {<needed>}' or 'import <module> hiding {<conflicting>}'"
 
 prep		:: [(Name, [IOImport])] -> String
 prep 		=  foldr (\toPrep acc -> "\n\t"++ prep' toPrep ++ acc) ""
