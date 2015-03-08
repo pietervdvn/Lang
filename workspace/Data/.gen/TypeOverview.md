@@ -48,7 +48,7 @@ Type | Declared in | Kind | Docstring
 
 ### How to read a 'Supertypetable of T a0 a1'
 
-````T a0 a1```` is the type given in **Is Type** , if the **requirements** on the free type variables are met. This table contains always the same number of frees, but a certain supertype can demand extra requirements.
+````T a0 a1````  is the type given in **Is Type**  , if the **requirements**  on the free type variables are met. This table contains always the same number of frees, but a certain supertype can demand extra requirements.
 
 The **Via**  column codes via what type this specific supertype was added. This means that, if ````List````  has supertype ````Collection```` , and ````Collection````  has supertype ````Mappable```` , that ````List```` has the suppertype````Mappable```` , which has been added via````Collection```` . _Native_ denotes that this supertype was added via the code.
 
