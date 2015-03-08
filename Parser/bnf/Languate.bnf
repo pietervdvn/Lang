@@ -10,6 +10,7 @@ import Expressions
 import TypeDefs
 import Imports
 import Annotations
+import Manifest showing {manifest} -- Import manifest so that it is loaded
 
 
 {- Where it all begins -}
