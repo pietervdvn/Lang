@@ -94,7 +94,7 @@ superBind	:: RType -> RType -> StMsg ()
 superBind t0 t1
  | (not $ isNormal t0) && (not $ isNormal t1)
 	= fail $ "Can not bind the special types "++show t0++" and "++show t1++" through a super type table lookup"
- | not $ isNormal t1	-- t1 is something special, like a curry; t0 is normal
+ | not $ isNormal t1	-- t1 is something special, like a curry; t0 is normal. We have to use the stt
 	= do	tidBt	<- getBaseTID t0 ? ("No basetid for "++show t0++"; this is weird")
 		fstt	<- get' typeT |> allSupertypes |> findWithDefault M.empty tidBt
 		let possible	= keys fstt & L.filter (not . isNormal)
