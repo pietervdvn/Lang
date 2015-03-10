@@ -124,15 +124,15 @@ renderHTML (Table mus muss)
 ------ EASY ACCESS FUNCTIONS -------
 
 
-parag	= Parag . Base
-emph	= Emph . Base
-imp	= Imp . Base
-code	= Code . Base
-incorr	= Incorr . Base
+parag  = Parag . Base
+emph   = Emph . Base
+imp    = Imp . Base
+code   = Code . Base
+incorr = Incorr . Base
 titling str
-	= Titling (Base str)
+       = Titling (Base str)
 link str url
-	= Link (Base str) url
+       = Link (Base str) url
 
 --------------- TOOLS ---------------
 
