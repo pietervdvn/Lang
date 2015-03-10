@@ -149,6 +149,11 @@ perms (ls:lss)
 	= do	l	<- ls
 		map (l:) $ perms lss
 
+-- Returns the first counter for which the condition is *not* met
+while		:: (counter -> Bool) -> (counter -> counter) -> counter -> counter
+while cond inc counter
+ | cond counter	= counter
+ | otherwise	= while cond inc (inc counter)
 
 whileM		:: (Monad m, Functor m) => (a -> m Bool) -> [a] -> m [a]
 whileM _ []	=  return []

@@ -169,9 +169,13 @@ resolveType tlt e@(TupleType (t:tps))
 
 resolveType _ Infer
 		= halt "Unresolved infer"
-
 resolveTypes tlt
 		= mapM (resolveType tlt)
+
+
+
+
+
 
 _construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
 _construct tlt e tps cons

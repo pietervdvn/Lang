@@ -50,12 +50,14 @@ import Languate.MaintenanceAccess.TestBuild (t)
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
-toIO	= do	world	<- packageIO $ path++"/src/"
+toIO	= do	world	<- packageIO path
 		runExceptionsIO' $ buildAllTables world
+
 to	= unsafePerformIO toIO
 tt	= typeTable to
 tlt	= findWithDefault (error "Prelude not found")
 		(toFQN' "pietervdvn:Data:Prelude") $ typeLookups tt
+
 
 -- parsing of types + ugly unpacking
 str2type str	= let parsed	= Bnf.parseFull bnfs (Bnf.toFQN ["Types"]) "type" str in
@@ -75,6 +77,9 @@ pt	= type2rtype . fst . str2type
 pr	= (||>> type2rtype) . snd . str2type
 
 
+eitherIO	:: (Show a) => Either String a -> IO ()
+eitherIO (Left msg)	= putStrLn msg
+eitherIO (Right a)	= print a
 
 ---------------
 -- TEST HERE --
@@ -83,9 +88,7 @@ pr	= (||>> type2rtype) . snd . str2type
 -- Test binding of t0 in t1
 bnd' t0 t1	= test (pt t0) (pt t1) $ fromList $ merge (pr t0 ++ pr t1)
 
-bnd t0 t1	= case bnd' t0 t1 of
-			Left msg	-> putStrLn msg
-			Right bnd	-> print bnd
+bnd t0 t1	= eitherIO $ bnd' t0 t1
 
 test t0 t1 reqs = bind tt reqs t0 t1
 

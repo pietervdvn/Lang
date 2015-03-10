@@ -124,6 +124,14 @@ To make all the constructors private, put an underscore before the name
 data _Record	= ...
 
 
+Type generation by constructors
+-------------------------------
+
+The constructors also create a new type.
+
+This means that constructors become types too. This however is something to think about.
+
+
 Type synonyms and subtypes
 ==========================
 

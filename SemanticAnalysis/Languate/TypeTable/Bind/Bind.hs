@@ -19,18 +19,23 @@ import Data.Either
 import Prelude hiding (fail, lookup)
 
 import Data.List (intercalate)
+import qualified Data.List as L
 
 import StateT
 
 import Languate.TAST
 import Languate.TypeTable
+import Languate.TypeTable.Bind.Substitute
+import Languate.TypeTable.Bind.StMsg
+
 
 import Control.Monad hiding (fail)
 import Control.Monad.Trans
+import Control.Arrow
 
 
 import Debug.Trace
-
+import Data.Function
 
 {-
 
@@ -45,11 +50,10 @@ Assumes that t0 has no overlapping free names with t1.
 -}
 bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
 bind tt reqs t0 t1
-	= let 	ctx	= Context reqs tt noBinding
+	= let 	used	= (t0:t1:(concat $ M.elems reqs)) |> freesInRT & concat & S.fromList
+		ctx	= Context reqs used tt noBinding
 		msg	= "While binding "++show t0++" in "++ show t1 in
 		runstateT (inside msg $ bind' t0 t1) ctx |> snd |> binding
-
-
 
 bind'	:: RType -> RType -> StMsg ()
 bind' (RFree a) (RFree b)
@@ -69,6 +73,11 @@ bind' t0 (RFree b)
 	addBinding (b, t0)
 	inside ("While binding "++show t0++" against the type requirements on '"++b++"'") $
 		mapM_ (bind' t0) bReqs
+bind' (RFree a) t1
+ = do	-- if the free has the right super type, we can assume binding is OK
+	aReqs	<- requirementsOn a
+	ok	<- mapM (\sub -> succeeded $ bind' sub t1) aReqs |> or
+	assert ok $ "Could not bind the free '"++a++"' as it does not have the necessary super type "++st True t1++".\nIt has the supertypes "++show aReqs
 bind' (RCurry t0 t1) (RCurry t0' t1')
  = do	bind' t0 t0'
 	bind' t1 t1'
@@ -82,194 +91,100 @@ bind' t0@(RApplied bt at) t1@(RApplied bt' at')
 	bind' bt bt'
 	bind' at at'
 bind' t0@(RApplied bt at) t1
- = superBind t0 t1
+ 	= superBind t0 t1
+bind' t0 t1	= fail $ "Unhandled bind: "++show t0++" "++show t1
 
-
-{- Tries to bind t0 in t1 via a super type table lookup
-
-At most one lookup happens per recursive layer.
-
--}
+-- tries to bind t0 into t1 via a super type table lookup
 superBind	:: RType -> RType -> StMsg ()
-superBind t0 t1
- | (not $ isNormal t0) && (not $ isNormal t1)
-	= fail $ "Can not bind the special types "++show t0++" and "++show t1++" through a super type table lookup"
- | not $ isNormal t1	-- t1 is something special, like a curry; t0 is normal. We have to use the stt
-	= do	tidBt	<- getBaseTID t0 ? ("No basetid for "++show t0++"; this is weird")
-		fstt	<- get' typeT |> allSupertypes |> findWithDefault M.empty tidBt
-		let possible	= keys fstt & L.filter (not . isNormal)
-		failed	<- tryBind possible t1
-		assert (length failed /= length possible) $
-			"No possible supertypes could be bound in "++show t1++".\nTried (abnormal) types:\n"++show failed
-		-- if no type failed, a binding has happened.
- | not $ isNormal t0
-	= fail $ "The base type is not a normal type. Could not bind "++show t0++" against "++show t1
- | otherwise	-- both are normal types!
-	= do	tid0	<- getBaseTID t0 ? "Huh? T0 should be normal!"
-		tid1	<- getBaseTID t1 ? "Huh? T1 should be normal!"
-		sstt	<- get' typeT |> spareSuperTypes |> findWithDefault M.empty tid0
-		-- possible super types, as given by the sstt
-		let possSups	= sstt & findWithDefault [] tid1
-		-- we do now know what types are possible, given the bases
-		-- we bind t0 against the first that is possible, in a recursive way that repects applied types
-		-- TODO what should happen with the requirements?
-		-- TODO fix possible free leaks
-		failed 	<- mapM (\possSup -> succeeded $ bapp t0 possSup) possSups
-		assert (length failed /= length possSups)
-			$ "Binding of "++show t0++" against a possible supertype failed\nTried supers:\n"++ intercalate "; " (possSups |> show)
-
-bapp	:: RType -> RType -> StMsg ()
-bapp t0 posSup
-	= fail "hi"
+superBind sub wantedSuper
+ | isNormal wantedSuper
+	= do	-- we calculate all possible super forms, which we try against match superBind
+		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
+		supTid	<- getBaseTID wantedSuper ? ("Huh? wanted super is normal!")
+		wantedForms	<- getSstt subTid |> findWithDefault [] supTid
+		whileM (\wantedForm -> succeeded $
+			lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
+		return ()
 
 
--- Tries to bind any t0 against the given t0. Returns the failed types
-tryBind	:: [RType] -> RType -> StMsg [RType]
-tryBind possSups t1
-	= whileM (\possSup -> (succeeded $ bind' possSup t1) |> not) possSups
+{-
 
-{- Tries to make two types the same, by filling in the frees in any of them.
-
-Unificate is associative.
-
-Type requirements and supertypes are **not** taken in account here.
-
-Used in "add binding", if conflicting values could be added
+Given a subtype, a form of a super type (from the FSTT) and the wanted super type, tries to perform binding (or fails)
 
 -}
-unificate	:: RType -> RType -> Either String Binding
-unificate t0 t1
-	| t0 == t1	= return noBinding
-	| otherwise	= let 	ctx	= Context M.empty (error "No tt needed for unify!") noBinding
-				res	= runstateT (unificate' t0 t1) ctx in
-				res |> snd |> binding
+lookupSupersAgainst	:: RType -> RType -> RType -> StMsg ()
+lookupSupersAgainst t wantedForm wantedType
+ | isNormal t	= do	tidSub	<- getBaseTID t ? "Huh? T0 should be normal! Check sanity of the universe"
+			stt	<-  getFstt tidSub
+			-- gives the applied types, which should get bound against the requirements
+			let baseBinding	= appliedTypes t & zip [0..] |> first ((++) "a" . show)
+			-- requirements on the frees. These bindings might be important, to fill in the super type
+ 			(freeReqs, _, _)	<- lookup wantedForm stt  ? (show t ++ " does not have a supertype "++show wantedForm)
+			assert (length freeReqs >= length baseBinding) $ "The type "++show t++" has been applied to too many arguments, only "++ show (length freeReqs)++" are needed"
+			assert (length freeReqs <= length baseBinding) $ "The type "++show t++" has been applied to too little arguments, "++ show (length freeReqs)++" are needed"
+			-- the binding which converts the wanted form into the wanted type
+			form2type	<- isolate $ bind' wantedType wantedForm >> getBinding
+			(bindAwayRaw, reqBound)	<- isolate $ _fixRequirements freeReqs baseBinding
+			-- empty bindaway: a0 -> a0, k1 --> k1 to ease the concatBindings
+			let bindAwayId	= substituents form2type & L.filter (`L.notElem` M.elems bindAwayRaw) |> (\free -> (free, free)) & M.fromList & asBinding
+			let bindAway	= mergeBinding (asBinding bindAwayRaw) bindAwayId
+			let form2type'	= concatBindings bindAway form2type
+			bindSameAgainst (unbind reqBound & M.toList) (unbind form2type')
+ | otherwise	= fail $ "The type "++show t++" is not normal"
 
-unificate'	:: RType -> RType -> StMsg ()
-unificate' (RFree a) (RFree b)
-	= unless (a == b) $ do
-		addBinding (a, RFree b)
-		addBinding (b, RFree a)
-unificate' (RFree a) t1
-	= addBinding (a,t1)
-unificate' t0 (RFree b)
-	= addBinding (b,t0)
-unificate' (RCurry t0 t1) (RCurry t0' t1')
-	= do	unificate' t0 t0'
-		unificate' t1 t1'
-unificate' (RApplied bt at) (RApplied bt' at')
-	= do	unificate' bt bt'
-		unificate' at at'
-unificate' t0 t1
-	= assert (t0 == t1) $ "Could not unify "++ st True t0 ++" and "++ st True t1
+-- Binds each sub in each super of matching names
+bindSameAgainst	:: [(Name, RType)] -> Map Name RType -> StMsg ()
+bindSameAgainst subs supers
+	= mapM_ (\(nm, sub) -> bind' sub $ M.findWithDefault sub nm supers) subs
 
-
-
-data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free. All bound frees should be included.
-				, typeT 	:: TypeTable
-				, binding 	:: Binding
-				}
-
--- the monad we'll work with
-type StMsg a	= StateT Context (Either String) a
-
-
-
-
------------
--- UTILS --
------------
-
-
-requirementsOn	:: Name -> StMsg [RType]
-requirementsOn a
-	= get' frees |> findWithDefault [] a
-
-
-fstt	:: TypeID -> StMsg FullSuperTypeTable
-fstt tid
-	= do	mFstt	<- get' typeT |> allSupertypes |> lookup tid
-		assert (isJust mFstt) $ "No full super type table found for "++show tid
-		return $ fromJust mFstt
-
-
-sstt	:: TypeID -> StMsg SpareSuperTypeTable
-sstt tid
-	= do	spareSTT	<- get' typeT |> spareSuperTypes |> lookup tid
-		assert (isJust spareSTT) $ "No spare STT for "++show tid
-		return $ fromJust spareSTT
+-- Binds the found applied types against the requirements. Returns (the bindaway to resolve conflicts, e.g. "k1" --> "free_k1", the binding of some frees which got bound by recursive calls)
+_fixRequirements	:: [(Name, Set RType)] -> [(Name, RType)] -> StMsg (Map Name Name, Binding)
+_fixRequirements reqs typeArgs
+	= do	-- first, we calculate what free type variables are used in the supertype
+		-- we bind those away as to prevent weird infections
+		usedFrees	<- getUsedFrees |> S.toList
+		-- the unwanted frees are the frees with overlap
+		let unwanted0	= reqs  |> snd |> S.toList ||>> freesInRT |> concat
+					& concat & L.filter (`elem` usedFrees)
+		let unwanted1	= reqs	|> fst & L.filter (`elem` usedFrees)
+		let unwanted	= L.nub $ unwanted0 ++ unwanted1
+		-- dict from "a0 --> freea0". These are strings at this moment
+		let bindAwayNms	= zip unwanted unwanted
+					||>> nameFor usedFrees
+		let bindAway	= bindAwayNms & M.fromList
+		-- lets add all those frees!
+		addFrees $ M.elems bindAway
+		-- and as a real binding
+		let bindAway'	= bindAway |> RFree & Binding
+		-- we replace all "a0","a1",... in the known types.
+		let fetchName oldName	= findWithDefault oldName oldName bindAway
+		let reqs'	= reqs 	|> first fetchName
+					|> second (S.map $ substitute bindAway')
+		-- type args has the form "a0" of the applied type is "type in context".
+		-- only the keys(!) have to be translated!
+		let typeArgs'	= typeArgs |> first fetchName
+		-- now, lets bind the requirements!
+		let bindAllReqs	= mapM_ (\(nm, bt) -> bindAll bt (L.lookup nm reqs' |> S.toList & fromMaybe [])) typeArgs'
+		reqBound	<- isolate $ bindAllReqs >> getBinding
+		return (bindAwayNms |> swap & M.fromList, reqBound)
 
 
-addBinding	:: (Name, RType) -> StMsg ()
-addBinding (n,t)
-	= do	ctx	<- get
-		let (Binding b)	= binding ctx
-		-- check wether or not a conflicting binding exists
-		let previous	= M.lookup n b
-		assert (isNothing previous || t == fromJust previous) $
-			"Conflicting bindings for '"++n++"' are found."++
-			" It could be both bound to "++show (fromJust previous)++" and "++show t
-		put $ ctx {binding = Binding $ M.insert n t b}
-
-addFrees	:: [Name] -> StMsg ()
-addFrees bound
-	= do	ctx	<- get
-		let frees'	= foldr (\n -> M.insert n []) (frees ctx) bound
-		put $ ctx {frees = frees'}
+-- ## TOOLS
 
 
-
-fail		:: String -> StMsg a
-fail		=  lift . Left
-
-
-assert True _	= return ()
-assert False msg	= fail msg
+nameFor	:: [Name] -> Name -> Name
+nameFor used free
+ | ("free_"++free) `L.notElem` used	= "free_"++free
+ | otherwise	= let 	ind	= while (\ind -> nameFor' free ind `elem` used) (+1) 0 in
+			nameFor' free ind
 
 
-catch		:: a -> StMsg a -> StMsg a
-catch backup stmsg
-	= do	ctx	<- get
-		case runstateT stmsg ctx of
-			(Left _)	-> return backup
-			(Right (a, ctx))	-> put ctx >> return a
+nameFor'	:: Name -> Int -> Name
+nameFor' free ind
+		=  "free_"++show ind++free
 
 
-try		:: StMsg a -> StMsg a -> StMsg a
-try first backup
-	= do	ctx	<- get
- 		case runstateT first ctx of
-			Left msg	-> backup
-			Right (a, ctx')	-> put ctx' >> return a
-
-inside		:: String -> StMsg a -> StMsg a
-inside msg m	=  do	ctx	<- get
-			case runstateT m ctx of
-				Left msg'	-> fail $ msg++":\n"++msg'
-				Right (a,ctx')	-> put ctx' >> return a
-
--- Tries the given action. If it fails, rolls back the binding and returns false
-succeeded	:: StMsg a -> StMsg Bool
-succeeded m	= catch False (m >> return True)
-
-(?)	:: Maybe a -> String -> StMsg a
-(?) Nothing
-	= fail
-(?) (Just a)
-	= const $ return a
-
-joinEither	:: [Either String b] -> Either String [b]
-joinEither []	= Right []
-joinEither (Left str:rest)
-	= case joinEither rest of
-		Left msg	-> Left $ str++"; "++msg
-		Right _		-> Left str
-joinEither (Right b:rest)
-	= case joinEither rest of
-		Left msg	-> Left msg
-		Right bs	-> Right (b:bs)
-
-
-
-
-instance Show Context where
-	show (Context frees _ b)= "Context "++sd frees ++ ", "++show b
+-- binds the subtype into all supertypes. Fails if one type fails
+bindAll	:: RType -> [RType] -> StMsg ()
+bindAll sub supers
+	= mapM_ (bind' sub) supers
