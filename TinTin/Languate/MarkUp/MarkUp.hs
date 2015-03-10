@@ -84,7 +84,7 @@ renderMD (Table mus muss)
                 let header' = bars header
                 let lines = header ||>> const '-' & bars
                 let table' = table |> bars
-                let content = header' : lines : table'
+                let content = "" : header' : lines : table'
                 return $ unlines content
 
 renderHTML	:: MarkUp -> State Int HTML
