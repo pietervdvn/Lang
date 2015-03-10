@@ -23,6 +23,7 @@ mu = Seq    [ Base "Hallo"
 			, Titling (Base "SubItem") $ Base "Hi"
 			, Titling (Base "SubItem 2") $ Base "Hi again"]
             , Link (Seq [Base "Some", Emph $ Base "link"]) "file1"
+            , Table $ Seq [TableRow (Seq [TableData (Base "kek"), TableData (Base "test")])]
             ]
 
 

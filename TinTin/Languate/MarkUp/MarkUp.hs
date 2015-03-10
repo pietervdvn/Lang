@@ -1,4 +1,4 @@
-module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link), rewrite, renderMD, renderHTML) where
+module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table), rewrite, renderMD, renderHTML) where
 
 -- This module implements the base definitions of the markup data structure
 
@@ -6,6 +6,7 @@ import StdDef
 import State
 
 import Data.Maybe
+import Data.List
 -- Represents a snippet of markUpped code
 data MarkUp
         = Base String		    -- Embeds a plaintext in markup
@@ -17,11 +18,14 @@ data MarkUp
         | Incorr MarkUp 	    -- Incorrect code
         | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
         | Link MarkUp URL       -- A link with overlay text [markup, url]
+        | Table [MarkUp] [[Markup]]         -- A table [header, tablerows]
 
 type URL = String
 
+
 rewrite     :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
 rewrite f mu = fromMaybe (rw f mu) (f mu)
+
 
 rw          :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
 rw f (Base str)
@@ -42,13 +46,12 @@ rw f (Titling title mu)
             = Titling (rewrite f title) $ rewrite f mu
 rw f (Link mu url)
             =  Link (rewrite f mu) url
-
-
-
-
+rw f (Table mus muss)
+            = Table (mus |> rewrite f) $ muss ||>> rewrite f
 
 type MarkDown	= String
 type HTML	= String
+
 
 renderMD	:: MarkUp -> State Int MarkDown
 renderMD (Base str)
@@ -74,6 +77,15 @@ renderMD (Titling mu text)
              return ("\n\n" ++ title ++ "\n\n"++text')
 renderMD (Link mu s)
         = renderMD mu |> between' "[" "]" |> (++ between' "(" ")" s)
+renderMD (Table mus muss)
+        = do    header <- mapM renderMD mus
+                table  <- mapM (mapM renderMD) muss
+                let bars = intercalate " | "
+                let header' = bars header
+                let lines = header ||>> const '-' & bars
+                let table' = table |> bars " | "
+                let content = header' : lines : table'
+                return $ unlines content
 
 renderHTML	:: MarkUp -> State Int HTML
 renderHTML (Base str)
@@ -99,8 +111,12 @@ renderHTML (Titling mu text)
              return $ title ++ text'
 renderHTML (Link text link)
         = renderHTML text |> inTag' "a" ["href="++show link]
-
-
+renderHTML (Table mus muss)
+        = do    header <- mapM renderHTML mus
+                table  <- mapM (mapM renderHTML) muss
+                let header' = header |> inTag' "td" ["id=table_header"] & concat & inTag "tr"
+                let table' = table ||>> inTag "td" |> concat |> inTag "tr"
+                return $ inTag "table" $ inTag "tbody" $ concat $ header' : table'
 
 --------- TOOLS -------------
 
@@ -113,6 +129,7 @@ between' start end str = start++str++end
 inTag   :: String -> HTML -> HTML
 inTag tagN html
 	= "<"++tagN++">"++html++"</"++tagN++">"
+
 inTag'  :: String -> [String] -> HTML -> HTML
 inTag' tagN metas html
     = "<"++tagN++" "++unwords metas ++">"++html++"</"++tagN++">"
