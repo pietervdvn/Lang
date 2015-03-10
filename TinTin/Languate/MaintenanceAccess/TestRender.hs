@@ -13,17 +13,17 @@ t = do  writeFile (fp ++ "md/file0.md") $ runstate (renderMD $ rewrite (renderLi
 
 
 mu = Seq    [ Base "Hallo"
-            , Emph $ Base "Test"
-            , Imp $ Base "important"
-            , Code $ Base "x = \"code\""
-            , Incorr $ Base "wrong info"
-            , Titling (Base "Main item") $ Seq
-			[ Parag $ Base "Information"
-			, Parag $ Base "More information"
-			, Titling (Base "SubItem") $ Base "Hi"
-			, Titling (Base "SubItem 2") $ Base "Hi again"]
-            , Link (Seq [Base "Some", Emph $ Base "link"]) "file1"
-	        , Table [Emph $ Base "Head 1", Emph $ Base "Head 2"] ([["Row 1","Row 1 again"],["Row 2","Row 2 again"]] ||>> Base)
+            , emph "Test"
+            , imp "important"
+            , code  "x = \"code\""
+            , incorr "wrong info"
+            , titling "Main item" $ Seq
+			[ parag "Information"
+			, parag "More information"
+			, titling "SubItem" $ Base "Hi"
+			, titling "SubItem 2" $ Base "Hi again"]
+            , Link (Seq [Base "Some", emph "link"]) "file1"
+	        , Table [imp "Head 1", imp "Head 2"] ([["Row 1","Row 1 again"],["Row 2","Row 2 again"]] ||>> Base)
             ]
 
 

@@ -14,7 +14,7 @@ Hi
 
 Hi again [Some _link_](file1.md) 
 
-_Head 1_ | _Head 2_
--------- | --------
+**Head 1** | **Head 2**
+---------- | ----------
 Row 1 | Row 1 again
 Row 2 | Row 2 again
