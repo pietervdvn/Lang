@@ -18,7 +18,7 @@ data MarkUp
         | Incorr MarkUp 	    -- Incorrect code
         | Titling MarkUp MarkUp -- Embedded titeling [title, markup]
         | Link MarkUp URL       -- A link with overlay text [markup, url]
-        | Table [MarkUp] [[Markup]]         -- A table [header, tablerows]
+        | Table [MarkUp] [[MarkUp]]         -- A table [header, tablerows]
 
 type URL = String
 
@@ -83,7 +83,7 @@ renderMD (Table mus muss)
                 let bars = intercalate " | "
                 let header' = bars header
                 let lines = header ||>> const '-' & bars
-                let table' = table |> bars " | "
+                let table' = table |> bars
                 let content = header' : lines : table'
                 return $ unlines content
 
