@@ -1,4 +1,6 @@
-module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table), rewrite, renderMD, renderHTML) where
+module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table),
+			rewrite, renderMD, renderHTML,
+			parag, emph, imp, code, incorr, link) where
 
 -- This module implements the base definitions of the markup data structure
 
@@ -32,7 +34,7 @@ rw f (Base str)
             = Base str
 rw f (Parag mu)
             = Parag $ rewrite f mu
-rw f (Seq mus) 
+rw f (Seq mus)
             = Seq $ mus |> rewrite f
 rw f (Emph mu)
             = Emph $ rewrite f mu
@@ -70,7 +72,7 @@ renderMD (Incorr mu)
         = renderMD mu |> between "~~"
 renderMD (Titling mu text)
         = do i <- get
-             title <- renderMD mu |> (replicate i '#' ++) 
+             title <- renderMD mu |> (replicate i '#' ++)
              put $ i + 1
              text' <- renderMD text
              put i
@@ -93,7 +95,7 @@ renderHTML (Base str)
 renderHTML (Parag mu)
         = mu & renderHTML |> inTag "p"
 renderHTML (Seq mus)
-        = mus & mapM renderHTML |> unwords 
+        = mus & mapM renderHTML |> unwords
 renderHTML (Emph mu)
 		= mu & renderHTML |> inDiv "emph"
 renderHTML (Imp mu)
@@ -118,7 +120,21 @@ renderHTML (Table mus muss)
                 let table' = table ||>> inTag "td" |> concat |> inTag "tr"
                 return $ inTag "table" $ inTag "tbody" $ concat $ header' : table'
 
---------- TOOLS -------------
+
+------ EASY ACCESS FUNCTIONS -------
+
+
+parag	= Parag . Base
+emph	= Emph . Base
+imp	= Imp . Base
+code	= Code . Base
+incorr	= Incorr . Base
+titling str
+	= Titling (Base str)
+link str url
+	= Link (base str) url
+
+--------------- TOOLS ---------------
 
 between	:: String -> MarkDown -> MarkDown
 between str md = str++md++str
