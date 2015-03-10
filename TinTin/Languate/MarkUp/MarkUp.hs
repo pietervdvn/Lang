@@ -1,6 +1,6 @@
 module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table),
 			rewrite, renderMD, renderHTML,
-			parag, emph, imp, code, incorr, link) where
+			parag, emph, imp, code, incorr, link, titling) where
 
 -- This module implements the base definitions of the markup data structure
 
@@ -132,7 +132,7 @@ incorr	= Incorr . Base
 titling str
 	= Titling (Base str)
 link str url
-	= Link (base str) url
+	= Link (Base str) url
 
 --------------- TOOLS ---------------
 
