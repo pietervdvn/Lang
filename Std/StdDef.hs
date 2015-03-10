@@ -159,3 +159,10 @@ whileM		:: (Monad m, Functor m) => (a -> m Bool) -> [a] -> m [a]
 whileM _ []	=  return []
 whileM f (a:as)	=  do	cont	<- f a
 			if cont then whileM f as |> (a:) else return []
+
+
+whileM'		:: (Monad m, Functor m) => (x -> Bool) -> (a -> m x) -> [a] -> m [x]
+whileM' _ _ []	= return []
+whileM' cond f (a:as)
+		= do	cont	<- f a
+			if cond cont then whileM' cond f as |> (cont:) else return []

@@ -21,6 +21,8 @@ import Prelude hiding (fail, lookup)
 import Data.List (intercalate)
 import qualified Data.List as L
 
+import Data.Either
+
 import StateT
 
 import Languate.TAST
@@ -77,22 +79,26 @@ bind' (RFree a) t1
  = do	-- if the free has the right super type, we can assume binding is OK
 	aReqs	<- requirementsOn a
 	ok	<- mapM (\sub -> succeeded $ bind' sub t1) aReqs |> or
-	assert ok $ "Could not bind the free '"++a++"' as it does not have the necessary super type "++st True t1++".\nIt has the supertypes "++show aReqs
+	assert ok $ "Could not bind the free '"++a++"'"++
+			" as it does not have the necessary super type "++st True t1++
+			".\nIt has the supertypes "++show aReqs
 bind' (RCurry t0 t1) (RCurry t0' t1')
  = do	bind' t0 t0'
 	bind' t1 t1'
+bind' (RCurry _ _) _
+ = fail "Curry-types (a->b) can not have super types"
 bind' t0@(RNormal fqn nm) t1
  = when (t0 /= t1) $	-- if they are the same, nothing should happen
 	-- we search if t1 is a supertype of t0
 	superBind t0 t1
 bind' t0@(RApplied bt at) t1@(RApplied bt' at')
- = try (superBind t0 t1) $	-- first try binding via the supertype, if not just recursive
+ = try (superBind t0 t1) $
+	-- first try binding via the supertype, if not just recursive
 	inside ("In the binding of "++show t0++" in "++show t1) $ do
 	bind' bt bt'
 	bind' at at'
 bind' t0@(RApplied bt at) t1
  	= superBind t0 t1
-bind' t0 t1	= fail $ "Unhandled bind: "++show t0++" "++show t1
 
 -- tries to bind t0 into t1 via a super type table lookup
 superBind	:: RType -> RType -> StMsg ()
@@ -102,11 +108,11 @@ superBind sub wantedSuper
 		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
 		supTid	<- getBaseTID wantedSuper ? ("Huh? wanted super is normal!")
 		wantedForms	<- getSstt subTid |> findWithDefault [] supTid
-		whileM (\wantedForm -> succeeded $
-			lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
-		return ()
-
-
+		let isLeft	= either (const True) (const False)
+		failed	<- whileM' isLeft (\wantedForm -> catch' $
+				lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
+		assert (length failed /= length wantedForms) $
+			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip wantedForms failed)
 {-
 
 Given a subtype, a form of a super type (from the FSTT) and the wanted super type, tries to perform binding (or fails)
@@ -114,23 +120,47 @@ Given a subtype, a form of a super type (from the FSTT) and the wanted super typ
 -}
 lookupSupersAgainst	:: RType -> RType -> RType -> StMsg ()
 lookupSupersAgainst t wantedForm wantedType
- | isNormal t	= do	tidSub	<- getBaseTID t ? "Huh? T0 should be normal! Check sanity of the universe"
-			stt	<-  getFstt tidSub
-			-- gives the applied types, which should get bound against the requirements
-			let baseBinding	= appliedTypes t & zip [0..] |> first ((++) "a" . show)
-			-- requirements on the frees. These bindings might be important, to fill in the super type
- 			(freeReqs, _, _)	<- lookup wantedForm stt  ? (show t ++ " does not have a supertype "++show wantedForm)
-			assert (length freeReqs >= length baseBinding) $ "The type "++show t++" has been applied to too many arguments, only "++ show (length freeReqs)++" are needed"
-			assert (length freeReqs <= length baseBinding) $ "The type "++show t++" has been applied to too little arguments, "++ show (length freeReqs)++" are needed"
-			-- the binding which converts the wanted form into the wanted type
-			form2type	<- isolate $ bind' wantedType wantedForm >> getBinding
-			(bindAwayRaw, reqBound)	<- isolate $ _fixRequirements freeReqs baseBinding
-			-- empty bindaway: a0 -> a0, k1 --> k1 to ease the concatBindings
-			let bindAwayId	= substituents form2type & L.filter (`L.notElem` M.elems bindAwayRaw) |> (\free -> (free, free)) & M.fromList & asBinding
-			let bindAway	= mergeBinding (asBinding bindAwayRaw) bindAwayId
-			let form2type'	= concatBindings bindAway form2type
-			bindSameAgainst (unbind reqBound & M.toList) (unbind form2type')
+ | isNormal t
+   = do	tidSub		<- getBaseTID t ? "Huh? T0 should be normal!"
+	stt		<-  getFstt tidSub
+	-- gives the applied types, which should get bound against the requirements
+	let baseBinding	= appliedTypes t & zip [0..] |> first ((++) "a" . show)
+	{- requirements on the frees.
+		These bindings might be important, to fill in the super type-}
+	(freeReqs,_,_)	<- lookup wantedForm stt  ?
+				(show t ++ " does not have a supertype "++show wantedForm)
+	assert (length freeReqs >= length baseBinding) $ "The type "++show t++
+		" has been applied to too many arguments, only "++
+		show (length freeReqs)++" are needed"
+	assert (length freeReqs <= length baseBinding) $ "The type "++show t++
+		" has been applied to too little arguments, "++
+		show (length freeReqs)++" are needed"
+	-- the binding which converts the wanted form into the wanted type
+	form2type	<- isolate $ bind' wantedType wantedForm >> getBinding
+	(bindAwayRaw,bindAwayRev, reqBound)
+			<- isolate $ _fixRequirements freeReqs baseBinding
+	-- empty bindaway: a0 -> a0, k1 --> k1 to ease the concatBindings
+	let bindAwayId	= substituents form2type
+				& L.filter (`L.notElem` M.elems bindAwayRaw)
+				|> (\free -> (free, free))
+				& M.fromList & asBinding
+	let bindAway	= mergeBinding (asBinding bindAwayRaw) bindAwayId
+	let form2type'	= concatBindings bindAway form2type
+	bindSameAgainst (unbind reqBound & M.toList) (unbind form2type')
+	-- bind the applied types
+	let wantedTypeApplieds	= appliedTypes wantedType
+	let wantedFormApplieds	= appliedTypes wantedForm
+	fail $
+		"\nbb: "++show baseBinding++
+		"\nwta: "++show wantedTypeApplieds++
+		"\nwfa:"++show wantedFormApplieds++
+		"\nreqbound"++show reqBound++
+		"\nform2type'; "++show form2type'++
+		"\nbindAway"++show bindAway
  | otherwise	= fail $ "The type "++show t++" is not normal"
+
+
+
 
 -- Binds each sub in each super of matching names
 bindSameAgainst	:: [(Name, RType)] -> Map Name RType -> StMsg ()
@@ -138,7 +168,7 @@ bindSameAgainst subs supers
 	= mapM_ (\(nm, sub) -> bind' sub $ M.findWithDefault sub nm supers) subs
 
 -- Binds the found applied types against the requirements. Returns (the bindaway to resolve conflicts, e.g. "k1" --> "free_k1", the binding of some frees which got bound by recursive calls)
-_fixRequirements	:: [(Name, Set RType)] -> [(Name, RType)] -> StMsg (Map Name Name, Binding)
+_fixRequirements	:: [(Name, Set RType)] -> [(Name, RType)] -> StMsg (Map Name Name,Map Name Name, Binding)
 _fixRequirements reqs typeArgs
 	= do	-- first, we calculate what free type variables are used in the supertype
 		-- we bind those away as to prevent weird infections
@@ -166,7 +196,7 @@ _fixRequirements reqs typeArgs
 		-- now, lets bind the requirements!
 		let bindAllReqs	= mapM_ (\(nm, bt) -> bindAll bt (L.lookup nm reqs' |> S.toList & fromMaybe [])) typeArgs'
 		reqBound	<- isolate $ bindAllReqs >> getBinding
-		return (bindAwayNms |> swap & M.fromList, reqBound)
+		return (bindAwayNms |> swap & M.fromList, M.fromList bindAwayNms, reqBound)
 
 
 -- ## TOOLS

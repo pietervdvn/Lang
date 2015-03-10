@@ -99,6 +99,13 @@ catch backup stmsg
 			(Left _)	-> return backup
 			(Right (a, ctx))	-> put ctx >> return a
 
+catch'	:: StMsg a -> StMsg (Either String a)
+catch' stmsg
+	= do	ctx	<- get
+		case runstateT stmsg ctx of
+			(Left msg)	-> return $ Left msg
+			(Right (a,ctx))	-> put ctx >> return (Right a)
+
 
 try		:: StMsg a -> StMsg a -> StMsg a
 try first backup

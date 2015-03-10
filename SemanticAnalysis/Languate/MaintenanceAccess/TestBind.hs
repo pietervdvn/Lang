@@ -45,6 +45,7 @@ import Data.List
 
 -- So we can rebuild the docs
 import Languate.MaintenanceAccess.TestBuild (t)
+import Languate.TypeTable.Bind.StMsg
 
 -- setup
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
@@ -114,8 +115,14 @@ t8	= bnd "Nat -> Int" "Int -> a"
 
 -- Binding via application
 t9	= bnd "List Nat" "List a"
-
+-- conflicting bindings
 t10	= bnd "Int -> Bool" "a -> a"
 
 -- binding via the super type tables
 t11	= bnd "[Nat]" "{a}"
+
+
+
+t12 = let ctx	= Context empty (S.fromList ["a"]) tt noBinding
+	  result = runstateT (lookupSupersAgainst (pt "[Nat]") (pt "{a0}") (pt "{Int}")) ctx in
+		eitherIO result
