@@ -1,7 +1,0 @@
-module Languate.MaintenanceAccess.TestRender where
-
-import StdDef
-
-import Languate.MarkUp.MarkUp
-
-t = Emph (Base "Abc") & renderMD

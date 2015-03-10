@@ -23,14 +23,15 @@ mu = Seq    [ Base "Hallo"
 			, Titling (Base "SubItem") $ Base "Hi"
 			, Titling (Base "SubItem 2") $ Base "Hi again"]
             , Link (Seq [Base "Some", Emph $ Base "link"]) "file1"
+	    , Table [Bold $ Base "Head 1", Bold $ Base "Head 2"] ([["Row 1","Row 1 again"],["Row 2","Row 2 again"]] ||>> Base)
             ]
 
 
 mu0	= Base "Hallo!"
- 
+
 
 renderLink  ::String -> MarkUp ->  Maybe MarkUp
 renderLink ext (Link naam link)
             = Just $ Link naam $ link ++ ext
-renderLink _ _ 
+renderLink _ _
             = Nothing
