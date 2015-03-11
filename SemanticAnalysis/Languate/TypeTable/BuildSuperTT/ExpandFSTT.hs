@@ -48,6 +48,7 @@ expand fstt
 		initNotifTable	= initSstt	|> keys |> S.fromList & invertDict
 		initTodo	= fstt 		|> keys |> S.fromList
 		ctx	= Ctx fstt initNotifTable initSstt initTodo []	in
+		-- TODO actual check 'toCheck' requirements
 		runstate _expandAll ctx & snd & (fstt_ &&& sstt_)
 
 
