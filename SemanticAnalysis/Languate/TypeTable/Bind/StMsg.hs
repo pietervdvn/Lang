@@ -8,7 +8,7 @@ import StdDef
 import StateT
 
 import Languate.TAST
-import Languate.TypeTable
+import Languate.TypeTable hiding (spareSuperTypes, allSupertypes)
 
 import Data.Map (Map, findWithDefault, lookup)
 import qualified Data.Map as M
@@ -27,11 +27,13 @@ type StMsg a	= StateT Context (Either String) a
 
 data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the supertypes (= requirements) for a given free.
 				, usedFrees	:: Set Name -- All knwon or used frees
-				, typeT 	:: TypeTable
+               			, spareSuperTypes :: Map TypeID SpareSuperTypeTable
+				, allSupertypes :: Map TypeID FullSuperTypeTable
 				, binding 	:: Binding
+
 				}
 instance Show Context where
-	show (Context frees _ _ b)= "Context "++sd frees ++ ", "++show b
+	show (Context frees _ _ _ b)= "Context "++sd frees ++ ", "++show b
 
 
 
@@ -44,7 +46,7 @@ requirementsOn a
 
 getFstt	:: TypeID -> StMsg FullSuperTypeTable
 getFstt tid
-	= do	mFstt	<- get' typeT |> allSupertypes |> lookup tid
+	= do	mFstt	<- get |> allSupertypes |> lookup tid
 		assert (isJust mFstt) $ "No full super type table found for "++show tid
 		return $ fromJust mFstt
 
@@ -52,7 +54,7 @@ getFstt tid
 getSstt	:: TypeID -> StMsg SpareSuperTypeTable
 getSstt tid
  | tid == anyTypeID	= return $ M.empty
- | otherwise	= do	spareSTT	<- get' typeT |> spareSuperTypes |> lookup tid
+ | otherwise	= do	spareSTT	<- get |> spareSuperTypes |> lookup tid
 			assert (isJust spareSTT) $ "No spare STT for "++show tid
 			return $ fromJust spareSTT
 

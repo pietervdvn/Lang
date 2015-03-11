@@ -26,7 +26,7 @@ import Data.Either
 import StateT
 
 import Languate.TAST
-import Languate.TypeTable
+import Languate.TypeTable as TT
 import Languate.TypeTable.Bind.Substitute
 import Languate.TypeTable.Bind.StMsg
 
@@ -50,12 +50,15 @@ When free ''a'' is bound against free ''b'', each requirement on ''a'' is matche
 
 Assumes that t0 has no overlapping free names with t1.
 -}
-bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
-bind tt reqs t0 t1
+_bind	:: Map TypeID SpareSuperTypeTable -> Map TypeID FullSuperTypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
+_bind sstt fstt reqs t0 t1
 	= let 	used	= (t0:t1:(concat $ M.elems reqs)) |> freesInRT & concat & S.fromList
-		ctx	= Context reqs used tt noBinding
+		ctx	= Context reqs used sstt fstt noBinding
 		msg	= "While binding "++show t0++" in "++ show t1 in
 		runstateT (inside msg $ bind' t0 t1) ctx |> snd |> binding
+
+bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
+bind tt	= _bind (TT.spareSuperTypes tt) (TT.allSupertypes tt)
 
 bind'	:: RType -> RType -> StMsg ()
 bind' (RFree a) (RFree b)

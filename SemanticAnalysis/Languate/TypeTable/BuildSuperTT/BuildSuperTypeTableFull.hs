@@ -1,4 +1,4 @@
-module Languate.TypeTable.BuildSuperTT.BuildSuperTypeTableFull where
+ module Languate.TypeTable.BuildSuperTT.BuildSuperTypeTableFull where
 
 import StdDef hiding (todo)
 
@@ -22,7 +22,6 @@ stt2fstt	:: SuperTypeTableFor -> FullSuperTypeTable
 stt2fstt sttf
 	= let tuples	= unmerge (M.toList sttf ||>> S.toList) |> conv in
 		M.fromList $ concat tuples
-
 
 -- creates the base entries for the fstt
 conv	:: ([Name], (RType, Map Name [RType])) -> [FullSTTKeyEntry]

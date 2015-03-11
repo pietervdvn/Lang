@@ -47,7 +47,7 @@ expand fstt
 	= let 	initSstt	= fstt |> buildSpareSuperTypeTable
 		initNotifTable	= initSstt	|> keys |> S.fromList & invertDict
 		initTodo	= fstt 		|> keys |> S.fromList
-		ctx	= Ctx fstt initNotifTable initSstt initTodo	in
+		ctx	= Ctx fstt initNotifTable initSstt initTodo []	in
 		runstate _expandAll ctx & snd & (fstt_ &&& sstt_)
 
 
@@ -59,7 +59,10 @@ data Context
 		-- when t0 (in SSTT) has changed, you need to reimport all according RTypes
 		sstt_	:: Map TypeID SpareSuperTypeTable,
 		    	 -- recalculate t0, as rtypes (part of supertypes) have changed
-		todos	:: Map TypeID (Set RType) }
+		todos	:: Map TypeID (Set RType),
+		-- the left type should be a subtype of all the right ones.
+		-- These are requirements that should be met
+		toCheck	:: [(RType, Set RType)] }
 
 
 
@@ -109,15 +112,14 @@ _addEntry base via oldBinding superToAdd newBinding
 		if super `M.member` fstt then return False else do
 		-- we just use the reqs of the via type ...
 		let reqs	= M.lookup via fstt |> (\(reqs, _, _) -> reqs) & fromMaybe []
+		-- if these don't exists (natively added), we use the
+		reqs'	<- mapM (subReq binding) reqs |> catMaybes
 		{- .. on which we substitute binding. Some requirements can dissapear.
 		 e.g. List (a:Eq) -> Eq
 			X is List Bool
 			-> X is Eq <-> Bool is Eq -> ok
-			We check those later, when we can bind
-
 		-}
-		let reqs'	= reqs |> subReq binding & catMaybes
-		let entry	= (reqs, Just via, (superToAdd, binding))
+		let entry	= (reqs', Just via, (superToAdd, binding))
 		let fstt'	= M.insert super entry fstt
 		let fstts'	= M.insert base fstt' fstts
 		modify (\ctx -> ctx {fstt_ = fstts'})
@@ -126,10 +128,20 @@ _addEntry base via oldBinding superToAdd newBinding
 		when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
 		return True
 
-subReq	:: Binding -> (Name, Set RType) -> Maybe (Name, Set RType)
-subReq _	= Just	-- TODO
 
+subReq	:: Binding -> (Name, Set RType) -> St (Maybe (Name, Set RType))
+subReq binding@(Binding dict) (nm, reqs)
+ | nm `M.member` dict
+	= case M.lookup nm dict of
+		-- Something got a new name: update requirements
+		(Just (RFree nm'))
+			-> return $ Just (nm', S.map (substitute binding) reqs)
+		-- Something fused out of existance.
+		-- e.g. a0 --> Bool, this means that we have to check bool against all requirements -> we do binding afterwards, when the entire table has been built
+		(Just typ)	-> do	addReqs (typ, reqs)
+					return Nothing
 
+ | otherwise	= return $ Just (nm, S.map (substitute binding) reqs)
 -----------
 -- UTILS --
 -----------
@@ -145,7 +157,10 @@ pop	= do	td	<- get' todos
 		modify (\ctx -> ctx {todos = M.delete nxt td})
 		return all
 
-
+addReqs		:: (RType, Set RType) -> St ()
+addReqs reqs
+	= do	ctx	<- get
+		put $ ctx {toCheck = reqs : toCheck ctx}
 
 notifyChanged	:: TypeID -> St ()
 notifyChanged tid
