@@ -120,9 +120,8 @@ t10	= bnd "Int -> Bool" "a -> a"
 
 -- binding via the super type tables
 t11	= bnd "[Nat]" "{a}"
+t12	= bnd "[[[(Nat, Int)]]]" "{{ {(a:Eq) --> (b:IntInf)} }}"
 
-
-
-t12 = let ctx	= Context empty (S.fromList ["a"]) tt noBinding
-	  result = runstateT (lookupSupersAgainst (pt "[Nat]") (pt "{a0}") (pt "{Int}")) ctx in
+t12' = let ctx	= Context empty (S.fromList ["a","k1"]) tt noBinding
+	   result = runstateT (lookupSupersAgainst (pt "[(Nat,Int)]") (pt "{k1 --> v1}") (pt "{a --> b}")) ctx in
 		eitherIO result

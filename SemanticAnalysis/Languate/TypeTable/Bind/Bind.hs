@@ -113,6 +113,16 @@ superBind sub wantedSuper
 				lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
 		assert (length failed /= length wantedForms) $
 			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip wantedForms failed)
+ | not $ isNormal wantedSuper
+	= do	-- we calculate all possible super forms, which we try against match superBind
+		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
+		wantedForms	<- getFstt subTid |> keys |> L.filter (not . isNormal)
+		let isLeft	= either (const True) (const False)
+		failed	<- whileM' isLeft (\wantedForm -> catch' $
+				lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
+		assert (length failed /= length wantedForms) $
+			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip wantedForms failed)
+
 {-
 
 Given a subtype, a form of a super type (from the FSTT) and the wanted super type, tries to perform binding (or fails)
@@ -146,17 +156,15 @@ lookupSupersAgainst t wantedForm wantedType
 				& M.fromList & asBinding
 	let bindAway	= mergeBinding (asBinding bindAwayRaw) bindAwayId
 	let form2type'	= concatBindings bindAway form2type
-	bindSameAgainst (unbind reqBound & M.toList) (unbind form2type')
+
+	-- basebinding with escaped frees applied
+	let baseBinding'= baseBinding |> first
+				(\free -> findWithDefault free free bindAwayRev)
+	-- ... which got merged with baseBinding'
+	let reqBound'	= mergeBinding (Binding $ M.fromList baseBinding') reqBound
 	-- bind the applied types
-	let wantedTypeApplieds	= appliedTypes wantedType
-	let wantedFormApplieds	= appliedTypes wantedForm
-	fail $
-		"\nbb: "++show baseBinding++
-		"\nwta: "++show wantedTypeApplieds++
-		"\nwfa:"++show wantedFormApplieds++
-		"\nreqbound"++show reqBound++
-		"\nform2type'; "++show form2type'++
-		"\nbindAway"++show bindAway
+	--fail $ "\nreqBound': "++show reqBound'
+	bindSameAgainst (unbind reqBound' & M.toList) (unbind form2type')
  | otherwise	= fail $ "The type "++show t++" is not normal"
 
 
