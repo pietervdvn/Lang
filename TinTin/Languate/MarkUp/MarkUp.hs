@@ -1,5 +1,6 @@
-module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table),
-			rewrite, renderMD, renderHTML,
+module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table, List),
+			MdContext (MdContext),
+            rewrite, renderMD, renderHTML,
 			parag, emph, imp, code, incorr, link, titling) where
 
 -- This module implements the base definitions of the markup data structure
@@ -21,6 +22,7 @@ data MarkUp
         | Titling MarkUp MarkUp         -- Embedded titeling [title, markup]
         | Link MarkUp URL               -- A link with overlay text [markup, url]
         | Table [MarkUp] [[MarkUp]]     -- A table [header, tablerows]
+        | List [MarkUp]
 
 type URL = String
 
@@ -50,12 +52,26 @@ rw f (Link mu url)
             =  Link (rewrite f mu) url
 rw f (Table mus muss)
             = Table (mus |> rewrite f) $ muss ||>> rewrite f
+rw f (List mus)
+            = List (mus |> rewrite f)
 
-type MarkDown	= String
-type HTML	= String
+type MarkDown = String
+type HTML     = String
+
+data MdContext  = MdContext {   titleDepth  :: Int,
+                                listDepth   :: Int }
+
+setTitleDepth   :: Int -> State MdContext ()
+setTitleDepth i = do    ctx <- get
+                        put $ ctx { titleDepth = i }
 
 
-renderMD	:: MarkUp -> State Int MarkDown
+setListDepth    :: Int -> State MdContext ()
+setListDepth i  = do    ctx <- get
+                        put $ ctx { listDepth = i }
+
+
+renderMD	:: MarkUp -> State MdContext MarkDown
 renderMD (Base str)
 		= return str
 renderMD (Parag mu)
@@ -71,12 +87,12 @@ renderMD (Code mu)
 renderMD (Incorr mu)
         = renderMD mu |> between "~~"
 renderMD (Titling mu text)
-        = do i <- get
-             title <- renderMD mu |> (replicate i '#' ++)
-             put $ i + 1
-             text' <- renderMD text
-             put i
-             return ("\n\n" ++ title ++ "\n\n"++text')
+        = do    i     <- get' titleDepth
+                title <- renderMD mu |> (replicate i '#' ++)
+                setTitleDepth $ i + 1
+                text' <- renderMD text
+                setTitleDepth i
+                return ("\n\n" ++ title ++ "\n\n" ++ text')
 renderMD (Link mu s)
         = renderMD mu |> between' "[" "]" |> (++ between' "(" ")" s)
 renderMD (Table mus muss)
@@ -88,6 +104,15 @@ renderMD (Table mus muss)
                 let table'  = table |> bars
                 let content = "" : "" : header' : lines : table'
                 return $ unlines content
+renderMD (List mus)
+        = do    i <- get' listDepth
+                setListDepth $ i + 1
+                list <- mapM renderMD mus   ||>> (++) "* " 
+                                            ||>> (++) (replicate (i * 3) ' ')
+                                            |> unlines
+                setListDepth i
+                return list
+
 
 renderHTML	:: MarkUp -> State Int HTML
 renderHTML (Base str)
@@ -119,7 +144,8 @@ renderHTML (Table mus muss)
                 let header' = header |> inTag' "td" ["id=table_header"] & concat & inTag "tr"
                 let table'  = table ||>> inTag "td" |> concat |> inTag "tr"
                 return $ inTag "table" $ inTag "tbody" $ concat $ header' : table'
-
+renderHTML (List mus)
+        = mapM renderHTML mus ||>> inTag "li" |> concat |> inTag "ul"
 
 ------ EASY ACCESS FUNCTIONS -------
 
@@ -132,7 +158,7 @@ incorr = Incorr . Base
 titling str
        = Titling (Base str)
 link str url
-       = Link (Base str) url
+       = Link (Base str)
 
 --------------- TOOLS ---------------
 
@@ -152,4 +178,4 @@ inTag' tagN metas html
 
 inDiv	:: String -> HTML -> HTML
 inDiv className html
-	= "<div class=\""i ++ className ++ "\">" ++ html ++ "</div>"
+	= "<div class=\"" ++ className ++ "\">" ++ html ++ "</div>"
