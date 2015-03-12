@@ -38,16 +38,13 @@ typeRow	tt (fqn, name)
 -- Builds a string as   ````a:Eq```` for Set a:Eq in supertypetable
 typeReqsFor	:: TypeTable -> TypeID -> MarkDown
 typeReqsFor tt id
-	= let	freeNmT	= findWithDefault empty id $ freeNames tt
-		kys	= sort $ keys freeNmT in
-		unwords $ map (typeReqFor tt id freeNmT) kys
+	= let	reqs	= findWithDefault [] id $ typeReqs tt in
+		reqs ||>> S.toList |> typeReqsFor' & unwords
 
-
-typeReqFor	:: TypeTable -> TypeID -> Map Int Name -> Int -> MarkDown
-typeReqFor tt id names i
-	= let 	name	= findWithDefault "?" i names
-		reqs	= findWithDefault S.empty (id,i) $ typeReqs tt in
-		code $ name ++ when ":" (strip $ intercal "," $ map (strip . showShort) $ S.toList reqs)
+typeReqsFor'	:: (Name, [RType]) -> MarkDown
+typeReqsFor' (nm, [])	= code nm
+typeReqsFor' (nm, reqs)
+		= pars $ code nm ++ ":" ++ (reqs |> st True |> code & intercal ", ")
 
 
 showShort	:: RType -> String

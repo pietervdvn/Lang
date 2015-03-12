@@ -39,11 +39,6 @@ import Debug.Trace
 
 type Reqs	= [(Name, [RType])]
 
-{-
-type SuperTypeTableFor	= Map [Set RType] (Set RType)
-type SuperTypeTable	= Map TypeID SuperTypeTableFor
--}
-
 buildSuperTypeTable	:: Package -> Map FQN TypeLookupTable -> KindLookupTable
 				-> Exc SuperTypeTable
 buildSuperTypeTable w tlts klt

@@ -33,8 +33,11 @@ The type table contains all known types within a certain module.
 
 type TypeID	= (FQN, Name)
 
---Type requirements are explicit for new type declarations; contains synonyms
-type TypeReqTable	= Map (TypeID, Int) (Set RType)
+{-Type requirements are explicit for new type declarations; in a "(freeName, reqs)" format, where each subsequent free is named "a0","a1",...
+
+Might contain synonyms
+-}
+type TypeReqTable	= Map TypeID [(Name, Set RType)]
 type KindLookupTable	= Map TypeID Kind
 
 {-

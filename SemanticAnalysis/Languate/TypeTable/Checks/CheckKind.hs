@@ -54,9 +54,8 @@ _bindReqKinds klt treqt rt
 		kind	<- lookup tid klt ? ("No klt-entry for "++show tid)
 		let nrFrees	= numberOfKindArgs kind
 		-- we now have the actual requirements for each type var of rt
-		let frees	= [0..nrFrees]
-			|> (\i -> lookup (tid, i) treqt)
-			||>> S.elems |> (>>= listToMaybe)
+		reqs	<- lookup tid treqt ? ("No requirements in the treqtable for "++show tid)
+		let frees	= reqs |> snd |> S.toList |> listToMaybe
 		-- we bind to each index the kind of the type variable
 		let kindOf	= appliedKinds kind
 		let kindFrees	= zip frees kindOf |> unpackMaybeTuple & catMaybes
