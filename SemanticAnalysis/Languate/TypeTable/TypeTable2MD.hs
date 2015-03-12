@@ -21,7 +21,7 @@ typeTable2md	:: TypeTable -> MarkDown
 typeTable2md tt
 	= let	overviewTable	= (table ["Type","Declared in","Kind","Docstring"] $ map (typeRow tt) $ keys $ kinds tt)
 		stts	= title 2 "Supertypes " ++ parag (superTypeTable2md tt)
-		perType	= toList (allSupertypes tt) >>= uncurry (fstt2md $ kinds tt)
+		perType	= toList (allSupertypes tt) >>= uncurry (fstt2md (kinds tt) (typeReqs tt))
 		in overviewTable ++ title 2 "Supertypetables per type" ++ explanation ++ perType
 
 

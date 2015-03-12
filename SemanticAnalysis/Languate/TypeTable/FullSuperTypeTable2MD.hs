@@ -30,9 +30,9 @@ explanation	= title 3 "How to read a 'Supertypetable of T a0 a1'" ++
 			"The "++bold "Orig Type"++"show this type before the substitution."] |> parag & concat
 
 
-fstt2md	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkDown
-fstt2md klt tid@(fqn, nm) fstt
-	= title 3 ("Supertypes of "++nm++" "++sfrees (findWithDefault Kind tid klt)) ++
+fstt2md	:: KindLookupTable -> TypeReqTable -> TypeID -> FullSuperTypeTable -> MarkDown
+fstt2md klt treqt tid@(fqn, nm) fstt
+	= title 3 ("Supertypes of "++nm++" "++ (findWithDefault [] tid treqt |> showReqs & unwords)) ++
 		if M.null fstt then parag "No supertypes"
 		   else	table ["Is type","Requirements","Via","Orig type","Binding"] (toList fstt |> rows)
 
@@ -47,10 +47,6 @@ rows (isA, (ifReq, via, (super, bnd)))
 		]
 
 
-sfrees	:: Kind -> MarkDown
-sfrees k
-	= [0..numberOfKindArgs k - 1] |> show |> ('a':) & unwords
-
 showReqs	:: (Name, Set RType) -> MarkDown
 showReqs (nm, reqs)
-	= code nm ++ enclose ": {" "}" (intercal ", " (S.toList reqs |> st True |> code))
+	= (if S.null reqs then id else pars) $ code nm ++ when ":" (intercal ", " (S.toList reqs |> st True |> code))

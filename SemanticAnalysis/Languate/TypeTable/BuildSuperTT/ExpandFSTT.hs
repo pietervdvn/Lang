@@ -81,7 +81,8 @@ _expandAll
 -- Adds the supertype of changedSuper to the FSTT of base
 _expand	:: TypeID -> RType -> St Bool
 _expand base changedSuper
-     = 	if base == anyTypeID then return False else do
+     = 	-- any has no super types
+	if base == anyTypeID then return False else do
 	fstt	<- get' fstt_ |> fetch (show base) "fstt_" base
 	let via	= changedSuper
 	let viaTid'	= getBaseTID via
@@ -103,30 +104,31 @@ _expand base changedSuper
 
 _addEntry	:: TypeID -> RType -> Binding -> RType -> Binding -> St Bool
 _addEntry base via oldBinding superToAdd newBinding
-	= do	fstts		<- get' fstt_
-		-- the fstt that has to be changed
-		let fstt	= findWithDefault M.empty base fstts
-		-- the new, combined binding ...
-		let binding	= concatBindings oldBinding newBinding
-		-- ... aplied on the super
-		let super	= substitute binding superToAdd
-		if super `M.member` fstt then return False else do
-		-- we just use the reqs of the via type ...
-		let reqs	= M.lookup via fstt |> (\(reqs, _, _) -> reqs) & fromMaybe []
-		reqs'	<- mapM (subReq binding) reqs |> catMaybes
-		{- .. on which we substitute binding. Some requirements can dissapear.
-		 e.g. List (a:Eq) -> Eq
-			X is List Bool
-			-> X is Eq <-> Bool is Eq -> ok
-		-}
-		let entry	= (reqs, Just via, (superToAdd, binding))
-		let fstt'	= M.insert super entry fstt
-		let fstts'	= M.insert base fstt' fstts
-		modify (\ctx -> ctx {fstt_ = fstts'})
-		let mSuperTid	= getBaseTID superToAdd
-		-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
-		when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
-		return True
+  = do	fstts		<- get' fstt_
+	-- the fstt that has to be changed
+	let fstt	= findWithDefault M.empty base fstts
+	-- the new, combined binding ...
+	let binding	= concatBindings oldBinding newBinding
+	-- ... aplied on the super
+	let super	= substitute binding superToAdd
+	-- if already added: skip this shit
+	if super `M.member` fstt then return False else do
+	-- we just use the reqs of the via type ...
+	let reqs	= M.lookup via fstt |> (\(reqs, _, _) -> reqs) & fromMaybe []
+	{- .. on which we substitute binding. Some requirements can dissapear.
+	 e.g. List (a:Eq) -> Eq
+		X is List Bool
+		-> X is Eq <-> Bool is Eq -> ok
+	-}
+	reqs'	<- mapM (subReq  ) reqs |> catMaybes
+	let entry	= (reqs', Just via, (superToAdd, binding))
+	let fstt'	= M.insert super entry fstt
+	let fstts'	= M.insert base fstt' fstts
+	modify (\ctx -> ctx {fstt_ = fstts'})
+	let mSuperTid	= getBaseTID superToAdd
+	-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
+	when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
+	return True
 
 
 subReq	:: Binding -> (Name, Set RType) -> St (Maybe (Name, Set RType))
