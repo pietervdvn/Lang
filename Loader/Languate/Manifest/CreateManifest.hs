@@ -27,10 +27,10 @@ type Exc a	= Exceptions' String a
 
 createFromDict	:: Name -> String -> String -> [(String, MetaValue)] -> Exc Manifest
 createFromDict name synopsis description pairs
-	= stack' ((++) "While building the manifest\n") $
+	= stack' ("While building the manifest\n"++) $
 	  do	pairs'	<- pairs |> preProc & preProcs'
 		(typesOk, dict)	<- mapM typeCheck pairs' |> unzip |> first and
-		haltIf (not typesOk) $ "Not all fields have the correct type"
+		haltIf (not typesOk) "Not all fields have the correct type"
 		let description'	= description & stripnl & reverse & stripnl & reverse
 		let fetch str	= lookup str dict ? ("The field '"++str++"' was not found")
 		let get def str	= return $ fromMaybe def $ lookup str dict
@@ -68,7 +68,7 @@ fetchDeps (Dict nmsV)
 -- uses preProcess from Manifest to preprocess all the entries
 preProc		:: (String, MetaValue) -> (String, MetaValue)
 preProc (k, v)
- = let (k', f)	= findWithDefault (k, id) k preProcess in
+ = 		let (k', f)	= findWithDefault (k, id) k preProcess in
 		(k', f v)
 
 -- typechecks against given types in manifest.hs
@@ -89,7 +89,7 @@ preProc' (k,v)
 		return (k', v')
 
 preProcs'	:: [(String, MetaValue)] -> Exc [(String, MetaValue)]
-preProcs' pairs	=  mapM preProc' pairs
+preProcs'	=  mapM preProc'
 
 
 

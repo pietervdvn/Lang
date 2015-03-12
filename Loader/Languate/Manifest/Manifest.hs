@@ -175,7 +175,7 @@ sman m
 
 deleteList	:: (Ord k) => [k] -> Map k v -> Map k v
 deleteList ks dict
-		=  foldr (\k d -> M.delete k d) dict ks
+		=  foldr M.delete dict ks
 
 
 showDict	:: Map String MetaValue -> String
@@ -193,7 +193,7 @@ metaValue' key v
 		= M.findWithDefault v key . rest
 
 showDeps	:: Map FQPN Version -> MetaValue
-showDeps dict	= dict & M.toList |> (first (FuncName . show)) |> (second Version) & Dict
+showDeps dict	= dict & M.toList |> first (FuncName . show) |> second Version & Dict
 
 
 

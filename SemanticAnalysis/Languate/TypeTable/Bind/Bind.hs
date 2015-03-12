@@ -5,6 +5,7 @@ This module implements a simple bind, which works on Full Super Type Tables
 --}
 
 import StdDef
+import StateT
 
 import Languate.Graphs.DirectedGraph
 
@@ -12,18 +13,14 @@ import Data.Map hiding (foldr)
 import qualified Data.Map as M
 import Data.Set hiding (foldr)
 import qualified Data.Set as S
+import Data.List (intercalate)
 import qualified Data.List as L
+
 import Data.Tuple
 import Data.Maybe
 import Data.Either
 import Prelude hiding (fail, lookup)
 
-import Data.List (intercalate)
-import qualified Data.List as L
-
-import Data.Either
-
-import StateT
 
 import Languate.TAST
 import Languate.TypeTable as TT
@@ -52,7 +49,7 @@ Assumes that t0 has no overlapping free names with t1.
 -}
 _bind	:: Map TypeID SpareSuperTypeTable -> Map TypeID FullSuperTypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
 _bind sstt fstt reqs t0 t1
-	= let 	used	= (t0:t1:(concat $ M.elems reqs)) |> freesInRT & concat & S.fromList
+	= let 	used	= (t0:t1:concat (M.elems reqs)) |> freesInRT & concat & S.fromList
 		ctx	= Context reqs used sstt fstt noBinding
 		msg	= "While binding "++show t0++" in "++ show t1 in
 		runstateT (inside msg $ bind' t0 t1) ctx |> snd |> binding
@@ -106,25 +103,24 @@ bind' t0@(RApplied bt at) t1
 -- tries to bind t0 into t1 via a super type table lookup
 superBind	:: RType -> RType -> StMsg ()
 superBind sub wantedSuper
+	= do	-- we calculate all possible super forms, which we try against match superBind
+		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
+		wantedForms	<- wantedFormsOf subTid wantedSuper
+		let isLeft	= either (const True) (const False)
+		failed	<- whileM' isLeft (\wantedForm -> catch' $
+				lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
+		assert (length failed /= length wantedForms) $
+			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip wantedForms failed)
+
+
+wantedFormsOf	:: TypeID -> RType -> StMsg [RType]
+wantedFormsOf subTid wantedSuper
  | isNormal wantedSuper
-	= do	-- we calculate all possible super forms, which we try against match superBind
-		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
-		supTid	<- getBaseTID wantedSuper ? ("Huh? wanted super is normal!")
-		wantedForms	<- getSstt subTid |> findWithDefault [] supTid
-		let isLeft	= either (const True) (const False)
-		failed	<- whileM' isLeft (\wantedForm -> catch' $
-				lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
-		assert (length failed /= length wantedForms) $
-			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip wantedForms failed)
- | not $ isNormal wantedSuper
-	= do	-- we calculate all possible super forms, which we try against match superBind
-		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
-		wantedForms	<- getFstt subTid |> keys |> L.filter (not . isNormal)
-		let isLeft	= either (const True) (const False)
-		failed	<- whileM' isLeft (\wantedForm -> catch' $
-				lookupSupersAgainst sub wantedForm wantedSuper) wantedForms
-		assert (length failed /= length wantedForms) $
-			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip wantedForms failed)
+	= do	supTid	<- getBaseTID wantedSuper ?
+				("Huh? wanted super "++show wantedSuper++" is normal!")
+		getSstt subTid |> findWithDefault [] supTid
+ | otherwise
+	= getFstt subTid |> keys |> L.filter (not . isNormal)
 
 {-
 
@@ -227,5 +223,5 @@ nameFor' free ind
 
 -- binds the subtype into all supertypes. Fails if one type fails
 bindAll	:: RType -> [RType] -> StMsg ()
-bindAll sub supers
-	= mapM_ (bind' sub) supers
+bindAll sub
+	= mapM_ (bind' sub)

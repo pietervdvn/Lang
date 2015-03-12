@@ -8,8 +8,6 @@ import Languate.TypeTable
 import Languate.TypeTable.Extended
 
 
-import Languate.TypeTable
-
 fixImplicitRequirements	:: Map TypeID FullSuperTypeTable -> Map TypeID FullSuperTypeTable
 fixImplicitRequirements fstt
 	= fstt

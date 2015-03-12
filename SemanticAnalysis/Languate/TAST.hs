@@ -203,10 +203,10 @@ traverseRT f (RCurry at rt)
 traverseRT f t	= f t
 
 foldRT	:: (RType -> a) -> ([a] -> a) -> RType -> a
-foldRT f concat (RApplied bt t)
-		= concat [foldRT f concat bt, foldRT f concat t]
-foldRT f concat (RCurry at rt)
-		= concat [foldRT f concat at, foldRT f concat rt]
+foldRT f conct (RApplied bt t)
+		= conct [foldRT f concat bt, foldRT f concat t]
+foldRT f conct (RCurry at rt)
+		= conct [foldRT f concat at, foldRT f concat rt]
 foldRT f _ t	= f t
 
 

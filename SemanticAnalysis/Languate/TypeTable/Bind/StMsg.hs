@@ -53,7 +53,7 @@ getFstt tid
 
 getSstt	:: TypeID -> StMsg SpareSuperTypeTable
 getSstt tid
- | tid == anyTypeID	= return $ M.empty
+ | tid == anyTypeID	= return M.empty
  | otherwise	= do	spareSTT	<- get |> spareSuperTypes |> lookup tid
 			assert (isJust spareSTT) $ "No spare STT for "++show tid
 			return $ fromJust spareSTT
