@@ -41,13 +41,13 @@ buildSpareSuperTypeTable dict
 {-
 Makes the super type table complete, by recursively adding the supertypes of (known) super types.
 -}
-expand	:: Map TypeID FullSuperTypeTable ->
+expand	:: (Map TypeID FullSuperTypeTable, [(RType, Set RType)]) ->
 		(Map TypeID FullSuperTypeTable, Map TypeID SpareSuperTypeTable)
-expand fstt
+expand (fstt, toCheck')
 	= let 	initSstt	= fstt |> buildSpareSuperTypeTable
 		initNotifTable	= initSstt	|> keys |> S.fromList & invertDict
 		initTodo	= fstt 		|> keys |> S.fromList
-		ctx	= Ctx fstt initNotifTable initSstt initTodo []	in
+		ctx	= Ctx fstt initNotifTable initSstt initTodo toCheck'	in
 		-- TODO actual check 'toCheck' requirements
 		runstate _expandAll ctx & snd & (fstt_ &&& sstt_)
 
@@ -113,14 +113,13 @@ _addEntry base via oldBinding superToAdd newBinding
 		if super `M.member` fstt then return False else do
 		-- we just use the reqs of the via type ...
 		let reqs	= M.lookup via fstt |> (\(reqs, _, _) -> reqs) & fromMaybe []
-		-- if these don't exists (natively added), we use the
 		reqs'	<- mapM (subReq binding) reqs |> catMaybes
 		{- .. on which we substitute binding. Some requirements can dissapear.
 		 e.g. List (a:Eq) -> Eq
 			X is List Bool
 			-> X is Eq <-> Bool is Eq -> ok
 		-}
-		let entry	= (reqs', Just via, (superToAdd, binding))
+		let entry	= (reqs, Just via, (superToAdd, binding))
 		let fstt'	= M.insert super entry fstt
 		let fstts'	= M.insert base fstt' fstts
 		modify (\ctx -> ctx {fstt_ = fstts'})
