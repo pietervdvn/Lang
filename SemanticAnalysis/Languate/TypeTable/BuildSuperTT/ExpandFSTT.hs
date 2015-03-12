@@ -47,9 +47,10 @@ expand (fstt, toCheck')
 	= let 	initSstt	= fstt |> buildSpareSuperTypeTable
 		initNotifTable	= initSstt	|> keys |> S.fromList & invertDict
 		initTodo	= fstt 		|> keys |> S.fromList
-		ctx	= Ctx fstt initNotifTable initSstt initTodo toCheck'	in
-		-- TODO actual check 'toCheck' requirements
-		runstate _expandAll ctx & snd & (fstt_ &&& sstt_)
+		ctx	= Ctx fstt initNotifTable initSstt initTodo toCheck'
+		ctx'	= runstate _expandAll ctx & snd in
+		-- TODO actually check 'toCheck' requirements
+		ctx'  & (fstt_ &&& sstt_)
 
 
 type St	a = State Context a
@@ -120,7 +121,7 @@ _addEntry base via oldBinding superToAdd newBinding
 		X is List Bool
 		-> X is Eq <-> Bool is Eq -> ok
 	-}
-	reqs'	<- mapM (subReq  ) reqs |> catMaybes
+	reqs'	<- mapM (subReq oldBinding) reqs |> catMaybes
 	let entry	= (reqs', Just via, (superToAdd, binding))
 	let fstt'	= M.insert super entry fstt
 	let fstts'	= M.insert base fstt' fstts

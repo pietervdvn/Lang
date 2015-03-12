@@ -13,6 +13,7 @@ import Languate.TypeTable.Extended
 import Languate.TypeTable.Bind.Substitute
 
 import Control.Monad.Writer
+import Control.Arrow
 
 type ToBinds	= [(RType, Set RType)]
 
@@ -33,7 +34,7 @@ fixImplicitsFor	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
 			Writer ToBinds (TypeID, FullSuperTypeTable)
 fixImplicitsFor treqt fstts tid fstt
 	= mapM (uncurry $ fixImplicitsForEntry treqt fstts) (M.toList fstt)
-		|> M.fromList |> \fstt -> (tid, fstt)
+		|> M.fromList |> (tid &&& id)
 
 {- Gets and adds the extra requirements for native types.
 

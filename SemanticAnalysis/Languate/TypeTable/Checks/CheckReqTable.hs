@@ -34,7 +34,7 @@ validateReqs klt tid reqs
 validateOneReq	:: KindLookupTable -> Map Name Kind -> Int -> (Name, Set RType) -> Check
 validateOneReq klt freeKinds i (nm, reqs)
 	= inside ("In the "++count i++" type requirement, namely '"++nm++"'") $
-	  inside ("Some of the requirements have different kinds") $
+	  inside "Some of the requirements have different kinds" $
 	  do	let rqs	= S.toList reqs
 		kinds	<- mapM (kindOf klt freeKinds) rqs
 		if L.null kinds then pass else do
