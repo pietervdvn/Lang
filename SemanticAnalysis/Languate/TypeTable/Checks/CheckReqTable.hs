@@ -5,9 +5,11 @@ import MarkDown
 import Exceptions
 import Languate.CheckUtils
 
+import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Maybe
 import Data.Map hiding (map)
+import qualified Data.List as L
 
 import Languate.TAST
 import Languate.TypeTable
@@ -19,38 +21,23 @@ import Prelude hiding (lookup)
 
 -- Checks that the requirements have the same kind. E.g. ''k:Eq, Mappable'' is wrong. (but ''a:Monad, Mappable'' is allowed)
 validateReqTable	:: KindLookupTable -> TypeReqTable -> Check
-validateReqTable klt tr
-	= err "TODO Validate type req table"	-- TODO
+validateReqTable klt treqt
+	= mapM_ (uncurry $ validateReqs klt) $ toList treqt
 
-{- do	let toCheck	= keys tr
-		mapM_ (uncurry $ checkReqsFor freeNms klt tr) toCheck
+validateReqs	:: KindLookupTable -> TypeID -> [(Name, Set RType)] -> Check
+validateReqs klt tid reqs
+	= inside ("In the type requirements for the type "++show tid) $ do
+		freeKinds 	<- bindKind' klt tid (reqs |> fst) |> snd
+		mapM_ (uncurry $ validateOneReq klt freeKinds) $ zip [1..] reqs
 
 
-checkReqsFor	:: KindLookupTable -> TypeReqTable -> TypeID -> Int -> Check
-checkReqsFor freeNms klt treqs typeId i
-	= inside ("While checking the type requirements of "++show typeId) $ try err $
-	   do	let name	= nameFor freeNms typeId i
-		let shouldBeT	= reqsFor treqs typeId i
-		inside ("While checking the "++count (1 +i)++" type variable, namely '"++name++"'") $ do
-			freeTable	<- buildFreeTable klt freeNms treqs typeId [0..i] empty
-			kinds	<- mapM (kindOf klt freeTable) shouldBeT
-			assert (allSame kinds) $ indent' ("The free type variable '"++name++"' has requirements of different kinds: ") $
-				intercalate "\n" (map (\(k,t) -> show t ++ ":: "++show k) $ zip kinds shouldBeT)
-
--- Builds a table of the form ''{ k -> *, v -> *~>* }. Assumes the free has the kind of the first requirements
-buildFreeTable	:: KindLookupTable -> Map TypeID (Map Int Name) -> TypeReqTable -> TypeID -> [Int] -> Map Name Kind -> Exc (Map Name Kind)
-buildFreeTable _ _ _ _ [] currentTable
-			= return currentTable	-- no more argument to check
-buildFreeTable klt freeNms treqs tId (i:is) currentTable
-			=  do	let rtyp	= listToMaybe $ reqsFor treqs tId i
-				let n	= nameFor freeNms tId i
-				case rtyp of
-					Nothing	-> 		buildFreeTable klt freeNms treqs tId is $ insert n Kind currentTable
-					(Just rt)	-> do	kind	<- kindOf klt currentTable rt
-								buildFreeTable klt freeNms treqs tId is $ insert n kind currentTable
-
-reqsFor	:: TypeReqTable -> TypeID -> Int -> [RType]
-reqsFor treqs typeId i	= fromMaybe [ ] (lookup (typeId, i) treqs |> S.toList)
-
-nameFor	:: Map TypeID (Map Int Name) -> TypeID -> Int -> Name
-nameFor freeNms tId i 	= fromMaybe "bug" $ lookup tId freeNms >>= lookup i -}
+validateOneReq	:: KindLookupTable -> Map Name Kind -> Int -> (Name, Set RType) -> Check
+validateOneReq klt freeKinds i (nm, reqs)
+	= inside ("In the "++count i++" type requirement, namely '"++nm++"'") $
+	  inside ("Some of the requirements have different kinds") $
+	  do	let rqs	= S.toList reqs
+		kinds	<- mapM (kindOf klt freeKinds) rqs
+		if L.null kinds then pass else do
+		let allSame	= all ((==) $ head kinds) $ tail kinds
+		let showReq rq kind	= show rq ++ " has the kind "++show kind
+		assert allSame $ zip rqs kinds |> uncurry showReq & unlines
