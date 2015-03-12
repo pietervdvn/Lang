@@ -33,6 +33,7 @@ import Languate.FQN
 import Languate.TAST
 import Languate.Package
 import Languate.TypeTable
+import Languate.TypeTable.BuildKnownTypes
 import Languate.TypeTable.BuildTypeLookupTable
 import Languate.TypeTable.KindChecker.BuildKindTable
 import Languate.TypeTable.BuildRequirementTable
@@ -48,7 +49,7 @@ import Languate.TypeTable.Checks.CheckReqTable
 
 import Languate.CheckUtils
 
-
+import Data.Set as S
 import Data.Map as M
 import Data.Maybe
 import Data.Tuple
@@ -57,14 +58,14 @@ import Data.Tuple
 buildTypeTable	:: Package -> Exceptions' String TypeTable
 buildTypeTable w
  = inside "While building the type table" $
-   do	tlts		<-  buildTLTs w
+   do	let knownTypes	= buildKnownTypes w
+	tlts		<-  buildTLTs w
 	inside "While prechecking" $ validatePackage tlts w
-	typeReqs	<- inside "While building the requirements table" $ buildRequirementTable w tlts
+	typeReqs	<- inside "While building the requirements table" $ buildRequirementTable w tlts knownTypes
 	freeNames	<- inside "While building the free type variables name table" $ buildFreeNameTable w
 	klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
-	let knownTypes	= keys klt
-	docstrings	<- inside "While building the docstring table" $ buildDocstringTable w knownTypes
+	docstrings	<- inside "While building the docstring table" $ buildDocstringTable w $ S.toList knownTypes
 	supers		<- inside "While building the super type table" $ buildSuperTypeTable w tlts klt
 	let (allSupers, spareSupers)	= expand $ fixImplicitRequirements $ fmap stt2fstt supers
 	inside "While checking the requirements table" $ validateReqTable klt typeReqs
-	return $ TypeTable tlts klt typeReqs supers allSupers spareSupers docstrings freeNames
+	return $ TypeTable knownTypes tlts klt typeReqs supers allSupers spareSupers docstrings freeNames

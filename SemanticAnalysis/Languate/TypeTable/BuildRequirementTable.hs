@@ -30,11 +30,19 @@ data Bla (a:Eq) (b:Ord,Eq)	= {Bla --> ["a0", {"Eq"}; "a1", {"Ord","Eq"} ]}
 
 -}
 
-buildRequirementTable	:: Package -> Map FQN TypeLookupTable -> Exc TypeReqTable
-buildRequirementTable package tlts
-	= do	rawReqs	<- mapM (uncurry $ buildRequirementTableFor tlts) $ M.toList $ modules package
-		return $ rawReqs & concat & merge ||>> S.unions |> (\((tid, freeIndex), req) -> (tid,('a':show freeIndex, req))) & merge & M.fromList
+buildRequirementTable	:: Package -> Map FQN TypeLookupTable -> Set TypeID
+				-> Exc TypeReqTable
+buildRequirementTable package tlts knownTypes
+ = do	rawReqs	<- mapM (uncurry $ buildRequirementTableFor tlts) $ M.toList $ modules package
+	rawReqs	& concat & merge ||>> S.unions
+		|> (\((tid, freeIndex), req) -> (tid,('a':show freeIndex, req)))
+		& merge & M.fromList & makeComplete knownTypes & return
 
+makeComplete	:: Set TypeID -> TypeReqTable -> TypeReqTable
+makeComplete known trt
+	= let	missing	= S.filter (not . flip M.member trt) known & S.toList
+		extras	= zip missing (repeat []) & M.fromList in
+		M.union trt extras
 
 buildRequirementTableFor	:: Map FQN TypeLookupTable -> FQN -> Module ->
 					Exc [((TypeID, Int), Set RType)]

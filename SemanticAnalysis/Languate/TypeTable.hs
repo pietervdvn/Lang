@@ -104,9 +104,9 @@ type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple
 
 
 
-data TypeTable	= TypeTable	{ typeLookups	:: Map FQN TypeLookupTable
+data TypeTable	= TypeTable	{ knownTypes	:: Set TypeID
+				, typeLookups	:: Map FQN TypeLookupTable
 				, kinds		:: KindLookupTable
-				-- only used in 2MD
 				, typeReqs	:: TypeReqTable
 				, supertypes	:: Map TypeID SuperTypeTableFor
 				, allSupertypes	:: Map TypeID FullSuperTypeTable
