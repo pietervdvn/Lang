@@ -3,6 +3,8 @@ module Languate.TypeTable.BuildSuperTT.FixImplicitRequirements where
 import Data.Map
 import qualified Data.Map as M
 
+import Languate.TAST
+import Languate.TypeTable
 import Languate.TypeTable.Extended
 
 
@@ -18,7 +20,7 @@ fixImplicitsFor fstts
 	= fmap (fixImplicitsForEntry fstts)
 
 fixImplicitsForEntry	:: Map TypeID FullSuperTypeTable -> FullSTTEntry -> FullSTTEntry
-fixImplicitsForEntry fstts (nameReqs, via, (origType, bnd))
+fixImplicitsForEntry fstts entry@(nameReqs, via, (origType, bnd))
  | not $ isNormal origType	= entry	-- do nothing if the super type is ""a -> b""
  | otherwise
-	= let	origTypeTid	= getBaseTID origType
+	= entry	-- TODO

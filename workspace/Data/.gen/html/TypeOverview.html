@@ -31,25 +31,25 @@
 <td align="left">The category which defines <em>equality</em> <code>==</code> and <em>inequality</em> <code>!=</code></td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Associative</strong> <code>a</code></td>
+<td align="left"><strong>Associative</strong> <code>a0</code></td>
 <td align="left">Category.Function</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">Functions for which the order of evaluation does not matter.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Commutative</strong> <code>a</code> <code>b</code></td>
+<td align="left"><strong>Commutative</strong> <code>a0</code> <code>a1</code></td>
 <td align="left">Category.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">Functions for which the arguments can be swapped.</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Curry</strong> <code>a</code> <code>b</code></td>
+<td align="left"><strong>Curry</strong> <code>a0</code> <code>a1</code></td>
 <td align="left">Category.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">Arbitrary functions from <code>a</code> to <code>b</code>.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Mappable</strong> <code>b</code></td>
+<td align="left"><strong>Mappable</strong> <code>a0</code></td>
 <td align="left">Category.Mappable</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <em>container</em> on which <code>map</code> is defined. Also known as <code>Functor</code> in most other functional programming languages.</td>
@@ -79,43 +79,43 @@
 <td align="left">The category which defines <em>lower then</em> and <em>higher then</em>.</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Collection</strong> <code>a</code></td>
+<td align="left"><strong>Collection</strong> <code>a0</code></td>
 <td align="left">Collection.Collection</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> is a data structure which contains zero or more elements.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Dict</strong> <code>k:Eq</code> <code>v</code></td>
+<td align="left"><strong>Dict</strong> (<code>a0</code> :<code>Eq</code> ) <code>a1</code></td>
 <td align="left">Collection.Dict</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">A <code>Collection</code> which maps a key onto a value.</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>List</strong> <code>a</code></td>
+<td align="left"><strong>List</strong> <code>a0</code></td>
 <td align="left">Collection.List</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> which preserves order and allows duplicate elements.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Maybe</strong> <code>a</code></td>
+<td align="left"><strong>Maybe</strong> <code>a0</code></td>
 <td align="left">Collection.Maybe</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A collection which contains at most one value.</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>More</strong> <code>a</code></td>
+<td align="left"><strong>More</strong> <code>a0</code></td>
 <td align="left">Collection.More</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> which contains at least one element.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Set</strong> <code>a:Eq</code></td>
+<td align="left"><strong>Set</strong> (<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">Collection.Set</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> without order and duplicates.</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Tuple</strong> <code>a</code> <code>b</code></td>
+<td align="left"><strong>Tuple</strong> <code>a0</code> <code>a1</code></td>
 <td align="left">Collection.Tuple</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">The data structure representing tuples.</td>
@@ -133,7 +133,7 @@
 <td align="left">The type representing the <em>private</em> key of a public-key encryption scheme</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>PubPrivAlgo</strong> <code>a:PrivateKey</code> <code>b:PublicKey</code></td>
+<td align="left"><strong>PubPrivAlgo</strong> (<code>a0</code> :<code>PrivateKey</code> ) (<code>a1</code> :<code>PublicKey</code> )</td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
@@ -169,19 +169,19 @@
 <td align="left">The <code>Bool</code> datatype represents truth values of logic.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Disjunct</strong> <code>n:Eq</code></td>
+<td align="left"><strong>Disjunct</strong> (<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">Graph.Graph</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">Set of disjunct sets</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Graph</strong> <code>n:Eq,Ord</code> <code>a</code></td>
+<td align="left"><strong>Graph</strong> (<code>a0</code> :<code>Eq</code> , <code>Ord</code> ) <code>a1</code></td>
 <td align="left">Graph.Graph</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">A generic, undirected graph (which might contain cycles).</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Weighted</strong> <code>graph:Graph</code> <code>n:Eq,Ord</code> <code>w:Eq,Monoid,Ord</code> <code>a</code></td>
+<td align="left"><strong>Weighted</strong> (<code>a0</code> :<code>Graph</code> ) (<code>a1</code> :<code>Eq</code> , <code>Ord</code> ) (<code>a2</code> :<code>Eq</code> , <code>Monoid</code> , <code>Ord</code> ) <code>a3</code></td>
 <td align="left">Graph.Graph</td>
 <td align="left"><code>((* ~&gt; (* ~&gt; *)) ~&gt; (* ~&gt; (* ~&gt; (* ~&gt; *))))</code></td>
 <td align="left">A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.</td>
@@ -235,7 +235,7 @@
 <td align="left">A natural number (which is not zero) or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Flip</strong> <code>x</code> <code>b</code> <code>a</code></td>
+<td align="left"><strong>Flip</strong> <code>a0</code> <code>a1</code> <code>a2</code></td>
 <td align="left">Type.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; (* ~&gt; *)))</code></td>
 <td align="left">The 'Flip' type takes a type function (<code>* -&gt; * -&gt; *</code>) and flips it arguments. E.g. Flip Dict v k = Dict k v</td>

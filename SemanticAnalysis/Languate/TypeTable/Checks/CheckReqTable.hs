@@ -18,13 +18,15 @@ import Data.List hiding (lookup, insert)
 import Prelude hiding (lookup)
 
 -- Checks that the requirements have the same kind. E.g. ''k:Eq, Mappable'' is wrong. (but ''a:Monad, Mappable'' is allowed)
-validateReqTable	:: Map TypeID (Map Int Name) -> KindLookupTable -> TypeReqTable -> Check
-validateReqTable freeNms klt tr
-	=  do	let toCheck	= keys tr
+validateReqTable	:: KindLookupTable -> TypeReqTable -> Check
+validateReqTable klt tr
+	= err "TODO Validate type req table"	-- TODO
+
+{- do	let toCheck	= keys tr
 		mapM_ (uncurry $ checkReqsFor freeNms klt tr) toCheck
 
 
-checkReqsFor	:: Map TypeID (Map Int Name) -> KindLookupTable -> TypeReqTable -> TypeID -> Int -> Check
+checkReqsFor	:: KindLookupTable -> TypeReqTable -> TypeID -> Int -> Check
 checkReqsFor freeNms klt treqs typeId i
 	= inside ("While checking the type requirements of "++show typeId) $ try err $
 	   do	let name	= nameFor freeNms typeId i
@@ -51,4 +53,4 @@ reqsFor	:: TypeReqTable -> TypeID -> Int -> [RType]
 reqsFor treqs typeId i	= fromMaybe [ ] (lookup (typeId, i) treqs |> S.toList)
 
 nameFor	:: Map TypeID (Map Int Name) -> TypeID -> Int -> Name
-nameFor freeNms tId i 	= fromMaybe "bug" $ lookup tId freeNms >>= lookup i
+nameFor freeNms tId i 	= fromMaybe "bug" $ lookup tId freeNms >>= lookup i -}

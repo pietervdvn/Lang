@@ -22,29 +22,27 @@ import Control.Arrow
 import Languate.CheckUtils
 
 
-
-type RequirementTable	= Map (TypeID, Int) (Set RType)
 {- The type requirement table is the table which keeps track of what frees should be instances of what.
 
 E.g.
 
-data Bla (a:Eq) (b:Ord,Eq)	= Bla {a --> Sorted {b}}
+data Bla (a:Eq) (b:Ord,Eq)	= {Bla --> ["a0", {"Eq"}; "a1", {"Ord","Eq"} ]}
 
-Type requirements should be explicit in type declarations.
-Mentally keeping track of where each requirement comes from is not user-friendly.
 -}
 
-buildRequirementTables	:: Map FQN TypeLookupTable -> Package -> Exc (Map FQN RequirementTable)
-buildRequirementTables tlts w
-			= do	tables <- mapM (\(fqn, mod) -> buildRequirementTable tlts fqn (statements mod)) $ M.toList $ modules w
-				return $ M.fromList tables
+buildRequirementTable	:: Package -> Map FQN TypeLookupTable -> Exc TypeReqTable
+buildRequirementTable package tlts
+	= do	rawReqs	<- mapM (uncurry $ buildRequirementTableFor tlts) $ M.toList $ modules package
+		return $ rawReqs & concat & merge ||>> S.unions |> (\((tid, freeIndex), req) -> (tid,('a':show freeIndex, req))) & merge & M.fromList
 
--- Builds the requirements table for all the type declarations in FQN
-buildRequirementTable	:: Map FQN TypeLookupTable -> FQN -> [Statement] -> Exc (FQN, Map (TypeID, Int) (Set RType))
-buildRequirementTable tlts fqn stmts
-		= do	tlt	<- M.lookup fqn tlts ? ("Bug: no tlt found for "++show fqn++" while building typeReqTable")
-			allReqs	<- mapM (requirementsIn tlt fqn) stmts |> concat
-			return (fqn, M.fromList allReqs)
+
+buildRequirementTableFor	:: Map FQN TypeLookupTable -> FQN -> Module ->
+					Exc [((TypeID, Int), Set RType)]
+buildRequirementTableFor tlts fqn m
+	= do	tlt	<- M.lookup fqn tlts ? ("No tlt for "++show fqn)
+		rawReqs	<- mapM (requirementsIn tlt fqn) (statements m)
+		return $ rawReqs & concat & merge ||>> S.unions
+
 
 
 requirementsIn	:: TypeLookupTable -> FQN -> Statement -> Exc [((TypeID, Int), Set RType)]

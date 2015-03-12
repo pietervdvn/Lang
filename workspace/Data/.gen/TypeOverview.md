@@ -7,32 +7,32 @@ Type | Declared in | Kind | Docstring
 **Any**  | Any | ````*````  | The supertype of every single type. Each type has ````Any```` implicitly as supertype.![Supertype.jpg](../doc/res/Supertype.jpg)
 **BIInt**  | Builtins | ````*````  | A int! This is a temporary representation, which will be replaced by a truly builtin one
 **Eq**  | Category.Eq | ````*````  | The category which defines _equality_ ````==```` and _inequality_ ````!=````
-**Associative** ````a````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
-**Commutative** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Functions for which the arguments can be swapped.
-**Curry** ````a````  ````b````  | Category.Function | ````(* ~> (* ~> *))````  | Arbitrary functions from ````a```` to ````b````.
-**Mappable** ````b````  | Category.Mappable | ````(* ~> *)````  | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
+**Associative** ````a0````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
+**Commutative** ````a0````  ````a1````  | Category.Function | ````(* ~> (* ~> *))````  | Functions for which the arguments can be swapped.
+**Curry** ````a0````  ````a1````  | Category.Function | ````(* ~> (* ~> *))````  | Arbitrary functions from ````a```` to ````b````.
+**Mappable** ````a0````  | Category.Mappable | ````(* ~> *)````  | A _container_ on which ````map```` is defined. Also known as ````Functor```` in most other functional programming languages.
 **Monoid**  | Category.Monoid | ````*````  | A ````Monoid```` is an type which has _neutral element_ and an _addition_.
 **Product**  | Category.Monoid | ````*````  | An instance of ````Monoid````, with ````*```` defined as append and ````1```` as neutral element.
 **Sum**  | Category.Monoid | ````*````  | An instance of ````Monoid````, with ````+```` defined as append and ````0```` as neutral element.
 **Ord**  | Category.Ord | ````*````  | The category which defines _lower then_ and _higher then_.
-**Collection** ````a````  | Collection.Collection | ````(* ~> *)````  | A ````Collection```` is a data structure which contains zero or more elements.
-**Dict** ````k:Eq````  ````v````  | Collection.Dict | ````(* ~> (* ~> *))````  | A ````Collection```` which maps a key onto a value.
-**List** ````a````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
-**Maybe** ````a````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
-**More** ````a````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
-**Set** ````a:Eq````  | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
-**Tuple** ````a````  ````b````  | Collection.Tuple | ````(* ~> (* ~> *))````  | The data structure representing tuples.
+**Collection** ````a0````  | Collection.Collection | ````(* ~> *)````  | A ````Collection```` is a data structure which contains zero or more elements.
+**Dict** (````a0```` :````Eq```` ) ````a1````  | Collection.Dict | ````(* ~> (* ~> *))````  | A ````Collection```` which maps a key onto a value.
+**List** ````a0````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
+**Maybe** ````a0````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
+**More** ````a0````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
+**Set** (````a0```` :````Eq```` ) | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
+**Tuple** ````a0````  ````a1````  | Collection.Tuple | ````(* ~> (* ~> *))````  | The data structure representing tuples.
 **Void**  | Collection.Void | ````*````  | Type representing _no data_.
 **PrivateKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing the _private_ key of a public-key encryption scheme
-**PubPrivAlgo** ````a:PrivateKey````  ````b:PublicKey````  | Crypto.PubPrivAlgo | ````(* ~> (* ~> *))````  | The type representing a public-key encryption scheme, with fixed keys
+**PubPrivAlgo** (````a0```` :````PrivateKey```` ) (````a1```` :````PublicKey```` ) | Crypto.PubPrivAlgo | ````(* ~> (* ~> *))````  | The type representing a public-key encryption scheme, with fixed keys
 **PublicKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing the _public_ key of a public-key encryption scheme
 **RSA**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
 **RSAPrivKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
 **RSAPubKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
-**Disjunct** ````n:Eq````  | Graph.Graph | ````(* ~> *)````  | Set of disjunct sets
-**Graph** ````n:Eq,Ord````  ````a````  | Graph.Graph | ````(* ~> (* ~> *))````  | A generic, undirected graph (which might contain cycles).
-**Weighted** ````graph:Graph````  ````n:Eq,Ord````  ````w:Eq,Monoid,Ord````  ````a````  | Graph.Graph | ````((* ~> (* ~> *)) ~> (* ~> (* ~> (* ~> *))))````  | A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.
+**Disjunct** (````a0```` :````Eq```` ) | Graph.Graph | ````(* ~> *)````  | Set of disjunct sets
+**Graph** (````a0```` :````Eq```` , ````Ord```` ) ````a1````  | Graph.Graph | ````(* ~> (* ~> *))````  | A generic, undirected graph (which might contain cycles).
+**Weighted** (````a0```` :````Graph```` ) (````a1```` :````Eq```` , ````Ord```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) ````a3````  | Graph.Graph | ````((* ~> (* ~> *)) ~> (* ~> (* ~> (* ~> *))))````  | A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.
 **Int**  | Num.Nat | ````*````  | An _integer_
 **Int'**  | Num.Nat | ````*````  | An _integer_ which is not zero
 **IntInf**  | Num.Nat | ````*````  | An _integer_ or positive or negative _Infinity_ (````Inf````).
@@ -41,7 +41,7 @@ Type | Declared in | Kind | Docstring
 **Nat'**  | Num.Nat | ````*````  | A natural number, which is not zero.
 **NatInf**  | Num.Nat | ````*````  | A natural number or _infinity_ (````Inf````).
 **NatInf'**  | Num.Nat | ````*````  | A natural number (which is not zero) or _infinity_ (````Inf````).
-**Flip** ````x````  ````b````  ````a````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | The 'Flip' type takes a type function (````* -> * -> *````) and flips it arguments. E.g. Flip Dict v k = Dict k v
+**Flip** ````a0````  ````a1````  ````a2````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | The 'Flip' type takes a type function (````* -> * -> *````) and flips it arguments. E.g. Flip Dict v k = Dict k v
 
 
 ## Supertypetables per type
