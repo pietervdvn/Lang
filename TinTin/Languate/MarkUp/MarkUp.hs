@@ -1,4 +1,4 @@
-module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table, List),
+module Languate.MarkUp.MarkUp (MarkUp (Base, Parag, Seq, Emph, Imp, Code, Incorr, Titling, Link, Table, List, OrderedList),
 			MdContext (MdContext),
             rewrite, renderMD, renderHTML,
 			parag, emph, imp, code, incorr, link, titling) where
@@ -22,7 +22,8 @@ data MarkUp
         | Titling MarkUp MarkUp         -- Embedded titeling [title, markup]
         | Link MarkUp URL               -- A link with overlay text [markup, url]
         | Table [MarkUp] [[MarkUp]]     -- A table [header, tablerows]
-        | List [MarkUp]
+        | List [MarkUp]                 -- Unordered list
+        | OrderedList [MarkUp]          -- Ordered list
 
 type URL = String
 
@@ -54,6 +55,8 @@ rw f (Table mus muss)
             = Table (mus |> rewrite f) $ muss ||>> rewrite f
 rw f (List mus)
             = List (mus |> rewrite f)
+rw f (OrderedList mus)
+            = OrderedList (mus |> rewrite f)
 
 type MarkDown = String
 type HTML     = String
@@ -112,6 +115,16 @@ renderMD (List mus)
                                             |> unlines
                 setListDepth i
                 return list
+renderMD (OrderedList mus)
+        = do    i <- get' listDepth
+                setListDepth $ i + 1
+                listItems <- mapM renderMD mus   
+                let list    = zip [1..] listItems 
+                                |> (\(j, content) -> show j ++ ". " ++ content)
+                                |> (++) (replicate (i * 3) ' ')
+                                 & unlines & ("\n" ++)
+                setListDepth i
+                return list
 
 
 renderHTML	:: MarkUp -> State Int HTML
@@ -146,6 +159,8 @@ renderHTML (Table mus muss)
                 return $ inTag "table" $ inTag "tbody" $ concat $ header' : table'
 renderHTML (List mus)
         = mapM renderHTML mus ||>> inTag "li" |> concat |> inTag "ul"
+renderHTML (OrderedList mus)
+        = mapM renderHTML mus ||>> inTag "li" |> concat |> inTag "ol"
 
 ------ EASY ACCESS FUNCTIONS -------
 
