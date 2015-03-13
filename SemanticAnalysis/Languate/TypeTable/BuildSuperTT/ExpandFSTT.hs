@@ -150,7 +150,8 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
 	foreignReqs	<- mapM (subReq binding) reqs |> catMaybes
-	{- We might have some requirements on the via type too in our own FSTT-}
+	{- We might have some requirements on the via type too in our own FSTT.
+		These don't have to be checked, as these are already requirements in function of the frees of base -}
 	let viaReqs	= fstt & M.lookup via |> (\(reqs, _, _) -> reqs) & fromMaybe []
 	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
 	let entry	= (newReqs, Just via, (superToAdd, binding))
