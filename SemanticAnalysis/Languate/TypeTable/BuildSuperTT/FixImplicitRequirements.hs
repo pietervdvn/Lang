@@ -34,7 +34,7 @@ fixImplicitsFor	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
 			Writer ToBinds (TypeID, FullSuperTypeTable)
 fixImplicitsFor treqt fstts tid fstt
 	= mapM (uncurry $ fixImplicitsForEntry treqt fstts) (M.toList fstt)
-		|> M.fromList |> (tid &&& id)
+		|> M.fromList |> (const tid &&& id)
 
 {- Gets and adds the extra requirements for native types.
 

@@ -44,7 +44,7 @@ toHTML md	=  let  html	= renderHtml . writeHtml def $ readMarkdown (def {readerE
 			htmlHead ++ html ++ htmlFoot
 
 
-htmlHead	= "<link rel=\"stylesheet\" href=\"github-markdown.css\"><style> .markdown-body {   min-width: 200px;    max-width: 1080;     margin: 0 auto;   padding: 60px;  }</style> <article class=\"markdown-body\">"
+htmlHead	= "<meta http-equiv=\"refresh\" content=\"3\" ><link rel=\"stylesheet\" href=\"github-markdown.css\"><style> .markdown-body {   min-width: 200px;    max-width: 1080;     margin: 0 auto;   padding: 60px;  }</style> <article class=\"markdown-body\">"
 htmlFoot	= "</article>"
 
 -- is placed just under the title
