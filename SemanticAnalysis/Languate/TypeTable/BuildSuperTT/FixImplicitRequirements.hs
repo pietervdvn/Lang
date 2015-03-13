@@ -50,7 +50,7 @@ fixImplicitsForEntry treqt fstts rtype entry@(nameReqs, via, (origType, bnd))
 		let origTypeRqs	= findWithDefault [] origTypeID treqt
 					:: [(Name, Set RType)]
 		extraReqs	<- mapM (subReq bnd) origTypeRqs |> catMaybes
-		let fullReqs	= (extraReqs ++ nameReqs) & merge ||>> S.unions
+		let fullReqs	= (extraReqs ++ nameReqs) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
 		return (rtype,(fullReqs, via, (origType, bnd)))
 
 

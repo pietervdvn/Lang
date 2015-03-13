@@ -93,7 +93,7 @@ Is type | Requirements | Via | Orig type | Binding
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0````  | _Native_  | .  | {}
+.  |  | _Native_  | .  | {}
 
 
 ### Supertypes of Monoid 
@@ -130,10 +130,10 @@ Is type | Requirements | Via | Orig type | Binding
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0````  | _Native_  | .  | {}
+.  |  | _Native_  | .  | {}
 Eq | (````a0```` :````Eq```` ) | _Native_  | Eq | {}
-Monoid | ````a0````  | _Native_  | Monoid | {}
-(Mappable a0) | ````a0````  | _Native_  | (Mappable a0) | {"a0" --> a0}
+Monoid |  | _Native_  | Monoid | {}
+(Mappable a0) |  | _Native_  | (Mappable a0) | {"a0" --> a0}
 
 
 ### Supertypes of Dict (````a0```` :````Eq```` ) ````a1```` 
@@ -142,10 +142,10 @@ Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  |  | Monoid | .  | {}
 Eq | (````a0```` :````Eq```` ) | (Collection (a0, a1)) | Eq | {}
-Monoid | ````a0````  ````a1````  | _Native_  | Monoid | {}
-(Mappable a1) | ````a1````  ````a0````  | _Native_  | (Mappable a1) | {"a0" --> a1}
+Monoid |  | _Native_  | Monoid | {}
+(Mappable a1) |  | _Native_  | (Mappable a1) | {"a0" --> a1}
 (Mappable (a0, a1)) | (````a0```` :````Eq```` ) | (Collection (a0, a1)) | (Mappable a0) | {"a0" --> (a0, a1)}
-(Collection (a0, a1)) | (````a0```` :````Eq```` ) ````a1````  | _Native_  | (Collection (a0, a1)) | {"a0" --> (a0, a1)}
+(Collection (a0, a1)) | (````a0```` :````Eq```` ) | _Native_  | (Collection (a0, a1)) | {"a0" --> (a0, a1)}
 
 
 ### Supertypes of List ````a0```` 
@@ -154,16 +154,16 @@ Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  |  | Monoid | .  | {}
 Eq | (````a0```` :````Eq```` ) | (Collection a0) | Eq | {}
-Monoid | ````a0````  | _Native_  | Monoid | {}
-(Mappable a0) | ````a0````  | _Native_  | (Mappable a0) | {"a0" --> a0}
+Monoid |  | _Native_  | Monoid | {}
+(Mappable a0) |  | _Native_  | (Mappable a0) | {"a0" --> a0}
 (Mappable a1) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | (Mappable a1) | {"a0" --> v1}
 (Mappable ((k1, v1), a1)) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | (Mappable (a0, a1)) | {"a0" --> (k1, v1)}
 (Mappable ((k1, [v1]), a1)) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) [v1]) | (Mappable (a0, a1)) | {"a0" --> (k1, [v1])}
-(Collection a0) | ````a0````  | _Native_  | (Collection a0) | {"a0" --> a0}
+(Collection a0) |  | _Native_  | (Collection a0) | {"a0" --> a0}
 (Collection ((k1, v1), a1)) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | (Collection (a0, a1)) | {"a0" --> (k1, v1)}
 (Collection ((k1, [v1]), a1)) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) [v1]) | (Collection (a0, a1)) | {"a0" --> (k1, [v1])}
 {a0} | (````a0```` :````Eq```` ) | _Native_  | {a0} | {"a0" --> a0}
-((Dict k1) v1) | (````k1```` :````Eq```` ) ````v1````  (````a0```` :````(k1, v1)```` ) | _Native_  | ((Dict k1) v1) | {"a0" --> k1 "a1" --> v1}
+((Dict k1) v1) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | _Native_  | ((Dict k1) v1) | {"a0" --> k1 "a1" --> v1}
 ((Dict k1) [v1]) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | _Native_  | ((Dict k1) [v1]) | {"a0" --> k1 "a1" --> [v1]}
 
 
@@ -171,18 +171,18 @@ Monoid | ````a0````  | _Native_  | Monoid | {}
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0````  | _Native_  | .  | {}
+.  |  | _Native_  | .  | {}
 
 
 ### Supertypes of More ````a0```` 
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0````  | _Native_  | .  | {}
+.  |  | _Native_  | .  | {}
 Eq | (````a0```` :````Eq```` ) | (Collection a0) | Eq | {}
 Monoid |  | (Collection a0) | Monoid | {}
 (Mappable a0) |  | (Collection a0) | (Mappable a0) | {"a0" --> a0}
-(Collection a0) | ````a0````  | _Native_  | (Collection a0) | {"a0" --> a0}
+(Collection a0) |  | _Native_  | (Collection a0) | {"a0" --> a0}
 
 
 ### Supertypes of Set (````a0```` :````Eq```` )
@@ -200,9 +200,9 @@ Monoid | (````a0```` :````Eq```` ) | (Collection a0) | Monoid | {}
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | ````a0````  ````a1````  | _Native_  | .  | {}
+.  |  | _Native_  | .  | {}
 Eq | (````a0```` :````Eq```` ) (````a1```` :````Eq```` ) | _Native_  | Eq | {}
-(Mappable a1) | ````a1````  ````a0````  | _Native_  | (Mappable a1) | {"a0" --> a1}
+(Mappable a1) |  | _Native_  | (Mappable a1) | {"a0" --> a1}
 
 
 ### Supertypes of Void 
@@ -280,7 +280,7 @@ Monoid | (````a0```` :````Eq```` ) | {Set a0} | Monoid | {}
 
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
-.  | (````a0```` :````Eq```` , ````Ord```` ) ````a1````  | _Native_  | .  | {}
+.  | (````a0```` :````Eq```` , ````Ord```` ) | _Native_  | .  | {}
 
 
 ### Supertypes of Weighted (````a0```` :````Graph```` ) (````a1```` :````Eq```` , ````Ord```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) ````a3```` 
