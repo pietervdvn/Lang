@@ -12,12 +12,14 @@ import Languate.CheckUtils
 import Languate.TAST
 import Languate.TypeTable
 import Languate.TypeTable.Extended
+import Languate.TypeTable.BuildSuperTT.FixImplicitRequirements
 import Languate.TypeTable.Bind.Substitute
 import Languate.TypeTable.Bind.Bind
 
 import Prelude hiding (null)
 import Data.Set hiding (null, filter)
 import qualified Data.Set as S
+import Data.Either
 
 import Data.Map hiding (filter)
 import qualified Data.Map as M
@@ -47,7 +49,7 @@ buildSpareSuperTypeTable dict
 {-
 Makes the super type table complete, by recursively adding the supertypes of (known) super types.
 -}
-expand	:: (Map TypeID FullSuperTypeTable, [(RType, Set RType)]) ->
+expand	:: (Map TypeID FullSuperTypeTable, [(RType, Set RType, [(Name, Set RType)])]) ->
 		Exc (Map TypeID FullSuperTypeTable, Map TypeID SpareSuperTypeTable)
 expand (fstt, toCheck')
 	= let 	initSstt	= fstt |> buildSpareSuperTypeTable
@@ -69,12 +71,15 @@ RSA is PubPrivAlgo RSAPrivKey RSAPubKey
 This means that RSAPrivKey should be a PrivKey. This requirements are checked here
 -}
 
-checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> [(RType, Set RType)] -> Check
-checkSuperBinds fstt sstt toCheck
+checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> [(RType, Set RType, [(Name, Set RType)])] -> Check
+checkSuperBinds fstts sstts toCheck
 	= inside "While checking that implicit type requirements are met" $ do
-		let toCheck'	= toCheck ||>> S.toList
-		-- TODO PICKUP
-		pass
+		let toCheck'	= toCheck & filter (not . S.null . snd3)
+		mapM_ (checkSuperBinds' fstts sstts) toCheck'
+
+checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> (RType, Set RType, [(Name, Set RType)]) -> Check
+checkSuperBinds' fstts sstts (sub, shouldBeSupers, metReqs)
+	= err $ show sub++" should be a "++show shouldBeSupers++"\nwithin the context: "++show metReqs
 
 
 type St	a = State Context a
@@ -87,8 +92,8 @@ data Context
 		    	 -- recalculate t0, as rtypes (part of supertypes) have changed
 		todos	:: Map TypeID (Set RType),
 		-- the left type should be a subtype of all the right ones.
-		-- These are requirements that should be met
-		toCheck	:: [(RType, Set RType)] }
+		-- These are requirements that should be met. The third arg is the context in which this is bound
+		toCheck	:: [(RType, Set RType, [(Name, Set RType)], Message)] }
 
 
 
@@ -149,11 +154,14 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	if super `M.member` fstt then return False else do
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
-	foreignReqs	<- mapM (subReq binding) reqs |> catMaybes
+	let (toCheck, foreignReqs)
+			= reqs |> subReq binding & (lefts &&& rights)
 	{- We might have some requirements on the via type too in our own FSTT.
 		These don't have to be checked, as these are already requirements in function of the frees of base -}
-	let viaReqs	= fstt & M.lookup via |> (\(reqs, _, _) -> reqs) & fromMaybe []
+	let viaReqs	= fstt & M.lookup via |> fst3 & fromMaybe []
 	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
+	-- add the tochecks
+	mapM addReqs $ (zip toCheck $ repeat newReqs) |> (\((a,b),c) -> (a,b,c))
 	let entry	= (newReqs, Just via, (superToAdd, binding))
 	let fstt'	= M.insert super entry fstt
 	let fstts'	= M.insert base fstt' fstts
@@ -164,19 +172,6 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	return True
 
 
-subReq	:: Binding -> (Name, Set RType) -> St (Maybe (Name, Set RType))
-subReq binding@(Binding dict) (nm, reqs)
- | nm `M.member` dict
-	= case M.lookup nm dict of
-		-- Something got a new name: update requirements
-		(Just (RFree nm'))
-			-> return $ Just (nm', S.map (substitute binding) reqs)
-		-- Something fused out of existance.
-		-- e.g. a0 --> Bool, this means that we have to check bool against all requirements -> we do binding afterwards, when the entire table has been built
-		(Just typ)	-> do	addReqs (typ, reqs)
-					return Nothing
-
- | otherwise	= return $ Just (nm, S.map (substitute binding) reqs)
 -----------
 -- UTILS --
 -----------
@@ -192,7 +187,7 @@ pop	= do	td	<- get' todos
 		modify (\ctx -> ctx {todos = M.delete nxt td})
 		return all
 
-addReqs		:: (RType, Set RType) -> St ()
+addReqs		:: (RType, Set RType, [(Name, Set RType)]) -> St ()
 addReqs reqs
 	= do	ctx	<- get
 		put $ ctx {toCheck = reqs : toCheck ctx}

@@ -30,12 +30,12 @@ type Error	= (NodeInfo, String)
 
 type Errors	= [Either Warning Error]
 
-type ErrorMsg	= String
-type WarningMsg	= String
+type ErrorMsg	= Message
+type WarningMsg	= Message
 
 type Annotated cpt	= ([Name], cpt, (Line, Column))
 
-type Message	= Maybe (Either WarningMsg ErrorMsg)
+type ExcMessage	= Maybe (Either WarningMsg ErrorMsg)
 
 simpleConvert	:: (Name -> ParseTree -> Maybe (Writer Errors cpt))
 			-> (Name -> String -> cpt)
@@ -60,8 +60,8 @@ noAnnotations (_,cpt, _)	= cpt
 
 
 convert	:: (Name -> ParseTree -> Maybe (Writer Errors cpt)) ->
-		(Name -> String -> (Message, cpt)) ->
-		(Name -> [Annotated cpt] -> (Message, cpt)) ->
+		(Name -> String -> (ExcMessage, cpt)) ->
+		(Name -> [Annotated cpt] -> (ExcMessage, cpt)) ->
 		ParseTree -> Writer Errors (Annotated cpt)
 convert hooks tokens seqs pt@(T inf@(fqn,name,(_,line,col)) str)
 	= do	cpt	<- doHook (hooks name pt) (takeMsg inf $ tokens name str)
@@ -78,7 +78,7 @@ doHook (Just hook) _
 	= hook
 doHook Nothing cpt	= cpt
 
-takeMsg	:: NodeInfo -> (Message, cpt) -> Writer Errors cpt
+takeMsg	:: NodeInfo -> (ExcMessage, cpt) -> Writer Errors cpt
 takeMsg	_ (Nothing, cpt)	= return cpt
 takeMsg inf (Just msg, cpt)
 		= do	addMsg inf msg

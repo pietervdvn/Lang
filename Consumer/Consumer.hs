@@ -10,7 +10,6 @@ import Prelude hiding (catch)
 
 data Outcome e a	= Res a | Exc e | Nope
 	deriving (Ord, Show, Eq)
-type Message		= String
 
 data Exception i e	= Exception (State i) Message e  -- Original stream, position where error happened, exception message, additional data (such as underlying error)
 	deriving (Ord, Eq)

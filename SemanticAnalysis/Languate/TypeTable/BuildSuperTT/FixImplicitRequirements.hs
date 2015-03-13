@@ -5,6 +5,7 @@ import Data.Map
 import Data.Set (Set)
 import qualified Data.Set as S
 import qualified Data.Map as M
+import Data.Either
 import Data.Maybe
 
 import Languate.TAST
@@ -15,7 +16,7 @@ import Languate.TypeTable.Bind.Substitute
 import Control.Monad.Writer
 import Control.Arrow
 
-type ToBinds	= [(RType, Set RType)]
+type ToBinds	= [(RType, Set RType, [(Name, Set RType)])]
 
 fixImplicitRequirements	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
 				(Map TypeID FullSuperTypeTable, ToBinds)
@@ -49,15 +50,18 @@ fixImplicitsForEntry treqt fstts rtype entry@(nameReqs, via, (origType, bnd))
 	= do	let origTypeID	= getBaseTID origType & fromJust
 		let origTypeRqs	= findWithDefault [] origTypeID treqt
 					:: [(Name, Set RType)]
-		extraReqs	<- mapM (subReq bnd) origTypeRqs |> catMaybes
+		let (toCheck, extraReqs)= origTypeRqs |> (subReq bnd)
+			& (lefts &&& rights)
+		tell $ fmap (\((a,b),c) -> (a,b,c)) $ zip toCheck $ repeat extraReqs
 		let fullReqs	= (extraReqs ++ nameReqs) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
 		return (rtype,(fullReqs, via, (origType, bnd)))
 
 
-subReq		:: Binding -> (Name, Set RType) -> Writer ToBinds (Maybe (Name, Set RType))
+subReq		:: Binding -> (Name, Set RType) -> Either (RType, Set RType)  (Name, Set RType)
 subReq binding@(Binding dict) (nm, supers)
-	= case M.lookup nm dict of
-		(Just (RFree nm'))	-> return $ Just (nm', S.map (substitute binding) supers)
-		-- nm corresponds with a bound type -> check binding
-		(Just tp)		-> tell [(tp, supers)] >> return Nothing
-		Nothing	-> return $ Just (nm, supers)
+	= let supers'	= S.map (substitute binding) supers in
+		case M.lookup nm dict of
+			(Just (RFree nm'))	-> Right (nm', supers')
+			-- nm corresponds with a bound type -> check binding
+			(Just tp)		-> Left (tp, supers')
+			Nothing			-> Right (nm, supers')

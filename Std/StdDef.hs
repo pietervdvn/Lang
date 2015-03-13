@@ -7,6 +7,7 @@ import qualified Data.Set as Set
 import Data.Set (Set)
 
 type Name 	= String
+type Message	= String
 type FileName	= String
 type LineNumber = Int
 type CharNumber	= Int
@@ -166,3 +167,8 @@ whileM' _ _ []	= return []
 whileM' cond f (a:as)
 		= do	cont	<- f a
 			if cond cont then whileM' cond f as |> (cont:) else return []
+
+
+mapTuple	:: (a -> b, c -> d) -> (a,c) -> (b,d)
+mapTuple (f, g) (a,b)
+		= (f a, g b)

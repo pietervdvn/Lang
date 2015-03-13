@@ -1,6 +1,6 @@
 module Bnf.Loader.Check (check, check') where
 
-import Bnf.Converter (Error, Warning, Errors, ErrorMsg, WarningMsg, Message)
+import Bnf.Converter (Error, Warning, Errors, ErrorMsg, WarningMsg, ExcMessage)
 import qualified Data.Set as S
 import Data.Map hiding (map, filter, foldr, null, lookup)
 import qualified Data.Map as M
