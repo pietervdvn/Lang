@@ -19,17 +19,16 @@ import Data.List
 import Languate.AST
 import StdDef
 import qualified Exceptions as E
+import Graphs.DirectedGraph
+import Graphs.ExportCalculator
+
 import Exceptions hiding (err)
 import Languate.CheckUtils
-import Languate.Graphs.DirectedGraph
 
-import Languate.Package
+import Languate.Package as P
 import Languate.FQN
 import Languate.TypeTable
 import Languate.TypeTable.BuildKnownTypes
-import Languate.Graphs.ExportCalculator
-
-
 
 {-
 Building of a type lookup table:
@@ -50,7 +49,7 @@ type Exports	= Map FQN (Map FQN (FQN, Name))
 
 buildTLTs	:: Package -> Exc (Map FQN TypeLookupTable)
 buildTLTs world
-	=  do 	let modules	= Languate.Package.modules world
+	=  do 	let modules	= P.modules world
 		let injectSet a	= S.map (\b -> (a,b))
 		let injectSetFunc f fqn	= injectSet fqn $ f fqn
 		let pubLocDecl	= injectSetFunc $ publicLocallyDeclared world
@@ -59,6 +58,15 @@ buildTLTs world
 		let imports	= calculateImports' world locDecl exports
 		mapM_ (uncurry checkDoubleTypeDeclare) $ M.toList modules
 		return $ mapWithKey (buildTLT  world imports) $ aliasTables world
+
+
+calculateExports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> (FQN -> (FQN, prop) -> Bool) -> Map FQN (Set (prop, FQN))
+calculateExports' w	= let ig	= P.importGraph w in
+ 				calculateExports ig (invert ig)
+
+calculateImports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> Map FQN (Set (prop, FQN)) -> Map FQN (Set (prop, FQN))
+calculateImports' w	= calculateImports (P.importGraph w)
+
 
 {- builds a TLT for a certain module.
 

@@ -16,7 +16,8 @@ import Languate.TypeTable.Bind.Substitute
 import Control.Monad.Writer
 import Control.Arrow
 
-type ToBinds	= [(RType, Set RType, [(Name, Set RType)])]
+type ToBind	= (RType, Set RType, [(Name, Set RType)], Message)
+type ToBinds	= [ToBind]
 
 fixImplicitRequirements	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
 				(Map TypeID FullSuperTypeTable, ToBinds)
@@ -34,26 +35,26 @@ fixImplicitsFor	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
 			TypeID -> FullSuperTypeTable ->
 			Writer ToBinds (TypeID, FullSuperTypeTable)
 fixImplicitsFor treqt fstts tid fstt
-	= mapM (uncurry $ fixImplicitsForEntry treqt fstts) (M.toList fstt)
+	= mapM (uncurry $ fixImplicitsForEntry tid treqt fstts) (M.toList fstt)
 		|> M.fromList |> (const tid &&& id)
 
 {- Gets and adds the extra requirements for native types.
 
 Gives a (this type, should be these types) too, when binding happens on the way.
 -}
-fixImplicitsForEntry	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
+fixImplicitsForEntry	:: TypeID -> TypeReqTable -> Map TypeID FullSuperTypeTable ->
 				RType -> FullSTTEntry -> Writer ToBinds FullSTTKeyEntry
-fixImplicitsForEntry treqt fstts rtype entry@(nameReqs, via, (origType, bnd))
+fixImplicitsForEntry tid treqt fstts rtype entry@(nameReqs, via, (origType, bnd))
 				-- do nothing if the super type is ""a -> b""
  | not $ isNormal origType	= return (rtype, entry)
  | otherwise
 	= do	let origTypeID	= getBaseTID origType & fromJust
 		let origTypeRqs	= findWithDefault [] origTypeID treqt
 					:: [(Name, Set RType)]
-		let (toCheck, extraReqs)= origTypeRqs |> (subReq bnd)
-			& (lefts &&& rights)
-		tell $ fmap (\((a,b),c) -> (a,b,c)) $ zip toCheck $ repeat extraReqs
+		let (toCheck, extraReqs)= origTypeRqs |> subReq bnd & (lefts &&& rights)
+		let msg	= "While adding the implicit requirements on "++show tid++" for its supertype "++show rtype
 		let fullReqs	= (extraReqs ++ nameReqs) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
+		tell $ fmap (\((a,b),c) -> (a,b,c, msg)) $ zip toCheck $ repeat fullReqs
 		return (rtype,(fullReqs, via, (origType, bnd)))
 
 

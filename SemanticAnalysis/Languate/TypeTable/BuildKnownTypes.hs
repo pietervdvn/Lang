@@ -10,7 +10,6 @@ import Languate.FQN
 import Languate.TypeTable
 import Languate.AST
 import Languate.TAST
-import Languate.Graphs.ExportCalculator
 
 import qualified Data.Map as M
 import qualified Data.Set as S

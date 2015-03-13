@@ -1,4 +1,4 @@
-module Languate.Graphs.DirectedGraph (DG,DirectedGraph, invert, addLink, nodesFrom, leafs, dropNodes, isEmpty, empty, addLinks, addNode, addNodes, makeComplete) where
+module Graphs.DirectedGraph (DG,DirectedGraph, invert, addLink, nodesFrom, leafs, dropNodes, isEmpty, empty, addLinks, addNode, addNodes, makeComplete) where
 
 import StdDef ((||>>),(|>))
 

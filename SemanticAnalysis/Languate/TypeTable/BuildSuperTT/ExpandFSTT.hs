@@ -19,17 +19,14 @@ import Languate.TypeTable.Bind.Bind
 import Prelude hiding (null)
 import Data.Set hiding (null, filter)
 import qualified Data.Set as S
-import Data.Either
-
 import Data.Map hiding (filter)
 import qualified Data.Map as M
 import qualified Data.List as L
-
-import Data.Either (rights)
+import Data.Either
 import Data.Tuple
 import Data.Maybe
 
-import Languate.Graphs.DirectedGraph
+import Graphs.DirectedGraph
 
 import State
 import Control.Monad
@@ -49,7 +46,7 @@ buildSpareSuperTypeTable dict
 {-
 Makes the super type table complete, by recursively adding the supertypes of (known) super types.
 -}
-expand	:: (Map TypeID FullSuperTypeTable, [(RType, Set RType, [(Name, Set RType)])]) ->
+expand	:: (Map TypeID FullSuperTypeTable, ToBinds) ->
 		Exc (Map TypeID FullSuperTypeTable, Map TypeID SpareSuperTypeTable)
 expand (fstt, toCheck')
 	= let 	initSstt	= fstt |> buildSpareSuperTypeTable
@@ -71,15 +68,21 @@ RSA is PubPrivAlgo RSAPrivKey RSAPubKey
 This means that RSAPrivKey should be a PrivKey. This requirements are checked here
 -}
 
-checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> [(RType, Set RType, [(Name, Set RType)])] -> Check
+checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBinds -> Check
 checkSuperBinds fstts sstts toCheck
 	= inside "While checking that implicit type requirements are met" $ do
-		let toCheck'	= toCheck & filter (not . S.null . snd3)
+		let toCheck'	= toCheck & filter (not . S.null . snd4)
 		mapM_ (checkSuperBinds' fstts sstts) toCheck'
 
-checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> (RType, Set RType, [(Name, Set RType)]) -> Check
-checkSuperBinds' fstts sstts (sub, shouldBeSupers, metReqs)
-	= err $ show sub++" should be a "++show shouldBeSupers++"\nwithin the context: "++show metReqs
+checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBind -> Check
+checkSuperBinds' fstts sstts (sub, shouldBeSupers, metReqs, msg)
+ = inside msg $ do
+	let metReqs'	= metReqs & M.fromList |> S.toList:: Map Name [Languate.TAST.RType]
+	let checkOne	= _bind sstts fstts (metReqs & M.fromList |> S.toList) sub
+	let showMsg super msg
+		= inside ("The type requirement '"++st True sub++" is a "++st True super++"' could not be fullfilled") $ err msg
+	let checkOne' super	= either (showMsg super) (const pass) $ checkOne super
+	mapM_ checkOne' $ S.toList shouldBeSupers
 
 
 type St	a = State Context a
@@ -111,13 +114,12 @@ _expandAll
 -- Adds the supertype of changedSuper to the FSTT of base
 _expand	:: TypeID -> RType -> St Bool
 _expand base changedSuper
-     = 	-- any has no super types
-	if base == anyTypeID then return False else
 	-- changedSuper is some strange case -> we do not add it (this can happen with the initial settings to start the algo)
-	if not $ isNormal changedSuper then return False else do
-	-- convenience function to get the binding out of a FSSTentry
+ |  (base == anyTypeID) || not (isNormal changedSuper)
+	= return False
+ | otherwise
+   = do	-- convenience function to get the binding out of a FSSTentry
 	let getBinding (_,_,tb)	= snd tb
-
 	-- the fstt of the base type (which should get changed)
 	fstt	<- get' fstt_ |> fetch (show base) "fstt_" base
 	let via	= changedSuper
@@ -147,7 +149,7 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	-- the fstt that has to be changed
 	let fstt	= findWithDefault M.empty base fstts
 	-- the new, combined binding ...
-	let binding	= concatBindings newBinding oldBinding
+	let binding	= concatBindings oldBinding newBinding
 	-- ... aplied on the super
 	let super	= substitute binding superToAdd
 	-- if already added: skip this shit
@@ -161,7 +163,8 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	let viaReqs	= fstt & M.lookup via |> fst3 & fromMaybe []
 	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
 	-- add the tochecks
-	mapM addReqs $ (zip toCheck $ repeat newReqs) |> (\((a,b),c) -> (a,b,c))
+	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show superToAdd++" which has been added via "++show via++")\nob: "++show oldBinding++" nb: "++show newBinding++" fb: "++show binding
+	mapM_ addReqs $ zip toCheck (repeat newReqs) |> (\((a,b),c) -> (a,b,c,msg))
 	let entry	= (newReqs, Just via, (superToAdd, binding))
 	let fstt'	= M.insert super entry fstt
 	let fstts'	= M.insert base fstt' fstts
@@ -169,7 +172,7 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	let mSuperTid	= getBaseTID superToAdd
 	-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
 	when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
-	return True
+	return True	-- somethingChanged -> we return true
 
 
 -----------
@@ -187,7 +190,7 @@ pop	= do	td	<- get' todos
 		modify (\ctx -> ctx {todos = M.delete nxt td})
 		return all
 
-addReqs		:: (RType, Set RType, [(Name, Set RType)]) -> St ()
+addReqs		:: (RType, Set RType, [(Name, Set RType)], Message) -> St ()
 addReqs reqs
 	= do	ctx	<- get
 		put $ ctx {toCheck = reqs : toCheck ctx}

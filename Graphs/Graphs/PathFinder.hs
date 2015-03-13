@@ -1,4 +1,4 @@
-module Languate.Graphs.PathFinder (searchPath, searchPaths) where
+module Graphs.PathFinder (searchPath, searchPaths) where
 
 {-
 Pathfinder algorithm.

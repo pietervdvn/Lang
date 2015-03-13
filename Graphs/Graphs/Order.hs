@@ -1,7 +1,7 @@
-module Languate.Graphs.Order (buildOrdering) where
+module Graphs.Order (buildOrdering) where
 
-import Languate.Graphs.DirectedGraph
-import Languate.Graphs.SearchCycles
+import Graphs.DirectedGraph
+import Graphs.SearchCycles
 
 import qualified Data.Set as S
 import qualified Data.Map as M

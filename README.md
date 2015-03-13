@@ -66,6 +66,11 @@ StdDef
 
 Some usefull functions, which where missing in the prelude.
 
+Graphs
+------
+
+Some basic graph algorithms
+
 Consumer
 --------
 

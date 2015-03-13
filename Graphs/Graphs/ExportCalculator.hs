@@ -1,4 +1,4 @@
-module Languate.Graphs.ExportCalculator where
+module Graphs.ExportCalculator where
 
 {--
 This module implements calculateExports and calculateImports
@@ -15,18 +15,8 @@ import Data.Tuple
 import Control.Arrow
 import Control.Monad
 
-import Languate.Graphs.DirectedGraph
+import Graphs.DirectedGraph
 
-import Languate.Package hiding (importGraph)
-import qualified Languate.Package as W
-import Languate.FQN
-
-calculateExports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> (FQN -> (FQN, prop) -> Bool) -> Map FQN (Set (prop, FQN))
-calculateExports' w	= let ig	= W.importGraph w in
- 				calculateExports ig (invert ig)
-
-calculateImports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> Map FQN (Set (prop, FQN)) -> Map FQN (Set (prop, FQN))
-calculateImports' w	= calculateImports (W.importGraph w)
 
 {- calculates what properties each node exports, even by reexporting.
 Params:

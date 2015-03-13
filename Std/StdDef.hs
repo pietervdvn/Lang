@@ -172,3 +172,6 @@ whileM' cond f (a:as)
 mapTuple	:: (a -> b, c -> d) -> (a,c) -> (b,d)
 mapTuple (f, g) (a,b)
 		= (f a, g b)
+
+snd4		:: (a,b,c,d) -> b
+snd4 (_,b,_,_)	=  b

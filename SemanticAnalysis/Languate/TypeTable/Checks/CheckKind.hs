@@ -23,7 +23,7 @@ import Languate.FQN
 import Languate.TypeTable.KindChecker.KindConstraint
 import Languate.TypeTable.KindChecker.KindOf
 
-import Languate.Graphs.SearchCycles
+import Graphs.SearchCycles
 
 
 {-Validates wether the 'HaveSameKind'-constraints are met-}

@@ -1,4 +1,4 @@
-module Languate.Graphs.UnionFind where
+module Graphs.UnionFind where
 
 {--
 This module implements the union find algo

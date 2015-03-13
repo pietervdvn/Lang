@@ -7,7 +7,7 @@ This module implements a simple bind, which works on Full Super Type Tables
 import StdDef
 import StateT
 
-import Languate.Graphs.DirectedGraph
+import Graphs.DirectedGraph
 
 import Data.Map hiding (foldr)
 import qualified Data.Map as M

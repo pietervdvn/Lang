@@ -24,9 +24,9 @@ import Languate.Precedence.PrecTable2MD
 import Languate.Precedence.CheckPrecStatements
 import Languate.Precedence.PrecedenceTable
 
-import Languate.Graphs.UnionFind
-import Languate.Graphs.Order
-import Languate.Graphs.DirectedGraph as DG
+import Graphs.UnionFind
+import Graphs.Order
+import Graphs.DirectedGraph as DG
 
 import Control.Arrow
 

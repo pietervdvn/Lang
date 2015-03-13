@@ -1,4 +1,4 @@
-module Languate.Graphs.SearchCycles (searchCycles, cleanCycles) where
+module Graphs.SearchCycles (searchCycles, cleanCycles) where
 
 {--
 This module implements a cycle searcher. It works as a reference counting garbage collector
@@ -13,7 +13,7 @@ import Data.Set (Set)
 import qualified Data.Set as S
 import Prelude hiding (lookup)
 
-import Languate.Graphs.PathFinder
+import Graphs.PathFinder
 
 
 -- Constructs all possible cycles
