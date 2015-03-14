@@ -30,8 +30,7 @@ conv (frees, (isTyp, reqs))
 		-- remove all frees which have been used from isTyp
 		-- isTyp	= fst $ substitute' frees isTyp'
 		-- we want to bind "X Bool" against "X a", to derive {a --> Bool}
-		applied	= appliedTypes isTyp
-		binding	= Binding $ M.fromList $ zip ([0..] |> show |> ('a':)) applied
+		binding	= Binding $ canonicalBinding isTyp
 		base	= (isTyp, (zip frees nativeS, Nothing, (isTyp, binding))) in
 		base:expandFrees reqs base
 

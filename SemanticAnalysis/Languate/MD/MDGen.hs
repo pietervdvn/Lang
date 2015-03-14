@@ -61,5 +61,6 @@ footer link
 		let p =  [parag "This page was automatically generated." -- " on "++date++" UTC ("++dateLocal++" "++show zone++")"
 			, parag "Do not edit it, as regeneration will overwrite your changes."
 			, "Back to "++link "index" "Index"
+			, "<div id=\"clicker\">click</div>"
 			]
 		return $ qoute $ unlines p

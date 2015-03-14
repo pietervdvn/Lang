@@ -20,6 +20,7 @@ import Languate.FQN
 import Data.Map
 import Data.Maybe
 
+import Control.Arrow
 
 
 
@@ -235,3 +236,10 @@ appliedTypes (RApplied bt at)
 	= appliedTypes bt ++ [at]
 appliedTypes _
 	= []
+
+
+
+-- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded
+canonicalBinding	:: RType -> Map Name RType
+canonicalBinding t
+	= appliedTypes t & zip ([0..] |> show) |> first ('a':) & fromList 

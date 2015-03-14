@@ -61,7 +61,6 @@ This table is only a intermediate structure (which is usefull to generate the do
 type SuperTypeTableFor	= Map [Name] (Set (RType, Map Name [RType]))
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
-
 {-
 A "FullSuperTypeTable" is saved for each typeId. It represents "This type is A if these conditions are met."
 
@@ -88,6 +87,7 @@ The type in the maybe is thee "via" type, the supertype of T which caused the cu
 The binding maps free type variables from the *supertype* (given) to *subtype*
 -}
 type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Maybe RType, (RType, Binding))
+type FullSuperTypeTables	= Map TypeID FullSuperTypeTable
 {-
 Complement of the full super type table.
 E.g.
@@ -96,6 +96,7 @@ Supertypes of list:
 
 -}
 type SpareSuperTypeTable	= Map TypeID [RType]
+type SpareSuperTypeTables	= Map TypeID SpareSuperTypeTable
 
 -- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
@@ -118,11 +119,6 @@ data TypeTable	= TypeTable	{ knownTypes	:: Set TypeID
 
 data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to allow a custom show function
 	deriving (Eq, Ord)
-
-
-
-
-
 
 -- Finds the type within the TLT
 findTypeOrigin	:: TypeLookupTable -> ([Name], Name) -> Exc FQN

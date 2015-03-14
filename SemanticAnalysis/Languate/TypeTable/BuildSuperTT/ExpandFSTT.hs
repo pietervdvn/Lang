@@ -13,8 +13,8 @@ import Languate.TAST
 import Languate.TypeTable
 import Languate.TypeTable.Extended
 import Languate.TypeTable.BuildSuperTT.FixImplicitRequirements
+import Languate.TypeTable.BuildSuperTT.PropagateRequirements
 import Languate.TypeTable.Bind.Substitute
-import Languate.TypeTable.Bind.Bind
 
 import Prelude hiding (null)
 import Data.Set hiding (null, filter)
@@ -55,34 +55,13 @@ expand (fstt, toCheck')
 		ctx	= Ctx fstt initNotifTable initSstt initTodo toCheck'
 		ctx'	= runstate _expandAll ctx & snd
 		-- stuff that has to be checked, as bind aways might have happened
-		toBind	= toCheck ctx' in do
-		checkSuperBinds (fstt_ ctx') (sstt_ ctx') toBind
-		return $ ctx'  & (fstt_ &&& sstt_)
+		toBind	= toCheck ctx'
+		fstts	= fstt_ ctx'
+		sstts	= sstt_ ctx' in do
+		fstts'	<-propagateRequirements sstts toBind fstts
+		return (fstts', sstts)
 
-{-
-During the calculation of the FSTT, values might have been bound where typer reqs are present.
 
-e.g.
-RSA is PubPrivAlgo RSAPrivKey RSAPubKey
-
-This means that RSAPrivKey should be a PrivKey. This requirements are checked here
--}
-
-checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBinds -> Check
-checkSuperBinds fstts sstts toCheck
-	= inside "While checking that implicit type requirements are met" $ do
-		let toCheck'	= toCheck & filter (not . S.null . snd4)
-		mapM_ (checkSuperBinds' fstts sstts) toCheck'
-
-checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBind -> Check
-checkSuperBinds' fstts sstts (sub, shouldBeSupers, metReqs, msg)
- = inside msg $ do
-	let metReqs'	= metReqs & M.fromList |> S.toList:: Map Name [Languate.TAST.RType]
-	let checkOne	= _bind sstts fstts (metReqs & M.fromList |> S.toList) sub
-	let showMsg super msg
-		= inside ("The type requirement '"++st True sub++" is a "++st True super++"' could not be fullfilled") $ err msg
-	let checkOne' super	= either (showMsg super) (const pass) $ checkOne super
-	mapM_ checkOne' $ S.toList shouldBeSupers
 
 
 type St	a = State Context a
