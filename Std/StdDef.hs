@@ -5,6 +5,8 @@ import Data.Map (Map, insert, adjust, findWithDefault)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Set (Set)
+import Data.List (sortBy)
+
 
 type Name 	= String
 type Message	= String
@@ -179,8 +181,12 @@ fst4 (a,_,_,_)	=  a
 snd4		:: (a,b,c,d) -> b
 snd4 (_,b,_,_)	=  b
 
+
 isLeft		:: Either a b -> Bool
 isLeft (Left _)	= True
 isLeft _	= False
 
 isRight		= not . isLeft
+
+sortOn		:: Ord b => (a -> b) -> [a] -> [a]
+sortOn f	=  sortBy (\a0 a1 -> f a0 `compare` f a1)

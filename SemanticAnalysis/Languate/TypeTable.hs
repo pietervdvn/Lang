@@ -64,16 +64,16 @@ type SuperTypeTable	= Map TypeID SuperTypeTableFor
 {-
 A "FullSuperTypeTable" is saved for each typeId. It represents "This type is A if these conditions are met."
 
-E.g. for list:
-Mappable 	--> []	-- thus if not applied to any free
-Collection 	--> []
-Monoid 		--> [a,{}]-- thus: if applied to a single free (with no special requirements)
-Dict k v	--> [a,{"(k,v)"}]	-- It is a dict if applied to a tuple
+E.g. for list a:
+Mappable a	--> []	-- no conditions on the frees
+Collection a	--> []	-- idem
+Monoid 		--> []-- thus: if applied to a single free (with no special requirements)
+Dict k v	--> [a is "(k,v)"]	-- It is a dict if applied to a tuple
 
 -- This table gets built recursively via the already known supertypes:
 -- added via collection:
 
-Eq --> [{"Eq"}]	-- List Eq is Eq
+Eq --> ["Eq"]	-- List Eq is Eq
 -- Monoid		--> [{}]	-- but already in the table
 
 
@@ -89,11 +89,12 @@ The binding maps free type variables from the *supertype* (given) to *subtype*
 type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Maybe RType, (RType, Binding))
 type FullSuperTypeTables	= Map TypeID FullSuperTypeTable
 {-
-Complement of the full super type table.
-E.g.
-Supertypes of list:
-(Dict k) v --if> a:{(k,v)}
 
+Aid while building the FSTT:
+It saves what supers exist in what form,e.g. for list
+
+Dict --> [""Dict k1 v1"", ""Dict k1 [v1]""]
+Set  --> [""Set a0""]
 -}
 type SpareSuperTypeTable	= Map TypeID [RType]
 type SpareSuperTypeTables	= Map TypeID SpareSuperTypeTable

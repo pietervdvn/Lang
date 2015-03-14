@@ -16,7 +16,13 @@ import Languate.TypeTable.Bind.Substitute
 import Control.Monad.Writer
 import Control.Arrow
 
-type ToBind	= (RType, Set RType, [(Name, Set RType)], Message)
+-- Represents a requiment which is not met at the moment, but should be
+data ToBind	= ToBnd	{ subType	:: TypeID	-- this type
+			, superType	:: RType	-- has this supertype
+			, ifType	:: RType	-- if this type
+			, neededReqs	:: Set RType	-- meets this requiments
+			, msg		:: Message	-- a message for the human
+			}
 type ToBinds	= [ToBind]
 
 fixImplicitRequirements	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
@@ -48,13 +54,13 @@ fixImplicitsForEntry tid treqt fstts rtype entry@(nameReqs, via, (origType, bnd)
 				-- do nothing if the super type is ""a -> b""
  | not $ isNormal origType	= return (rtype, entry)
  | otherwise
-	= do	let origTypeID	= getBaseTID origType & fromJust
+	= do	let origTypeID	= getBaseTID origType & fromMaybe (error $ "FixImplicitRequirements: "++show origType++" is not normal")
 		let origTypeRqs	= findWithDefault [] origTypeID treqt
 					:: [(Name, Set RType)]
 		let (toCheck, extraReqs)= origTypeRqs |> subReq bnd & (lefts &&& rights)
 		let msg	= "While adding the implicit requirements on "++show tid++" for its supertype "++show rtype
 		let fullReqs	= (extraReqs ++ nameReqs) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
-		tell $ fmap (\((a,b),c) -> (a,b,c, msg)) $ zip toCheck $ repeat fullReqs
+		tell $ toCheck |> (\(ifType, isTypes) -> ToBnd tid rtype ifType isTypes msg)
 		return (rtype,(fullReqs, via, (origType, bnd)))
 
 

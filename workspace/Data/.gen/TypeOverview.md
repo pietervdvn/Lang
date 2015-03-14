@@ -141,7 +141,7 @@ Monoid |  | _Native_  | Monoid | {}
 Is type | Requirements | Via | Orig type | Binding
 ------- | ------------ | --- | --------- | -------
 .  |  | Monoid | .  | {}
-Eq | (````a0```` :````Eq```` ) | (Collection (a0, a1)) | Eq | {"a0" --> (a0, a1)}
+Eq | (````a0```` :````Eq```` ) (````a1```` :````Eq```` ) | (Collection (a0, a1)) | Eq | {"a0" --> (a0, a1)}
 Monoid |  | _Native_  | Monoid | {}
 (Mappable a1) |  | _Native_  | (Mappable a1) | {"a0" --> a1}
 (Mappable (a0, a1)) | (````a0```` :````Eq```` ) | (Collection (a0, a1)) | (Mappable a0) | {"a0" --> (a0, a1)}

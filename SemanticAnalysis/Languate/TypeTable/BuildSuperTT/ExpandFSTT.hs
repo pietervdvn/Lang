@@ -58,7 +58,7 @@ expand (fstt, toCheck')
 		toBind	= toCheck ctx'
 		fstts	= fstt_ ctx'
 		sstts	= sstt_ ctx' in do
-		fstts'	<-propagateRequirements sstts toBind fstts
+		fstts'	<-propagateRequirements sstts (notifyTable ctx') toBind fstts
 		return (fstts', sstts)
 
 
@@ -75,7 +75,7 @@ data Context
 		todos	:: Map TypeID (Set RType),
 		-- the left type should be a subtype of all the right ones.
 		-- These are requirements that should be met. The third arg is the context in which this is bound
-		toCheck	:: [(RType, Set RType, [(Name, Set RType)], Message)] }
+		toCheck	:: ToBinds }
 
 
 
@@ -142,8 +142,9 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	let viaReqs	= fstt & M.lookup via |> fst3 & fromMaybe []
 	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
 	-- add the tochecks
-	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show superToAdd++" which has been added via "++show via++")\nob: "++show oldBinding++" nb: "++show newBinding++" fb: "++show binding
-	mapM_ addReqs $ zip toCheck (repeat newReqs) |> (\((a,b),c) -> (a,b,c,msg))
+	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show super++" which has been added via "++show via++")"
+	mapM_ addReqs $ toCheck |> (\(ifType, isTypes) ->
+		ToBnd base super ifType isTypes msg)
 	let entry	= (newReqs, Just via, (superToAdd, binding))
 	let fstt'	= M.insert super entry fstt
 	let fstts'	= M.insert base fstt' fstts
@@ -169,7 +170,7 @@ pop	= do	td	<- get' todos
 		modify (\ctx -> ctx {todos = M.delete nxt td})
 		return all
 
-addReqs		:: (RType, Set RType, [(Name, Set RType)], Message) -> St ()
+addReqs		:: ToBind -> St ()
 addReqs reqs
 	= do	ctx	<- get
 		put $ ctx {toCheck = reqs : toCheck ctx}
