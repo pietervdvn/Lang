@@ -6,7 +6,7 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Set (Set)
 import Data.List (sortBy)
-
+import Data.Function
 
 type Name 	= String
 type Message	= String
@@ -189,4 +189,4 @@ isLeft _	= False
 isRight		= not . isLeft
 
 sortOn		:: Ord b => (a -> b) -> [a] -> [a]
-sortOn f	=  sortBy (\a0 a1 -> f a0 `compare` f a1)
+sortOn f	=  sortBy (compare `on` f)

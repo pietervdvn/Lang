@@ -50,7 +50,7 @@ propagateRequirements sstts notifyTable toBinds fstts
 		-- toBinds' contains all the toBinds which might contain a free
 		toBinds'= [STB subTid isSuper ifThisType isThis
 				| ToBnd subTid isSuper ifThisType isThese _ <- toBinds
-				, isThis <- S.toList $ isThese
+				, isThis <- S.toList isThese
 				, not (null $ freesInRT ifThisType)]
 		fstts'	= runstate (propagateReqs toBinds') ctx & snd & fstts_ in do
 		-- check if we really met all requirements
@@ -85,7 +85,7 @@ propagateReqs toBinds
 -}
 propagateReq	:: SingleToBind -> StMsg Bool
 propagateReq  toBind@(STB baseSubTid baseSuper sub super)	-- We call ifThisType "sub" and isThisOne "super"! Do not get confused!
- | (not $ isNormal sub) || (not $ isNormal super)
+ | not (isNormal sub) || not (isNormal super)
 	= return False	-- we ignore strange cases here
  | otherwise
 	= do	{- The sub should be a element for super.
@@ -111,7 +111,7 @@ propagateReq  toBind@(STB baseSubTid baseSuper sub super)	-- We call ifThisType 
 			= baseSuperEntry & fromMaybe (error $ "No basesuperentry for "++show baseSuper++" in fstt of "++show baseSubTid) & fst3 & M.fromList
 		let alreadyMet	= map (_bind sstts fstts (knownFreeReqs |> S.toList) sub) posSuperForms |> isRight & or
 		if alreadyMet then return False else do
-		possReqs	<- flip mapM posSuperForms $ \posSuperForm ->
+		possReqs	<- forM posSuperForms $ \posSuperForm ->
 		  do	-- we calculate here what **extra** requirements are needed to meet the posSuperForm
 			let fsstEntry	= M.lookup posSuperForm subFstt & fromMaybe (error $ "PropagateRequirements: "++show posSuperForm++" not found in subFstt of "++show sub)
 			let oldReqs	= fst3 fsstEntry
@@ -135,9 +135,9 @@ calculateMissingReqs oldReqs newReqs
 	Will add fstts to the queue that should be re-evaluated, and propage these through the fstts. This propagation might result in another missed requiment, but that is for the next iteration of the main loop! -}
 addRequirement	:: TypeID -> RType -> [(Name, Set RType)] -> StMsg ()
 addRequirement subTid super req
-	= do	origReqs	<- get' fstts_  |> (\fstts -> M.lookup subTid fstts >>= M.lookup super)
-						|> fromMaybe (error $ "PropagateRequirements: derp?")
-						|> fst3
+	= do	origReqs 	<- get' fstts_  |> (M.lookup subTid >=> M.lookup super)
+					|> fromMaybe (error "PropagateRequirements: derp?")
+					|> fst3
 		let newReqs	= (origReqs ++ req) & merge ||>> S.unions
 		when (newReqs /= origReqs) $ do
 		modify . modFstts_ . flip M.adjust subTid . flip M.adjust super $ first3 (const newReqs)
@@ -148,7 +148,7 @@ addRequirement subTid super req
 
 rebuildReqs	:: TypeID -> TypeID -> StMsg ()
 rebuildReqs changedType typeToCheck
-	= do
+	= todo
 
 
 ------------
