@@ -4,7 +4,6 @@ import StdDef hiding (todo)
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Extended
 
 import Prelude hiding (null)
 import Data.Set as S hiding (null, filter)
@@ -24,14 +23,14 @@ stt2fstt sttf
 		M.fromList $ concat tuples
 
 -- creates the base entries for the fstt
-conv	:: ([Name], (RType, Map Name [RType])) -> [FullSTTKeyEntry]
+conv	:: ([Name], (RType, Map Name [RType])) -> [FSTTKeyEntry]
 conv (frees, (isTyp, reqs))
 	= let 	nativeS	= frees |> (\a -> findWithDefault [] a reqs) |> S.fromList
 		-- remove all frees which have been used from isTyp
 		-- isTyp	= fst $ substitute' frees isTyp'
 		-- we want to bind "X Bool" against "X a", to derive {a --> Bool}
 		binding	= Binding $ canonicalBinding isTyp
-		base	= (isTyp, (zip frees nativeS, Nothing, (isTyp, binding))) in
+		base	= (isTyp, FSTTEntry (zip frees nativeS) Nothing isTyp binding Nothing) in
 		base:expandFrees reqs base
 
 
@@ -50,7 +49,7 @@ and give:
 [(Y, [graph:Graph, X, Y])]
 
 -}
-expandFrees	:: Map Name [RType] -> FullSTTKeyEntry -> [FullSTTKeyEntry]
+expandFrees	:: Map Name [RType] -> FSTTKeyEntry -> [FSTTKeyEntry]
 expandFrees reqs (RFree a, rest)
 	= let possible	= findWithDefault [] a reqs in
 		zip possible $ repeat rest

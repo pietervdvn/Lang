@@ -82,11 +82,17 @@ We know that the first free should be a "Graph", thus:
 Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
 
-The type in the maybe is thee "via" type, the supertype of T which caused the current supertype to be added (and is in the list)
-
 The binding maps free type variables from the *supertype* (given) to *subtype*
 -}
-type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Maybe RType, (RType, Binding))
+data FSTTEntry	= FSTTEntry {	reqs		:: [(Name,Set RType)],	-- The requiments needed to be this type
+				viaType		:: Maybe RType, 	-- The supertype of T which caused the current supertype to be added (and is in the list)
+				origSuper	:: RType,		-- The type this super was derived from, e.g. Dict a0 a1
+				binding		:: Binding,		-- The binding which takes the orig super into it's actual form, e.g. Dict k1 v1
+				stepBinding	:: Maybe Binding	-- The binding which takes the frees to this form
+				}
+	deriving (Show, Eq, Ord)
+type FSTTKeyEntry	= (RType, FSTTEntry)
+type FullSuperTypeTable	= Map RType FSTTEntry
 type FullSuperTypeTables	= Map TypeID FullSuperTypeTable
 {-
 

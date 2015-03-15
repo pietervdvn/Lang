@@ -145,10 +145,11 @@ addRequirement subTid super req
 		toRecheck	<- get' notifyTable |> nodesFrom subTid
 		mapM (rebuildReqs subTid) (S.toList toRecheck) |> (error . show)
 
-
+{- All types that have been added via the changed type should be re-evaluated, and new requiments might be needed.
+-}
 rebuildReqs	:: TypeID -> TypeID -> StMsg ()
 rebuildReqs changedType typeToCheck
-	= todo
+	= return ()	-- TODO
 
 
 ------------

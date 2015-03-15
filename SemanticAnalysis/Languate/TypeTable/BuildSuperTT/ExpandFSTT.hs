@@ -11,7 +11,6 @@ import Languate.CheckUtils
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Extended
 import Languate.TypeTable.BuildSuperTT.FixImplicitRequirements
 import Languate.TypeTable.BuildSuperTT.PropagateRequirements
 import Languate.TypeTable.Bind.Substitute

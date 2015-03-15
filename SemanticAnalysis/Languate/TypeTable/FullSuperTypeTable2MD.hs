@@ -11,7 +11,6 @@ import Data.Maybe
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Extended
 
 
 
@@ -34,16 +33,17 @@ fstt2md	:: KindLookupTable -> TypeReqTable -> TypeID -> FullSuperTypeTable -> Ma
 fstt2md klt treqt tid@(fqn, nm) fstt
 	= title 3 ("Supertypes of "++nm++" "++ (findWithDefault [] tid treqt |> showReqs & unwords)) ++
 		if M.null fstt then parag "No supertypes"
-		   else	table ["Is type","Requirements","Via","Orig type","Binding"] (toList fstt |> rows)
+		   else	table ["Is type","Requirements","Via","Orig type","Origsuper -> actualsuper binding","Via -> Current binding"] (toList fstt |> rows)
 
 
-rows	:: FullSTTKeyEntry -> [MarkDown]
-rows (isA, (ifReq, via, (super, bnd)))
+rows	:: FSTTKeyEntry -> [MarkDown]
+rows (isA, entry)
 	= [st True isA,
-		unwords (ifReq |> showReqs),
-		fromMaybe (ital "Native") (via |> st True),
-		st True super,
-		show bnd
+		unwords (reqs entry |> showReqs),
+		fromMaybe (ital "Native") (viaType entry |> st True),
+		st True $ origSuper entry,
+		show $ binding entry,
+		fromMaybe (ital "Natve") (stepBinding entry |> show)
 		]
 
 
