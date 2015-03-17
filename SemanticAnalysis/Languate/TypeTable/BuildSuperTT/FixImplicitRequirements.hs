@@ -56,7 +56,7 @@ fixImplicitsForEntry tid treqt fstts rtype entry
 	= do	let origType	= origSuper entry
 		let origTypeID	= getBaseTID origType & fromMaybe (error $ "FixImplicitRequirements: "++show origType++" is not normal")
 		let origTypeRqs	= findWithDefault [] origTypeID treqt	:: [(Name, Set RType)]
-		let (toCheck, extraReqs)= origTypeRqs |> subReq (binding entry) & (lefts &&& rights)
+		let (toCheck, extraReqs)= origTypeRqs |> subReq (origBinding entry) & (lefts &&& rights)
 		let msg	= "While adding the implicit requirements on "++show tid++" for its supertype "++show rtype
 		let fullReqs	= (extraReqs ++ reqs entry) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
 		tell $ toCheck |> (\(ifType, isTypes) -> ToBnd tid rtype ifType isTypes msg)

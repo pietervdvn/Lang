@@ -52,7 +52,7 @@ _bind sstt fstt reqs t0 t1
 	= let 	used	= (t0:t1:concat (M.elems reqs)) |> freesInRT & concat & S.fromList
 		ctx	= Context reqs used sstt fstt noBinding
 		msg	= "While binding "++show t0++" in "++ show t1 in
-		runstateT (inside msg $ bind' t0 t1) ctx |> snd |> binding
+		runstateT (inside msg $ bind' t0 t1) ctx |> snd |> binding_
 
 bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
 bind tt	= _bind (TT.spareSuperTypes tt) (TT.allSupertypes tt)
@@ -136,7 +136,7 @@ lookupSupersAgainst t wantedForm wantedType
 	let baseBinding	= appliedTypes t & zip [0..] |> first ((++) "a" . show)
 	{- requirements on the frees.
 		These bindings might be important, to fill in the super type-}
-	(freeReqs,_,_)	<- lookup wantedForm stt  ?
+	freeReqs	<- lookup wantedForm stt |> reqs  ?
 				(show t ++ " does not have a supertype "++show wantedForm)
 	assert (length freeReqs >= length baseBinding) $ "The type "++show t++
 		" has been applied to too many arguments, only "++

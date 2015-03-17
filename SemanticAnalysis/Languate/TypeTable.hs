@@ -87,7 +87,7 @@ The binding maps free type variables from the *supertype* (given) to *subtype*
 data FSTTEntry	= FSTTEntry {	reqs		:: [(Name,Set RType)],	-- The requiments needed to be this type
 				viaType		:: Maybe RType, 	-- The supertype of T which caused the current supertype to be added (and is in the list)
 				origSuper	:: RType,		-- The type this super was derived from, e.g. Dict a0 a1
-				binding		:: Binding,		-- The binding which takes the orig super into it's actual form, e.g. Dict k1 v1
+				origBinding		:: Binding,		-- The binding which takes the orig super into it's actual form, e.g. Dict k1 v1
 				stepBinding	:: Maybe Binding	-- The binding which takes the frees to this form
 				}
 	deriving (Show, Eq, Ord)

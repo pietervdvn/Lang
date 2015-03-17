@@ -109,7 +109,7 @@ _expand base changedSuper
 
 		This binding might produce a fixed binding, e.g. {a0 --> RSAPrivKey}
 	 -}
-	let oldBinding	= fetch (show via) "fstt" via fstt & getBinding
+	let oldBinding	= fetch (show via) "fstt" via fstt & origBinding
 				:: Binding
 	-- the supers FSTT, which we will tear apart and add to base
 	supersToAdd	<- get' fstt_ |> findWithDefault M.empty viaTid |> M.toList
@@ -121,13 +121,13 @@ _expand base changedSuper
 Adds a supertypeentry to the basetype. The oldbinding takes the supertype(via) from its baseform to the needed form,
 
 -}
-_addEntry	:: TypeID -> RType -> Binding -> FullSTTKeyEntry -> St Bool
-_addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
+_addEntry	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
+_addEntry base via oldBinding (superToAdd, entry)
   = do	fstts		<- get' fstt_
 	-- the fstt that has to be changed
 	let fstt	= findWithDefault M.empty base fstts
 	-- the new, combined binding ...
-	let binding	= concatBindings oldBinding newBinding
+	let binding	= concatBindings oldBinding $ origBinding entry
 	-- ... aplied on the super
 	let super	= substitute binding superToAdd
 	-- if already added: skip this shit
@@ -135,16 +135,16 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
 	let (toCheck, foreignReqs)
-			= reqs |> subReq binding & (lefts &&& rights)
+			= reqs entry |> subReq binding & (lefts &&& rights)
 	{- We might have some requirements on the via type too in our own FSTT.
 		These don't have to be checked, as these are already requirements in function of the frees of base -}
-	let viaReqs	= fstt & M.lookup via |> fst3 & fromMaybe []
+	let viaReqs	= fstt & M.lookup via |> reqs & fromMaybe []
 	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
 	-- add the tochecks
 	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show super++" which has been added via "++show via++")"
 	mapM_ addReqs $ toCheck |> (\(ifType, isTypes) ->
 		ToBnd base super ifType isTypes msg)
-	let entry	= (newReqs, Just via, (superToAdd, binding))
+	let entry	= FSTTEntry newReqs (Just via) superToAdd binding (Just $ origBinding entry)	-- TODO or oldbinding?
 	let fstt'	= M.insert super entry fstt
 	let fstts'	= M.insert base fstt' fstts
 	modify (\ctx -> ctx {fstt_ = fstts'})

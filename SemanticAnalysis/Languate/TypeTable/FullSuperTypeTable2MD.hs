@@ -42,7 +42,7 @@ rows (isA, entry)
 		unwords (reqs entry |> showReqs),
 		fromMaybe (ital "Native") (viaType entry |> st True),
 		st True $ origSuper entry,
-		show $ binding entry,
+		show $ origBinding entry,
 		fromMaybe (ital "Natve") (stepBinding entry |> show)
 		]
 

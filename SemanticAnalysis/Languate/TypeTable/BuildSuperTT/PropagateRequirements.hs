@@ -108,13 +108,13 @@ propagateReq  toBind@(STB baseSubTid baseSuper sub super)	-- We call ifThisType 
 		-- base super is not configured correctly, as all frees are already in the right context
 		if isNothing baseSuperEntry then return False else do
 		let knownFreeReqs
-			= baseSuperEntry & fromMaybe (error $ "No basesuperentry for "++show baseSuper++" in fstt of "++show baseSubTid) & fst3 & M.fromList
+			= baseSuperEntry & fromMaybe (error $ "No basesuperentry for "++show baseSuper++" in fstt of "++show baseSubTid) & reqs & M.fromList
 		let alreadyMet	= map (_bind sstts fstts (knownFreeReqs |> S.toList) sub) posSuperForms |> isRight & or
 		if alreadyMet then return False else do
 		possReqs	<- forM posSuperForms $ \posSuperForm ->
 		  do	-- we calculate here what **extra** requirements are needed to meet the posSuperForm
 			let fsstEntry	= M.lookup posSuperForm subFstt & fromMaybe (error $ "PropagateRequirements: "++show posSuperForm++" not found in subFstt of "++show sub)
-			let oldReqs	= fst3 fsstEntry
+			let oldReqs	= reqs fsstEntry
 			-- what requiments didn't we meet?
 			let missingReqs	= calculateMissingReqs oldReqs knownFreeReqs
 			return missingReqs
@@ -137,10 +137,11 @@ addRequirement	:: TypeID -> RType -> [(Name, Set RType)] -> StMsg ()
 addRequirement subTid super req
 	= do	origReqs 	<- get' fstts_  |> (M.lookup subTid >=> M.lookup super)
 					|> fromMaybe (error "PropagateRequirements: derp?")
-					|> fst3
+					|> reqs
 		let newReqs	= (origReqs ++ req) & merge ||>> S.unions
 		when (newReqs /= origReqs) $ do
-		modify . modFstts_ . flip M.adjust subTid . flip M.adjust super $ first3 (const newReqs)
+		modify . modFstts_ . flip M.adjust subTid . flip M.adjust super $
+			(\fsttEntry -> fsttEntry {reqs = newReqs})
 	  	-- now, what typetables should be rechecked? We have the notifyTable for that
 		toRecheck	<- get' notifyTable |> nodesFrom subTid
 		mapM (rebuildReqs subTid) (S.toList toRecheck) |> (error . show)
@@ -177,7 +178,7 @@ checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTa
 checkSuperBinds' fstts sstts (ToBnd subTid superT sub shouldBeSupers msg)
  = inside msg $ do
 	let metReqs	= findWithDefault M.empty subTid fstts
-				& M.lookup superT & fromMaybe (error $ "PropagateRequirements: No entry for "++show superT++" in the fstt of "++show subTid++"\n"++msg) & fst3
+				& M.lookup superT & fromMaybe (error $ "PropagateRequirements: No entry for "++show superT++" in the fstt of "++show subTid++"\n"++msg) & reqs
 				& M.fromList |> S.toList
 	let checkOne	= _bind sstts fstts metReqs sub
 	let showMsg super msg
