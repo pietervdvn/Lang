@@ -2,7 +2,7 @@ module Languate.MaintenanceAccess.TestRender where
 
 import StdDef
 import State
-import Languate.MarkUp.MarkUp hiding (renderMD, renderHTML)
+import Languate.MarkUp.MarkUp hiding (renderHTML)
 import Languate.MarkUp.Document
 import Data.Map
 
