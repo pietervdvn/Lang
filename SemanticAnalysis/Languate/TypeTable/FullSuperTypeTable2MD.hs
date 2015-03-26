@@ -43,7 +43,7 @@ rows (isA, entry)
 		fromMaybe (ital "Native") (viaType entry |> st True),
 		st True $ origSuper entry,
 		show $ origBinding entry,
-		fromMaybe (ital "Natve") (stepBinding entry |> show)
+		fromMaybe (ital "Native") (stepBinding entry |> show)
 		]
 
 
