@@ -2,14 +2,16 @@ module Languate.MaintenanceAccess.TestRender where
 
 import StdDef
 import State
-import Languate.MarkUp.MarkUp
+import Languate.MarkUp.MarkUp hiding (renderMD, renderHTML)
+import Languate.MarkUp.Document
+import Data.Map
 
 fp	= "test/"
 
 t = do  writeFile (fp ++ "md/file0.md") $ runstate (renderMD $ rewrite (renderLink ".md") mu) (MdContext 1 0) & fst
 	writeFile (fp ++ "md/file1.md") $ runstate (renderMD mu0) (MdContext 1 0) & fst
-	writeFile (fp ++ "html/file0.html") $ runstate (renderHTML $ rewrite (renderLink ".html") mu) 1 & fst
-	writeFile (fp ++ "html/file1.html") $ runstate (renderHTML mu0) 1 & fst
+	writeFile (fp ++ "html/file0.html") $ renderHTML doc1
+	writeFile (fp ++ "html/file1.html") $ renderHTML doc2
 
 
 mu = Seq    [ Base "Hallo"
@@ -30,6 +32,9 @@ mu = Seq    [ Base "Hallo"
 
 
 mu0	= Base "Hallo!"
+
+doc1	= Doc "Doc1" "This is the first document" empty mu
+doc2	= Doc "Doc2" "This is the second document" empty mu0
 
 
 renderLink  ::String -> MarkUp ->  Maybe MarkUp
