@@ -52,7 +52,7 @@ _bk k@(KindCurry ka rest) (a:as)
 			show ka++" and "++show prevA++" are possible."
 		return (rest, M.insert a ka binding)
 _bk Kind _
-	= halt "Overapplication detected in bk"
+	= halt "Overapplication detected while binding the kinds"
 
 
 

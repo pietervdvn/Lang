@@ -4,8 +4,6 @@
 
 [Operator Overview](OperatorOverview.md)
 
-[two todos](Todo.md)
-
 
 
 > This page was automatically generated.

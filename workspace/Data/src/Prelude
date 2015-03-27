@@ -5,6 +5,24 @@ Each program imports these by default
 -------
 
 public import Any
+
+cat Eq
+	> True
+
+cat X (a:Eq)
+	> True
+
+cat Y a is X a
+	> True
+
+cat Z a
+	> True
+
+instance Z a is Y a
+
+
+
+---
 public import Category.Eq
 
 public import Data.Bool
@@ -33,3 +51,4 @@ public import Graph.Graph
 public import Num.Nat
 
 public import Crypto.PubPrivAlgo
+---
