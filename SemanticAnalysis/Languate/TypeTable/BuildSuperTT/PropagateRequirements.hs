@@ -144,13 +144,13 @@ addRequirement subTid super req
 			(\fsttEntry -> fsttEntry {reqs = newReqs})
 	  	-- now, what typetables should be rechecked? We have the notifyTable for that
 		toRecheck	<- get' notifyTable |> nodesFrom subTid
-		mapM (rebuildReqs subTid) (S.toList toRecheck) |> (error . show)
+		mapM_ (rebuildReqs subTid) (S.toList toRecheck)
 
 {- All types that have been added via the changed type should be re-evaluated, and new requiments might be needed.
 -}
 rebuildReqs	:: TypeID -> TypeID -> StMsg ()
 rebuildReqs changedType typeToCheck
-	= return ()	-- TODO
+	= trace ("rebuild reqs for "++show typeToCheck++" as the type "++show changedType ++" changed") $ return ()	-- TODO
 
 
 ------------
