@@ -7,7 +7,7 @@ import Regex
 import Bnf.FQN
 
 fqnBnf	= FQN [] "bnf"
-bnfMod	= Module (fromList 
+bnfMod	= Module (fromList
 		[("expression", expression)
 		,("andExpr", andExpr)
 		,("sequence", sequenceRule)
@@ -25,14 +25,13 @@ This module implements the rules to parse a Bnf. These can (and will) be used to
 --}
 
 
-comment		= Choice [ Seq [rgx "--", rgx "!\n*"] 
-			, Seq [ rgx "\\{-" , Star $ Choice 
+comment		= Choice [ Seq [rgx "--", rgx "!\n*"]
+			, Seq [ rgx "\\{-" , Star $ Choice
 				[More $ rgx "!-", rgx "-+![-}]"] , rgx "-+\\}"] ]
 
 --  "/\*" ("!\*"+ | "\*+![*/]" )* "\*+/"
 
 expression	= Choice [ More $ Seq [Call "andExpr", _or, Call "expression"] , Call "andExpr" ]
-
 
 andExpr		= Choice [ Seq [
 				Call "sequence", More $ Seq [rgx "\\&", Opt $ rgx "\\!", Call "sequence"]
@@ -49,7 +48,7 @@ factor' str1 str2
 term		= Choice [ Call "localIdent"
 			 , DeepNWs $ Seq [_dquote, Call "regex", _dquote]
 			 , Seq [rgx "\\(", Call "expression", rgx "\\)"]
-			 , Seq [ rgx "\\{", Call "sequence", More $ Seq [_or, Call "sequence"], rgx "\\}"] ] 
+			 , Seq [ rgx "\\{", Call "sequence", More $ Seq [_or, Call "sequence"], rgx "\\}"] ]
 
 localIdent	= rgx "[a..z][a..zA..Z0..9]*'?"
 
@@ -58,17 +57,17 @@ bar		= Seq [Opt $ Call "comment", rgx "(\n\t)?", rgx "\\|"]
 dquote		= rgx "\""
 _dquote		= Call "dquote"
 rgx 		= Rgx . regex
-wsrgx		= NWs . rgx	
+wsrgx		= NWs . rgx
 
 
 
 {--
 
-term	::= localIdent | regex | (expr) 
+term	::= localIdent | regex | (expr)
 factor	::= "%"? "$"? term | "$"? "%"? term
 
 seq	::= factor +
-andExpr	::= (seq ("&" "!"? seqre)+) | seq 
+andExpr	::= (seq ("&" "!"? seqre)+) | seq
 expr	::= (andExpr "|" expr) | andExpr
 
 

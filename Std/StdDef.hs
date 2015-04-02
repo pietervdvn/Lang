@@ -190,3 +190,14 @@ isRight		= not . isLeft
 
 sortOn		:: Ord b => (a -> b) -> [a] -> [a]
 sortOn f	=  sortBy (compare `on` f)
+
+
+splitOn		:: (Eq a) => a -> [a] -> [[a]]
+splitOn a as	= splitOn' a [] as
+
+splitOn'	:: (Eq a) => a -> [a] -> [a] -> [[a]]
+splitOn' _ acc []
+		= [reverse acc]
+splitOn' a' acc (a:as)
+ | a == a'	= reverse acc : splitOn' a' [] as
+ | otherwise	= splitOn' a' (a:acc) as
