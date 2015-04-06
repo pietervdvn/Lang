@@ -55,7 +55,9 @@ propagateRequirements sstts notifyTable toBinds fstts
 		fstts'	= runstate (propagateReqs toBinds') ctx & snd & fstts_ in do
 		-- check if we really met all requirements
 		checkSuperBinds fstts' sstts toBinds
-		return fstts'
+		let ctx'	= Context fstts' sstts notifyTable []
+		let fstts''	= runstate rebuildEntries ctx' & snd & fstts_
+		return fstts''
 
 data SingleToBind
 		= STB {	subTid	:: TypeID,
@@ -142,18 +144,63 @@ addRequirement subTid super req
 		when (newReqs /= origReqs) $ do
 		modify . modFstts_ . flip M.adjust subTid . flip M.adjust super $
 			(\fsttEntry -> fsttEntry {reqs = newReqs})
-	  	-- now, what typetables should be rechecked? We have the notifyTable for that
-		toRecheck	<- get' notifyTable |> nodesFrom subTid
-		mapM_ (rebuildReqs subTid) (S.toList toRecheck)
-
-{- All types that have been added via the changed type should be re-evaluated, and new requiments might be needed.
--}
-rebuildReqs	:: TypeID -> TypeID -> StMsg ()
-rebuildReqs changedType typeToCheck
-	= trace ("rebuild reqs for "++show typeToCheck++" as the type "++show changedType ++" changed") $ return ()	-- TODO
+	  	-- now, some typetables should be rebuild. This actually happens in rebuildTable
 
 
-------------
+-- Rebuild table --
+-------------------
+
+
+rebuildEntries	:: StMsg ()
+rebuildEntries	=  do	tps	<- get' fstts_ |> M.keys
+			changed	<- mapM rebuildEntry tps |> or
+			when changed rebuildEntries
+
+rebuildEntry	:: TypeID -> StMsg Bool
+rebuildEntry tid
+	= do	supers	<- get' fstts_ |> findWithDefault (error $ "DAFUQ? No entry for "++show tid++" in rebuilding") tid |> M.keys
+		mapM (fixEntry tid) supers |> or
+
+
+fixEntry	:: TypeID -> RType -> StMsg Bool
+fixEntry tid rt
+ | not $ isNormal rt	= return False	-- no strange cases here please!
+ | rt == anyType	= return False -- TODO
+ | otherwise	= do
+	entry	<- get' $ getFsttEntry (tid,rt)
+	let origReqs 	= reqs entry
+	-- when the viatype is nothing, we take the any type of the foreign type, as it will contain all reqs
+	foreignReqs	<- if isNothing $ viaType entry then do
+		-- the viatype is empty. This means that the supertype has been added natively
+		-- we rebuild the requirements against the orig super (it's Any super) type and the current super type
+		foreignEntry	<- get |> getFsttEntry (fromJust $ getBaseTID rt, anyType)
+		()	<- when (snd tid `elem` ["Z"]) $ trace (">>>>>"++show tid++": "++show rt++" IS A "++ show entry++"\n<<<<<<<"++show foreignEntry) $ return ()
+		return $ reqs foreignEntry
+		else
+		return []
+	return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- CHECKS --
 ------------
 
@@ -192,6 +239,14 @@ modFstts_	:: (FullSuperTypeTables -> FullSuperTypeTables) -> Context -> Context
 modFstts_ f ctx	= ctx {fstts_ = f $ fstts_ ctx}
 setFstts fstts	= modFstts_ (const fstts)
 
+
+modFsttEntry	:: (TypeID, RType) -> (FSTTEntry -> FSTTEntry) -> Context -> Context
+modFsttEntry (tid, rt) f
+		= modFstts_ (M.adjust (M.adjust f rt) tid)
+setFsttEntry tidrt entry
+		= modFsttEntry tidrt (const entry)
+getFsttEntry (tid, rt) ctx
+		= ctx & fstts_ & findWithDefault (error $ "No fstt found for tid "++show tid) tid & findWithDefault (error $ "No entry found for "++show rt++"; super "++show rt) rt
 
 modSstts_	:: (SpareSuperTypeTables -> SpareSuperTypeTables) -> Context -> Context
 modSstts_ f ctx	= ctx {sstts_ = f $ sstts_ ctx}

@@ -6,23 +6,14 @@ Each program imports these by default
 
 public import Any
 
-cat Eq
-	> True
+public import Collection.List
+import Collection.Tuple
 
-cat X (a:Eq)
-	> True
-
-cat Y a is X a
-	> True
-
-cat Z a
-	> True
-
-instance Z a is Y a
 
 
 
 ---
+
 public import Category.Eq
 
 public import Data.Bool
@@ -42,7 +33,6 @@ public import Collection.Tuple
 public import Collection.Collection
 public import Collection.More
 public import Collection.Maybe
-public import Collection.List
 public import Collection.Dict
 public import Collection.Set
 
@@ -52,3 +42,20 @@ public import Num.Nat
 
 public import Crypto.PubPrivAlgo
 ---
+
+cat Dummy
+	> True
+
+cat Eq
+	> True
+
+cat X (a:Eq)
+	> True
+
+cat Y b a is X a
+	> True
+
+cat Z a
+	> True
+
+instance Z is Y Dummy

@@ -57,7 +57,7 @@ expand (fstt, toCheck')
 		toBind	= toCheck ctx'
 		fstts	= fstt_ ctx'
 		sstts	= sstt_ ctx' in do
-		fstts'	<-propagateRequirements sstts (notifyTable ctx') toBind fstts
+		fstts'	<- propagateRequirements sstts (notifyTable ctx') toBind fstts
 		return (fstts', sstts)
 
 
