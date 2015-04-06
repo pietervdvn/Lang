@@ -6,11 +6,11 @@ Type | Declared in | Kind | Docstring
 ---- | ----------- | ---- | ---------
 **Any**  | Any | ````*````  | The supertype of every single type. Each type has ````Any```` implicitly as supertype.![Supertype.jpg](../doc/res/Supertype.jpg)
 **BIInt**  | Builtins | ````*````  | A int! This is a temporary representation, which will be replaced by a truly builtin one
-**Dummy**  | Prelude | ````*````  | public import Category.Eq
-**Eq**  | Prelude | ````*````  | public import Category.Eq
-**X** (````a0```` :````Eq```` ) | Prelude | ````(* ~> *)````  | public import Category.Eq
-**Y** ````a0````  ````a1````  | Prelude | ````(* ~> (* ~> *))````  | public import Category.Eq
-**Z** ````a0````  | Prelude | ````(* ~> *)````  | public import Category.Eq
+**Dummy**  | Prelude | ````*````  | 
+**Eq0**  | Prelude | ````*````  | 
+**X** (````a0```` :````Eq0```` ) | Prelude | ````(* ~> *)````  | 
+**Y** ````a0````  ````a1````  | Prelude | ````(* ~> (* ~> *))````  | 
+**Z** ````a0````  | Prelude | ````(* ~> *)````  | 
 **Eq**  | Category.Eq | ````*````  | The category which defines _equality_ ````==```` and _inequality_ ````!=````
 **Associative** ````a0````  | Category.Function | ````(* ~> *)````  | Functions for which the order of evaluation does not matter.
 **Commutative** ````a0````  ````a1````  | Category.Function | ````(* ~> (* ~> *))````  | Functions for which the arguments can be swapped.
@@ -24,9 +24,20 @@ Type | Declared in | Kind | Docstring
 **Dict** (````a0```` :````Eq```` ) ````a1````  | Collection.Dict | ````(* ~> (* ~> *))````  | A ````Collection```` which maps a key onto a value.
 **List** ````a0````  | Collection.List | ````(* ~> *)````  | A ````Collection```` which preserves order and allows duplicate elements.
 **Maybe** ````a0````  | Collection.Maybe | ````(* ~> *)````  | A collection which contains at most one value.
+**More** ````a0````  | Collection.More | ````(* ~> *)````  | A ````Collection```` which contains at least one element.
 **Set** (````a0```` :````Eq```` ) | Collection.Set | ````(* ~> *)````  | A ````Collection```` without order and duplicates.
 **Tuple** ````a0````  ````a1````  | Collection.Tuple | ````(* ~> (* ~> *))````  | The data structure representing tuples.
+**Void**  | Collection.Void | ````*````  | Type representing _no data_.
+**PrivateKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing the _private_ key of a public-key encryption scheme
+**PubPrivAlgo** (````a0```` :````PrivateKey```` ) (````a1```` :````PublicKey```` ) | Crypto.PubPrivAlgo | ````(* ~> (* ~> *))````  | The type representing a public-key encryption scheme, with fixed keys
+**PublicKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing the _public_ key of a public-key encryption scheme
+**RSA**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
+**RSAPrivKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
+**RSAPubKey**  | Crypto.PubPrivAlgo | ````*````  | The type representing a public-key encryption scheme, with fixed keys
 **Bool**  | Data.Bool | ````*````  | The ````Bool```` datatype represents truth values of logic.
+**Disjunct** (````a0```` :````Eq```` ) | Graph.Graph | ````(* ~> *)````  | Set of disjunct sets
+**Graph** (````a0```` :````Eq```` , ````Ord```` ) ````a1````  | Graph.Graph | ````(* ~> (* ~> *))````  | A generic, undirected graph (which might contain cycles).
+**Weighted** (````a0```` :````Graph```` ) (````a1```` :````Eq```` , ````Ord```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) ````a3````  | Graph.Graph | ````((* ~> (* ~> *)) ~> (* ~> (* ~> (* ~> *))))````  | A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.
 **Int**  | Num.Nat | ````*````  | An _integer_
 **Int'**  | Num.Nat | ````*````  | An _integer_ which is not zero
 **IntInf**  | Num.Nat | ````*````  | An _integer_ or positive or negative _Infinity_ (````Inf````).
@@ -35,6 +46,7 @@ Type | Declared in | Kind | Docstring
 **Nat'**  | Num.Nat | ````*````  | A natural number, which is not zero.
 **NatInf**  | Num.Nat | ````*````  | A natural number or _infinity_ (````Inf````).
 **NatInf'**  | Num.Nat | ````*````  | A natural number (which is not zero) or _infinity_ (````Inf````).
+**Flip** ````a0````  ````a1````  ````a2````  | Type.Function | ````(* ~> (* ~> (* ~> *)))````  | The 'Flip' type takes a type function (````* -> * -> *````) and flips it arguments. E.g. Flip Dict v k = Dict k v
 
 
 ## Supertypetables per type
@@ -61,26 +73,26 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 .  |  | _Native_  | .  | {} | _Native_ 
 
 
-### Supertypes of Eq 
+### Supertypes of Eq0 
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
 .  |  | _Native_  | .  | {} | _Native_ 
 
 
-### Supertypes of X (````a0```` :````Eq```` )
+### Supertypes of X (````a0```` :````Eq0```` )
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
-.  | (````a0```` :````Eq```` ) | _Native_  | .  | {} | _Native_ 
+.  | (````a0```` :````Eq0```` ) | _Native_  | .  | {} | _Native_ 
 
 
 ### Supertypes of Y ````a0````  ````a1```` 
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
-.  | (````a1```` :````Eq```` ) | (X a1) | .  | {"a0" --> a1} | {"a0" --> a1}
-(X a1) | (````a1```` :````Eq```` ) | _Native_  | (X a1) | {"a0" --> a1} | _Native_ 
+.  | (````a1```` :````Eq0```` ) | (X a1) | .  | {"a0" --> a1} | {"a0" --> a1}
+(X a1) | (````a1```` :````Eq0```` ) | _Native_  | (X a1) | {"a0" --> a1} | _Native_ 
 
 
 ### Supertypes of Z ````a0```` 
@@ -88,7 +100,7 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
 .  |  | _Native_  | .  | {} | _Native_ 
-(X a1) | (````a1```` :````Eq```` ) | ((Y Dummy) a0) | (X a1) | {"a0" --> pietervdvn:Data:Prelude.Dummy} | {"a0" --> pietervdvn:Data:Prelude.Dummy}
+(X a1) | (````a1```` :````Eq0```` ) | ((Y Dummy) a0) | (X a1) | {"a0" --> pietervdvn:Data:Prelude.Dummy} | {"a0" --> pietervdvn:Data:Prelude.Dummy}
 ((Y Dummy) a0) |  | _Native_  | ((Y Dummy) a0) | {"a0" --> pietervdvn:Data:Prelude.Dummy "a1" --> a0} | _Native_ 
 
 
@@ -199,6 +211,17 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 .  |  | _Native_  | .  | {} | _Native_ 
 
 
+### Supertypes of More ````a0```` 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | _Native_  | .  | {} | _Native_ 
+Eq | (````a0```` :````Eq```` ) | (Collection a0) | Eq | {} | {}
+Monoid |  | (Collection a0) | Monoid | {} | {}
+(Mappable a0) |  | (Collection a0) | (Mappable a0) | {} | {}
+(Collection a0) |  | _Native_  | (Collection a0) | {"a0" --> a0} | _Native_ 
+
+
 ### Supertypes of Set (````a0```` :````Eq```` )
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
@@ -219,11 +242,91 @@ Eq | (````a0```` :````Eq```` ) (````a1```` :````Eq```` ) | _Native_  | Eq | {} |
 (Mappable a1) |  | _Native_  | (Mappable a1) | {"a0" --> a1} | _Native_ 
 
 
+### Supertypes of Void 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | _Native_  | .  | {} | _Native_ 
+
+
+### Supertypes of PrivateKey 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | _Native_  | .  | {} | _Native_ 
+
+
+### Supertypes of PubPrivAlgo (````a0```` :````PrivateKey```` ) (````a1```` :````PublicKey```` )
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  | (````a0```` :````PrivateKey```` ) (````a1```` :````PublicKey```` ) | _Native_  | .  | {} | _Native_ 
+
+
+### Supertypes of PublicKey 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | _Native_  | .  | {} | _Native_ 
+
+
+### Supertypes of RSA 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | .  | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey} | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey}
+((PubPrivAlgo RSAPrivKey) RSAPubKey) |  | _Native_  | ((PubPrivAlgo RSAPrivKey) RSAPubKey) | {"a0" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPrivKey "a1" --> pietervdvn:Data:Crypto.PubPrivAlgo.RSAPubKey} | _Native_ 
+
+
+### Supertypes of RSAPrivKey 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | _Native_  | .  | {} | _Native_ 
+PrivateKey |  | _Native_  | PrivateKey | {} | _Native_ 
+
+
+### Supertypes of RSAPubKey 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | _Native_  | .  | {} | _Native_ 
+PublicKey |  | _Native_  | PublicKey | {} | _Native_ 
+
+
 ### Supertypes of Bool 
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
 .  |  | _Native_  | .  | {} | _Native_ 
+
+
+### Supertypes of Disjunct (````a0```` :````Eq```` )
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  | (````a0```` :````Eq```` ) | {Set a0} | .  | {"a0" --> {a0}} | {"a0" --> {a0}}
+Eq | (````a0```` :````Eq```` ) | {Set a0} | Eq | {"a0" --> {a0}} | {"a0" --> {a0}}
+Monoid | (````a0```` :````Eq```` ) | {Set a0} | Monoid | {"a0" --> {a0}} | {"a0" --> {a0}}
+(Mappable {a0}) | (````a0```` :````Eq```` ) | {Set a0} | (Mappable a0) | {"a0" --> {a0}} | {"a0" --> {a0}}
+(Collection {a0}) | (````a0```` :````Eq```` ) | {Set a0} | (Collection a0) | {"a0" --> {a0}} | {"a0" --> {a0}}
+{Set a0} | (````a0```` :````Eq```` ) | _Native_  | {Set a0} | {"a0" --> {a0}} | _Native_ 
+
+
+### Supertypes of Graph (````a0```` :````Eq```` , ````Ord```` ) ````a1```` 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  | (````a0```` :````Eq```` , ````Ord```` ) | _Native_  | .  | {} | _Native_ 
+
+
+### Supertypes of Weighted (````a0```` :````Graph```` ) (````a1```` :````Eq```` , ````Ord```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) ````a3```` 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  | (````a1```` :````Eq```` , ````Ord```` ) (````a0```` :````Graph```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) | ((Graph a1) a3) | .  | {"a0" --> a1 "a1" --> a3} | {"a0" --> a1 "a1" --> a3}
+((Graph a1) a3) | (````a0```` :````Graph```` ) (````a1```` :````Eq```` , ````Ord```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) ````a3````  | _Native_  | ((a0 a1) a3) | {"a0" --> a1 "a1" --> a3} | _Native_ 
+((a0 a1) a3) | (````a0```` :````Graph```` ) (````a1```` :````Eq```` , ````Ord```` ) (````a2```` :````Eq```` , ````Monoid```` , ````Ord```` ) ````a3````  | _Native_  | ((a0 a1) a3) | {"a0" --> a1 "a1" --> a3} | _Native_ 
 
 
 ### Supertypes of Int 
@@ -314,6 +417,13 @@ Eq |  | IntInf' | Eq | {} | {}
 IntInf |  | IntInf' | IntInf | {} | {}
 IntInf' |  | _Native_  | IntInf' | {} | _Native_ 
 NatInf |  | _Native_  | NatInf | {} | _Native_ 
+
+
+### Supertypes of Flip ````a0````  ````a1````  ````a2```` 
+
+Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
+------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+((a0 a2) a1) | ````a0````  ````a1````  ````a2````  | _Native_  | ((a0 a2) a1) | {"a0" --> a2 "a1" --> a1} | _Native_ 
 
 
 

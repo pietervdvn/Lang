@@ -26,7 +26,9 @@ table		:: [String] -> [[String]] -> MarkDown
 table header conts
 	= let 	header'	= bars header
 		lines	= header ||>> const '-' & bars
-		conts'	= conts & filter (not . null) |> bars in
+		actCont	= conts & filter (not . null)
+		conts'	= map bars $ if not $ null actCont then actCont else
+				[(ital "No data"):replicate (length header - 1) (ital " na ")] in
 		unlines (header':lines:conts') ++ "\n\n"
 
 parag ""	= ""
@@ -54,7 +56,7 @@ pars str	= "("++str++")"
 modif		:: String -> MarkDown -> MarkDown
 modif str md
 	| strip md == "" =	 ""
-	| otherwise	= str ++ " " ++ strip md ++" " ++str ++ " "
+	| otherwise	= str ++ strip md ++ str ++ " "
 
 enclose	:: String -> String -> MarkDown -> MarkDown
 enclose op cp md

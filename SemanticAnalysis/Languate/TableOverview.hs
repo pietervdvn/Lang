@@ -28,5 +28,5 @@ data TableOverview	= TableOverview { typeTable		:: TypeTable
 buildAllTables	:: Package -> Exc TableOverview
 buildAllTables w	= do	tt	<- buildTypeTable w
 				precT	<- buildPrecTable' w
-				let fts	= buildFunctionTables w tt
+				fts	<- buildFunctionTables w tt
 				return $ TableOverview tt fts precT

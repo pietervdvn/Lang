@@ -15,7 +15,7 @@ The function table is associated with a single module and keeps track of all kno
 
 -}
 data FunctionTable	= FunctionTable
-	{ defined	:: Map Name ([RType], [TClause])	-- Locally defined functions
+	{ defined	:: Map Name [RType]	-- signatures of locally defined functions, which might be private
 	}
 	deriving (Show)
 
@@ -24,7 +24,7 @@ type FunctionTables	= Map FQN FunctionTable
 functiontable2md	:: FunctionTable -> MarkDown
 functiontable2md ft	=
 	let contents	= defined ft & toList
-				|> (\(nm, (tps, clause)) -> [bold nm, tps |> show |> code & unwords])
+				|> (\(nm, tps) -> [bold nm, tps |> show |> code & unwords])
 	    header	= ["Name","Types"] in
 		table header contents
 

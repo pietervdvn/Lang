@@ -37,4 +37,4 @@ buildWorld manifest dict
 			aliasTables	= buildAliasTables importSet in
 			Package manifest modules importGr' aliastLookupTables aliasTables
 	where 	unp	(fqn, [imp])	= (fqn, imp)
-		unp	(fqn, imps)	= error $ "Warning: double import. "++show fqn++" is imported by two or more import statements"
+		unp	(fqn, imps)	= error $ "Warning: double import. "++show fqn++" is imported by two or more import statements"	-- TODO make a non-crashing warning from this

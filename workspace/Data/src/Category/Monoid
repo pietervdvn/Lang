@@ -4,6 +4,7 @@ Declaration and functions for ''Monoids'', ''Sum'' and ''Product''
 ------
 
 import Num.Nat
+import Category.Function
 
 ---
 A ''Monoid'' is an type which has _neutral element_ and an _addition_.

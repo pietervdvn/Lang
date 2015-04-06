@@ -7,12 +7,7 @@ Each program imports these by default
 public import Any
 
 public import Collection.List
-import Collection.Tuple
-
-
-
-
----
+-- import Collection.Tuple
 
 public import Category.Eq
 
@@ -46,10 +41,10 @@ public import Crypto.PubPrivAlgo
 cat Dummy
 	> True
 
-cat Eq
+cat Eq0
 	> True
 
-cat X (a:Eq)
+cat X (a:Eq0)
 	> True
 
 cat Y b a is X a

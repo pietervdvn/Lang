@@ -179,7 +179,15 @@ resolveTypes tlt
 		= mapM (resolveType tlt)
 
 
+resolveTypeIn	:: TypeLookupTable -> (a,Type) -> Exc (a,RType)
+resolveTypeIn tlt (a,tp)
+	= do	rtp	<- resolveType tlt tp
+		return (a,rtp)
 
+resolveTypesIn	:: TypeLookupTable -> (a,[Type]) -> Exc (a,[RType])
+resolveTypesIn tlt (a,tps)
+	= do	rtps	<- mapM (resolveType tlt) tps
+		return (a,rtps)
 
 
 

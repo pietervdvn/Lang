@@ -7,10 +7,12 @@ import Collection.Collection
 import Collection.Maybe
 import Collection.Set
 import Collection.Dict
+import Collection.Void
 
 import Category.Monoid
 import Category.Mappable
 import Category.Eq
+
 
 ---
 A ''Collection'' which preserves order and allows duplicate elements.
