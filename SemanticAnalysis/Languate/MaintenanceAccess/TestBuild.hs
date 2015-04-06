@@ -16,8 +16,12 @@ import Languate.Package
 import Languate.TableOverview
 import Languate.MD.TableOverview2MD
 
+import Languate.FunctionTable
+import Languate.FunctionTable.BuildFunctionTable
+
 import System.IO.Unsafe
 import System.Directory
+
 
 import Languate.TypeTable
 import Data.Map

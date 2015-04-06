@@ -1,52 +1,33 @@
 module Languate.FunctionTable where
 
-{--
+import StdDef
 
-This module implements a table keeping track of all the functions
-
---}
+import Languate.FQN
+import Languate.TAST
 
 import Data.Map
-import Prelude hiding (lookup)
-import StdDef
-import Languate.TAST
-import Normalizable
-import Languate.FQN
-import Data.List
 
-{- A signature is a function identifier. When looking up a function with given signature, this function should be **all** of the given types (e.g. Assoc + Commut), and can be more.
+import MarkDown
 
-Note that the different types the function carries will be orderable. The function will have a (meaningfull) upper type.
+{-
 
-Prop X A & Commut X A		is X -> X -> A
-Prop Y A & Commut Y A		is Y -> Y -> A
-
-
-Int -> Int -> Int	& (Assoc Nat : Nat -> Nat -> Nat)
-Nat -> Nat -> Nat	& (Assoc Nat : Nat -> Nat -> Nat)
-
+The function table is associated with a single module and keeps track of all known functions.
 
 -}
-data Signature	= Signature Name [RType]
-	deriving (Eq, Ord)
+data FunctionTable	= FunctionTable
+	{ defined	:: Map Name ([RType], [TClause])	-- Locally defined functions
+	}
+	deriving (Show)
 
-instance Show Signature where
-	show (Signature n t)
-	 	= tabs 2 n ++ ": "++ show t
+type FunctionTables	= Map FQN FunctionTable
 
-instance Normalizable Signature where
-	normalize (Signature n t)
-		= Signature n $ nub $ Prelude.map normalize t
+functiontable2md	:: FunctionTable -> MarkDown
+functiontable2md ft	=
+	let contents	= defined ft & toList
+				|> (\(nm, (tps, clause)) -> [bold nm, tps |> show |> code & unwords])
+	    header	= ["Name","Types"] in
+		table header contents
 
-
-
-
--- The (unique) identifier of a function. One identifier == one clause
-type FunctionID	= (FQN, Int)
-
-type FunctionBody	= [TClause]
-data FunctionInfo	= FunctionInfo {declaredIn :: FQN, body :: FunctionBody}
-
-{-The function table is a local function table, thus local for a single module-}
-data FunctionTable
-	= FunctionTable { locallyDeclared	:: Map Name Signature }
+functiontables2md	:: FunctionTables -> MarkDown
+functiontables2md fts	=  fts & toList ||>> functiontable2md
+				|> (\(fqn, md) -> title 1 (show fqn) ++ md) & unlines
