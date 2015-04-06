@@ -12,6 +12,7 @@ It is this data-structure that all semantic analysis things use or build.
 --}
 
 import StdDef
+import qualified MarkDown as MD
 import Languate.AST
 import Data.List
 import Normalizable
@@ -142,6 +143,12 @@ showRTypeReq (name, rtype)
 showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
 		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
+
+rTypeReqs2md	:: [RTypeReq] -> MD.MarkDown
+rTypeReqs2md rqs
+		= rqs	& merge
+			|> (\(nm, subs) -> curry showRTypeReq' nm subs)
+			|> MD.code & unwords
 
 instance Normalizable ResolvedType where
 	normalize	= nt
