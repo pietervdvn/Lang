@@ -5,6 +5,8 @@ This module provides the ''context''-datatype, which contains all commonly neede
 --}
 
 import StdDef
+import Exceptions
+
 import Data.Map
 import Languate.AST
 import Languate.FQN
