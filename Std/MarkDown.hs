@@ -54,7 +54,7 @@ pars str	= "("++str++")"
 modif		:: String -> MarkDown -> MarkDown
 modif str md
 	| strip md == "" =	 ""
-	| otherwise	= str ++ strip md ++ str ++ " "
+	| otherwise	= str ++ " " ++ strip md ++" " ++str ++ " "
 
 enclose	:: String -> String -> MarkDown -> MarkDown
 enclose op cp md
