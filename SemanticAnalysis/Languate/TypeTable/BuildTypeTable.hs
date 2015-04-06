@@ -70,4 +70,4 @@ buildTypeTable w
 	(allSupers, spareSupers)
 			<- expand fstts
 	inside "While checking the requirements table" $ validateReqTable klt typeReqs
-	return $ TypeTable knownTypes tlts klt typeReqs supers (fst fstts) {- TODO << allSupers-} spareSupers docstrings freeNames
+	return $ TypeTable knownTypes tlts klt typeReqs supers allSupers spareSupers docstrings freeNames
