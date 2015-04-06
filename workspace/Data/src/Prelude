@@ -7,7 +7,7 @@ Each program imports these by default
 public import Any
 
 public import Collection.List
--- import Collection.Tuple
+import Collection.Tuple
 
 public import Category.Eq
 

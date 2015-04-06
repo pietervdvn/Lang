@@ -6,6 +6,7 @@ This module loads a module, looks at it's imports and loads unloaded stuff
 
 --}
 import StdDef
+import Exceptions
 import qualified Bnf
 import Languate.FQN
 import Languate.AST
@@ -29,7 +30,7 @@ loadPackage' world fqn fp
 		= do	manifest		<- parseManifest world $ fp ++ "/Manifest"
 			(package, notFound)	<- loadPackage world fqn $ fp ++ "/src/"
 			unless (null notFound) $ printErr notFound
-			return $ buildWorld manifest package
+			runExceptionsIO' $ buildWorld manifest package
 
 printErr	:: [(FQN,FQN)] -> IO ()
 printErr notFound
