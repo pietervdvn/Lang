@@ -311,6 +311,14 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left">(<code>a1</code> :<code>Eq</code> )</td>
+<td align="left">(X a1)</td>
+<td align="left">.</td>
+<td align="left">{&quot;a0&quot; --&gt; a1}</td>
+<td align="left">{&quot;a0&quot; --&gt; a1}</td>
+</tr>
+<tr class="even">
 <td align="left">(X a1)</td>
 <td align="left">(<code>a1</code> :<code>Eq</code> )</td>
 <td align="left"><em>Native</em></td>
@@ -342,6 +350,14 @@
 <td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
+<td align="left">(X a1)</td>
+<td align="left">(<code>a1</code> :<code>Eq</code> )</td>
+<td align="left">((Y Dummy) a0)</td>
+<td align="left">(X a1)</td>
+<td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Prelude.Dummy" class="uri">Data:Prelude.Dummy</a>}</td>
+<td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Prelude.Dummy" class="uri">Data:Prelude.Dummy</a>}</td>
+</tr>
+<tr class="odd">
 <td align="left">((Y Dummy) a0)</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -635,6 +651,22 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">Monoid</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">Eq</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> ) (<code>a1</code> :<code>Eq</code> )</td>
+<td align="left">(Collection (a0, a1))</td>
+<td align="left">Eq</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
+</tr>
+<tr class="odd">
 <td align="left">Monoid</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -651,6 +683,14 @@
 <td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
+<td align="left">(Mappable (a0, a1))</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
+<td align="left">(Collection (a0, a1))</td>
+<td align="left">(Mappable a0)</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
+</tr>
+<tr class="even">
 <td align="left">(Collection (a0, a1))</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left"><em>Native</em></td>
@@ -682,6 +722,46 @@
 <td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
+<td align="left">Eq</td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">Eq</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+</tr>
+<tr class="odd">
+<td align="left">Monoid</td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">Monoid</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+</tr>
+<tr class="even">
+<td align="left">(Mappable v1)</td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">(Mappable a1)</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+</tr>
+<tr class="odd">
+<td align="left">(Mappable (k1, v1))</td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">(Mappable (a0, a1))</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+</tr>
+<tr class="even">
+<td align="left">(Collection (k1, v1))</td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
+<td align="left">(Collection (a0, a1))</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+</tr>
+<tr class="odd">
 <td align="left">((Dict k1) v1)</td>
 <td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
 <td align="left"><em>Native</em></td>
@@ -727,6 +807,38 @@
 </tr>
 </thead>
 <tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
+<td align="left">(Collection a0)</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">Eq</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
+<td align="left">(Collection a0)</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Monoid</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
+<td align="left">(Collection a0)</td>
+<td align="left">Monoid</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">(Mappable a0)</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
+<td align="left">(Collection a0)</td>
+<td align="left">(Mappable a0)</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
 <tr class="odd">
 <td align="left">(Collection a0)</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
@@ -813,6 +925,30 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">IntInf</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -836,12 +972,44 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">Int</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
 <td align="left">Int</td>
 <td align="left">{}</td>
 <td align="left"><em>Native</em></td>
+</tr>
+<tr class="odd">
+<td align="left">IntInf</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">IntInf</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">IntInf'</td>
@@ -867,6 +1035,14 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">BIInt</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -874,7 +1050,7 @@
 <td align="left">{}</td>
 <td align="left"><em>Native</em></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Eq</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -898,6 +1074,30 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">IntInf</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -921,12 +1121,44 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">Int</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
 <td align="left">Int</td>
 <td align="left">{}</td>
 <td align="left"><em>Native</em></td>
+</tr>
+<tr class="odd">
+<td align="left">IntInf</td>
+<td align="left"></td>
+<td align="left">Int</td>
+<td align="left">IntInf</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">NatInf</td>
@@ -952,6 +1184,38 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">Int'</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">Int'</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">Int'</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">Int</td>
+<td align="left"></td>
+<td align="left">Int'</td>
+<td align="left">Int</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
 <td align="left">Int'</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -960,12 +1224,36 @@
 <td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
+<td align="left">IntInf</td>
+<td align="left"></td>
+<td align="left">Int'</td>
+<td align="left">IntInf</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">IntInf'</td>
+<td align="left"></td>
+<td align="left">Int'</td>
+<td align="left">IntInf'</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">Nat</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
 <td align="left">Nat</td>
 <td align="left">{}</td>
 <td align="left"><em>Native</em></td>
+</tr>
+<tr class="odd">
+<td align="left">NatInf</td>
+<td align="left"></td>
+<td align="left">Nat</td>
+<td align="left">NatInf</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 </tbody>
 </table>
@@ -983,6 +1271,30 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">IntInf</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
 <td align="left">IntInf</td>
 <td align="left"></td>
 <td align="left"><em>Native</em></td>
@@ -1005,6 +1317,38 @@
 </tr>
 </thead>
 <tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left">IntInf'</td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">BIInt</td>
+<td align="left"></td>
+<td align="left">IntInf'</td>
+<td align="left">BIInt</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="odd">
+<td align="left">Eq</td>
+<td align="left"></td>
+<td align="left">IntInf'</td>
+<td align="left">Eq</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
+<tr class="even">
+<td align="left">IntInf</td>
+<td align="left"></td>
+<td align="left">IntInf'</td>
+<td align="left">IntInf</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
+</tr>
 <tr class="odd">
 <td align="left">IntInf'</td>
 <td align="left"></td>

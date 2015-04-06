@@ -79,6 +79,7 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  | (````a1```` :````Eq```` ) | (X a1) | .  | {"a0" --> a1} | {"a0" --> a1}
 (X a1) | (````a1```` :````Eq```` ) | _Native_  | (X a1) | {"a0" --> a1} | _Native_ 
 
 
@@ -87,6 +88,7 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
 .  |  | _Native_  | .  | {} | _Native_ 
+(X a1) | (````a1```` :````Eq```` ) | ((Y Dummy) a0) | (X a1) | {"a0" --> pietervdvn:Data:Prelude.Dummy} | {"a0" --> pietervdvn:Data:Prelude.Dummy}
 ((Y Dummy) a0) |  | _Native_  | ((Y Dummy) a0) | {"a0" --> pietervdvn:Data:Prelude.Dummy "a1" --> a0} | _Native_ 
 
 
@@ -169,8 +171,11 @@ Monoid |  | _Native_  | Monoid | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | Monoid | .  | {} | {}
+Eq | (````a0```` :````Eq```` ) (````a1```` :````Eq```` ) | (Collection (a0, a1)) | Eq | {"a0" --> (a0, a1)} | {"a0" --> (a0, a1)}
 Monoid |  | _Native_  | Monoid | {} | _Native_ 
 (Mappable a1) |  | _Native_  | (Mappable a1) | {"a0" --> a1} | _Native_ 
+(Mappable (a0, a1)) | (````a0```` :````Eq```` ) | (Collection (a0, a1)) | (Mappable a0) | {"a0" --> (a0, a1)} | {"a0" --> (a0, a1)}
 (Collection (a0, a1)) | (````a0```` :````Eq```` ) | _Native_  | (Collection (a0, a1)) | {"a0" --> (a0, a1)} | _Native_ 
 
 
@@ -179,6 +184,11 @@ Monoid |  | _Native_  | Monoid | {} | _Native_
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
 .  |  | _Native_  | .  | {} | _Native_ 
+Eq | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | Eq | {"a0" --> k1 "a1" --> v1} | {"a0" --> k1 "a1" --> v1}
+Monoid | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | Monoid | {"a0" --> k1 "a1" --> v1} | {"a0" --> k1 "a1" --> v1}
+(Mappable v1) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | (Mappable a1) | {"a0" --> k1 "a1" --> v1} | {"a0" --> k1 "a1" --> v1}
+(Mappable (k1, v1)) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | (Mappable (a0, a1)) | {"a0" --> k1 "a1" --> v1} | {"a0" --> k1 "a1" --> v1}
+(Collection (k1, v1)) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | ((Dict k1) v1) | (Collection (a0, a1)) | {"a0" --> k1 "a1" --> v1} | {"a0" --> k1 "a1" --> v1}
 ((Dict k1) v1) | (````k1```` :````Eq```` ) (````a0```` :````(k1, v1)```` ) | _Native_  | ((Dict k1) v1) | {"a0" --> k1 "a1" --> v1} | _Native_ 
 
 
@@ -193,6 +203,10 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  | (````a0```` :````Eq```` ) | (Collection a0) | .  | {} | {}
+Eq | (````a0```` :````Eq```` ) | (Collection a0) | Eq | {} | {}
+Monoid | (````a0```` :````Eq```` ) | (Collection a0) | Monoid | {} | {}
+(Mappable a0) | (````a0```` :````Eq```` ) | (Collection a0) | (Mappable a0) | {} | {}
 (Collection a0) | (````a0```` :````Eq```` ) | _Native_  | (Collection a0) | {"a0" --> a0} | _Native_ 
 
 
@@ -216,6 +230,9 @@ Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Vi
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | IntInf | .  | {} | {}
+BIInt |  | IntInf | BIInt | {} | {}
+Eq |  | IntInf | Eq | {} | {}
 IntInf |  | _Native_  | IntInf | {} | _Native_ 
 
 
@@ -223,7 +240,11 @@ IntInf |  | _Native_  | IntInf | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | Int | .  | {} | {}
+BIInt |  | Int | BIInt | {} | {}
+Eq |  | Int | Eq | {} | {}
 Int |  | _Native_  | Int | {} | _Native_ 
+IntInf |  | Int | IntInf | {} | {}
 IntInf' |  | _Native_  | IntInf' | {} | _Native_ 
 
 
@@ -231,6 +252,7 @@ IntInf' |  | _Native_  | IntInf' | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | BIInt | .  | {} | {}
 BIInt |  | _Native_  | BIInt | {} | _Native_ 
 Eq |  | _Native_  | Eq | {} | _Native_ 
 
@@ -239,6 +261,9 @@ Eq |  | _Native_  | Eq | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | IntInf | .  | {} | {}
+BIInt |  | IntInf | BIInt | {} | {}
+Eq |  | IntInf | Eq | {} | {}
 IntInf |  | _Native_  | IntInf | {} | _Native_ 
 
 
@@ -246,7 +271,11 @@ IntInf |  | _Native_  | IntInf | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | Int | .  | {} | {}
+BIInt |  | Int | BIInt | {} | {}
+Eq |  | Int | Eq | {} | {}
 Int |  | _Native_  | Int | {} | _Native_ 
+IntInf |  | Int | IntInf | {} | {}
 NatInf |  | _Native_  | NatInf | {} | _Native_ 
 
 
@@ -254,14 +283,24 @@ NatInf |  | _Native_  | NatInf | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | Int' | .  | {} | {}
+BIInt |  | Int' | BIInt | {} | {}
+Eq |  | Int' | Eq | {} | {}
+Int |  | Int' | Int | {} | {}
 Int' |  | _Native_  | Int' | {} | _Native_ 
+IntInf |  | Int' | IntInf | {} | {}
+IntInf' |  | Int' | IntInf' | {} | {}
 Nat |  | _Native_  | Nat | {} | _Native_ 
+NatInf |  | Nat | NatInf | {} | {}
 
 
 ### Supertypes of NatInf 
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | IntInf | .  | {} | {}
+BIInt |  | IntInf | BIInt | {} | {}
+Eq |  | IntInf | Eq | {} | {}
 IntInf |  | _Native_  | IntInf | {} | _Native_ 
 
 
@@ -269,6 +308,10 @@ IntInf |  | _Native_  | IntInf | {} | _Native_
 
 Is type | Requirements | Via | Orig type | Origsuper -> actualsuper binding | Via -> Current binding
 ------- | ------------ | --- | --------- | -------------------------------- | ----------------------
+.  |  | IntInf' | .  | {} | {}
+BIInt |  | IntInf' | BIInt | {} | {}
+Eq |  | IntInf' | Eq | {} | {}
+IntInf |  | IntInf' | IntInf | {} | {}
 IntInf' |  | _Native_  | IntInf' | {} | _Native_ 
 NatInf |  | _Native_  | NatInf | {} | _Native_ 
 
