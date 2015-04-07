@@ -20,7 +20,7 @@ Hi
 
 ##SubItem 2
 
-Hi again [Some _link_](file1.md) 
+Hi again [Some _link_](file1) 
 
 **Head 1** | **Head 2**
 ---------- | ----------

@@ -6,15 +6,22 @@ import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
 import Languate.MarkUp.HTML
 import Languate.MarkUp.MD
+import Languate.MarkUp.Cluster
+import Data.Map (fromList)
+
 import Data.Map
 
 fp	= "test/"
 
-t = do  writeFile (fp ++ "md/file0.md") $ runstate (renderMD $ rewrite (renderLink ".md") mu) (MdContext 1 0) & fst
+t = do	renderClusterTo html (fp ++ "/html") cluster
+	renderClusterTo md (fp ++ "/md") cluster
+{-
+do  writeFile (fp ++ "md/file0.md") $ runstate (renderMD $ rewrite (renderLink ".md") mu) (MdContext 1 0) & fst
 	writeFile (fp ++ "md/file1.md") $ runstate (renderMD mu0) (MdContext 1 0) & fst
 	writeFile (fp ++ "html/file0.html") $ renderDoc2HTML doc1
 	writeFile (fp ++ "html/file1.html") $ renderDoc2HTML doc2
-
+-}
+cluster	= buildCluster [doc1,doc2]
 
 mu = Seq    [ Base "Hallo"
             , OrderedList [Base "Item", OrderedList [Base "More", Base "Nested", Base "Lists"], Base "Item"]

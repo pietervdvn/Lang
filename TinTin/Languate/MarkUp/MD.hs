@@ -66,7 +66,8 @@ renderMD (OrderedList mus)
                 setListDepth i
                 return list
 
-
+renderDoc2MD	:: Doc -> MarkDown
+renderDoc2MD dc	= runstate (renderMD $ contents dc) (MdContext 1 0) & fst
 --------------- TOOLS ---------------
 
 between	:: String -> MarkDown -> MarkDown
