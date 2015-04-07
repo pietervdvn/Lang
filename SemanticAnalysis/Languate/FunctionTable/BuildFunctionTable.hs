@@ -19,6 +19,7 @@ import Graphs.ExportCalculator hiding (importGraph)
 
 import Data.Map hiding (filter)
 import qualified Data.Map as M
+import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Maybe (fromMaybe)
 
@@ -32,16 +33,25 @@ buildFunctionTables p tt
 		let impGr	= importGraph p
 		let getPubl fqn	= fromMaybe S.empty $ (M.lookup fqn functiontables
 					|> public)
-		let restrictions n (impFrom, funcSign)
-				= todo
+		let restrictions fqn (impFrom, funcSign)
+				= isRestricted p fqn impFrom funcSign
 		let exported	= calculateExports impGr (invert impGr) getPubl restrictions
+		return $ mergeTables exported functiontables
 
-		return functiontables
+
+isRestricted	:: Package -> FQN -> FQN -> Signature -> Bool
+isRestricted pack currentModule importedFrom sign
+	= let 	mod	= findWithDefault (error $ "Where is module "++show currentModule++"?") currentModule $ modules pack
+		restr	= exports mod in
+		isAllowed restr (signName sign)
 
 
-isRestricted	:: (Name, [RType], [RTypeReq]) -> Bool
-isRestricted 	= todo
-
+mergeTables	:: Map FQN (Set (Signature, FQN)) -> FunctionTables -> FunctionTables
+mergeTables exported fts
+	= mapWithKey (\fqn ft ->
+		let	exp	= findWithDefault S.empty fqn exported & S.toList |> fst & S.fromList in
+			ft {public = S.union exp $ public ft}
+		) fts
 
 buildFunctionTable		:: Package -> TypeTable -> FQN -> Module -> Exc FunctionTable
 buildFunctionTable p tt fqn m = inFile fqn $

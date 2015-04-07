@@ -11,11 +11,11 @@ import Collection.Tuple
 
 public import Category.Eq
 
-public import Data.Bool
+public import Data.Bool showing {(&&)}
 
 public import ControlFlow
 
-public import Category.Eq
+public import Category.Eq hiding {(!=)}
 public import Category.Monoid
 public import Category.Mappable
 public import Category.Function

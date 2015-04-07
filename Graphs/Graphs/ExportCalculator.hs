@@ -26,7 +26,7 @@ Params:
 - filter: for a given property, does this node re-export this property?
 	current node -> (property, imported out of node) -> current node -> current node re-exports?
 Returns:
-- What properties each node exports.
+- What properties each node exports + via which node it got imported (this is **not** ~~the home node~~ where prop originally came from).
 -}
 calculateExports	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> Map n (Set n) -> (n -> Set prop) -> (n -> (n,prop) -> Bool) -> Map n (Set (prop,n))
 calculateExports importGraph exportGraph exps impFilt
