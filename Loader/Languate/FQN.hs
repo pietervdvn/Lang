@@ -105,11 +105,6 @@ constrIfValid extra constr name
 		= if valid extra name then Just $ constr name else Nothing
 
 
-splitOn		:: (a -> Bool) -> [a] -> [[a]]
-splitOn f []	=  []
-splitOn f ls	=  let (h,t)	= break f ls in
-			h:splitOn f (drop 1 t)
-
 modulePath	:: FQN -> [Name]
 modulePath (FQN _ modNames modName)
 		= fmap deModName (modNames++[modName])

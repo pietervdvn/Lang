@@ -43,9 +43,8 @@ toHTML		:: MarkDown -> String
 toHTML md	=  let  html	= renderHtml . writeHtml def $ readMarkdown (def {readerExtensions = githubMarkdownExtensions}) md in
 			htmlHead ++ html ++ htmlFoot
 
-
-htmlHead	= "<meta http-equiv=\"refresh\" content=\"3\" ><link rel=\"stylesheet\" href=\"github-markdown.css\"><style> .markdown-body {   min-width: 200px;    max-width: 1080;     margin: 0 auto;   padding: 60px;  }</style> <article class=\"markdown-body\">"
-htmlFoot	= "</article>"
+htmlHead	= "<html><head><script type=\"text/javascript\" src=\"reloader.js\"></script><link rel=\"stylesheet\" href=\"github-markdown.css\"><style> .markdown-body {   min-width: 200px;    max-width: 1080;     margin: 0 auto;   padding: 60px;  }</style> <article class=\"markdown-body\"></head>"
+htmlFoot	= "</article></html>"
 
 -- is placed just under the title
 header	:: (String -> String -> String) -> IO MarkDown
@@ -62,5 +61,6 @@ footer link
 		let p =  [parag "This page was automatically generated." -- " on "++date++" UTC ("++dateLocal++" "++show zone++")"
 			, parag "Do not edit it, as regeneration will overwrite your changes."
 			, "Back to "++link "index" "Index"
+			, "<div id=\"clicker\">click</div>"
 			]
 		return $ qoute $ unlines p

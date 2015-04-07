@@ -38,11 +38,15 @@ buildRequirementTable package tlts knownTypes
 		|> (\((tid, freeIndex), req) -> (tid,('a':show freeIndex, req)))
 		& merge & M.fromList & makeComplete knownTypes & return
 
+-- Adds types to the trt with no supertypes, so that missing types in trt don't happen
 makeComplete	:: Set TypeID -> TypeReqTable -> TypeReqTable
 makeComplete known trt
 	= let	missing	= S.filter (not . flip M.member trt) known & S.toList
 		extras	= zip missing (repeat []) & M.fromList in
 		M.union trt extras
+
+
+
 
 buildRequirementTableFor	:: Map FQN TypeLookupTable -> FQN -> Module ->
 					Exc [((TypeID, Int), Set RType)]

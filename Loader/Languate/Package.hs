@@ -5,6 +5,9 @@ This module provides the ''context''-datatype, which contains all commonly neede
 --}
 
 import StdDef
+import Exceptions
+import Languate.CheckUtils
+
 import Data.Map
 import Languate.AST
 import Languate.FQN
@@ -27,14 +30,20 @@ importGraph	:: Package -> Map FQN (Set FQN)
 importGraph	=  M.map (S.fromList . keys) . importGraph'
 
 
-buildWorld	:: Manifest -> Map FQN (Module, Set (FQN, Import)) -> Package
-buildWorld manifest dict
-		= let 	modules		= fmap fst dict
-			importGr	= fmap (merge . S.toList . snd) dict	:: Map FQN [(FQN, [Import])]
-			importGr'	= fmap (M.fromList . fmap unp) importGr	:: Map FQN (Map FQN Import)
-			importSet	= fmap (S.fromList . M.toList) importGr'
-			aliastLookupTables	= buildAliasLookupTables importSet
-			aliasTables	= buildAliasTables importSet in
-			Package manifest modules importGr' aliastLookupTables aliasTables
-	where 	unp	(fqn, [imp])	= (fqn, imp)
-		unp	(fqn, imps)	= error $ "Warning: double import. "++show fqn++" is imported by two or more import statements"
+buildWorld	:: Manifest -> Map FQN (Module, Set (FQN, Import)) -> Exc Package
+buildWorld manifest dict = do
+	let modules		= fmap fst dict
+	let importGr	= fmap (merge . S.toList . snd) dict & M.toList
+				:: [(FQN, [(FQN, [Import] )])]
+	cleanImportGr	<- mapM (\(fqn, imps) -> inFile fqn $ do
+							imps'	<- mapM unp imps
+							return (fqn, imps')) importGr
+	let importGr'	= M.fromList cleanImportGr |> M.fromList
+	let importSet	= fmap (S.fromList . M.toList) importGr'
+	let aliastLookupTables	= buildAliasLookupTables importSet
+	let aliasTables	= buildAliasTables importSet
+	return $ Package manifest modules importGr' aliastLookupTables aliasTables
+	where 	unp	(fqn, [imp])	= return (fqn, imp)
+		unp	(fqn, imps)	= do	warn $ "Error: double import. "++show fqn++" is imported by two or more import statements"
+						return (fqn, head imps)
+			-- TODO make a non-crashing warning from this

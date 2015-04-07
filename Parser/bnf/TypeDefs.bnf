@@ -5,9 +5,9 @@ date		[2013, 12, 23, 01, 18, 42]
 desc		"The syntaxis of all kind of TypeDefinitions."
 
 import Prelude
-import Types
 import Comments
 import Functions
+import Types
 
 
  -------------

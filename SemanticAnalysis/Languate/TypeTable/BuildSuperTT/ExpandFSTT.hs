@@ -11,10 +11,9 @@ import Languate.CheckUtils
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Extended
 import Languate.TypeTable.BuildSuperTT.FixImplicitRequirements
+import Languate.TypeTable.BuildSuperTT.PropagateRequirements
 import Languate.TypeTable.Bind.Substitute
-import Languate.TypeTable.Bind.Bind
 
 import Prelude hiding (null)
 import Data.Set hiding (null, filter)
@@ -55,34 +54,13 @@ expand (fstt, toCheck')
 		ctx	= Ctx fstt initNotifTable initSstt initTodo toCheck'
 		ctx'	= runstate _expandAll ctx & snd
 		-- stuff that has to be checked, as bind aways might have happened
-		toBind	= toCheck ctx' in do
-		checkSuperBinds (fstt_ ctx') (sstt_ ctx') toBind
-		return $ ctx'  & (fstt_ &&& sstt_)
+		toBind	= toCheck ctx'
+		fstts	= fstt_ ctx'
+		sstts	= sstt_ ctx' in do
+		fstts'	<- propagateRequirements sstts (notifyTable ctx') toBind fstts
+		return (fstts', sstts)
 
-{-
-During the calculation of the FSTT, values might have been bound where typer reqs are present.
 
-e.g.
-RSA is PubPrivAlgo RSAPrivKey RSAPubKey
-
-This means that RSAPrivKey should be a PrivKey. This requirements are checked here
--}
-
-checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBinds -> Check
-checkSuperBinds fstts sstts toCheck
-	= inside "While checking that implicit type requirements are met" $ do
-		let toCheck'	= toCheck & filter (not . S.null . snd4)
-		mapM_ (checkSuperBinds' fstts sstts) toCheck'
-
-checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBind -> Check
-checkSuperBinds' fstts sstts (sub, shouldBeSupers, metReqs, msg)
- = inside msg $ do
-	let metReqs'	= metReqs & M.fromList |> S.toList:: Map Name [Languate.TAST.RType]
-	let checkOne	= _bind sstts fstts (metReqs & M.fromList |> S.toList) sub
-	let showMsg super msg
-		= inside ("The type requirement '"++st True sub++" is a "++st True super++"' could not be fullfilled") $ err msg
-	let checkOne' super	= either (showMsg super) (const pass) $ checkOne super
-	mapM_ checkOne' $ S.toList shouldBeSupers
 
 
 type St	a = State Context a
@@ -96,7 +74,7 @@ data Context
 		todos	:: Map TypeID (Set RType),
 		-- the left type should be a subtype of all the right ones.
 		-- These are requirements that should be met. The third arg is the context in which this is bound
-		toCheck	:: [(RType, Set RType, [(Name, Set RType)], Message)] }
+		toCheck	:: ToBinds }
 
 
 
@@ -131,7 +109,7 @@ _expand base changedSuper
 
 		This binding might produce a fixed binding, e.g. {a0 --> RSAPrivKey}
 	 -}
-	let oldBinding	= fetch (show via) "fstt" via fstt & getBinding
+	let oldBinding	= fetch (show via) "fstt" via fstt & origBinding
 				:: Binding
 	-- the supers FSTT, which we will tear apart and add to base
 	supersToAdd	<- get' fstt_ |> findWithDefault M.empty viaTid |> M.toList
@@ -143,13 +121,13 @@ _expand base changedSuper
 Adds a supertypeentry to the basetype. The oldbinding takes the supertype(via) from its baseform to the needed form,
 
 -}
-_addEntry	:: TypeID -> RType -> Binding -> FullSTTKeyEntry -> St Bool
-_addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
+_addEntry	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
+_addEntry base via oldBinding (superToAdd, entry)
   = do	fstts		<- get' fstt_
 	-- the fstt that has to be changed
 	let fstt	= findWithDefault M.empty base fstts
 	-- the new, combined binding ...
-	let binding	= concatBindings oldBinding newBinding
+	let binding	= concatBindings oldBinding $ origBinding entry
 	-- ... aplied on the super
 	let super	= substitute binding superToAdd
 	-- if already added: skip this shit
@@ -157,15 +135,16 @@ _addEntry base via oldBinding (superToAdd, (reqs, _, (_, newBinding)))
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
 	let (toCheck, foreignReqs)
-			= reqs |> subReq binding & (lefts &&& rights)
+			= reqs entry |> subReq binding & (lefts &&& rights)
 	{- We might have some requirements on the via type too in our own FSTT.
 		These don't have to be checked, as these are already requirements in function of the frees of base -}
-	let viaReqs	= fstt & M.lookup via |> fst3 & fromMaybe []
+	let viaReqs	= fstt & M.lookup via |> reqs & fromMaybe []
 	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
 	-- add the tochecks
-	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show superToAdd++" which has been added via "++show via++")\nob: "++show oldBinding++" nb: "++show newBinding++" fb: "++show binding
-	mapM_ addReqs $ zip toCheck (repeat newReqs) |> (\((a,b),c) -> (a,b,c,msg))
-	let entry	= (newReqs, Just via, (superToAdd, binding))
+	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show super++" which has been added via "++show via++")"
+	mapM_ addReqs $ toCheck |> (\(ifType, isTypes) ->
+		ToBnd base super ifType isTypes msg)
+	let entry	= FSTTEntry newReqs (Just via) superToAdd binding (Just $ origBinding entry)	-- TODO or oldbinding?
 	let fstt'	= M.insert super entry fstt
 	let fstts'	= M.insert base fstt' fstts
 	modify (\ctx -> ctx {fstt_ = fstts'})
@@ -190,7 +169,7 @@ pop	= do	td	<- get' todos
 		modify (\ctx -> ctx {todos = M.delete nxt td})
 		return all
 
-addReqs		:: (RType, Set RType, [(Name, Set RType)], Message) -> St ()
+addReqs		:: ToBind -> St ()
 addReqs reqs
 	= do	ctx	<- get
 		put $ ctx {toCheck = reqs : toCheck ctx}

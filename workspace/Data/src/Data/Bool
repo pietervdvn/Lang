@@ -45,3 +45,7 @@ precedence of (!) is prefix, (!) < (&&)
 (!)	: Bool -> Bool
   True	= False
   False	= True
+
+-- Some extremely private function
+_priv	: Bool -> Bool
+t	= t

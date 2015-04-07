@@ -7,10 +7,12 @@ import Collection.Collection
 import Collection.Maybe
 import Collection.Set
 import Collection.Dict
+import Collection.Void
 
 import Category.Monoid
 import Category.Mappable
 import Category.Eq
+
 
 ---
 A ''Collection'' which preserves order and allows duplicate elements.
@@ -18,23 +20,23 @@ A ''Collection'' which preserves order and allows duplicate elements.
 The syntactic sugar ''[a]'' desugars to ''List a''
 
 ---
-cat List a in Collection a
+cat List a
+	-- in Collection a
 	-- Returns the first element of the list. The element returned is of the type 'a', but might be a subclass of element 'a' too.
 	head	: [a] -> (b:a)
 	-- Returns the given list without the first element. The returned elements might be a subtype of the given list.
 	tail	: [a] -> [(b:a)]
 	empty	: Maybe ()
 
-instance List a is Monoid
+-- instance List a is Monoid
 
-instance List a is Mappable a
+--instance List a is Mappable a
 
 instance List (a:(k,v)) is Dict k v
-instance List (a:(k,v)) is Dict k [v]
+--instance List (a:(k,v)) is Dict k [v]
+--instance List a is Set a
+
 ---
-instance List a is Set a
-
-
 
 map	: (a -> b) -> [a] -> [b]
 f empty	= []

@@ -4,6 +4,7 @@ author		"Pieter Vander Vennet"
 date		[2014, 5, 29, 21, 48, 42]
 desc		"The syntaxis of the Languate programming language"
 
+import Types
 import Functions
 import Comments
 import Expressions

@@ -5,6 +5,8 @@ import Data.Map (Map, insert, adjust, findWithDefault)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Set (Set)
+import Data.List (sortBy)
+import Data.Function
 
 type Name 	= String
 type Message	= String
@@ -173,5 +175,27 @@ mapTuple	:: (a -> b, c -> d) -> (a,c) -> (b,d)
 mapTuple (f, g) (a,b)
 		= (f a, g b)
 
+fst4		:: (a,b,c,d) -> a
+fst4 (a,_,_,_)	=  a
+
 snd4		:: (a,b,c,d) -> b
 snd4 (_,b,_,_)	=  b
+
+
+isLeft		:: Either a b -> Bool
+isLeft (Left _)	= True
+isLeft _	= False
+
+isRight		= not . isLeft
+
+sortOn		:: Ord b => (a -> b) -> [a] -> [a]
+sortOn f	=  sortBy (compare `on` f)
+
+
+splitOn'	:: (Eq a) => a -> [a] -> [[a]]
+splitOn' a as	= splitOn (a==) as
+
+splitOn		:: (a -> Bool) -> [a] -> [[a]]
+splitOn f []	=  []
+splitOn f ls	=  let (h,t)	= break f ls in
+			h:splitOn f (drop 1 t)

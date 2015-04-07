@@ -54,10 +54,6 @@ checkDatum (l,c) fqn time
 				"Need at leat 5 ints for the date meta info [year month day hour minute], some are missing"
 			return ()
 
-isLeft		:: Either a b -> Bool
-isLeft (Left _)	= True
-isLeft _	= False
-
 allDoubles	:: Eq a => [a] -> [a]
 allDoubles (a:as)
 	| a `elem` as	= a:allDoubles (filter (a /=) as)

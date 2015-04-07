@@ -1,7 +1,7 @@
 module Languate.TypeTable.BuildSuperTT.FixImplicitRequirements where
 
 import StdDef
-import Data.Map
+import Data.Map hiding (null)
 import Data.Set (Set)
 import qualified Data.Set as S
 import qualified Data.Map as M
@@ -10,23 +10,31 @@ import Data.Maybe
 
 import Languate.TAST
 import Languate.TypeTable
-import Languate.TypeTable.Extended
 import Languate.TypeTable.Bind.Substitute
 
 import Control.Monad.Writer
 import Control.Arrow
 
-type ToBind	= (RType, Set RType, [(Name, Set RType)], Message)
+{- Represents a requiment which is not met at this moment in the algorithm, but should be met.
+We postpone the check to the moment the entire supertypetable is checked
+-}
+data ToBind	= ToBnd	{ subType	:: TypeID	-- this type
+			, superType	:: RType	-- has this supertype
+			, ifType	:: RType	-- if this type
+			, neededReqs	:: Set RType	-- meets this requiments
+			, msg		:: Message	-- a message for the human
+			}
+	deriving (Show)
 type ToBinds	= [ToBind]
 
-fixImplicitRequirements	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
-				(Map TypeID FullSuperTypeTable, ToBinds)
+fixImplicitRequirements	:: TypeReqTable -> FullSuperTypeTables ->
+				(FullSuperTypeTables, ToBinds)
 fixImplicitRequirements treqt
 		= runWriter . fixImplicitRequirements_ treqt
 
 
-fixImplicitRequirements_	:: TypeReqTable -> Map TypeID FullSuperTypeTable ->
-				Writer ToBinds (Map TypeID FullSuperTypeTable)
+fixImplicitRequirements_	:: TypeReqTable -> FullSuperTypeTables ->
+				Writer ToBinds (FullSuperTypeTables)
 fixImplicitRequirements_ treqt fstts
 	= mapM (uncurry $ fixImplicitsFor treqt fstts) (M.toList fstts) |> M.fromList
 
@@ -43,19 +51,19 @@ fixImplicitsFor treqt fstts tid fstt
 Gives a (this type, should be these types) too, when binding happens on the way.
 -}
 fixImplicitsForEntry	:: TypeID -> TypeReqTable -> Map TypeID FullSuperTypeTable ->
-				RType -> FullSTTEntry -> Writer ToBinds FullSTTKeyEntry
-fixImplicitsForEntry tid treqt fstts rtype entry@(nameReqs, via, (origType, bnd))
+				RType -> FSTTEntry -> Writer ToBinds FSTTKeyEntry
+fixImplicitsForEntry tid treqt fstts rtype entry
 				-- do nothing if the super type is ""a -> b""
- | not $ isNormal origType	= return (rtype, entry)
+ | not $ isNormal $ origSuper entry	= return (rtype, entry)
  | otherwise
-	= do	let origTypeID	= getBaseTID origType & fromJust
-		let origTypeRqs	= findWithDefault [] origTypeID treqt
-					:: [(Name, Set RType)]
-		let (toCheck, extraReqs)= origTypeRqs |> subReq bnd & (lefts &&& rights)
+	= do	let origType	= origSuper entry
+		let origTypeID	= getBaseTID origType & fromMaybe (error $ "FixImplicitRequirements: "++show origType++" is not normal")
+		let origTypeRqs	= findWithDefault [] origTypeID treqt	:: [(Name, Set RType)]
+		let (toCheck, extraReqs)= origTypeRqs |> subReq (origBinding entry) & (lefts &&& rights)
 		let msg	= "While adding the implicit requirements on "++show tid++" for its supertype "++show rtype
-		let fullReqs	= (extraReqs ++ nameReqs) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
-		tell $ fmap (\((a,b),c) -> (a,b,c, msg)) $ zip toCheck $ repeat fullReqs
-		return (rtype,(fullReqs, via, (origType, bnd)))
+		let fullReqs	= (extraReqs ++ reqs entry) & merge ||>> S.unions & Prelude.filter (not . S.null . snd)
+		unless (null fullReqs) $ tell $ toCheck |> (\(ifType, isTypes) -> ToBnd tid rtype ifType isTypes msg)
+		return (rtype, entry {reqs = fullReqs})
 
 
 subReq		:: Binding -> (Name, Set RType) -> Either (RType, Set RType)  (Name, Set RType)

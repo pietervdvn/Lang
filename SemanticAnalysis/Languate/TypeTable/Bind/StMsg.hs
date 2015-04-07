@@ -29,7 +29,7 @@ data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the super
 				, usedFrees	:: Set Name -- All knwon or used frees
                			, spareSuperTypes :: Map TypeID SpareSuperTypeTable
 				, allSupertypes :: Map TypeID FullSuperTypeTable
-				, binding 	:: Binding
+				, binding_ 	:: Binding
 
 				}
 instance Show Context where
@@ -62,13 +62,13 @@ getSstt tid
 addBinding	:: (Name, RType) -> StMsg ()
 addBinding (n,t)
 	= do	ctx	<- get
-		let (Binding b)	= binding ctx
+		let (Binding b)	= binding_ ctx
 		-- check wether or not a conflicting binding exists
 		let previous	= M.lookup n b
 		assert (isNothing previous || t == fromJust previous) $
 			"Conflicting bindings for '"++n++"' are found."++
 			" It could be both bound to "++show (fromJust previous)++" and "++show t
-		put $ ctx {binding = Binding $ M.insert n t b}
+		put $ ctx {binding_ = Binding $ M.insert n t b}
 
 addFrees	:: [Name] -> StMsg ()
 addFrees bound
@@ -81,7 +81,7 @@ getUsedFrees	= get' usedFrees
 
 
 getBinding	:: StMsg Binding
-getBinding	= get' binding
+getBinding	= get' binding_
 
 
 -- ## Monad tools

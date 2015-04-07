@@ -1,52 +1,45 @@
 module Languate.FunctionTable where
 
-{--
-
-This module implements a table keeping track of all the functions
-
---}
-
-import Data.Map
-import Prelude hiding (lookup)
 import StdDef
-import Languate.TAST
-import Normalizable
+
 import Languate.FQN
-import Data.List
+import Languate.TAST
 
-{- A signature is a function identifier. When looking up a function with given signature, this function should be **all** of the given types (e.g. Assoc + Commut), and can be more.
+import Data.Set
+import Data.Map (Map)
+import qualified Data.Set as S
+import qualified Data.Map as M
 
-Note that the different types the function carries will be orderable. The function will have a (meaningfull) upper type.
+import MarkDown
 
-Prop X A & Commut X A		is X -> X -> A
-Prop Y A & Commut Y A		is Y -> Y -> A
+{-
 
-
-Int -> Int -> Int	& (Assoc Nat : Nat -> Nat -> Nat)
-Nat -> Nat -> Nat	& (Assoc Nat : Nat -> Nat -> Nat)
-
+The function table is associated with a single module and keeps track of all known functions.
 
 -}
-data Signature	= Signature Name [RType]
-	deriving (Eq, Ord)
+data FunctionTable	= FunctionTable
+	{ defined	:: Set Signature-- signatures of locally defined functions, which might be private
+	, public	:: Set Signature --all public functions
+	}
+	deriving (Show)
 
-instance Show Signature where
-	show (Signature n t)
-	 	= tabs 2 n ++ ": "++ show t
+type FunctionTables	= Map FQN FunctionTable
 
-instance Normalizable Signature where
-	normalize (Signature n t)
-		= Signature n $ nub $ Prelude.map normalize t
+funcSign2md	:: Signature -> [MarkDown]
+funcSign2md sign	=
+	[ bold $ signName sign
+	, signTypes sign |> st True |> code & unwords
+	, signTypeReqs sign & rTypeReqs2md]
 
+functiontable2md	:: FunctionTable -> MarkDown
+functiontable2md ft	=
+	let header	= ["Name","Types","Requirements"]
+	    contents f	= f ft & toList |> funcSign2md
+	    tableFor f	= table header $ contents f
+		in
+		title 2 "Defined" ++ tableFor defined ++
+		title 2 "Exported" ++ tableFor public
 
-
-
--- The (unique) identifier of a function. One identifier == one clause
-type FunctionID	= (FQN, Int)
-
-type FunctionBody	= [TClause]
-data FunctionInfo	= FunctionInfo {declaredIn :: FQN, body :: FunctionBody}
-
-{-The function table is a local function table, thus local for a single module-}
-data FunctionTable
-	= FunctionTable { locallyDeclared	:: Map Name Signature }
+functiontables2md	:: FunctionTables -> MarkDown
+functiontables2md fts	=  fts & M.toList ||>> functiontable2md
+				|> (\(fqn, md) -> title 1 (show fqn) ++ md) & unlines

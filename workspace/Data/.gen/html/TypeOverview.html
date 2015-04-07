@@ -1,4 +1,4 @@
-<meta http-equiv="refresh" content="3" ><link rel="stylesheet" href="github-markdown.css"><style> .markdown-body {   min-width: 200px;    max-width: 1080;     margin: 0 auto;   padding: 60px;  }</style> <article class="markdown-body"><blockquote>
+<html><head><script type="text/javascript" src="reloader.js"></script><link rel="stylesheet" href="github-markdown.css"><style> .markdown-body {   min-width: 200px;    max-width: 1080;     margin: 0 auto;   padding: 60px;  }</style> <article class="markdown-body"></head><blockquote>
 <p>Back to <a href="Index.html">index</a></p>
 </blockquote>
 <h1 id="type-overview">Type overview</h1>
@@ -25,216 +25,241 @@
 <td align="left">A int! This is a temporary representation, which will be replaced by a truly builtin one</td>
 </tr>
 <tr class="odd">
+<td align="left"><strong>Dummy</strong></td>
+<td align="left">Prelude</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Eq0</strong></td>
+<td align="left">Prelude</td>
+<td align="left"><code>*</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>X</strong> (<code>a0</code> :<code>Eq0</code> )</td>
+<td align="left">Prelude</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Y</strong> <code>a0</code> <code>a1</code></td>
+<td align="left">Prelude</td>
+<td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Z</strong> <code>a0</code></td>
+<td align="left">Prelude</td>
+<td align="left"><code>(* ~&gt; *)</code></td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Eq</strong></td>
 <td align="left">Category.Eq</td>
 <td align="left"><code>*</code></td>
 <td align="left">The category which defines <em>equality</em> <code>==</code> and <em>inequality</em> <code>!=</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Associative</strong> <code>a0</code></td>
 <td align="left">Category.Function</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">Functions for which the order of evaluation does not matter.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Commutative</strong> <code>a0</code> <code>a1</code></td>
 <td align="left">Category.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">Functions for which the arguments can be swapped.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Curry</strong> <code>a0</code> <code>a1</code></td>
 <td align="left">Category.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">Arbitrary functions from <code>a</code> to <code>b</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Mappable</strong> <code>a0</code></td>
 <td align="left">Category.Mappable</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <em>container</em> on which <code>map</code> is defined. Also known as <code>Functor</code> in most other functional programming languages.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Monoid</strong></td>
 <td align="left">Category.Monoid</td>
 <td align="left"><code>*</code></td>
 <td align="left">A <code>Monoid</code> is an type which has <em>neutral element</em> and an <em>addition</em>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Product</strong></td>
 <td align="left">Category.Monoid</td>
 <td align="left"><code>*</code></td>
 <td align="left">An instance of <code>Monoid</code>, with <code>*</code> defined as append and <code>1</code> as neutral element.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Sum</strong></td>
 <td align="left">Category.Monoid</td>
 <td align="left"><code>*</code></td>
 <td align="left">An instance of <code>Monoid</code>, with <code>+</code> defined as append and <code>0</code> as neutral element.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Ord</strong></td>
 <td align="left">Category.Ord</td>
 <td align="left"><code>*</code></td>
 <td align="left">The category which defines <em>lower then</em> and <em>higher then</em>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Collection</strong> <code>a0</code></td>
 <td align="left">Collection.Collection</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> is a data structure which contains zero or more elements.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Dict</strong> (<code>a0</code> :<code>Eq</code> ) <code>a1</code></td>
 <td align="left">Collection.Dict</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">A <code>Collection</code> which maps a key onto a value.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>List</strong> <code>a0</code></td>
 <td align="left">Collection.List</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> which preserves order and allows duplicate elements.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Maybe</strong> <code>a0</code></td>
 <td align="left">Collection.Maybe</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A collection which contains at most one value.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>More</strong> <code>a0</code></td>
 <td align="left">Collection.More</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> which contains at least one element.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Set</strong> (<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">Collection.Set</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">A <code>Collection</code> without order and duplicates.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Tuple</strong> <code>a0</code> <code>a1</code></td>
 <td align="left">Collection.Tuple</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">The data structure representing tuples.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Void</strong></td>
 <td align="left">Collection.Void</td>
 <td align="left"><code>*</code></td>
 <td align="left">Type representing <em>no data</em>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>PrivateKey</strong></td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>*</code></td>
 <td align="left">The type representing the <em>private</em> key of a public-key encryption scheme</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>PubPrivAlgo</strong> (<code>a0</code> :<code>PrivateKey</code> ) (<code>a1</code> :<code>PublicKey</code> )</td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>PublicKey</strong></td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>*</code></td>
 <td align="left">The type representing the <em>public</em> key of a public-key encryption scheme</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>RSA</strong></td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>*</code></td>
 <td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>RSAPrivKey</strong></td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>*</code></td>
 <td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>RSAPubKey</strong></td>
 <td align="left">Crypto.PubPrivAlgo</td>
 <td align="left"><code>*</code></td>
 <td align="left">The type representing a public-key encryption scheme, with fixed keys</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Bool</strong></td>
 <td align="left">Data.Bool</td>
 <td align="left"><code>*</code></td>
 <td align="left">The <code>Bool</code> datatype represents truth values of logic.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Disjunct</strong> (<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">Graph.Graph</td>
 <td align="left"><code>(* ~&gt; *)</code></td>
 <td align="left">Set of disjunct sets</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Graph</strong> (<code>a0</code> :<code>Eq</code> , <code>Ord</code> ) <code>a1</code></td>
 <td align="left">Graph.Graph</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; *))</code></td>
 <td align="left">A generic, undirected graph (which might contain cycles).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Weighted</strong> (<code>a0</code> :<code>Graph</code> ) (<code>a1</code> :<code>Eq</code> , <code>Ord</code> ) (<code>a2</code> :<code>Eq</code> , <code>Monoid</code> , <code>Ord</code> ) <code>a3</code></td>
 <td align="left">Graph.Graph</td>
 <td align="left"><code>((* ~&gt; (* ~&gt; *)) ~&gt; (* ~&gt; (* ~&gt; (* ~&gt; *))))</code></td>
 <td align="left">A generic, undirected graph (which might contain cycles) and has a (symmetric) weight on each vertex.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Int</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Int'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> which is not zero</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>IntInf</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> or positive or negative <em>Infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>IntInf'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">An <em>integer</em> which is not zero, or positive or negative <em>Infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Nat</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Nat'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number, which is not zero.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>NatInf</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>NatInf'</strong></td>
 <td align="left">Num.Nat</td>
 <td align="left"><code>*</code></td>
 <td align="left">A natural number (which is not zero) or <em>infinity</em> (<code>Inf</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Flip</strong> <code>a0</code> <code>a1</code> <code>a2</code></td>
 <td align="left">Type.Function</td>
 <td align="left"><code>(* ~&gt; (* ~&gt; (* ~&gt; *)))</code></td>
@@ -255,7 +280,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -265,6 +291,146 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-dummy">Supertypes of Dummy</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">Requirements</th>
+<th align="left">Via</th>
+<th align="left">Orig type</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left"><em>Native</em></td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left"><em>Native</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-eq0">Supertypes of Eq0</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">Requirements</th>
+<th align="left">Via</th>
+<th align="left">Orig type</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left"><em>Native</em></td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left"><em>Native</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-x-a0-eq0">Supertypes of X (<code>a0</code> :<code>Eq0</code> )</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">Requirements</th>
+<th align="left">Via</th>
+<th align="left">Orig type</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left">(<code>a0</code> :<code>Eq0</code> )</td>
+<td align="left"><em>Native</em></td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left"><em>Native</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-y-a0-a1">Supertypes of Y <code>a0</code> <code>a1</code></h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">Requirements</th>
+<th align="left">Via</th>
+<th align="left">Orig type</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left">(<code>a1</code> :<code>Eq0</code> )</td>
+<td align="left">(X a1)</td>
+<td align="left">.</td>
+<td align="left">{&quot;a0&quot; --&gt; a1}</td>
+<td align="left">{&quot;a0&quot; --&gt; a1}</td>
+</tr>
+<tr class="even">
+<td align="left">(X a1)</td>
+<td align="left">(<code>a1</code> :<code>Eq0</code> )</td>
+<td align="left"><em>Native</em></td>
+<td align="left">(X a1)</td>
+<td align="left">{&quot;a0&quot; --&gt; a1}</td>
+<td align="left"><em>Native</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="supertypes-of-z-a0">Supertypes of Z <code>a0</code></h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Is type</th>
+<th align="left">Requirements</th>
+<th align="left">Via</th>
+<th align="left">Orig type</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">.</td>
+<td align="left"></td>
+<td align="left"><em>Native</em></td>
+<td align="left">.</td>
+<td align="left">{}</td>
+<td align="left"><em>Native</em></td>
+</tr>
+<tr class="even">
+<td align="left">(X a1)</td>
+<td align="left">(<code>a1</code> :<code>Eq0</code> )</td>
+<td align="left">((Y Dummy) a0)</td>
+<td align="left">(X a1)</td>
+<td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Prelude.Dummy" class="uri">Data:Prelude.Dummy</a>}</td>
+<td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Prelude.Dummy" class="uri">Data:Prelude.Dummy</a>}</td>
+</tr>
+<tr class="odd">
+<td align="left">((Y Dummy) a0)</td>
+<td align="left"></td>
+<td align="left"><em>Native</em></td>
+<td align="left">((Y Dummy) a0)</td>
+<td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Prelude.Dummy" class="uri">Data:Prelude.Dummy</a> &quot;a1&quot; --&gt; a0}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -276,7 +442,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -286,6 +453,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -297,7 +465,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -307,6 +476,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(a0 -&gt; (a0 -&gt; a0))</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -318,7 +488,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -328,6 +499,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(a0 -&gt; (a0 -&gt; a1))</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -339,7 +511,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -349,6 +522,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(a0 -&gt; a1)</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -360,7 +534,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -370,6 +545,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -381,7 +557,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -391,6 +568,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -402,7 +580,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -412,6 +591,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">Monoid</td>
@@ -419,6 +599,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Monoid</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -430,7 +611,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -440,6 +622,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">Monoid</td>
@@ -447,6 +630,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Monoid</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -458,7 +642,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -468,6 +653,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -479,7 +665,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -489,6 +676,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
@@ -496,6 +684,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
@@ -503,6 +692,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Monoid</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">(Mappable a0)</td>
@@ -510,6 +700,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -521,7 +712,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -531,12 +723,14 @@
 <td align="left">Monoid</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
-<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
+<td align="left">(<code>a0</code> :<code>Eq</code> ) (<code>a1</code> :<code>Eq</code> )</td>
 <td align="left">(Collection (a0, a1))</td>
 <td align="left">Eq</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 <td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 </tr>
 <tr class="odd">
@@ -545,6 +739,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Monoid</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">(Mappable a1)</td>
@@ -552,12 +747,14 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">(Mappable (a0, a1))</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">(Collection (a0, a1))</td>
 <td align="left">(Mappable a0)</td>
+<td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 <td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
 </tr>
 <tr class="even">
@@ -566,6 +763,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(Collection (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; (a0, a1)}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -577,51 +775,42 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">.</td>
 <td align="left"></td>
-<td align="left">Monoid</td>
+<td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
-<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
-<td align="left">(Collection a0)</td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
 <td align="left">Eq</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
-<td align="left"></td>
-<td align="left"><em>Native</em></td>
+<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
+<td align="left">((Dict k1) v1)</td>
 <td align="left">Monoid</td>
-<td align="left">{}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="even">
-<td align="left">(Mappable a0)</td>
-<td align="left"></td>
-<td align="left"><em>Native</em></td>
-<td align="left">(Mappable a0)</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
-</tr>
-<tr class="odd">
 <td align="left">(Mappable v1)</td>
 <td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
 <td align="left">((Dict k1) v1)</td>
 <td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
-</tr>
-<tr class="even">
-<td align="left">(Mappable [v1])</td>
-<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
-<td align="left">((Dict k1) [v1])</td>
-<td align="left">(Mappable a1)</td>
-<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="odd">
 <td align="left">(Mappable (k1, v1))</td>
@@ -629,20 +818,7 @@
 <td align="left">((Dict k1) v1)</td>
 <td align="left">(Mappable (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
-</tr>
-<tr class="even">
-<td align="left">(Mappable (k1, [v1]))</td>
-<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
-<td align="left">((Dict k1) [v1])</td>
-<td align="left">(Mappable (a0, a1))</td>
-<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
-</tr>
-<tr class="odd">
-<td align="left">(Collection a0)</td>
-<td align="left"></td>
-<td align="left"><em>Native</em></td>
-<td align="left">(Collection a0)</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="even">
 <td align="left">(Collection (k1, v1))</td>
@@ -650,20 +826,7 @@
 <td align="left">((Dict k1) v1)</td>
 <td align="left">(Collection (a0, a1))</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
-</tr>
-<tr class="odd">
-<td align="left">(Collection (k1, [v1]))</td>
-<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
-<td align="left">((Dict k1) [v1])</td>
-<td align="left">(Collection (a0, a1))</td>
-<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
-</tr>
-<tr class="even">
-<td align="left">{a0}</td>
-<td align="left">(<code>a0</code> :<code>Eq</code> )</td>
-<td align="left"><em>Native</em></td>
-<td align="left">{a0}</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
 </tr>
 <tr class="odd">
 <td align="left">((Dict k1) v1)</td>
@@ -671,13 +834,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">((Dict k1) v1)</td>
 <td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; v1}</td>
-</tr>
-<tr class="even">
-<td align="left">((Dict k1) [v1])</td>
-<td align="left">(<code>k1</code> :<code>Eq</code> ) (<code>a0</code> :<code>(k1, v1)</code> )</td>
 <td align="left"><em>Native</em></td>
-<td align="left">((Dict k1) [v1])</td>
-<td align="left">{&quot;a0&quot; --&gt; k1 &quot;a1&quot; --&gt; [v1]}</td>
 </tr>
 </tbody>
 </table>
@@ -689,7 +846,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -699,6 +857,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -710,7 +869,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -720,27 +880,31 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">(Collection a0)</td>
 <td align="left">Eq</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
 <td align="left"></td>
 <td align="left">(Collection a0)</td>
 <td align="left">Monoid</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">(Mappable a0)</td>
 <td align="left"></td>
 <td align="left">(Collection a0)</td>
 <td align="left">(Mappable a0)</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="odd">
 <td align="left">(Collection a0)</td>
@@ -748,6 +912,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(Collection a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -759,7 +924,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -768,28 +934,32 @@
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">(Collection a0)</td>
 <td align="left">.</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">(Collection a0)</td>
 <td align="left">Eq</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">(Collection a0)</td>
 <td align="left">Monoid</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">(Mappable a0)</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">(Collection a0)</td>
 <td align="left">(Mappable a0)</td>
-<td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="odd">
 <td align="left">(Collection a0)</td>
@@ -797,6 +967,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(Collection a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; a0}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -808,7 +979,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -818,6 +990,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
@@ -825,6 +998,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">(Mappable a1)</td>
@@ -832,6 +1006,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">(Mappable a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -843,7 +1018,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -853,6 +1029,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -864,7 +1041,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -874,6 +1052,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -885,7 +1064,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -895,6 +1075,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -906,7 +1087,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -916,6 +1098,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -927,7 +1110,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -937,6 +1121,7 @@
 <td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPrivKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPrivKey</a> &quot;a1&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPubKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPubKey</a>}</td>
+<td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPrivKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPrivKey</a> &quot;a1&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPubKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPubKey</a>}</td>
 </tr>
 <tr class="even">
 <td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
@@ -944,6 +1129,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">((PubPrivAlgo RSAPrivKey) RSAPubKey)</td>
 <td align="left">{&quot;a0&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPrivKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPrivKey</a> &quot;a1&quot; --&gt; pietervdvn:<a href="Data:Crypto.PubPrivAlgo.RSAPubKey" class="uri">Data:Crypto.PubPrivAlgo.RSAPubKey</a>}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -955,7 +1141,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -965,6 +1152,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">PrivateKey</td>
@@ -972,6 +1160,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">PrivateKey</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -983,7 +1172,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -993,6 +1183,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">PublicKey</td>
@@ -1000,6 +1191,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">PublicKey</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1011,7 +1203,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1021,6 +1214,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1032,7 +1226,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1042,6 +1237,7 @@
 <td align="left">{Set a0}</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
+<td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="even">
 <td align="left">Eq</td>
@@ -1049,12 +1245,14 @@
 <td align="left">{Set a0}</td>
 <td align="left">Eq</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
+<td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="odd">
 <td align="left">Monoid</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">{Set a0}</td>
 <td align="left">Monoid</td>
+<td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="even">
@@ -1063,12 +1261,14 @@
 <td align="left">{Set a0}</td>
 <td align="left">(Mappable a0)</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
+<td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="odd">
 <td align="left">(Collection {a0})</td>
 <td align="left">(<code>a0</code> :<code>Eq</code> )</td>
 <td align="left">{Set a0}</td>
 <td align="left">(Collection a0)</td>
+<td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
 </tr>
 <tr class="even">
@@ -1077,6 +1277,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">{Set a0}</td>
 <td align="left">{&quot;a0&quot; --&gt; {a0}}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1088,7 +1289,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1098,6 +1300,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1109,7 +1312,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1119,6 +1323,7 @@
 <td align="left">((Graph a1) a3)</td>
 <td align="left">.</td>
 <td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
+<td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
 </tr>
 <tr class="even">
 <td align="left">((Graph a1) a3)</td>
@@ -1126,6 +1331,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">((a0 a1) a3)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">((a0 a1) a3)</td>
@@ -1133,6 +1339,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">((a0 a1) a3)</td>
 <td align="left">{&quot;a0&quot; --&gt; a1 &quot;a1&quot; --&gt; a3}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1144,7 +1351,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1154,12 +1362,14 @@
 <td align="left">IntInf</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">IntInf</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1168,6 +1378,7 @@
 <td align="left">IntInf</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">IntInf</td>
@@ -1175,6 +1386,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">IntInf</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1186,7 +1398,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1196,12 +1409,14 @@
 <td align="left">Int</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">Int</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1210,6 +1425,7 @@
 <td align="left">Int</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">Int</td>
@@ -1217,6 +1433,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Int</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">IntInf</td>
@@ -1224,6 +1441,7 @@
 <td align="left">Int</td>
 <td align="left">IntInf</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">IntInf'</td>
@@ -1231,6 +1449,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">IntInf'</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1242,7 +1461,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1252,6 +1472,7 @@
 <td align="left">BIInt</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
@@ -1259,6 +1480,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">BIInt</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">Eq</td>
@@ -1266,6 +1488,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1277,7 +1500,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1287,12 +1511,14 @@
 <td align="left">IntInf</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">IntInf</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1301,6 +1527,7 @@
 <td align="left">IntInf</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">IntInf</td>
@@ -1308,6 +1535,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">IntInf</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1319,7 +1547,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1329,12 +1558,14 @@
 <td align="left">Int</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">Int</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1343,6 +1574,7 @@
 <td align="left">Int</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">Int</td>
@@ -1350,6 +1582,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Int</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">IntInf</td>
@@ -1357,6 +1590,7 @@
 <td align="left">Int</td>
 <td align="left">IntInf</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">NatInf</td>
@@ -1364,6 +1598,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">NatInf</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1375,7 +1610,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1385,12 +1621,14 @@
 <td align="left">Int'</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">Int'</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1399,12 +1637,14 @@
 <td align="left">Int'</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">Int</td>
 <td align="left"></td>
 <td align="left">Int'</td>
 <td align="left">Int</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1413,6 +1653,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Int'</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">IntInf</td>
@@ -1420,12 +1661,14 @@
 <td align="left">Int'</td>
 <td align="left">IntInf</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="odd">
 <td align="left">IntInf'</td>
 <td align="left"></td>
 <td align="left">Int'</td>
 <td align="left">IntInf'</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="even">
@@ -1434,12 +1677,14 @@
 <td align="left"><em>Native</em></td>
 <td align="left">Nat</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="odd">
 <td align="left">NatInf</td>
 <td align="left"></td>
 <td align="left">Nat</td>
 <td align="left">NatInf</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 </tbody>
@@ -1452,7 +1697,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1462,12 +1708,14 @@
 <td align="left">IntInf</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">IntInf</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1476,6 +1724,7 @@
 <td align="left">IntInf</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">IntInf</td>
@@ -1483,6 +1732,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">IntInf</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1494,7 +1744,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1504,12 +1755,14 @@
 <td align="left">IntInf'</td>
 <td align="left">.</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">BIInt</td>
 <td align="left"></td>
 <td align="left">IntInf'</td>
 <td align="left">BIInt</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1518,12 +1771,14 @@
 <td align="left">IntInf'</td>
 <td align="left">Eq</td>
 <td align="left">{}</td>
+<td align="left">{}</td>
 </tr>
 <tr class="even">
 <td align="left">IntInf</td>
 <td align="left"></td>
 <td align="left">IntInf'</td>
 <td align="left">IntInf</td>
+<td align="left">{}</td>
 <td align="left">{}</td>
 </tr>
 <tr class="odd">
@@ -1532,6 +1787,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">IntInf'</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 <tr class="even">
 <td align="left">NatInf</td>
@@ -1539,6 +1795,7 @@
 <td align="left"><em>Native</em></td>
 <td align="left">NatInf</td>
 <td align="left">{}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
@@ -1550,7 +1807,8 @@
 <th align="left">Requirements</th>
 <th align="left">Via</th>
 <th align="left">Orig type</th>
-<th align="left">Binding</th>
+<th align="left">Origsuper -&gt; actualsuper binding</th>
+<th align="left">Via -&gt; Current binding</th>
 </tr>
 </thead>
 <tbody>
@@ -1560,11 +1818,12 @@
 <td align="left"><em>Native</em></td>
 <td align="left">((a0 a2) a1)</td>
 <td align="left">{&quot;a0&quot; --&gt; a2 &quot;a1&quot; --&gt; a1}</td>
+<td align="left"><em>Native</em></td>
 </tr>
 </tbody>
 </table>
 <blockquote>
 <p>This page was automatically generated.</p>
 <p>Do not edit it, as regeneration will overwrite your changes.</p>
-<p>Back to <a href="Index.html">index</a></p>
-</blockquote></article>
+<p>Back to <a href="Index.html">index</a><br /><div id="clicker">click</div></p>
+</blockquote></article></html>

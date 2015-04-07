@@ -3,6 +3,7 @@ Ord
 Declaration and utils for ''Ord'', a total ordered relationship
 ---
 
+import Data.Bool
 
 precedence of (<) is Left, (<) < (==), (<) = (>), (<) < (!)
 

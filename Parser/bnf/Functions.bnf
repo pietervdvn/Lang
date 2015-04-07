@@ -4,11 +4,11 @@ author		"Pieter Vander Vennet"
 date		[2013, 12, 23, 01, 18, 42]
 desc		"The syntaxis of function declarations"
 
-public import Types
 public import Prelude
 import Expressions
 import Comments
 public import Patterns
+import Types
 
 {- lawnames are simple strings which allow spaces.
    Note that these should not be case sensitive when referred to in docs;

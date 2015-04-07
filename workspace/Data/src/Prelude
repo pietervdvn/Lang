@@ -5,13 +5,17 @@ Each program imports these by default
 -------
 
 public import Any
+
+public import Collection.List
+import Collection.Tuple
+
 public import Category.Eq
 
-public import Data.Bool
+public import Data.Bool showing {(&&)}
 
 public import ControlFlow
 
-public import Category.Eq
+public import Category.Eq hiding {(!=)}
 public import Category.Monoid
 public import Category.Mappable
 public import Category.Function
@@ -24,7 +28,6 @@ public import Collection.Tuple
 public import Collection.Collection
 public import Collection.More
 public import Collection.Maybe
-public import Collection.List
 public import Collection.Dict
 public import Collection.Set
 
@@ -33,3 +36,21 @@ public import Graph.Graph
 public import Num.Nat
 
 public import Crypto.PubPrivAlgo
+---
+
+cat Dummy
+	> True
+
+cat Eq0
+	> True
+
+cat X (a:Eq0)
+	> True
+
+cat Y b a is X a
+	> True
+
+cat Z a
+	> True
+
+instance Z is Y Dummy

@@ -66,7 +66,8 @@ buildTypeTable w
 	klt		<- inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
 	docstrings	<- inside "While building the docstring table" $ buildDocstringTable w $ S.toList knownTypes
 	supers		<- inside "While building the super type table" $ buildSuperTypeTable w tlts klt
+	let fstts	= supers |> stt2fstt & fixImplicitRequirements typeReqs
 	(allSupers, spareSupers)
-			<- supers |> stt2fstt & fixImplicitRequirements typeReqs & expand
+			<- expand fstts
 	inside "While checking the requirements table" $ validateReqTable klt typeReqs
 	return $ TypeTable knownTypes tlts klt typeReqs supers allSupers spareSupers docstrings freeNames

@@ -61,20 +61,19 @@ This table is only a intermediate structure (which is usefull to generate the do
 type SuperTypeTableFor	= Map [Name] (Set (RType, Map Name [RType]))
 type SuperTypeTable	= Map TypeID SuperTypeTableFor
 
-
 {-
 A "FullSuperTypeTable" is saved for each typeId. It represents "This type is A if these conditions are met."
 
-E.g. for list:
-Mappable 	--> []	-- thus if not applied to any free
-Collection 	--> []
-Monoid 		--> [a,{}]-- thus: if applied to a single free (with no special requirements)
-Dict k v	--> [a,{"(k,v)"}]	-- It is a dict if applied to a tuple
+E.g. for list a:
+Mappable a	--> []	-- no conditions on the frees
+Collection a	--> []	-- idem
+Monoid 		--> []-- thus: if applied to a single free (with no special requirements)
+Dict k v	--> [a is "(k,v)"]	-- It is a dict if applied to a tuple
 
 -- This table gets built recursively via the already known supertypes:
 -- added via collection:
 
-Eq --> [{"Eq"}]	-- List Eq is Eq
+Eq --> ["Eq"]	-- List Eq is Eq
 -- Monoid		--> [{}]	-- but already in the table
 
 
@@ -83,19 +82,28 @@ We know that the first free should be a "Graph", thus:
 Graph n		--> [{graph, Graph}, {n, Ord, Eq}, {w, Monoid, Ord, Eq}, {n}]
 
 
-The type in the maybe is thee "via" type, the supertype of T which caused the current supertype to be added (and is in the list)
-
 The binding maps free type variables from the *supertype* (given) to *subtype*
 -}
-type FullSuperTypeTable	= Map RType ([(Name,Set RType)], Maybe RType, (RType, Binding))
+data FSTTEntry	= FSTTEntry {	reqs		:: [(Name,Set RType)],	-- The requiments needed to be this type
+				viaType		:: Maybe RType, 	-- The supertype of T which caused the current supertype to be added (and is in the list)
+				origSuper	:: RType,		-- The type this super was derived from, e.g. Dict a0 a1
+				origBinding		:: Binding,		-- The binding which takes the orig super into it's actual form, e.g. Dict k1 v1
+				stepBinding	:: Maybe Binding	-- The binding which takes the frees to this form
+				}
+	deriving (Show, Eq, Ord)
+type FSTTKeyEntry	= (RType, FSTTEntry)
+type FullSuperTypeTable	= Map RType FSTTEntry
+type FullSuperTypeTables	= Map TypeID FullSuperTypeTable
 {-
-Complement of the full super type table.
-E.g.
-Supertypes of list:
-(Dict k) v --if> a:{(k,v)}
 
+Aid while building the FSTT:
+It saves what supers exist in what form,e.g. for list
+
+Dict --> [""Dict k1 v1"", ""Dict k1 [v1]""]
+Set  --> [""Set a0""]
 -}
 type SpareSuperTypeTable	= Map TypeID [RType]
+type SpareSuperTypeTables	= Map TypeID SpareSuperTypeTable
 
 -- basically the same as the aliastable, but with types.
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
@@ -118,11 +126,6 @@ data TypeTable	= TypeTable	{ knownTypes	:: Set TypeID
 
 data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to allow a custom show function
 	deriving (Eq, Ord)
-
-
-
-
-
 
 -- Finds the type within the TLT
 findTypeOrigin	:: TypeLookupTable -> ([Name], Name) -> Exc FQN
@@ -176,7 +179,15 @@ resolveTypes tlt
 		= mapM (resolveType tlt)
 
 
+resolveTypeIn	:: TypeLookupTable -> (a,Type) -> Exc (a,RType)
+resolveTypeIn tlt (a,tp)
+	= do	rtp	<- resolveType tlt tp
+		return (a,rtp)
 
+resolveTypesIn	:: TypeLookupTable -> (a,[Type]) -> Exc (a,[RType])
+resolveTypesIn tlt (a,tps)
+	= do	rtps	<- mapM (resolveType tlt) tps
+		return (a,rtps)
 
 
 

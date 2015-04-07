@@ -12,6 +12,7 @@ It is this data-structure that all semantic analysis things use or build.
 --}
 
 import StdDef
+import qualified MarkDown as MD
 import Languate.AST
 import Data.List
 import Normalizable
@@ -20,6 +21,7 @@ import Languate.FQN
 import Data.Map
 import Data.Maybe
 
+import Control.Arrow
 
 
 
@@ -68,6 +70,16 @@ data ResolvedType	= RNormal FQN Name
 	deriving (Eq, Ord)
 type RType		= ResolvedType
 type RTypeReq		= (Name, ResolvedType)
+
+data Signature		= Signature
+				{ signName	:: Name
+				, signTypes	:: [RType]
+				, signTypeReqs	:: [RTypeReq]}
+	deriving (Show, Eq, Ord)
+
+asSignature	:: (Name, [RType], [RTypeReq]) -> Signature
+asSignature (n, rtps, rtpreqs)
+	= Signature n rtps rtpreqs
 
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
@@ -141,6 +153,12 @@ showRTypeReq (name, rtype)
 showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
 		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
+
+rTypeReqs2md	:: [RTypeReq] -> MD.MarkDown
+rTypeReqs2md rqs
+		= rqs	& merge
+			|> (\(nm, subs) -> curry showRTypeReq' nm subs)
+			|> MD.code & unwords
 
 instance Normalizable ResolvedType where
 	normalize	= nt
@@ -235,3 +253,10 @@ appliedTypes (RApplied bt at)
 	= appliedTypes bt ++ [at]
 appliedTypes _
 	= []
+
+
+
+-- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded
+canonicalBinding	:: RType -> Map Name RType
+canonicalBinding t
+	= appliedTypes t & zip ([0..] |> show) |> first ('a':) & fromList 

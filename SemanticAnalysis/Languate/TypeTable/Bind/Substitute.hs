@@ -14,7 +14,10 @@ import Languate.TAST
 -- execute substitution of b1 everywhere in b0. e.g. concatBindings {a --> b, x --> y} {b --> c} = {a --> c}
 concatBindings	:: Binding -> Binding -> Binding
 concatBindings (Binding dict) b1
-	= dict |> substitute b1 & Binding
+	= let dict'	= b1 & unbind & filterWithKey (\k _ -> k `notMember` dict) in	-- binding without a and x of
+		dict |> substitute b1 & filterWithKey (\k v -> not $ isSame k v) & M.union dict' & Binding
+		where isSame	a (RFree b)	= a == b
+		      isSame	_ _		= False
 
 
 -- Gets variables which will be substituted

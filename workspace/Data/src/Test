@@ -6,11 +6,11 @@ Tests
 import Any
 import Category.Mappable
 
-cat X a b is Mappable b
+cat X
 	> True
 
-
-
-
-cat Y a	is X Any a
+cat Y
 	> True
+
+instance X is Y
+instance Y is X

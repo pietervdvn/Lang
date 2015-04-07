@@ -4,6 +4,8 @@
 
 [Operator Overview](OperatorOverview.md)
 
+[Function tables](FunctionTablesOverview.md)
+
 [two todos](Todo.md)
 
 
@@ -15,3 +17,4 @@
 > 
 > 
 > Back to [index](Index.md)
+> <div id="clicker">click</div>
