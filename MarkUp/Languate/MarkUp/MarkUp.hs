@@ -25,38 +25,73 @@ data MarkUp
 
 type URL = String
 
+data MarkUpStructure
+	= Bs String
+	| One (MarkUp -> MarkUp) MarkUp
+	| Two (MarkUp -> MarkUp -> MarkUp) MarkUp MarkUp
+	| Multi ([MarkUp] -> MarkUp) [MarkUp]
+	| ExtraString (MarkUp -> String -> MarkUp) MarkUp String
+	| TableStructure [MarkUp] [[MarkUp]]
+
+-- A general function which extract the markdown into it's constructor + args, within the structure
+unpack	:: MarkUp -> MarkUpStructure
+unpack (Base str)
+	= Bs str
+unpack (Parag mu)
+	= One Parag mu
+unpack (Seq mus)
+            = Multi Seq mus
+unpack (Emph mu)
+            = One Emph mu
+unpack (Imp mu)
+            = One Imp mu
+unpack (Code mu)
+            = One Code mu
+unpack (Incorr mu)
+            = One Incorr mu
+unpack (Titling title mu)
+            = Two Titling title mu
+unpack (Link mu url)
+            =  ExtraString Link mu url
+unpack (Table mus muss)
+            = TableStructure mus muss
+unpack (List mus)
+            = Multi List mus
+unpack (OrderedList mus)
+            = Multi OrderedList mus
+unpack (InLink mu url)
+	    = ExtraString InLink mu url
+
+-- rebuild the markup from its structure
+repack	:: (MarkUp -> MarkUp) -> MarkUpStructure -> MarkUp
+repack f (Bs str)	= Base str
+repack f (One cons mu)	= cons $ f mu
+repack f (Two cons mu0 mu1)
+			= cons (f mu0) (f mu1)
+repack f (Multi cons mus)
+			= mus |> f & cons
+repack f (ExtraString cons mu str)
+			= cons (f mu) str
+repack f (TableStructure mus muss)
+			= Table (mus |> f) (muss ||>> f)
+
+-- Traverses the MarkUp. When on a node a 'a' is found, this a is returned. Children of this node  are not traversed
+search	:: (MarkUp -> Maybe a) -> MarkUp -> [a]
+search f mu	= fromMaybe (unpack mu & flatten >>= search f) (f mu |> (:[]))
+
+flatten	:: MarkUpStructure -> [MarkUp]
+flatten (Bs _)		= []
+flatten (One _ mu)	= [mu]
+flatten (Two _ mu0 mu1)	= [mu0, mu1]
+flatten (Multi _ mus)	= mus
+flatten (ExtraString _ mu _)
+			= [mu]
+flatten (TableStructure mus muss)
+			= mus ++ concat muss
+
+
 rewrite     :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
-rewrite f mu = fromMaybe (rw f mu) (f mu)
-
-
-rw          :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
-rw f (Base str)
-            = Base str
-rw f (Parag mu)
-            = Parag $ rewrite f mu
-rw f (Seq mus)
-            = Seq $ mus |> rewrite f
-rw f (Emph mu)
-            = Emph $ rewrite f mu
-rw f (Imp mu)
-            = Imp $ rewrite f mu
-rw f (Code mu)
-            = Code $ rewrite f mu
-rw f (Incorr mu)
-            = Incorr $ rewrite f mu
-rw f (Titling title mu)
-            = Titling (rewrite f title) $ rewrite f mu
-rw f (Link mu url)
-            =  Link (rewrite f mu) url
-rw f (Table mus muss)
-            = Table (mus |> rewrite f) $ muss ||>> rewrite f
-rw f (List mus)
-            = List (mus |> rewrite f)
-rw f (OrderedList mus)
-            = OrderedList (mus |> rewrite f)
-rw f (InLink mu url)
-	    = InLink (mu & rewrite f) url
-
+rewrite f mu = fromMaybe (repack (rewrite f) $ unpack mu) (f mu)
 
 ------ EASY ACCESS FUNCTIONS -------
 

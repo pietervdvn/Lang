@@ -1,6 +1,7 @@
 module Languate.MarkUp.Cluster where
 
 import StdDef
+import HumanUtils
 
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
@@ -12,6 +13,7 @@ import Data.Set (Set)
 import qualified Data.Set as S
 
 import Control.Arrow
+import Control.Monad
 
 import Debug.Trace
 
@@ -34,16 +36,26 @@ md	:: RenderSettings
 md	= RenderSettings renderDoc2MD (++".md") id
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
-renderClusterTo	settings fp (Cluster docs)
-	= mapM_ (renderFile settings fp) (M.elems docs)
+renderClusterTo	settings fp cluster@(Cluster docs)
+	= do	mapM_ (renderFile cluster settings fp) (M.elems docs)
+		putStrLn $ "Written document cluster to "++fp++" containing "++ commas (M.keys docs)
 
 
-renderFile	:: RenderSettings -> FilePath -> Doc -> IO ()
-renderFile rs fp doc
-	= do	let doc'	= preprocess (rewrite (_renderInLink rs fp) . preprocessor rs) doc
-		let target	= _targetName rs fp $ title doc
-		let str		= render rs doc'
-		writeFile target str
+renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
+renderFile (Cluster docs) rs fp doc= do
+	let doc'	= preprocess (rewrite (_renderInLink rs fp) . preprocessor rs) doc
+	let inLinks	= search searchInLinks $ contents doc
+	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
+	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links: "++unwords (deadLinks |> show)
+	let target	= _targetName rs fp $ title doc
+	let str		= render rs doc'
+	writeFile target str
+
+
+searchInLinks	:: MarkUp -> Maybe Name
+searchInLinks (InLink _ nm)
+	= Just nm
+searchInLinks _	= Nothing
 
 _renderInLink	:: RenderSettings -> FilePath -> MarkUp -> Maybe MarkUp
 _renderInLink rs fp (InLink mu docName)
