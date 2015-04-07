@@ -10,7 +10,7 @@ fi
 
 FOUND=0
 
-for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ SemanticAnalysis/
+for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/
 do
 	if [ "$FOUND" -eq 1 -o "$START" = "$pack" ]
 	then

@@ -20,7 +20,7 @@ Hi
 
 ##SubItem 2
 
-Hi again [Some _link_](file1) 
+Hi again [Some _link_](/home/pieter/git/Lang/TinTin/test/md/Doc2.md) 
 
 **Head 1** | **Head 2**
 ---------- | ----------

@@ -18,6 +18,7 @@ data MarkUp
         | Incorr MarkUp 	            -- Incorrect code
         | Titling MarkUp MarkUp         -- Embedded titeling [title, markup]
         | Link MarkUp URL               -- A link with overlay text [markup, url]
+	| InLink MarkUp Name		-- A link to a document within the cluster
         | Table [MarkUp] [[MarkUp]]     -- A table [header, tablerows]
         | List [MarkUp]                 -- Unordered list
         | OrderedList [MarkUp]          -- Ordered list
@@ -53,6 +54,8 @@ rw f (List mus)
             = List (mus |> rewrite f)
 rw f (OrderedList mus)
             = OrderedList (mus |> rewrite f)
+rw f (InLink mu url)
+	    = InLink (mu & rewrite f) url
 
 
 ------ EASY ACCESS FUNCTIONS -------
@@ -66,3 +69,5 @@ titling str
        = Titling (Base str)
 link str url
        = Link (Base str)
+inlink str
+	= InLink (Base str) str
