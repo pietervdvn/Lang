@@ -109,5 +109,7 @@ link str
        = Link (Base str)
 inlink str
 	= InLink (Base str) str
+table header
+	= Table (header |> Base)
 notImportant
 	= emph	-- TODO change to actual not important

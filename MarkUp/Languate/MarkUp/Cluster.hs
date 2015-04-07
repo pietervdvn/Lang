@@ -29,20 +29,33 @@ data RenderSettings	= RenderSettings
 	{render		:: Doc -> String
 	, renderName	:: String -> FilePath
 	, embedder	:: Doc -> MarkUp
-	, preprocessor	:: MarkUp -> MarkUp}
+	, preprocessor	:: MarkUp -> MarkUp
+	, overviewPage	:: Maybe ([Doc] -> Doc)}
 
 html	:: RenderSettings
-html	= RenderSettings renderDoc2HTML (++".html") contents id
+html	= RenderSettings renderDoc2HTML (++".html") contents id (Just defaultOverviewPage)
 
 md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") contents id
+md	= RenderSettings renderDoc2MD (++".md") contents id (Just defaultOverviewPage)
 
 fancyEmbedder doc
 	= titling (title doc) $ Seq [notImportant $ description doc, contents doc]
 
+defaultOverviewPage	:: [Doc] -> Doc
+defaultOverviewPage docs
+	= let	titl	= "All pages"
+		descr	= "Overview of all pages within the cluster"
+		genEntry doc
+			= [inlink $ title doc, Base $ description doc]
+		tbl	= table ["Title", "Description"] $ docs |> genEntry in
+		Doc titl descr M.empty $ titling titl tbl
+
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
 renderClusterTo	settings fp cluster@(Cluster docs)
 	= do	mapM_ (renderFile cluster settings fp) (M.elems docs)
+		case overviewPage settings of
+			Just overview	-> renderFile cluster settings fp $ overview $ M.elems docs
+			Nothing		-> return ()
 		putStrLn $ "Written document cluster to "++fp++" containing "++ commas (M.keys docs)
 
 
