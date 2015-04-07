@@ -5,8 +5,10 @@ import StdDef
 import Languate.FQN
 import Languate.TAST
 
-import Data.Map
-
+import Data.Set
+import Data.Map (Map)
+import qualified Data.Set as S
+import qualified Data.Map as M
 
 import MarkDown
 
@@ -16,16 +18,18 @@ The function table is associated with a single module and keeps track of all kno
 
 -}
 data FunctionTable	= FunctionTable
-	{ defined	:: Map Name ([RType],[RTypeReq])	-- signatures of locally defined functions, which might be private
-	, public	:: Map Name ([RType],[RTypeReq])	-- all public functions
+	{ defined	:: Set Signature-- signatures of locally defined functions, which might be private
+	, public	:: Set Signature --all public functions
 	}
 	deriving (Show)
 
 type FunctionTables	= Map FQN FunctionTable
 
-funcSign2md	:: (Name, ([RType],[RTypeReq])) -> [MarkDown]
-funcSign2md (nm, (tps, reqs))	=
-	[ bold nm, tps |> st True |> code & unwords, rTypeReqs2md reqs]
+funcSign2md	:: Signature -> [MarkDown]
+funcSign2md sign	=
+	[ bold $ signName sign
+	, signTypes sign |> st True |> code & unwords
+	, signTypeReqs sign & rTypeReqs2md]
 
 functiontable2md	:: FunctionTable -> MarkDown
 functiontable2md ft	=
@@ -37,5 +41,5 @@ functiontable2md ft	=
 		title 2 "Exported" ++ tableFor public
 
 functiontables2md	:: FunctionTables -> MarkDown
-functiontables2md fts	=  fts & toList ||>> functiontable2md
+functiontables2md fts	=  fts & M.toList ||>> functiontable2md
 				|> (\(fqn, md) -> title 1 (show fqn) ++ md) & unlines
