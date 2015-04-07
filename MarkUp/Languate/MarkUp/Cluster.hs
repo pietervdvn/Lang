@@ -11,6 +11,7 @@ import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
+import Data.Maybe
 
 import Control.Arrow
 import Control.Monad
@@ -27,13 +28,17 @@ buildCluster docs
 data RenderSettings	= RenderSettings 
 	{render		:: Doc -> String
 	, renderName	:: String -> FilePath
+	, embedder	:: Doc -> MarkUp
 	, preprocessor	:: MarkUp -> MarkUp}
 
 html	:: RenderSettings
-html	= RenderSettings renderDoc2HTML (++".html") id
+html	= RenderSettings renderDoc2HTML (++".html") contents id
 
 md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") id
+md	= RenderSettings renderDoc2MD (++".md") contents id
+
+fancyEmbedder doc
+	= titling (title doc) $ Seq [notImportant $ description doc, contents doc]
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
 renderClusterTo	settings fp cluster@(Cluster docs)
@@ -42,25 +47,38 @@ renderClusterTo	settings fp cluster@(Cluster docs)
 
 
 renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
-renderFile (Cluster docs) rs fp doc= do
-	let doc'	= preprocess (rewrite (_renderInLink rs fp) . preprocessor rs) doc
-	let inLinks	= search searchInLinks $ contents doc
+renderFile cluster@(Cluster docs) rs fp doc= do
+	let doc'	= preprocess (rewrite (_renderEmbed cluster rs) . rewrite (_renderInLink rs fp) . preprocessor rs) doc
+	let inLinks	= search searchRefs $ contents doc
 	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
-	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links: "++unwords (deadLinks |> show)
+	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links, namely "++commas deadLinks
 	let target	= _targetName rs fp $ title doc
 	let str		= render rs doc'
 	writeFile target str
 
 
-searchInLinks	:: MarkUp -> Maybe Name
-searchInLinks (InLink _ nm)
+-- Returns all markups with references to different docs for error msgs
+searchRefs	:: MarkUp -> Maybe Name
+searchRefs (InLink _ nm)
 	= Just nm
-searchInLinks _	= Nothing
+searchRefs (Embed nm)
+	= Just nm
+searchRefs _	= Nothing
+
+
 
 _renderInLink	:: RenderSettings -> FilePath -> MarkUp -> Maybe MarkUp
 _renderInLink rs fp (InLink mu docName)
 	= Just $ Link mu $ _targetName rs fp docName
 _renderInLink _ _ _	= Nothing
+
+_renderEmbed	:: Cluster -> RenderSettings -> MarkUp -> Maybe MarkUp
+_renderEmbed (Cluster docs) rs (Embed docName)
+	= Just $ fromMaybe (Parag $ Seq [Base "Document ", imp docName,Base " not found"]) $ do
+		doc	<- M.lookup docName docs
+		return $ embedder rs doc
+_renderEmbed _ _ _	= Nothing
+
 
 _targetName	:: RenderSettings -> FilePath -> Name -> FilePath
 _targetName rs fp nm

@@ -22,11 +22,12 @@ data MarkUp
         | Table [MarkUp] [[MarkUp]]     -- A table [header, tablerows]
         | List [MarkUp]                 -- Unordered list
         | OrderedList [MarkUp]          -- Ordered list
+	| Embed Name			-- Embeds the document from the cluster into this markup
 
 type URL = String
 
 data MarkUpStructure
-	= Bs String
+	= Str (String -> MarkUp) String
 	| One (MarkUp -> MarkUp) MarkUp
 	| Two (MarkUp -> MarkUp -> MarkUp) MarkUp MarkUp
 	| Multi ([MarkUp] -> MarkUp) [MarkUp]
@@ -36,7 +37,7 @@ data MarkUpStructure
 -- A general function which extract the markdown into it's constructor + args, within the structure
 unpack	:: MarkUp -> MarkUpStructure
 unpack (Base str)
-	= Bs str
+	= Str Base str
 unpack (Parag mu)
 	= One Parag mu
 unpack (Seq mus)
@@ -61,10 +62,12 @@ unpack (OrderedList mus)
             = Multi OrderedList mus
 unpack (InLink mu url)
 	    = ExtraString InLink mu url
+unpack (Embed url)
+	    = Str Embed url
 
 -- rebuild the markup from its structure
 repack	:: (MarkUp -> MarkUp) -> MarkUpStructure -> MarkUp
-repack f (Bs str)	= Base str
+repack f (Str cons str)	= cons str
 repack f (One cons mu)	= cons $ f mu
 repack f (Two cons mu0 mu1)
 			= cons (f mu0) (f mu1)
@@ -80,7 +83,7 @@ search	:: (MarkUp -> Maybe a) -> MarkUp -> [a]
 search f mu	= fromMaybe (unpack mu & flatten >>= search f) (f mu |> (:[]))
 
 flatten	:: MarkUpStructure -> [MarkUp]
-flatten (Bs _)		= []
+flatten (Str _ _)	= []
 flatten (One _ mu)	= [mu]
 flatten (Two _ mu0 mu1)	= [mu0, mu1]
 flatten (Multi _ mus)	= mus
@@ -102,7 +105,9 @@ code   = Code . Base
 incorr = Incorr . Base
 titling str
        = Titling (Base str)
-link str url
+link str
        = Link (Base str)
 inlink str
 	= InLink (Base str) str
+notImportant
+	= emph	-- TODO change to actual not important
