@@ -3,7 +3,7 @@ module Exceptions where
 {--
 This module implements a exception monad and tools
 --}
-
+import Prelude hiding (catch)
 import Control.Monad hiding (fail)
 import Debug.Trace
 import StdDef
