@@ -7,7 +7,7 @@ import Prelude hiding (catch)
 import Control.Monad hiding (fail)
 import Debug.Trace
 import StdDef
-import HumanUtils
+import HumanUtils hiding (when)
 
 runExceptions	:: Exceptions w e a -> ([w], [e], Either e a)
 runExceptions (Exceptions ws es ea)	= (ws, es, ea)
