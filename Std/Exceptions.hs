@@ -7,7 +7,7 @@ This module implements a exception monad and tools
 import Control.Monad hiding (fail)
 import Debug.Trace
 import StdDef
-import MarkDown hiding (when)
+import HumanUtils
 
 runExceptions	:: Exceptions w e a -> ([w], [e], Either e a)
 runExceptions (Exceptions ws es ea)	= (ws, es, ea)
