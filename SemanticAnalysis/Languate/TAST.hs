@@ -71,6 +71,16 @@ data ResolvedType	= RNormal FQN Name
 type RType		= ResolvedType
 type RTypeReq		= (Name, ResolvedType)
 
+data Signature		= Signature
+				{ signName	:: Name
+				, signTypes	:: [RType]
+				, signTypeReqs	:: [RTypeReq]}
+	deriving (Show, Eq, Ord)
+
+asSignature	:: (Name, [RType], [RTypeReq]) -> Signature
+asSignature (n, rtps, rtpreqs)
+	= Signature n rtps rtpreqs
+
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [RType] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
