@@ -58,12 +58,13 @@ defaultOverviewPage docs
 		Doc titl descr M.empty $ titling titl tbl
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
-renderClusterTo	settings fp cluster@(Cluster docs)
-	= do	mapM_ (renderFile cluster settings fp) (M.elems docs)
-		case overviewPage settings of
-			Just overview	-> renderFile cluster settings fp $ overview $ M.elems docs
-			Nothing		-> return ()
-		putStrLn $ "Written document cluster to "++fp++" containing "++ commas (M.keys docs)
+renderClusterTo	settings fp (Cluster docsDict)
+	= do	let docs	= M.elems docsDict
+		let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
+							return (overviewGen docs':docs))
+		let cluster	= docs' |> (title &&& id) & M.fromList & Cluster
+		mapM_ (renderFile cluster settings fp) docs'
+		putStrLn $ "Written document cluster to "++fp++" containing "++ commas (docs' |> title)
 
 
 renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()

@@ -20,7 +20,11 @@ Hi
 
 ##SubItem 2
 
-Hi again [Some _link_](/home/pieter/git/Lang/MarkUp/test/md/Doc2.md) Contents of doc3 [Dead Link](/home/pieter/git/Lang/MarkUp/test/md/Dead Link.md) 
+Hi again [Some _link_](/home/pieter/git/Lang/MarkUp/test/md/Doc2.md) 
+
+#Doc3
+
+_The third document_ Contents of doc3 
 
 **Head 1** | **Head 2**
 ---------- | ----------

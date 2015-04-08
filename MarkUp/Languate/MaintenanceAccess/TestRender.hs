@@ -34,7 +34,6 @@ mu = Seq    [ Base "Hallo"
 			, titling "SubItem 2" $ Base "Hi again"]
             , InLink (Seq [Base "Some", emph "link"]) "Doc2"
 	    , Embed "Doc3"
-	    , inlink "Dead Link"
 	        , Table [imp "Head 1", imp "Head 2"] [["Row 1","Row 1 again"] |> Base, [Base "Row 2", List [Base "Row 2 again", Base "Row 2 again"]]]
             , List [Base "Item", List [Base "More", Base "Nested", Base "Lists"], Base "Item"]
             ]
