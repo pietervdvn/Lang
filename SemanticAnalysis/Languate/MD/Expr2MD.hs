@@ -3,7 +3,8 @@ module Languate.MD.Expr2MD where
 {-Conversion of laws, expressions, ... into MD -}
 
 import StdDef
-import MarkDown
+import Languate.MarkUp
+import HumanUtils
 import Languate.AST
 import Languate.TAST
 import Languate.FQN

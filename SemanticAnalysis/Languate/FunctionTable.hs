@@ -10,7 +10,7 @@ import Data.Map (Map)
 import qualified Data.Set as S
 import qualified Data.Map as M
 
-import MarkDown
+import Languate.MarkUp
 
 {-
 

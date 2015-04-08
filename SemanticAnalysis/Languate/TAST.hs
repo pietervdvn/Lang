@@ -12,11 +12,12 @@ It is this data-structure that all semantic analysis things use or build.
 --}
 
 import StdDef
-import qualified MarkDown as MD
+import qualified HumanUtils
 import Languate.AST
 import Data.List
 import Normalizable
 import Languate.FQN
+import Languate.MarkUp as Mu
 
 import Data.Map
 import Data.Maybe
@@ -154,11 +155,11 @@ showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
 		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
 
-rTypeReqs2md	:: [RTypeReq] -> MD.MarkDown
+rTypeReqs2md	:: [RTypeReq] -> MarkUp
 rTypeReqs2md rqs
 		= rqs	& merge
 			|> (\(nm, subs) -> curry showRTypeReq' nm subs)
-			|> MD.code & unwords
+			|> code & Mu.Seq
 
 instance Normalizable ResolvedType where
 	normalize	= nt
@@ -256,7 +257,10 @@ appliedTypes _
 
 
 
--- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded
+-- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded (defaultFreeNames)
 canonicalBinding	:: RType -> Map Name RType
 canonicalBinding t
-	= appliedTypes t & zip ([0..] |> show) |> first ('a':) & fromList 
+	= appliedTypes t & zip defaultFreeNames & fromList 
+
+defaultFreeNames	:: [Name]
+defaultFreeNames	= [0..] |> show |> ('a':)

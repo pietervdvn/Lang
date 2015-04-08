@@ -1,7 +1,7 @@
 module Languate.TypeTable.KindChecker.KindOf where
 
 import StdDef
-import MarkDown (pars)
+import HumanUtils (pars)
 import Exceptions
 import Languate.CheckUtils
 import qualified Data.Map as M

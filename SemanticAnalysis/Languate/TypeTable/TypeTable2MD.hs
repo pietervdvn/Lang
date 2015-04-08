@@ -1,7 +1,7 @@
 module Languate.TypeTable.TypeTable2MD where
 
 import StdDef
-import MarkDown
+import Languate.MarkUp
 
 import Data.Map (keys, Map, lookup, findWithDefault, empty, toList)
 import qualified Data.Set as S

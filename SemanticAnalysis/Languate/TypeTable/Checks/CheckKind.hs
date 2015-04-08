@@ -5,7 +5,7 @@ This module implements various checks on kinds. It provides helper functions for
 --}
 
 import StdDef
-import MarkDown
+import HumanUtils
 import Exceptions
 import Languate.CheckUtils
 

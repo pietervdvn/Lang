@@ -20,7 +20,6 @@ import Languate.AST
 import Languate.Package
 
 import Languate.Precedence.Utils
-import Languate.Precedence.PrecTable2MD
 import Languate.Precedence.CheckPrecStatements
 import Languate.Precedence.PrecedenceTable
 

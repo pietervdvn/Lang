@@ -1,7 +1,7 @@
 module Languate.TypeTable.Checks.CheckReqTable (validateReqTable) where
 
 import StdDef
-import MarkDown
+import HumanUtils
 import Exceptions
 import Languate.CheckUtils
 

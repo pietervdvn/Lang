@@ -12,18 +12,19 @@ import Languate.File2Package
 import Languate.FQN
 import Languate.AST
 import Languate.Package
-
-import Languate.TableOverview
-import Languate.MD.TableOverview2MD
-
-import Languate.FunctionTable
-import Languate.FunctionTable.BuildFunctionTable
+import Languate.MarkUp
 
 import System.IO.Unsafe
 import System.Directory
 
 
+import Languate.Precedence.PrecedenceTable
+import Languate.Precedence.BuildPrecedenceTable
 import Languate.TypeTable
+import Languate.TypeTable.BuildTypeLookupTable
+import Languate.TypeTable.BuildTypeTable
+import Languate.TypeTable.TypeTable2MD
+
 import Data.Map
 import StdDef
 
@@ -31,9 +32,10 @@ bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 
-t	= do	world	<- packageIO path
-		to	<- runExceptionsIO' $ buildAllTables world
-		writeTables world to path
-		wd	<- getCurrentDirectory
-		let wd'	= wd ++ "/" ++ path ++ "/.gen/html"
-		putStrLn $ "Written MDs! See file:///"++wd'++"/Index.html"
+t	= do	w	<- packageIO path
+		dir	<- getCurrentDirectory
+		let cluster	= buildCluster []
+		precT	<- runExceptionsIO' $ buildPrecTable' w
+		let cluster'	= add precT cluster
+		renderClusterTo html (dir ++"/" ++ path ++ "/.gen" ++ "/html2") cluster'
+		renderClusterTo md (dir ++"/" ++ path ++ "/.gen" ++ "/md2") cluster'
