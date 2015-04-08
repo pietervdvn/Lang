@@ -44,6 +44,8 @@ renderHTML (List mus)
         = mapM renderHTML mus ||>> inTag "li" |> concat |> inTag "ul"
 renderHTML (OrderedList mus)
         = mapM renderHTML mus ||>> inTag "li" |> concat |> inTag "ol"
+renderHTML (InLink mu url)
+	= renderHTML $ Link mu url
 
 renderDoc2HTML::    Doc -> HTML
 renderDoc2HTML doc   = 

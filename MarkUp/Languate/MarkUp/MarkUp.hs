@@ -23,6 +23,7 @@ data MarkUp
         | List [MarkUp]                 -- Unordered list
         | OrderedList [MarkUp]          -- Ordered list
 	| Embed Name			-- Embeds the document from the cluster into this markup
+	deriving (Show)
 
 type URL = String
 
@@ -33,7 +34,6 @@ data MarkUpStructure
 	| Multi ([MarkUp] -> MarkUp) [MarkUp]
 	| ExtraString (MarkUp -> String -> MarkUp) MarkUp String
 	| TableStructure [MarkUp] [[MarkUp]]
-
 -- A general function which extract the markdown into it's constructor + args, within the structure
 unpack	:: MarkUp -> MarkUpStructure
 unpack (Base str)
@@ -96,6 +96,10 @@ flatten (TableStructure mus muss)
 rewrite     :: (MarkUp -> Maybe MarkUp) -> MarkUp -> MarkUp
 rewrite f mu = fromMaybe (repack (rewrite f) $ unpack mu) (f mu)
 
+deepRewrite	:: (MarkUp ->  Maybe MarkUp) -> MarkUp -> MarkUp
+deepRewrite f mu
+	= fromMaybe (repack (deepRewrite f) $ unpack mu) (f mu |> deepRewrite f)
+
 ------ EASY ACCESS FUNCTIONS -------
 
 parag  = Parag . Base
@@ -107,6 +111,8 @@ titling str
        = Titling (Base str)
 link str
        = Link (Base str)
+link' str
+	= link str str
 inlink str
 	= InLink (Base str) str
 table header

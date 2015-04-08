@@ -64,7 +64,7 @@ renderClusterTo	settings fp (Cluster docsDict)
 							return (overviewGen docs':docs))
 		let cluster	= docs' |> (title &&& id) & M.fromList & Cluster
 		mapM_ (renderFile cluster settings fp) docs'
-		putStrLn $ "Written document cluster to "++fp++" containing "++ commas (docs' |> title)
+		putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
 
 
 renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
@@ -90,7 +90,7 @@ searchRefs _	= Nothing
 
 _renderInLink	:: RenderSettings -> FilePath -> MarkUp -> Maybe MarkUp
 _renderInLink rs fp (InLink mu docName)
-	= Just $ Link mu $ _targetName rs fp docName
+	= Just $ Link (rewrite (_renderInLink rs fp) mu) $ _targetName rs fp docName
 _renderInLink _ _ _	= Nothing
 
 _renderEmbed	:: Cluster -> RenderSettings -> MarkUp -> Maybe MarkUp
