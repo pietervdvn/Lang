@@ -16,17 +16,46 @@ import qualified Data.Set as S
 b	= Base
 
 instance Documentable TypeTable where
-	toDocument tt	= (typeTable2doc tt,  allSupertypes tt & M.toList |> fstt2doc (kinds tt) ++ [explanationFSTT])
+	toDocument tt	= 
+		let klt	= kinds tt
+		    fstts	= allSupertypes tt & M.toList |> fstt2doc klt
+		    types	= knownTypes tt & S.toList |> type2doc tt in
+			(typeTable2doc tt,  explanationFSTT:types ++ fstts)
 
 
 
 typeTable2doc	:: TypeTable -> Doc
 typeTable2doc tt
-	= doc "Type overview" "Everything we know about every type we know of" $ b "hi"
+	= let	rows	= knownTypes tt & S.toList
+				|> (\tid -> [link' $ showtid tid, b $ fst $ synops tt tid ]) in
+
+		doc "Type overview" "Everything we know about every type we know of" $ 
+		titling "Known types" $ table ["Type", "Synopsis"] rows
+
+type2doc	:: TypeTable -> TypeID -> Doc
+type2doc tt tid
+	= let	(synopsis, rest) = synops tt tid
+		kind	= kinds tt & M.findWithDefault Kind tid in
+		doc (showtid tid) synopsis $
+		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid]) 
+			$ Mu.Seq [Imp $ code $ show kind
+				, imp synopsis, parag $ unlines rest, 
+				if tid == anyTypeID then Mu.Seq [] else
+					Embed $ "Types/Supertypes/Supertypes of "++showtid tid]
+
+synops	:: TypeTable -> TypeID -> (String, [String])
+synops tt tid
+	= let	descr	= docstrings tt & M.lookup tid & fromMaybe "" & lines 
+		synopsis= if null descr then "" else head descr
+		rest	= tail' descr in
+		(synopsis, rest)
 
 fstt2doc	:: KindLookupTable -> (TypeID, FullSuperTypeTable) -> Doc
-fstt2doc klt (tid@(fqn,nm), fstt)
-	= doc ("Supertypes of "++show fqn++"."++nm) "" $ fstt2mu klt tid fstt
+fstt2doc klt (tid, fstt)
+	= doc ("Types/Supertypes/Supertypes of "++showtid tid) "" $ fstt2mu klt tid fstt
+
+showtid (fqn, nm)
+	= show fqn++"."++nm
 
 fstt2mu	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkUp
 fstt2mu klt tid@(fqn, nm) fstt
