@@ -17,9 +17,10 @@ t = do	dir	<- getCurrentDirectory
 
 cluster	= buildCluster [doc1,doc2,doc3]
 
-mu = Seq    [ Base "Hallo"
+mu = Parag $ Seq
+	    [ Base "Hallo"
             , OrderedList [Base "Item", OrderedList [Base "More", Base "Nested", Base "Lists"], Base "Item"]
-            , emph "Test"
+            , emph "Test emph"
             , imp "important"
             , code  "x = \"code\""
             , incorr "wrong info"

@@ -18,16 +18,16 @@ renderHTML (Parag mu)
 renderHTML (Seq mus)
         = mus & mapM renderHTML |> unwords
 renderHTML (Emph mu)
-		= mu & renderHTML       |> inDiv "emph"
+		= mu & renderHTML       |> inSpan "emph"
 renderHTML (Imp mu)
-        = mu & renderHTML       |> inDiv "imp"
+        = mu & renderHTML       |> inSpan "imp"
 renderHTML (Code mu)
-        = mu & renderHTML       |> inDiv "code"
+        = mu & renderHTML       |> inSpan "code"
 renderHTML (Incorr mu)
-        = mu & renderHTML       |> inDiv "incorr"
+        = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
         = do    i <- get
-                title <- renderHTML mu |> inDiv ("title" ++ show i)
+                title <- renderHTML mu |> inSpan ("title" ++ show i)
                 put $ i + 1
                 text' <- renderHTML text
                 put i
@@ -64,6 +64,6 @@ ogpTag  :: Name -> String -> HTML
 ogpTag name value 
     = "<meta property=\"og:" ++ name ++ "\" content=\"" ++ value ++ "\" />" 
 
-inDiv	:: String -> HTML -> HTML
-inDiv className html
-	= "<div class=\"" ++ className ++ "\">" ++ html ++ "</div>"
+inSpan	:: String -> HTML -> HTML
+inSpan className html
+	= "<span class=\"" ++ className ++ "\">" ++ html ++ "</span>"

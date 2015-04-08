@@ -1,7 +1,7 @@
 module Languate.MarkUp.Cluster where
 
 import StdDef
-import HumanUtils
+import HumanUtils hiding (when)
 
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
@@ -15,7 +15,8 @@ import Data.Maybe
 import Control.Arrow
 import Control.Monad
 
-import Debug.Trace
+import System.Directory
+
 
 -- A cluster is a collection of documents, which can get linked with ILink
 data Cluster	= Cluster (Map Name Doc)
@@ -48,11 +49,17 @@ renderClusterTo	settings fp (Cluster docsDict)
 							return (overviewGen docs':docs))
 		let cluster	= docs' |> (title &&& id) & M.fromList & Cluster
 		mapM_ (renderFile cluster settings fp) docs'
-		let res		= M.toList $ M.fromList $ resources settings
-		mapM_ (uncurry writeFile) res
+		let res		= (M.toList $ M.fromList $ resources settings) |> first ((fp ++ "/res/")++)
+		mapM_ (uncurry writeFile') res
 		putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
 
-
+-- Creates the file on the given path. If the needed directories don't exist, create them 
+writeFile'	:: FilePath -> String -> IO ()
+writeFile' fp contents
+	= do	let dirPath	= fp & reverse & break ('/'==) & snd & reverse
+		createDirectoryIfMissing True dirPath
+		writeFile fp contents
+		
 renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
 renderFile cluster@(Cluster docs) rs fp doc= do
 	let doc'	= preprocess (rewrite (_renderEmbed cluster rs) . rewrite (_renderInLink rs fp)) $ preprocessor rs doc
@@ -61,7 +68,7 @@ renderFile cluster@(Cluster docs) rs fp doc= do
 	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links, namely "++commas deadLinks
 	let target	= _targetName rs fp $ title doc
 	let str		= postprocessor rs doc' $ render rs doc'
-	writeFile target str
+	writeFile' target str
 
 
 -- Returns all markups with references to different docs for error msgs
