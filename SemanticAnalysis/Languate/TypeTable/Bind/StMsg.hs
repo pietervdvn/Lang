@@ -17,7 +17,7 @@ import Data.Set (Set)
 import qualified Data.Set as S
 
 import Data.Maybe
-import Prelude hiding (fail, lookup)
+import Prelude hiding (fail, lookup, catch)
 
 import Control.Monad.Trans
 
@@ -86,8 +86,10 @@ getBinding	= get' binding_
 
 -- ## Monad tools
 
+-- TODO write again elegantly with lift, once we are on a better ghc again
 fail		:: String -> StMsg a
-fail		=  lift . Left
+fail str	=  StateT $ \ s -> do	a	<- Left str
+					return (a,s)
 
 
 assert True _	= return ()

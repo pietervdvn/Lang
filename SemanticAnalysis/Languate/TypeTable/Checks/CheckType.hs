@@ -2,7 +2,7 @@ module Languate.TypeTable.Checks.CheckType where
 
 import StdDef
 import Exceptions
-
+import Prelude hiding (catch)
 import Languate.AST
 import Languate.TAST
 import Languate.CheckUtils

@@ -19,7 +19,7 @@ import qualified Data.List as L
 import Data.Tuple
 import Data.Maybe
 import Data.Either
-import Prelude hiding (fail, lookup)
+import Prelude hiding (fail, lookup, catch)
 
 
 import Languate.TAST

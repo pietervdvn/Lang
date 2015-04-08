@@ -23,7 +23,7 @@ import Languate.Precedence.BuildPrecedenceTable
 import Languate.TypeTable
 import Languate.TypeTable.BuildTypeLookupTable
 import Languate.TypeTable.BuildTypeTable
-import Languate.TypeTable.TypeTable2MD
+import Languate.TypeTable.TypeTable2mu
 
 import Data.Map
 import StdDef
@@ -36,6 +36,7 @@ t	= do	w	<- packageIO path
 		dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
 		precT	<- runExceptionsIO' $ buildPrecTable' w
-		let cluster'	= add precT cluster
+		tt	<- runExceptionsIO' $ buildTypeTable w
+		let cluster'	= add tt $ add precT cluster
 		renderClusterTo html (dir ++"/" ++ path ++ "/.gen" ++ "/html2") cluster'
 		renderClusterTo md (dir ++"/" ++ path ++ "/.gen" ++ "/md2") cluster'

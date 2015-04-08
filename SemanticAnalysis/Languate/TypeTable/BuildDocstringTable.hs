@@ -14,7 +14,7 @@ import Languate.FQN
 import Languate.Package
 import Languate.TypeTable
 
-import Data.Map hiding (mapMaybe, map, isJust)
+import Data.Map hiding (mapMaybe, map)
 import Prelude hiding (lookup)
 import Data.Set (Set)
 import Data.Maybe
