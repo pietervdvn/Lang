@@ -6,8 +6,6 @@ import HumanUtils
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
 import Languate.MarkUp.Classes
-import Languate.MarkUp.HTML
-import Languate.MarkUp.MD
 import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
 import Data.Set (Set)
@@ -36,26 +34,12 @@ data RenderSettings	= RenderSettings
 	{render		:: Doc -> String
 	, renderName	:: String -> FilePath
 	, embedder	:: Doc -> MarkUp
-	, preprocessor	:: MarkUp -> MarkUp
+	, preprocessor	:: Doc -> Doc
+	, postprocessor	:: Doc -> String -> String
+	, resources	:: [(String, String)]
 	, overviewPage	:: Maybe ([Doc] -> Doc)}
 
-html	:: RenderSettings
-html	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id (Just defaultOverviewPage)
 
-md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id (Just defaultOverviewPage)
-
-fancyEmbedder doc
-	= titling (title doc) $ Seq [notImportant $ description doc, contents doc]
-
-defaultOverviewPage	:: [Doc] -> Doc
-defaultOverviewPage docs
-	= let	titl	= "All pages"
-		descr	= "Overview of all pages within the cluster"
-		genEntry doc
-			= [inlink $ title doc, Base $ description doc]
-		tbl	= table ["Title", "Description"] $ docs |> genEntry in
-		Doc titl descr M.empty $ titling titl tbl
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
 renderClusterTo	settings fp (Cluster docsDict)
@@ -64,17 +48,19 @@ renderClusterTo	settings fp (Cluster docsDict)
 							return (overviewGen docs':docs))
 		let cluster	= docs' |> (title &&& id) & M.fromList & Cluster
 		mapM_ (renderFile cluster settings fp) docs'
+		let res		= M.toList $ M.fromList $ resources settings
+		mapM_ (uncurry writeFile) res
 		putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
 
 
 renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
 renderFile cluster@(Cluster docs) rs fp doc= do
-	let doc'	= preprocess (rewrite (_renderEmbed cluster rs) . rewrite (_renderInLink rs fp) . preprocessor rs) doc
+	let doc'	= preprocess (rewrite (_renderEmbed cluster rs) . rewrite (_renderInLink rs fp)) $ preprocessor rs doc
 	let inLinks	= search searchRefs $ contents doc
 	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
 	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links, namely "++commas deadLinks
 	let target	= _targetName rs fp $ title doc
-	let str		= render rs doc'
+	let str		= postprocessor rs doc' $ render rs doc'
 	writeFile target str
 
 

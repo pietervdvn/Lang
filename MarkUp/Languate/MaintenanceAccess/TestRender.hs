@@ -2,11 +2,7 @@ module Languate.MaintenanceAccess.TestRender where
 
 import StdDef
 import State
-import Languate.MarkUp.MarkUp
-import Languate.MarkUp.Doc
-import Languate.MarkUp.HTML
-import Languate.MarkUp.MD
-import Languate.MarkUp.Cluster
+import Languate.MarkUp
 import Data.Map (fromList)
 
 import Data.Map

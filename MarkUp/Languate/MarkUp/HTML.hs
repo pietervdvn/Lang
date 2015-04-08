@@ -48,13 +48,8 @@ renderHTML (InLink mu url)
 	= renderHTML $ Link mu url
 
 renderDoc2HTML::    Doc -> HTML
-renderDoc2HTML doc   = 
-            let body = runstate (contents doc & renderHTML) 1 & fst & inTag "body" 
-                basicOgp ls =  ("title", title doc):("description",description doc) : ls
-                ogpTags = meta doc & toList & basicOgp |> uncurry ogpTag
-                head = ((title doc & inTag "title") ++ unwords ogpTags) & inTag "head" in
-                head ++ body
-
+renderDoc2HTML doc   = runstate (contents doc & renderHTML) 1 & fst
+            
 --------------- TOOLS ---------------
 
 inTag   :: String -> HTML -> HTML

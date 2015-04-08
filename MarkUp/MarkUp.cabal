@@ -11,5 +11,5 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     Languate.MarkUp
-  other-modules:  	Languate.MarkUp.Classes, Languate.MarkUp.MarkUp, Languate.MarkUp.Doc, Languate.MarkUp.HTML, Languate.MarkUp.Cluster, Languate.MarkUp.MD, Languate.MaintenanceAccess.TestRender     
+  other-modules:  	Languate.MarkUp.Classes, Languate.MarkUp.MarkUp, Languate.MarkUp.Doc, Languate.MarkUp.HTML, Languate.MarkUp.Cluster, Languate.MarkUp.MD, Languate.MarkUp.Options Languate.MaintenanceAccess.TestRender     
   build-depends:       base ==4.5.*, Std ==0.1.*, containers ==0.5.*, directory ==1.2.*
