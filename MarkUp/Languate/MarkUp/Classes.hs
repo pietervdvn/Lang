@@ -9,4 +9,9 @@ class MarkUpable m where
 
 -- Something that can be made a document of
 class Documentable m where
-	toDocument	:: m -> Doc
+	toDocument	:: m -> (Doc, [Doc])
+
+addDocs	:: (Documentable docable) => docable -> [Doc] -> [Doc]
+addDocs docable docs
+	= let (d, dcs)	= toDocument docable in
+		d:dcs ++ docs

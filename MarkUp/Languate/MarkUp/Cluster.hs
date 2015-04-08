@@ -5,6 +5,7 @@ import HumanUtils
 
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
+import Languate.MarkUp.Classes
 import Languate.MarkUp.HTML
 import Languate.MarkUp.MD
 import Data.Map (Map, findWithDefault)
@@ -25,6 +26,12 @@ buildCluster	:: [Doc] -> Cluster
 buildCluster docs
 	= docs |> (title &&& id) & M.fromList & Cluster
 
+add	:: (Documentable documentable) => documentable -> Cluster -> Cluster
+add docable (Cluster docs)
+	= let 	(doc, docs')	= toDocument docable 
+		newDocs	= (doc:docs') |> (title &&& id) in
+		Cluster $ M.union docs $ M.fromList newDocs
+
 data RenderSettings	= RenderSettings 
 	{render		:: Doc -> String
 	, renderName	:: String -> FilePath
@@ -33,10 +40,10 @@ data RenderSettings	= RenderSettings
 	, overviewPage	:: Maybe ([Doc] -> Doc)}
 
 html	:: RenderSettings
-html	= RenderSettings renderDoc2HTML (++".html") contents id (Just defaultOverviewPage)
+html	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id (Just defaultOverviewPage)
 
 md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") contents id (Just defaultOverviewPage)
+md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id (Just defaultOverviewPage)
 
 fancyEmbedder doc
 	= titling (title doc) $ Seq [notImportant $ description doc, contents doc]

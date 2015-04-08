@@ -111,5 +111,7 @@ inlink str
 	= InLink (Base str) str
 table header
 	= Table (header |> Base)
+commas' mus
+	= Seq $ intersperse (Base ", ") mus
 notImportant
 	= emph	-- TODO change to actual not important
