@@ -27,16 +27,21 @@ instance Documentable TypeTable where
 typeTable2doc	:: TypeTable -> Doc
 typeTable2doc tt
 	= let	rows	= knownTypes tt & S.toList
-				|> (\tid -> [link' $ showtid tid, b $ fst $ synops tt tid ]) in
+				|> (\tid -> [link (showtid tid) ("Types/"++showtid tid),
+						 b $ fst $ synops tt tid ]) 
+		superTables	=  knownTypes tt & S.toList
+				|> (Parag . Embed . ("Types/Supertypes/Supertypes of "++) . showtid) 
+				& Mu.Seq in
 
 		doc "Type overview" "Everything we know about every type we know of" $ 
-		titling "Known types" $ table ["Type", "Synopsis"] rows
+		Mu.Seq [titling "Known types" $ table ["Type", "Synopsis"] rows,
+			titling "Supertype overview" $ superTables]
 
 type2doc	:: TypeTable -> TypeID -> Doc
 type2doc tt tid
 	= let	(synopsis, rest) = synops tt tid
 		kind	= kinds tt & M.findWithDefault Kind tid in
-		doc (showtid tid) synopsis $
+		doc ("Types/"++showtid tid) synopsis $
 		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid]) 
 			$ Mu.Seq [Imp $ code $ show kind
 				, imp synopsis, parag $ unlines rest, 
