@@ -115,9 +115,12 @@ link' str
 	= link str str
 inlink str
 	= InLink (Base str) str
+notImportant
+	= emph	-- TODO change to actual not important
 table header
 	= Table (header |> Base)
 commas' mus
 	= Seq $ intersperse (Base ", ") mus
-notImportant
-	= emph	-- TODO change to actual not important
+parags mus
+	= mus |> Parag & Seq
+unwords'= Seq

@@ -11,7 +11,11 @@ class MarkUpable m where
 class Documentable m where
 	toDocument	:: m -> (Doc, [Doc])
 
-addDocs	:: (Documentable docable) => docable -> [Doc] -> [Doc]
-addDocs docable docs
+addDocs'	:: (Documentable docable) => docable -> [Doc] -> [Doc]
+addDocs' docable docs
 	= let (d, dcs)	= toDocument docable in
 		d:dcs ++ docs
+
+addDocs :: (Documentable docable) => [docable] -> [Doc] -> [Doc]
+addDocs docables docs
+	= foldr addDocs' docs docables
