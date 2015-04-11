@@ -18,12 +18,7 @@ import System.IO.Unsafe
 import System.Directory
 
 
-import Languate.Precedence.PrecedenceTable
-import Languate.Precedence.BuildPrecedenceTable
-import Languate.TypeTable
-import Languate.TypeTable.BuildTypeLookupTable
-import Languate.TypeTable.BuildTypeTable
-import Languate.TypeTable.TypeTable2mu
+import Languate.TableOverview
 
 import Data.Map
 import StdDef
@@ -35,8 +30,7 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 t	= do	w	<- packageIO path
 		dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
-		precT	<- runExceptionsIO' $ buildPrecTable' w
-		tt	<- runExceptionsIO' $ buildTypeTable w
-		let cluster'	= add tt $ add precT cluster
+		to	<- runExceptionsIO' $ buildAllTables w
+		let cluster'	= add to cluster
 		renderClusterTo html (dir ++"/" ++ path ++ "/.gen" ++ "/html2") cluster'
 		renderClusterTo md (dir ++"/" ++ path ++ "/.gen" ++ "/md2") cluster'

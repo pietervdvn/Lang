@@ -10,7 +10,7 @@ import Data.Map (Map)
 import qualified Data.Set as S
 import qualified Data.Map as M
 
-import Languate.MarkUp
+import Languate.MarkUp as Mu
 
 {-
 
@@ -23,23 +23,35 @@ data FunctionTable	= FunctionTable
 	}
 	deriving (Show)
 
-type FunctionTables	= Map FQN FunctionTable
+newtype FunctionTables	= FunctionTables (Map FQN FunctionTable)
 
-funcSign2md	:: Signature -> [MarkDown]
-funcSign2md sign	=
-	[ bold $ signName sign
-	, signTypes sign |> st True |> code & unwords
+funcSign2mu	:: Signature -> [MarkUp]
+funcSign2mu sign	=
+	[ imp $ signName sign
+	, signTypes sign |> st True |> code & Mu.Seq
 	, signTypeReqs sign & rTypeReqs2md]
 
-functiontable2md	:: FunctionTable -> MarkDown
-functiontable2md ft	=
+docname fqn	= "Modules/FunctionTable/Function table for "++show fqn
+
+functiontable2doc fqn ft
+	= doc (docname fqn) ("Function overview for "++show fqn) $ functiontable2mu ft
+
+functiontable2mu	:: FunctionTable -> MarkUp
+functiontable2mu ft	=
 	let header	= ["Name","Types","Requirements"]
-	    contents f	= f ft & toList |> funcSign2md
+	    contents f	= f ft & toList |> funcSign2mu
 	    tableFor f	= table header $ contents f
 		in
-		title 2 "Defined" ++ tableFor defined ++
-		title 2 "Exported" ++ tableFor public
+		[ titling "Defined" (tableFor defined)
+		, titling "Exported" (tableFor public)] & Mu.Seq
 
-functiontables2md	:: FunctionTables -> MarkDown
-functiontables2md fts	=  fts & M.toList ||>> functiontable2md
-				|> (\(fqn, md) -> title 1 (show fqn) ++ md) & unlines
+instance Documentable FunctionTables where
+	toDocument	= functiontables2docs
+
+functiontables2docs	:: FunctionTables -> (Doc, [Doc])
+functiontables2docs (FunctionTables fts)
+	=  let	all	= fts & M.toList
+		docs	= all |> uncurry functiontable2doc
+		embeds	= all |> fst |> show |> Embed & Mu.Seq in
+		(doc "Functiontable overview" "Overview of all functions in all modules" embeds,
+			docs)

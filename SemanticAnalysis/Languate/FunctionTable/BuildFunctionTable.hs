@@ -36,7 +36,7 @@ buildFunctionTables p tt
 		let restrictions fqn (impFrom, funcSign)
 				= isRestricted p fqn impFrom funcSign
 		let exported	= calculateExports impGr (invert impGr) getPubl restrictions
-		return $ mergeTables exported functiontables
+		return $ FunctionTables $ mergeTables exported functiontables
 
 
 isRestricted	:: Package -> FQN -> FQN -> Signature -> Bool
@@ -46,7 +46,8 @@ isRestricted pack currentModule importedFrom sign
 		isAllowed restr (signName sign)
 
 
-mergeTables	:: Map FQN (Set (Signature, FQN)) -> FunctionTables -> FunctionTables
+mergeTables	:: Map FQN (Set (Signature, FQN)) -> Map FQN FunctionTable -> 
+			Map FQN FunctionTable
 mergeTables exported fts
 	= mapWithKey (\fqn ft ->
 		let	exp	= findWithDefault S.empty fqn exported & S.toList |> fst & S.fromList in
