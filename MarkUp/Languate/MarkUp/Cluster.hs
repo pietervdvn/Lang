@@ -17,8 +17,6 @@ import Control.Monad
 
 import System.Directory
 
-import Debug.Trace
-
 -- A cluster is a collection of documents, which can get linked with ILink
 data Cluster	= Cluster {docsIn	:: Map Name Doc}
 
@@ -93,8 +91,7 @@ _renderInLink _ _ _	= Nothing
 
 _renderEmbed	:: Cluster -> RenderSettings -> MarkUp -> Maybe MarkUp
 _renderEmbed (Cluster docs) rs (Embed docName)
-	= trace ("Rendering embedding for "++docName) $
-	  Just $ fromMaybe (Parag $ Seq [Base "Document ", imp docName,Base " not found"]) $ do
+	= Just $ fromMaybe (Parag $ Seq [Base "Document ", imp docName,Base " not found"]) $ do
 		doc	<- M.lookup docName docs
 		return $ embedder rs doc
 _renderEmbed _ _ _	= Nothing
