@@ -17,9 +17,10 @@ import Control.Monad
 
 import System.Directory
 
+import Debug.Trace
 
 -- A cluster is a collection of documents, which can get linked with ILink
-data Cluster	= Cluster (Map Name Doc)
+data Cluster	= Cluster {docsIn	:: Map Name Doc}
 
 buildCluster	:: [Doc] -> Cluster
 buildCluster docs
@@ -43,15 +44,30 @@ data RenderSettings	= RenderSettings
 
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
-renderClusterTo	settings fp (Cluster docsDict)
-	= do	let docs	= M.elems docsDict
-		let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
-							return (overviewGen docs':docs))
-		let cluster	= docs' |> (title &&& id) & M.fromList & Cluster
-		mapM_ (renderFile cluster settings fp) docs'
-		let res		= (M.toList $ M.fromList $ resources settings) |> first ((fp ++ "/res/")++)
-		mapM_ (uncurry writeFile') res
-		putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
+renderClusterTo	settings fp (Cluster docsDict)= do	
+	let docs	= M.elems docsDict
+	let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
+						return (overviewGen docs':docs))
+	let cluster	= docs' |> (title &&& id) & M.fromList
+	let cluster'	= cluster |> preprocessor settings
+				|> preprocess (rewrite $ _renderEmbed cluster' settings)
+				|> preprocess (rewrite $ _renderInLink settings fp)
+				& Cluster
+	mapM_ (renderFile cluster' settings fp) (docsIn cluster' & M.elems)
+	let res		= (M.toList $ M.fromList $ resources settings) 
+				|> first ((fp ++ "/res/")++)
+	mapM_ (uncurry writeFile') res
+	putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
+
+		
+renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
+renderFile cluster@(Cluster docs) rs fp doc = do
+	let inLinks	= search searchRefs $ contents doc
+	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
+	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links, namely "++commas deadLinks
+	let target	= _targetName rs fp $ title doc
+	let str		= postprocessor rs doc $ render rs doc
+	writeFile' target str
 
 -- Creates the file on the given path. If the needed directories don't exist, create them 
 writeFile'	:: FilePath -> String -> IO ()
@@ -59,17 +75,6 @@ writeFile' fp contents
 	= do	let dirPath	= fp & reverse & break ('/'==) & snd & reverse
 		createDirectoryIfMissing True dirPath
 		writeFile fp contents
-		
-renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
-renderFile cluster@(Cluster docs) rs fp doc= do
-	let doc'	= preprocess (rewrite (_renderEmbed cluster rs) . rewrite (_renderInLink rs fp)) $ preprocessor rs doc
-	let inLinks	= search searchRefs $ contents doc
-	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
-	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links, namely "++commas deadLinks
-	let target	= _targetName rs fp $ title doc
-	let str		= postprocessor rs doc' $ render rs doc'
-	writeFile' target str
-
 
 -- Returns all markups with references to different docs for error msgs
 searchRefs	:: MarkUp -> Maybe Name
@@ -88,7 +93,8 @@ _renderInLink _ _ _	= Nothing
 
 _renderEmbed	:: Cluster -> RenderSettings -> MarkUp -> Maybe MarkUp
 _renderEmbed (Cluster docs) rs (Embed docName)
-	= Just $ fromMaybe (Parag $ Seq [Base "Document ", imp docName,Base " not found"]) $ do
+	= trace ("Rendering embedding for "++docName) $
+	  Just $ fromMaybe (Parag $ Seq [Base "Document ", imp docName,Base " not found"]) $ do
 		doc	<- M.lookup docName docs
 		return $ embedder rs doc
 _renderEmbed _ _ _	= Nothing

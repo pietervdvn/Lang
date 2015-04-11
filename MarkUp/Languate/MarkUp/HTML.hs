@@ -46,6 +46,8 @@ renderHTML (OrderedList mus)
         = mapM renderHTML mus ||>> inTag "li" |> concat |> inTag "ol"
 renderHTML (InLink mu url)
 	= renderHTML $ Link mu url
+renderHTML mu
+	= return $ inTag "red" $ inTag "b" $ "Markup "++show mu++" can not be rendered to html" 
 
 renderDoc2HTML::    Doc -> HTML
 renderDoc2HTML doc   = runstate (contents doc & renderHTML) 1 & fst

@@ -14,4 +14,5 @@ doc titl descr contents
 
 
 preprocess	:: (MarkUp -> MarkUp) -> Doc -> Doc
-preprocess f dc	=  dc { contents = f $ contents dc}
+preprocess f dc	=  let mu	= f $ contents dc in
+			dc { contents = mu}
