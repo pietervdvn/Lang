@@ -21,7 +21,7 @@ import Data.Map hiding (filter, map)
 import Normalizable
 
 
-expr2prefExpr		:: PrecedenceTable -> Expression -> Expression
+expr2prefExpr		:: PrecedenceTable -> Expression -> OperatorFreeExpression
 expr2prefExpr t (Seq exprs)
 			= normalize $ makePref t $ map (expr2prefExpr t) exprs
 expr2prefExpr t (Tuple exprs)

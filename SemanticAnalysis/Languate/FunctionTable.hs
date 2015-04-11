@@ -52,6 +52,6 @@ functiontables2docs	:: FunctionTables -> (Doc, [Doc])
 functiontables2docs (FunctionTables fts)
 	=  let	all	= fts & M.toList
 		docs	= all |> uncurry functiontable2doc
-		embeds	= all |> fst |> show |> Embed & Mu.Seq in
+		embeds	= all |> fst |> docname |> Embed & Mu.Seq in
 		(doc "Functiontable overview" "Overview of all functions in all modules" embeds,
 			docs)

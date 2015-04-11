@@ -60,7 +60,10 @@ data Expression	= Nat Int
 		| Operator String
 		| ExpNl (Maybe Comment)	-- a newline in the expression, which might have a comment
 	deriving (Ord, Eq)
-
+{- Expression which only contains calls (which has been passed through the precedencerebuild)
+	Only gets used from semantic analysis
+-}
+type OperatorFreeExpression	= Expression
 
 -- ## TYPE STUFF
 
