@@ -26,7 +26,7 @@ This is the heart of the typechecker, where expressions get converted into their
 
 expr2texpr	:: Package -> TableOverview -> FQN -> OperatorFreeExpression -> TExpression
 expr2texpr p to fqn e
-	=  runstate (_e2te $ preClean e) (Ctx p to fqn) & fst
+	=  runstate (_e2te $ normalize $ preClean e) (Ctx p to fqn) & fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
@@ -39,11 +39,20 @@ _e2te		:: Expression -> SCtx TExpression
 _e2te (Nat n)	= return $ TNat n 
 _e2te (Flt f)	= return $ TFlt f
 _e2te (Chr c)	= return $ TChr c
-_e2te (ExpNl _)	= error  $ "expr2texpr: some seq did not get converted out. This is a bug
-
+_e2te (Call
+_e2te (ExpNl (function:args))= do
+	tfunction	<- _e2te function
+	targs		<- mapM _e2te args
+	todo	-- TODO
+_e2te e		= error $ "Could not type the expression "+e
 
 preClean	:: Expression -> Expression
 preClean (Seq exps)
-		= exps & filter (not . isExpNl)
+		= exps & preClean' & Seq
+preClean (Tuple exps)
+		= exps & preClean' & Tuple
+preClean e	= e
 
+preClean'	:: [Expression] -> [Expression]
+preClean' exps	= exps & filter (not . isExpNl) |> preClean
 
