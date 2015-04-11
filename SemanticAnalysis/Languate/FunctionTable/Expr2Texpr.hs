@@ -24,9 +24,9 @@ This is the heart of the typechecker, where expressions get converted into their
 
 -}
 
-expr2texpr	:: Package -> TableOverview -> FQN -> Expression -> TExpression
+expr2texpr	:: Package -> TableOverview -> FQN -> OperatorFreeExpression -> TExpression
 expr2texpr p to fqn e
-	=  runstate (_e2te e) (Ctx p to fqn) & fst
+	=  runstate (_e2te $ preClean e) (Ctx p to fqn) & fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
@@ -35,9 +35,15 @@ data Ctx = Ctx	{ package	:: Package
 
 type SCtx a	= State Ctx a
 
-_e2te	:: Expression -> SCtx TExpression
-_e2te e	= todo 
+_e2te		:: Expression -> SCtx TExpression
+_e2te (Nat n)	= return $ TNat n 
+_e2te (Flt f)	= return $ TFlt f
+_e2te (Chr c)	= return $ TChr c
+_e2te (ExpNl _)	= error  $ "expr2texpr: some seq did not get converted out. This is a bug
 
 
+preClean	:: Expression -> Expression
+preClean (Seq exps)
+		= exps & filter (not . isExpNl)
 
 

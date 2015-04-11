@@ -90,6 +90,49 @@ showTypeReq	:: TypeRequirement -> String
 showTypeReq (name, t)
 		=  "("++name++" in "++show t++")"
 
+
+-- EXPRESSION UTILS --
+----------------------
+
+isOperator		:: Expression -> Bool
+isOperator (Operator _)	= True
+isOperator _		= False
+
+isExpNl			:: Expression -> Bool
+isExpNl (ExpNl _)	= True
+isExpNl _		= False
+
+instance Normalizable Expression where
+	normalize	= ne
+
+instance Show Expression where
+	show	= se . normalize
+
+se		:: Expression -> String
+se (Nat i)	= show i
+se (Flt flt)	= show flt
+se (Chr c)	= show c
+se (Seq expr)	= "("++unwords (map show expr) ++ ")"
+se (Tuple exprs)= "("++intercalate ", " (map show exprs) ++ ")"
+se (BuiltIn str)= '#':str
+se (Cast t)	= "~("++show t++")"
+se AutoCast	= "~~"
+se (Call str)	= str
+se (Operator str)= str
+se _	= ""
+
+
+ne		:: Expression -> Expression
+ne (Seq [e])	= ne e
+ne (Seq exprs)	= Seq $ nes exprs
+ne (Tuple exprs)= Tuple $ map ne exprs
+ne e		= e
+
+nes	:: [Expression] -> [Expression]
+nes	= filter (Seq [] /=) . map ne
+
+
+
 instance Show ADTSum where
 	show (ADTSum nm v namedArgs )
 		= "ADTSum "++nm++" "++show v ++ " " ++ show namedArgs
@@ -131,38 +174,6 @@ instance Show PrecRelation where
 	show (PrecEQ o1 o2)	= "(" ++ o1 ++ ") = (" ++ o2 ++ ")"
 	show (PrecLT o1 o2)	= "(" ++ o1 ++ ") < (" ++ o2 ++ ")"
 
-instance Show Expression where
-	show	= se . normalize
-
-se		:: Expression -> String
-se (Nat i)	= show i
-se (Flt flt)	= show flt
-se (Chr c)	= show c
-se (Seq expr)	= "("++unwords (map show expr) ++ ")"
-se (Tuple exprs)= "("++intercalate ", " (map show exprs) ++ ")"
-se (BuiltIn str)= '#':str
-se (Cast t)	= "~("++show t++")"
-se AutoCast	= "~~"
-se (Call str)	= str
-se (Operator str)= str
-se _	= ""
-
-
-ne		:: Expression -> Expression
-ne (Seq [e])	= ne e
-ne (Seq exprs)	= Seq $ nes exprs
-ne (Tuple exprs)= Tuple $ map ne exprs
-ne e		= e
-
-nes	:: [Expression] -> [Expression]
-nes	= filter (Seq [] /=) . map ne
-
-isOperator		:: Expression -> Bool
-isOperator (Operator _)	= True
-isOperator _		= False
-
-instance Normalizable Expression where
-	normalize	= ne
 
 instance Show ClassDef where
 	show (ClassDef n frees reqs subC laws signs)

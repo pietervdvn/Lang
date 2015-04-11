@@ -1,9 +1,4 @@
-module Languate.AST (module AST)
-
-
-
-
-where
+module Languate.AST (module AST) where
 
 {--
 

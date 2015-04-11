@@ -21,7 +21,7 @@ import System.Directory
 import Languate.TableOverview
 import Languate.ParserStub
 import Languate.FunctionTable.Expr2Texpr
-
+import Languate.Precedence.Expr2PrefExpr
 import Data.Map
 import Data.Maybe
 import StdDef
@@ -32,7 +32,8 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 loadedPackage	= unsafePerformIO $ packageIO path
 tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 
-tst str	= do	expr	<- parseExpr str
+tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
+		print expr
 		print $ expr2texpr loadedPackage tablesOverv 
 			(toFQN' "pietervdvn:Data:Prelude") expr
 
