@@ -1,9 +1,10 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, setVisibility, usedTypes, freesIn, trav) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav) where
 
 {--
 This module implements utilities for type asts
 --}
 import StdDef
+
 
 import Normalizable
 import Data.List (intercalate)
@@ -23,6 +24,7 @@ nt (Applied t [t'])	= Applied (nt t) [nt t']
 nt (Applied t ts)	= Applied (nt $ Applied t $ init ts) [nt $ last ts]
 nt (Curry [t])		= nt t
 nt (Curry ts)		= Curry [nt $ head ts, nt $ Curry $ tail ts ]
+
 nt (TupleType [t])	= nt t
 nt (TupleType ts)	= TupleType $ map nt ts
 nt t			= t

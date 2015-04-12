@@ -37,7 +37,7 @@ convert Unknown	= noReq Infer
 convert (AppliedType ast asts)
 		= packReqs (\tps -> Applied (head tps) (tail tps)) (ast:asts)
 convert (Tuple asts)
-		=  packReqs TupleType asts
+		= packReqs TupleType asts
 convert (CurryType asts)
 		=  packReqs Curry asts
 convert	ast	=  convErr "Pt2Type" ast
