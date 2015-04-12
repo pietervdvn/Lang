@@ -3,8 +3,6 @@ module Languate.MaintenanceAccess.TestRender where
 import StdDef
 import State
 import Languate.MarkUp
-import Data.Map (fromList)
-
 import Data.Map
 
 import System.Directory
@@ -42,5 +40,3 @@ mu0	= Seq [Base "Hallo!", Embed "Doc3"]
 doc1	= Doc "Doc1" "This is the first document" (fromList [("key", "value")]) mu
 doc2	= Doc "Doc2" "This is the second document" empty mu0
 doc3	= Doc "Doc3" "The third document" empty $ Base "Contents of doc3"
-
-

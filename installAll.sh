@@ -9,9 +9,12 @@ else
 fi
 
 FOUND=0
+DONE=0
 
 for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/
 do
+	DONE=$(($DONE+1))
+	echo $DONE
 	if [ "$FOUND" -eq 1 -o "$START" = "$pack" ]
 	then
 		FOUND=1

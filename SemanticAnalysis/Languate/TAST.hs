@@ -80,7 +80,7 @@ data ResolvedType	= RNormal FQN Name
 	deriving (Eq, Ord)
 type RType		= ResolvedType
 -- A function that is all of these. Note that frees are all regarded in the same context
-type RTypeUnion		= [RType]	
+type RTypeUnion		= [RType]
 type RTypeReq		= (Name, ResolvedType)
 
 {- a signature for a single implementation.
@@ -174,7 +174,7 @@ showRTypeReq' (nm, subs)
 rTypeReqs2md	:: [RTypeReq] -> MarkUp
 rTypeReqs2md rqs
 		= rqs	& merge
-			|> (\(nm, subs) -> curry showRTypeReq' nm subs)
+			|> showRTypeReq'
 			|> code & Mu.Seq
 
 instance Normalizable ResolvedType where
@@ -270,7 +270,7 @@ appliedTypes _
 -- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded (defaultFreeNames)
 canonicalBinding	:: RType -> Map Name RType
 canonicalBinding t
-	= appliedTypes t & zip defaultFreeNames & fromList 
+	= appliedTypes t & zip defaultFreeNames & fromList
 
 defaultFreeNames	:: [Name]
 defaultFreeNames	= [0..] |> show |> ('a':)

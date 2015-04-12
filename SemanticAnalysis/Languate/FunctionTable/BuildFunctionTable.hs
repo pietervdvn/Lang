@@ -31,13 +31,13 @@ buildFunctionTables p tt
 					return (fqn, ft)
 		functiontables	<- p & modules & toList & mapM bft |> fromList
 		let impGr	= importGraph p
-		let getPubl fqn	= fromMaybe S.empty $ (M.lookup fqn functiontables
+		let getPubl fqn	= fromMaybe S.empty (M.lookup fqn functiontables
 					|> public)
 		let restrictions fqn (impFrom, funcSign)
 				= isRestricted p fqn impFrom funcSign
 		let exported	= calculateExports impGr (invert impGr) getPubl restrictions
 		let ftsWithPub	= mergeTables exported functiontables
-		let known	= calculateImports impGr getPubl exported 
+		let known	= calculateImports impGr getPubl exported
 					|> S.toList ||>> fst
 		let ftsWithKnown
 			= mapWithKey (addKnown known) ftsWithPub
@@ -56,13 +56,13 @@ isRestricted pack currentModule importedFrom sign
 		isAllowed restr (signName sign)
 
 
-mergeTables	:: Map FQN (Set (Signature, FQN)) -> Map FQN FunctionTable -> 
+mergeTables	:: Map FQN (Set (Signature, FQN)) -> Map FQN FunctionTable ->
 			Map FQN FunctionTable
-mergeTables exported fts
-	= mapWithKey (\fqn ft ->
+mergeTables exported
+	= mapWithKey $ \fqn ft ->
 		let	exp	= findWithDefault S.empty fqn exported & S.toList |> fst & S.fromList in
 			ft {public = S.union exp $ public ft}
-		) fts
+
 
 buildFunctionTable		:: Package -> TypeTable -> FQN -> Module -> Exc FunctionTable
 buildFunctionTable p tt fqn m = inFile fqn $
@@ -89,7 +89,7 @@ functionIn	:: Statement -> [((Name, [Type], [TypeRequirement]), Visible)]
 functionIn (FunctionStm f)
 	= zip (signs f) (repeat $ visibility f)
 functionIn (ClassDefStm cd)
-	= let	signs	= decls cd |> (third3 $ (classReqs cd ++)) in
+	= let	signs	= decls cd |> third3 (classReqs cd ++) in
 		zip signs $ repeat Public
 functionIn (ADTDefStm (ADTDef nm frees reqs sums))
 	= let	typ	= Applied (Normal [] nm) (frees |> Free) in
@@ -103,5 +103,3 @@ functionsInADTSum (t,treqs) (ADTSum consName vis args)
 	= let	argTypes	= args |> snd
 		constructor	= ((consName, [Curry $ argTypes++[t]], treqs), vis) in
 		[constructor]	-- TODO add field getters, setters and modders
-
-	

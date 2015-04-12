@@ -34,7 +34,7 @@ fixImplicitRequirements treqt
 
 
 fixImplicitRequirements_	:: TypeReqTable -> FullSuperTypeTables ->
-				Writer ToBinds (FullSuperTypeTables)
+				Writer ToBinds FullSuperTypeTables
 fixImplicitRequirements_ treqt fstts
 	= mapM (uncurry $ fixImplicitsFor treqt fstts) (M.toList fstts) |> M.fromList
 

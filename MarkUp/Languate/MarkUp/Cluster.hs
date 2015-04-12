@@ -26,11 +26,11 @@ buildCluster docs
 
 add	:: (Documentable documentable) => documentable -> Cluster -> Cluster
 add docable (Cluster docs)
-	= let 	(doc, docs')	= toDocument docable 
+	= let 	(doc, docs')	= toDocument docable
 		newDocs	= (doc:docs') |> (title &&& id) in
 		Cluster $ M.union docs $ M.fromList newDocs
 
-data RenderSettings	= RenderSettings 
+data RenderSettings	= RenderSettings
 	{render		:: Doc -> String
 	, renderName	:: String -> FilePath
 	, embedder	:: Doc -> MarkUp
@@ -42,7 +42,7 @@ data RenderSettings	= RenderSettings
 
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
-renderClusterTo	settings fp (Cluster docsDict)= do	
+renderClusterTo	settings fp (Cluster docsDict)= do
 	let docs	= M.elems docsDict
 	let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
 						return (overviewGen docs':docs))
@@ -52,12 +52,12 @@ renderClusterTo	settings fp (Cluster docsDict)= do
 				|> preprocess (rewrite $ _renderInLink settings fp)
 				& Cluster
 	mapM_ (renderFile cluster' settings fp) (docsIn cluster' & M.elems)
-	let res		= (M.toList $ M.fromList $ resources settings) 
+	let res		= M.toList (M.fromList $ resources settings)
 				|> first ((fp ++ "/res/")++)
 	mapM_ (uncurry writeFile') res
 	putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
 
-		
+
 renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
 renderFile cluster@(Cluster docs) rs fp doc = do
 	let inLinks	= search searchRefs $ contents doc
@@ -67,7 +67,7 @@ renderFile cluster@(Cluster docs) rs fp doc = do
 	let str		= postprocessor rs doc $ render rs doc
 	writeFile' target str
 
--- Creates the file on the given path. If the needed directories don't exist, create them 
+-- Creates the file on the given path. If the needed directories don't exist, create them
 writeFile'	:: FilePath -> String -> IO ()
 writeFile' fp contents
 	= do	let dirPath	= fp & reverse & break ('/'==) & snd & reverse

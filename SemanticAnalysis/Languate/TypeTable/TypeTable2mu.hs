@@ -16,7 +16,7 @@ import qualified Data.Set as S
 b	= Base
 
 instance Documentable TypeTable where
-	toDocument tt	= 
+	toDocument tt	=
 		let klt	= kinds tt
 		    fstts	= allSupertypes tt & M.toList |> fstt2doc klt
 		    types	= knownTypes tt & S.toList |> type2doc tt in
@@ -28,29 +28,29 @@ typeTable2doc	:: TypeTable -> Doc
 typeTable2doc tt
 	= let	rows	= knownTypes tt & S.toList
 				|> (\tid -> [link (showtid tid) ("Types/"++showtid tid),
-						 b $ fst $ synops tt tid ]) 
+						 b $ fst $ synops tt tid ])
 		superTables	=  knownTypes tt & S.toList
-				|> (Parag . Embed . ("Types/Supertypes/Supertypes of "++) . showtid) 
+				|> (Parag . Embed . ("Types/Supertypes/Supertypes of "++) . showtid)
 				& Mu.Seq in
 
-		doc "Type overview" "Everything we know about every type we know of" $ 
+		doc "Type overview" "Everything we know about every type we know of" $
 		Mu.Seq [titling "Known types" $ table ["Type", "Synopsis"] rows,
-			titling "Supertype overview" $ superTables]
+			titling "Supertype overview" superTables]
 
 type2doc	:: TypeTable -> TypeID -> Doc
 type2doc tt tid
 	= let	(synopsis, rest) = synops tt tid
 		kind	= kinds tt & M.findWithDefault Kind tid in
 		doc ("Types/"++showtid tid) synopsis $
-		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid]) 
+		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid])
 			$ Mu.Seq [Imp $ code $ show kind
-				, imp synopsis, parag $ unlines rest, 
+				, imp synopsis, parag $ unlines rest,
 				if tid == anyTypeID then Mu.Seq [] else
 					Embed $ "Types/Supertypes/Supertypes of "++showtid tid]
 
 synops	:: TypeTable -> TypeID -> (String, [String])
 synops tt tid
-	= let	descr	= docstrings tt & M.lookup tid & fromMaybe "" & lines 
+	= let	descr	= docstrings tt & M.lookup tid & fromMaybe "" & lines
 		synopsis= if null descr then "" else head descr
 		rest	= tail' descr in
 		(synopsis, rest)
@@ -68,7 +68,7 @@ fstt2mu klt tid@(fqn, nm) fstt
 		tpname		= nm++" "++ unwords (take nrOfArgs defaultFreeNames)
 		titl		= Mu.Seq [b "Supertypes of ", code tpname]
 		tbl	= if M.null fstt then Parag $ emph "No supertypes" else
-				table ["Is type","Requirements","Via","Orig type","Origsuper -> actualsuper binding","Via -> Current binding"] 
+				table ["Is type","Requirements","Via","Orig type","Origsuper -> actualsuper binding","Via -> Current binding"]
 				(M.toList fstt |> fsttKeyentry2mu)
 		in
 		Titling titl $ Mu.Seq [tbl, inlink $ title explanationFSTT]
@@ -85,8 +85,8 @@ fsttKeyentry2mu (isA, entry)
 
 req2mu	:: (Name, Set RType) -> MarkUp
 req2mu (nm, reqs)
-	= code $ (if S.null reqs then nm else 
-		pars $ nm ++ ":" ++ commas (S.toList reqs |> st True))
+	= code $ if S.null reqs then nm else
+		pars $ nm ++ ":" ++ commas (S.toList reqs |> st True)
 
 explanationFSTT	:: Doc
 explanationFSTT	= doc "Full super type table explanation" "How to read a super type table" $
@@ -98,11 +98,11 @@ explanationFSTT	= doc "Full super type table explanation" "How to read a super t
 		code"Mappable", b", that ", code "List", b"has the suppertype", code "Mappable", b", which has been added via",
 		code "Collection", b". "],
 	  [emph "Native" , b "denotes that this supertype was added via the code.",
-		b "A ", imp "Binding", b"might have happened on this supertype. E.g ", 
-		code "List (k,v)", b"has the supertype", code "Dict k v", b".", 
-		code "Dict a0 a1", b"has the supertype", code "Collection a0 a1", b".", 
-		b"So if we want to add the supertype", code "Collection a0 a1", b"to", code "List (k,v)", b", we have to substitute", 
-		code "a0 --> k, a1 --> v", 
-		b"in the", code"Collection a0 a1", b"example, if we want it to be correct.", 
+		b "A ", imp "Binding", b"might have happened on this supertype. E.g ",
+		code "List (k,v)", b"has the supertype", code "Dict k v", b".",
+		code "Dict a0 a1", b"has the supertype", code "Collection a0 a1", b".",
+		b"So if we want to add the supertype", code "Collection a0 a1", b"to", code "List (k,v)", b", we have to substitute",
+		code "a0 --> k, a1 --> v",
+		b"in the", code"Collection a0 a1", b"example, if we want it to be correct.",
 		b"The ", imp "Orig Type", b"show this type before the substitution."
 	]] |> Mu.Seq |> Parag & Mu.Seq

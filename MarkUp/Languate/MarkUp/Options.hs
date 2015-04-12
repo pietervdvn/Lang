@@ -19,8 +19,8 @@ type Option	= (Doc -> String -> String, [(String, String)])
 type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
 addOption	:: Option -> RenderSettings -> RenderSettings
-addOption f rs	=  rs {postprocessor = 
-			\doc -> (fst f) doc . postprocessor rs doc,
+addOption f rs	=  rs {postprocessor =
+			\doc -> fst f doc . postprocessor rs doc,
 			resources	= snd f ++ resources rs}
 
 
@@ -32,7 +32,7 @@ md	:: RenderSettings
 md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id (flip const) [] (Just defaultOverviewPage)
 
 fancyEmbedder doc
-	= Parag $ Titling 
+	= Parag $ Titling
 		(inlink $ title doc) $ Seq [notImportant $ description doc, Parag $ contents doc]
 
 defaultOverviewPage	:: [Doc] -> Doc
@@ -49,7 +49,7 @@ headers	:: HeaderOption -> Option
 headers (opts, resources)
 
 	= (\doc body -> "<!DOCTYPE html>" ++ inTag' "html" ["lang=\"en\""] (
-		inTag "head" (unlines $ opts <*> [doc]) ++ 
+		inTag "head" (unlines $ opts <*> [doc]) ++
 			inTag "body" (inTag "article" body)), resources)
 
 mergeHeaders	:: [HeaderOption] -> HeaderOption
@@ -66,10 +66,10 @@ headerTag f	= ([f],[])
 
 titleHeader	= inTag "title" . title
 
-doctype	= const $ inTag "doctype" 
+doctype	= const $ inTag "doctype"
 
 ogpTags	:: Doc -> HTML
-ogpTags doc	
+ogpTags doc
 	= let 	basicOgp ls =  ("title", title doc):("description",description doc) : ls
 		ogpTags = meta doc & M.toList & basicOgp |> uncurry ogpTag in
 			unlines ogpTags

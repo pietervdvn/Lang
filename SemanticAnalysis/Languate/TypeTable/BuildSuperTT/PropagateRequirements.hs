@@ -24,7 +24,7 @@ import Control.Monad
 import Debug.Trace
 {--
 
-When the super type table is built, some extra requirement might becoma clear.
+When the super type table is built, some extra requirement might become clear.
 
 E.g.
 

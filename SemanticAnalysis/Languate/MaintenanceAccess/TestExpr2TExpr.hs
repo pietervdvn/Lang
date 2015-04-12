@@ -1,4 +1,4 @@
-xmodule Languate.MaintenanceAccess.TestExpr2TExpr where
+module Languate.MaintenanceAccess.TestExpr2TExpr where
 
 {--
 This module builds all the stuff!
@@ -50,7 +50,7 @@ bDocs	= do	dir	<- getCurrentDirectory
 
 
 addFooter	:: RenderSettings -> RenderSettings
-addFooter rs	= rs {preprocessor = \doc -> preprocessor rs doc}
+addFooter rs	= rs {preprocessor = preprocessor rs}
 
 -- builds our parse tree
 parseExpr	:: String -> IO Expression
