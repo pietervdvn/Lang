@@ -37,7 +37,7 @@ t	= tst "True"
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		print expr
-		result	<- runExceptionsIO' expr2texpr loadedPackage tablesOverv 
+		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv
 			(toFQN' "pietervdvn:Data:Prelude") expr
 		print result
 
@@ -61,4 +61,3 @@ parseExpr str
 					Right pt	-> pt
 					Left exception	-> error $ show exception
 			return $ pt2expr pt
-

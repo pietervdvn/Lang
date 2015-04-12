@@ -86,10 +86,8 @@ getBinding	= get' binding_
 
 -- ## Monad tools
 
--- TODO write again elegantly with lift, once we are on a better ghc again
 fail		:: String -> StMsg a
-fail str	=  StateT $ \ s -> do	a	<- Left str
-					return (a,s)
+fail		=  lift . Left
 
 
 assert True _	= return ()
