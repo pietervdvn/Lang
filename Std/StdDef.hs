@@ -193,7 +193,7 @@ sortOn f	=  sortBy (compare `on` f)
 
 
 splitOn'	:: (Eq a) => a -> [a] -> [[a]]
-splitOn' a as	= splitOn (a==) as
+splitOn' a	= splitOn (a==)
 
 splitOn		:: (a -> Bool) -> [a] -> [[a]]
 splitOn f []	=  []

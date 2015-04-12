@@ -9,8 +9,8 @@ data Doc = Doc	{title::String
 		, meta::Map Name String
 		, contents::MarkUp}
 
-doc titl descr contents
-	= Doc titl descr empty contents
+doc titl descr
+	= Doc titl descr empty
 
 
 preprocess	:: (MarkUp -> MarkUp) -> Doc -> Doc
