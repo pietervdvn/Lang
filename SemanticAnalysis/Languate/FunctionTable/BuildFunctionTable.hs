@@ -22,6 +22,7 @@ import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Maybe (fromMaybe)
+import Data.List
 
 import Control.Arrow
 
@@ -29,6 +30,7 @@ buildFunctionTables	:: Package -> TypeTable -> Exc FunctionTables
 buildFunctionTables p tt
 	= do	let bft (fqn, m)= do	ft 	<- buildFunctionTable p tt fqn m
 					return (fqn, ft)
+		-- TODO check for doubly defined functions
 		functiontables	<- p & modules & toList & mapM bft |> fromList
 		let impGr	= importGraph p
 		let getPubl fqn	= fromMaybe S.empty (M.lookup fqn functiontables
@@ -46,7 +48,7 @@ buildFunctionTables p tt
 addKnown	:: Map FQN [Signature] -> FQN -> FunctionTable -> FunctionTable
 addKnown known fqn fts
 	= let	signs	= findWithDefault (error $ "no known table for "++show fqn) fqn known
-		dict	= signs |> (signName &&& id) & M.fromList in
+		dict	= signs |> (signName &&& id) & merge ||>> nub & M.fromList in
 		fts {known = dict}
 
 isRestricted	:: Package -> FQN -> FQN -> Signature -> Bool

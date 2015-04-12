@@ -36,9 +36,11 @@ tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 t	= tst "True"
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
-		print expr
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv
 			(toFQN' "pietervdvn:Data:Prelude") expr
+		putStrLn "-- original expression --"
+		print expr
+		putStrLn "-- which has the type --"
 		print result
 
 bDocs	= do	dir	<- getCurrentDirectory
@@ -50,7 +52,9 @@ bDocs	= do	dir	<- getCurrentDirectory
 
 
 addFooter	:: RenderSettings -> RenderSettings
-addFooter rs	= rs {preprocessor = preprocessor rs}
+addFooter rs	= let back = InLink (Base "Back to all pages") "All pages" in
+			rs {preprocessor = preprocess
+				(\mu -> parags [back,mu,back]) . preprocessor rs}
 
 -- builds our parse tree
 parseExpr	:: String -> IO Expression

@@ -102,7 +102,7 @@ asSignature (fqn, n, rtps, rtpreqs)
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [RType] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
 			| TApplication [RTypeUnion] TypedExpression [TypedExpression]
-			| TCall Signature
+			| TCall [Signature]
 	deriving (Show, Eq)
 type TExpression	= TypedExpression
 
@@ -193,8 +193,8 @@ typeOf (TNat _)	=  [[natType], [intType]]
 typeOf (TFlt _)
 		=  [[floatType]]
 typeOf (TChr _)	=  [[charType]]
-typeOf (TCall sign)
-		= [signTypes sign]
+typeOf (TCall signs)
+		= signs |> signTypes
 typeOf (TApplication tps _ _)
 		=  tps
 

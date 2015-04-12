@@ -39,16 +39,16 @@ data Ctx = Ctx	{ package	:: Package
 type SCtx a	= State Ctx a
 
 _e2te		:: Expression -> SCtx TExpression
-_e2te (Nat n)	= return $ TNat n 
+_e2te (Nat n)	= return $ TNat n
 _e2te (Flt f)	= return $ TFlt f
 _e2te (Chr c)	= return $ TChr c
 _e2te (Call nm)	= do
 	fqn		<- get' location
 	funcTable	<- get' tables |> functionTables
-				|> unpackFTS 
+				|> unpackFTS
 				|> findWithDefault (error $ errMsg fqn) fqn
 	let signs 	= findWithDefault (error $ errMsg' fqn nm) nm $ known funcTable
-	todos $ show signs
+	return $ TCall signs
 _e2te (Seq (function:args))= do
 	tfunction	<- _e2te function
 	targs		<- mapM _e2te args
@@ -67,4 +67,3 @@ preClean e	= e
 
 preClean'	:: [Expression] -> [Expression]
 preClean' exps	= exps & filter (not . isExpNl) |> preClean
-
