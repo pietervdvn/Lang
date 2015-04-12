@@ -32,6 +32,9 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 loadedPackage	= unsafePerformIO $ packageIO path
 tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 
+
+t	= tst "True"
+
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		print expr
 		print $ expr2texpr loadedPackage tablesOverv 

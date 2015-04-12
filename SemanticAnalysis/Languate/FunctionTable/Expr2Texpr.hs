@@ -1,12 +1,15 @@
 module Languate.FunctionTable.Expr2Texpr where
 
 import StdDef
+import Normalizable
+
 
 import Languate.AST
 import Languate.TAST
 import Languate.FQN
 import Languate.Package
 import Languate.TableOverview
+import Languate.Functiontable
 
 
 import Data.Map (Map, findWithDefault)
@@ -30,7 +33,7 @@ expr2texpr p to fqn e
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
-		, fqn		:: FQN	-- the current location where to search
+		, location	:: FQN	-- the current location where to search
 		}
 
 type SCtx a	= State Ctx a
@@ -39,12 +42,18 @@ _e2te		:: Expression -> SCtx TExpression
 _e2te (Nat n)	= return $ TNat n 
 _e2te (Flt f)	= return $ TFlt f
 _e2te (Chr c)	= return $ TChr c
-_e2te (Call
-_e2te (ExpNl (function:args))= do
+_e2te (Call c)	= do
+	fqn		<- get' location
+	funcTable	<- get' tables |> findWithDefault (error $ errMsg fqn) fqn
+	todo
+_e2te (Seq (function:args))= do
 	tfunction	<- _e2te function
 	targs		<- mapM _e2te args
 	todo	-- TODO
-_e2te e		= error $ "Could not type the expression "+e
+_e2te e		= error $ "Could not type the expression "++show e
+
+
+errMsg fqn	= "No function table found for "++show fqn++".\nThis is a bug in the compiler. (A compiler dev probably passed in a wrong FQN into expr2texpr")
 
 preClean	:: Expression -> Expression
 preClean (Seq exps)

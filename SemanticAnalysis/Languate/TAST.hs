@@ -43,8 +43,17 @@ listTypeID	= (toFQN' "pietervdvn:Data:Collection.List","List")
 setType	= uncurry RNormal setTypeID
 setTypeID	= (toFQN' "pietervdvn:Data:Collection.Set","Set")
 
+charType	= uncurry RNormal charTypeID
+charTypeID	= (toFQN' "pietervdvn:Data:Data.Char", "Char")
 
+natType		= uncurry RNormal natTypeID
+natTypeID	= (toFQN' "pietervdvn:Data:Num.Nat", "Nat")
 
+intType		= uncurry RNormal intTypeID
+intTypeID	= (toFQN' "pietervdvn:Data:Num.Nat", "Int")
+
+floatType	= uncurry RNormal floatTypeID
+floatTypeID	= (toFQN' "pietervdvn:Data:Num.Float", "Float")
 
 {- Each type has a kind. You can think of those as the 'type of the type'
 E.g. a 'Maybe' is always in function of a second argument, e.g. 'Maybe Int' or 'Maybe String'.
@@ -70,23 +79,26 @@ data ResolvedType	= RNormal FQN Name
 			| RCurry RType RType
 	deriving (Eq, Ord)
 type RType		= ResolvedType
+-- A function that is all of these. Note that frees are all regarded in the same context
+type RTypeUnion		= [RType]	
 type RTypeReq		= (Name, ResolvedType)
 
+-- a signature for a single implementation.
 data Signature		= Signature
 				{ signName	:: Name
-				, signTypes	:: [RType]
+				, signTypes	:: RTypeUnion
 				, signTypeReqs	:: [RTypeReq]}
 	deriving (Show, Eq, Ord)
 
-asSignature	:: (Name, [RType], [RTypeReq]) -> Signature
+asSignature	:: (Name, RTypeUnion, [RTypeReq]) -> Signature
 asSignature (n, rtps, rtpreqs)
 	= Signature n rtps rtpreqs
 
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [RType] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
-			| TApplication [RType] TypedExpression [TypedExpression]
-			| TCall [RType] Name
+			| TApplication [RTypeUnion] TypedExpression [TypedExpression]
+			| TCall [RTypeUnion] Name
 	deriving (Show, Eq)
 type TExpression	= TypedExpression
 
@@ -172,21 +184,15 @@ nt t			= t
 
 
 
-typeOf		:: TypedExpression -> [RType]
-typeOf (TNat _)	=  [nat, int]
+typeOf		:: TypedExpression -> [RTypeUnion]
+typeOf (TNat _)	=  [[natType], [intType]]
 typeOf (TFlt _)
-		=  [float]
-typeOf (TChr _)	=  [RNormal (toFQN' "pietervdvn:Data:Data.Char") "Char"]
+		=  [[floatType]]
+typeOf (TChr _)	=  [[charType]]
 typeOf (TCall tps _)
 		=  tps
 typeOf (TApplication tps _ _)
 		=  tps
-
-nat	= num "Nat"
-int	= num "Int"
-float	= num "Float"
-
-num str	= RNormal (toFQN' $ "pietervdvn:Data:Num."++str) str
 
 instance Show Kind where
 	show Kind	= "*"
