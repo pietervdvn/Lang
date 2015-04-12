@@ -83,22 +83,26 @@ type RType		= ResolvedType
 type RTypeUnion		= [RType]	
 type RTypeReq		= (Name, ResolvedType)
 
--- a signature for a single implementation.
+{- a signature for a single implementation.
+All types (union + reqs) live withing the same context, thus a free type var is the same everywhere
+-}
 data Signature		= Signature
-				{ signName	:: Name
-				, signTypes	:: RTypeUnion
-				, signTypeReqs	:: [RTypeReq]}
+				{ signFQN	:: FQN	-- where the function is defined
+				, signName	:: Name	-- its name
+				, signTypes	:: RTypeUnion	-- all the types it obeys
+				, signTypeReqs	:: [RTypeReq]	-- needed requirements
+				}
 	deriving (Show, Eq, Ord)
 
-asSignature	:: (Name, RTypeUnion, [RTypeReq]) -> Signature
-asSignature (n, rtps, rtpreqs)
-	= Signature n rtps rtpreqs
+asSignature	:: (FQN, Name, RTypeUnion, [RTypeReq]) -> Signature
+asSignature (fqn, n, rtps, rtpreqs)
+	= Signature fqn n rtps rtpreqs
 
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			{- the first argument, [RType] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
 			| TApplication [RTypeUnion] TypedExpression [TypedExpression]
-			| TCall [RTypeUnion] Name
+			| TCall Signature
 	deriving (Show, Eq)
 type TExpression	= TypedExpression
 
@@ -189,8 +193,8 @@ typeOf (TNat _)	=  [[natType], [intType]]
 typeOf (TFlt _)
 		=  [[floatType]]
 typeOf (TChr _)	=  [[charType]]
-typeOf (TCall tps _)
-		=  tps
+typeOf (TCall sign)
+		= [signTypes sign]
 typeOf (TApplication tps _ _)
 		=  tps
 

@@ -20,10 +20,12 @@ The function table is associated with a single module and keeps track of all kno
 data FunctionTable	= FunctionTable
 	{ defined	:: Set Signature-- signatures of locally defined functions, which might be private
 	, public	:: Set Signature --all public functions
+	, known		:: Map Name Signature	-- all functions known withing local scope
 	}
 	deriving (Show)
 
-newtype FunctionTables	= FunctionTables (Map FQN FunctionTable)
+newtype FunctionTables	= FunctionTables {unpackFTS	:: Map FQN FunctionTable}
+
 
 funcSign2mu	:: Signature -> [MarkUp]
 funcSign2mu sign	=

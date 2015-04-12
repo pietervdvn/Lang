@@ -89,9 +89,11 @@ type TypeRequirement	= (Name, Type)
 
 {-
 Represents an ADT in languate.
+ADTDef "TypeName" ["Free", "type","variable","names"] [TReqs] [sums]
+
 > data List a  = Cons a (List a) | Nil
 becomes : ADTDef "List" [("a", Nothing)] "Comment about a list" product
-> data NaiveDict a b	= [a,b]
+> data NaiveDict a b	= [a,b]ADT
 > data BalancedTreeDict (a in Eq) b	= ...
 becomes
 ADTDef "Dict" ["k","v"] [("k","Ord")] product

@@ -1,4 +1,4 @@
-module Languate.MaintenanceAccess.TestBuild where
+module Languate.MaintenanceAccess.TestExpr2TExpr where
 
 {--
 This module builds all the stuff!
@@ -37,15 +37,20 @@ t	= tst "True"
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		print expr
-		print $ expr2texpr loadedPackage tablesOverv 
+		result	<- runExceptionsIO' expr2texpr loadedPackage tablesOverv 
 			(toFQN' "pietervdvn:Data:Prelude") expr
+		print result
 
 bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
 		let cluster'	= add tablesOverv cluster
-		renderClusterTo html (dir ++"/" ++ path ++ "/.gen" ++ "/html2") cluster'
-		renderClusterTo md (dir ++"/" ++ path ++ "/.gen" ++ "/md2") cluster'
+		renderClusterTo (addFooter html)
+				 (dir ++"/" ++ path ++ "/.gen" ++ "/html2") cluster'
+		renderClusterTo (addFooter md) (dir ++"/" ++ path ++ "/.gen" ++ "/md2") cluster'
 
+
+addFooter	:: RenderSettings -> RenderSettings
+addFooter rs	= rs {preprocessor = \doc -> preprocessor rs doc}
 
 -- builds our parse tree
 parseExpr	:: String -> IO Expression

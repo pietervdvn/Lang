@@ -3,6 +3,8 @@ Float
 The implementation of the float data type and functions
 -----
 
+import Num.Nat
+
 ---
 A floating point number, to represent numerical values with commas. Note that this type has only a limited precision.
 ---

@@ -9,8 +9,8 @@ import Languate.TAST
 import Languate.FQN
 import Languate.Package
 import Languate.TableOverview
-import Languate.Functiontable
-
+import Languate.FunctionTable
+import Languate.CheckUtils
 
 import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
@@ -27,9 +27,9 @@ This is the heart of the typechecker, where expressions get converted into their
 
 -}
 
-expr2texpr	:: Package -> TableOverview -> FQN -> OperatorFreeExpression -> TExpression
+expr2texpr	:: Package -> TableOverview -> FQN -> OperatorFreeExpression -> Exc TExpression
 expr2texpr p to fqn e
-	=  runstate (_e2te $ normalize $ preClean e) (Ctx p to fqn) & fst
+	=  return $ runstate (_e2te $ normalize $ preClean e) (Ctx p to fqn) & fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
@@ -42,10 +42,13 @@ _e2te		:: Expression -> SCtx TExpression
 _e2te (Nat n)	= return $ TNat n 
 _e2te (Flt f)	= return $ TFlt f
 _e2te (Chr c)	= return $ TChr c
-_e2te (Call c)	= do
+_e2te (Call nm)	= do
 	fqn		<- get' location
-	funcTable	<- get' tables |> findWithDefault (error $ errMsg fqn) fqn
-	todo
+	funcTable	<- get' tables |> functionTables
+				|> unpackFTS 
+				|> findWithDefault (error $ errMsg fqn) fqn
+	let signs 	= findWithDefault (error $ errMsg' fqn nm) nm $ known funcTable
+	todos $ show signs
 _e2te (Seq (function:args))= do
 	tfunction	<- _e2te function
 	targs		<- mapM _e2te args
@@ -53,8 +56,8 @@ _e2te (Seq (function:args))= do
 _e2te e		= error $ "Could not type the expression "++show e
 
 
-errMsg fqn	= "No function table found for "++show fqn++".\nThis is a bug in the compiler. (A compiler dev probably passed in a wrong FQN into expr2texpr")
-
+errMsg fqn	= "No function table found for "++show fqn++".\nThis is a bug in the compiler. (A compiler dev probably passed in a wrong FQN into expr2texpr"
+errMsg' fqn nm	= "No function with the name "++nm++" found in the module "++show fqn
 preClean	:: Expression -> Expression
 preClean (Seq exps)
 		= exps & preClean' & Seq
