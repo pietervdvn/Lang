@@ -34,6 +34,7 @@ public import Collection.Set
 public import Graph.Graph
 
 public import Num.Nat
+public import Num.Float
 
 public import Crypto.PubPrivAlgo
 ---
