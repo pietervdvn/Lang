@@ -46,4 +46,3 @@ buildWorld manifest dict = do
 	where 	unp	(fqn, [imp])	= return (fqn, imp)
 		unp	(fqn, imps)	= do	warn $ "Error: double import. "++show fqn++" is imported by two or more import statements"
 						return (fqn, head imps)
-			-- TODO make a non-crashing warning from this
