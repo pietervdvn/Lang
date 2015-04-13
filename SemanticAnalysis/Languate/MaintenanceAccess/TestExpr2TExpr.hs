@@ -47,14 +47,14 @@ bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
 		let cluster'	= add tablesOverv cluster
 		renderClusterTo (addFooter html)
-				 (dir ++"/" ++ path ++ "/.gen" ++ "/html2") cluster'
-		renderClusterTo (addFooter md) (dir ++"/" ++ path ++ "/.gen" ++ "/md2") cluster'
+				 (dir ++"/" ++ path ++ "/.gen" ++ "/html") cluster'
+		renderClusterTo (addFooter md) (dir ++"/" ++ path ++ "/.gen" ++ "/md") cluster'
 
 
 addFooter	:: RenderSettings -> RenderSettings
 addFooter rs	= let back = InLink (Base "Back to all pages") "All pages" in
-			rs {preprocessor = preprocess
-				(\mu -> parags [back,mu,back]) . preprocessor rs}
+			rs {nonEmbedPreprocessor = preprocess
+				(\mu -> parags [back,mu,back]) . nonEmbedPreprocessor rs}
 
 -- builds our parse tree
 parseExpr	:: String -> IO Expression

@@ -31,11 +31,14 @@ add docable (Cluster docs)
 		Cluster $ M.union docs $ M.fromList newDocs
 
 data RenderSettings	= RenderSettings
-	{render		:: Doc -> String
+	{ render	:: Doc -> String	-- main render function
 	, renderName	:: String -> FilePath
-	, embedder	:: Doc -> MarkUp
-	, preprocessor	:: Doc -> Doc
+	, embedder	:: Doc -> MarkUp	-- renderered to embed documents
+	, preprocessor	:: Doc -> Doc		-- all documents are preprocessed with this first
+	, nonEmbedPreprocessor
+			:: Doc -> Doc	-- Once the documents are embedded, the resting docs are preprocessed with this one
 	, postprocessor	:: Doc -> String -> String
+				-- the string is processed with this one right before writing to file
 	, resources	:: [(String, String)]
 	, overviewPage	:: Maybe ([Doc] -> Doc)}
 
@@ -51,7 +54,8 @@ renderClusterTo	settings fp (Cluster docsDict)= do
 				|> preprocess (rewrite $ _renderEmbed cluster' settings)
 				|> preprocess (rewrite $ _renderInLink settings fp)
 				& Cluster
-	mapM_ (renderFile cluster' settings fp) (docsIn cluster' & M.elems)
+	let cluster''	= docsIn cluster' |> nonEmbedPreprocessor settings & Cluster
+	mapM_ (renderFile cluster'' settings fp) (docsIn cluster'' & M.elems)
 	let res		= M.toList (M.fromList $ resources settings)
 				|> first ((fp ++ "/res/")++)
 	mapM_ (uncurry writeFile') res

@@ -25,11 +25,11 @@ addOption f rs	=  rs {postprocessor =
 
 
 html	:: RenderSettings
-html	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id (flip const) []
+html	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id id (flip const) []
 		(Just defaultOverviewPage) & addOption (headers defaultHeader)
 
 md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id (flip const) [] (Just defaultOverviewPage)
+md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id id (flip const) [] (Just defaultOverviewPage)
 
 fancyEmbedder doc
 	= Parag $ Titling
