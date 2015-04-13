@@ -91,21 +91,22 @@ Note that each
 -}
 calcTypes	:: [RTypeUnion] -> [[RTypeUnion]] -> SCtx [RTypeUnion]
 calcTypes funcT args
-		=
+		= todo
 
-calcTypeUnion	:: RTypeUnion -> [RTypeUnion] -> SCtx RTypeUnion
-calcTypeUnion rtu rtuArgs
-	=
+calcTypeUnion	:: Context -> RTypeUnion -> [RTypeUnion] -> Exc RTypeUnion
+calcTypeUnion ctx rtu rtuArgs
+	= todo -- TODO PICKUP
 
-calcType	:: RType -> [RType] -> SCtx RType
-calcType t0 []
+
+calcType	:: Context -> RType -> [RType] -> Exc RType
+calcType ctx t0 []
 		= return t0
-calcType (RCurry t0 rest) (arg:args)
-	= do	tt	<- get' tables |> typeTable
-		rqs	<- get' reqs
+calcType ctx (RCurry t0 rest) (arg:args)
+	= do	let tt	= ctx & tables & typeTable
+		let rqs	= ctx & reqs
 		-- the argument can come from a different context, we thus rename frees
 		let arg'	= substitute' (M.keys rqs) arg & fst
-		bnd	<- lift $ either halt return $ bind tt rqs arg' t0
+		bnd	<- either halt return $ bind tt rqs arg' t0
 		let rest'	= substitute bnd rest
 		calcType rest' args
 
