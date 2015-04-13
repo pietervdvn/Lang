@@ -26,7 +26,6 @@ import Languate.AST
 import Languate.Package
 
 import Languate.TableOverview
-import Languate.MD.TableOverview2MD
 
 import Languate.TypeTable.Bind
 

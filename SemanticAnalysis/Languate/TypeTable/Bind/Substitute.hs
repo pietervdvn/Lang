@@ -35,7 +35,7 @@ mergeBinding (Binding dict0) (Binding dict1)
 
 
 {- Substitutes all frees which name is already bound in a different context.
-The list 'nms' represents thos frees which are already bound
+The list 'nms' represents those frees which are already bound
 e.g.
 ["a"] (List (a,b)) -> List (a0,b)
 -}
