@@ -6,6 +6,8 @@ Each program imports these by default
 
 public import Any
 public import Data.Bool
+public import Type.Function
+public import Category.Function
 ---
 
 public import Category.Eq
@@ -19,7 +21,6 @@ public import Category.Mappable
 public import Category.Function
 public import Category.Boolean
 
-public import Type.Function
 
 public import Collection.Void
 public import Collection.Tuple
@@ -37,19 +38,19 @@ public import Num.Float
 public import Crypto.PubPrivAlgo
 ---
 ---
-cat Dummy
-	> True
 
-cat Eq0
-	> True
 
-cat X (a:Eq0)
-	> True
+data X	= XTrue | XFalse
+data Y	= YTrue | YFalse
 
-cat Y b a is X a
-	> True
+(&&)		: X -> X -> X
+ XTrue XTrue	= XTrue
+ *		= XFalse
+(&&)		: Y -> Y -> Y
+ YTrue YTrue	= YTrue
+ *		= YFalse
 
-cat Z a
-	> True
-
-instance Z is Y Dummy
+strue	: Bool
+	= True
+strue	: X
+	= XTrue

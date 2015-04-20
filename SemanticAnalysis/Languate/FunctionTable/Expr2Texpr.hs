@@ -3,6 +3,7 @@ module Languate.FunctionTable.Expr2Texpr where
 import StdDef
 import Exceptions
 import Normalizable
+import HumanUtils hiding (when)
 
 
 import Languate.AST
@@ -24,10 +25,14 @@ import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.List (nub)
+import Data.Either
+import Data.Tuple
 
 
 import StateT
+import Control.Monad
 import Control.Monad.Trans
+import Control.Arrow
 
 {-
 
@@ -69,9 +74,10 @@ _e2te (Call nm)	= do
 _e2te (Seq (function:args))= do
 	tfunction	<- _e2te function
 	targs		<- mapM _e2te args
-	types	<- calcTypes (typeOf tfunction) (targs |> typeOf)
-	return $ TApplication types tfunction targs
-
+	-- TODO PICKUP
+	-- types	<- calcTypes (typeOf tfunction) (targs |> typeOf)
+	--return $ TApplication types tfunction targs
+	todo
 _e2te e		=
 	lift $ halt $ "Could not type the expression "++show e++"\n\t"++
 	case e of
@@ -89,30 +95,61 @@ errMsg fqn	= "No function table found for "++show fqn++".\nThis is a bug in the 
 errMsg' fqn nm	= "No function with the name "++nm++" found in the module "++show fqn
 
 
-{- calculates the resulting types that a function has
-Note that each
+{- calculates the resulting types that a function has.
+
+There is room for an extra parameter, (e.g. the signature) which will be passed.
 
 -}
-calcTypes	:: [RTypeUnion] -> [[RTypeUnion]] -> SCtx [RTypeUnion]
-calcTypes funcT args
-		= todo
+calcTypes	:: [(RTypeUnion, a)] -> [(RTypeUnion,a)] ->
+			SCtx [((a,a), RTypeUnion)]
+calcTypes func arg
+	= do	let tps	= [ (((funcT, argT),(funcA,argA)), (funcT, argT)) | (funcT, funcA) <- func, (argT, argA) <- arg]
+		ctx	<- get
+		let res	= tps ||>> uncurry (calcTypeUnion ctx) ||>> runExceptions ||>> thd3 -- :: [((([RType], [RType]), (a,a)), Either String RTypeUnion)]
+		let smsg (((funcUnion, argUnion), _), Left msg)
+			= "The typeunion "++ (funcUnion |> st True & unwords)++" could not be applied on the types "++(argUnion |> st True & unwords)++":\n"++indent msg
+		let msg	= res |> smsg & unlines	:: String
+		let ok	= res	|> (first snd)
+				& filter (isRight . snd) ||>> (\(Right t) -> t)
+		when (null ok) $ lift $ halt $ "Not a single type union gave a result:\n"++indent msg
+		return ok
 
-calcTypeUnion	:: Ctx -> RTypeUnion -> [RTypeUnion] -> Exc RTypeUnion
-calcTypeUnion ctx rtu rtuArgs
-	= todo -- TODO PICKUP
+{-
+A function can have multiple typeunions, e.g.
+
+(+)	: Int -> Int -> Int, Associative Int
+Applied on
+1	: Int, Nat
+
+Results in
+[Int -> Int]
+
+Note that the associative dissappears
+
+-}
+calcTypeUnion	:: Ctx -> RTypeUnion -> RTypeUnion -> Exc RTypeUnion
+calcTypeUnion ctx rtu rtuArg
+	= do	let tps = [(baseType, argType) | baseType <- rtu, argType <- rtuArg]
+				|> (id &&& (uncurry $ calcType ctx))
+				||>> runExceptions ||>> thd3
+		let rst	= tps |> snd & rights	:: RTypeUnion
+		let msg	= tps |> (\((base, arg), Left msg) -> "The type "++st True base++" could not be applied with "++st True arg++"\n"++indent msg)
+				& unlines
+		when (null rst) $ halt $ "No types left in the union. Tried types: \n"++indent msg
+		return rst
+
 
 -- Calculates a applied type. Gives the rest of the types, and new, calculated type requirements
-calcType	:: Ctx -> RType -> [RType] -> Exc RType
-calcType ctx t0 []
-		= return t0
-calcType ctx (RCurry t0 rest) (arg:args)
+calcType	:: Ctx -> RType -> RType -> Exc RType
+calcType ctx (RCurry t0 rest) arg
 	= do	let tt		= ctx & tables & typeTable
 		let rqs		= ctx & reqs
 		-- the argument can come from a different context, we thus rename frees
 		let arg'	= substitute' (M.keys rqs) arg & fst
 		binding		<- either halt return $ bind tt rqs arg' t0
-		let rest'	= rest & substitute binding
-		calcType ctx rest' args
+		return $ substitute binding rest
+calcType ctx t0 arg
+	= halt $ "The type "++st True t0++" is applied to "++(arg & st True)++", but this is not possible"
 
 
 preClean	:: Expression -> Expression

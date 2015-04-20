@@ -39,7 +39,7 @@ tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 prelude		= toFQN' "pietervdvn:Data:Prelude"
 defaultReqs		= M.fromList [("a",[])]
 
-t	= tct (pt "List a -> a -> a") $ ["List Boolean", "Bool"] |> pt
+t	= tct (["X -> X -> X","Y -> Y -> Y"] |> pt) (["Bool"] |> pt)
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv
@@ -51,7 +51,7 @@ tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv
 
 tct t args
 	= do	let ctx	= Ctx loadedPackage tablesOverv prelude defaultReqs
-		texpr	<- runExceptionsIO' $ calcType ctx t args
+		texpr	<- runExceptionsIO' $ calcTypeUnion ctx t args
 		print texpr
 
 bDocs	= do	dir	<- getCurrentDirectory
