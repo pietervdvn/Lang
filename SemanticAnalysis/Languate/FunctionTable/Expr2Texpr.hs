@@ -13,6 +13,8 @@ import Languate.TableOverview
 import Languate.FunctionTable
 import Languate.CheckUtils
 
+import Languate.TypeTable hiding (reqs)
+
 import Languate.TypeTable.Bind.Bind
 import Languate.TypeTable.Bind.Substitute
 
@@ -21,6 +23,8 @@ import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
+import Data.List (nub)
+
 
 import StateT
 import Control.Monad.Trans
@@ -93,22 +97,22 @@ calcTypes	:: [RTypeUnion] -> [[RTypeUnion]] -> SCtx [RTypeUnion]
 calcTypes funcT args
 		= todo
 
-calcTypeUnion	:: Context -> RTypeUnion -> [RTypeUnion] -> Exc RTypeUnion
+calcTypeUnion	:: Ctx -> RTypeUnion -> [RTypeUnion] -> Exc RTypeUnion
 calcTypeUnion ctx rtu rtuArgs
 	= todo -- TODO PICKUP
 
-
-calcType	:: Context -> RType -> [RType] -> Exc RType
+-- Calculates a applied type. Gives the rest of the types, and new, calculated type requirements
+calcType	:: Ctx -> RType -> [RType] -> Exc RType
 calcType ctx t0 []
 		= return t0
 calcType ctx (RCurry t0 rest) (arg:args)
-	= do	let tt	= ctx & tables & typeTable
-		let rqs	= ctx & reqs
+	= do	let tt		= ctx & tables & typeTable
+		let rqs		= ctx & reqs
 		-- the argument can come from a different context, we thus rename frees
 		let arg'	= substitute' (M.keys rqs) arg & fst
-		bnd	<- either halt return $ bind tt rqs arg' t0
-		let rest'	= substitute bnd rest
-		calcType rest' args
+		binding		<- either halt return $ bind tt rqs arg' t0
+		let rest'	= rest & substitute binding
+		calcType ctx rest' args
 
 
 preClean	:: Expression -> Expression

@@ -28,6 +28,7 @@ import StdDef
 import StateT
 import Languate.MaintenanceAccess.TestBind (pt, pr)
 
+
 import qualified Data.Map as M
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
@@ -38,7 +39,7 @@ tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 prelude		= toFQN' "pietervdvn:Data:Prelude"
 defaultReqs		= M.fromList [("a",[])]
 
-t	= tct (pt "List a -> a -> a") $ ["List Bool"] |> pt
+t	= tct (pt "List a -> a -> a") $ ["List Boolean", "Bool"] |> pt
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv
@@ -50,7 +51,7 @@ tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv
 
 tct t args
 	= do	let ctx	= Ctx loadedPackage tablesOverv prelude defaultReqs
-		texpr	<- runExceptionsIO' $ runstateT (calcType t args) ctx |> fst
+		texpr	<- runExceptionsIO' $ calcType ctx t args
 		print texpr
 
 bDocs	= do	dir	<- getCurrentDirectory
