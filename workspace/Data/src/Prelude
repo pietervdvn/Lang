@@ -5,14 +5,15 @@ Each program imports these by default
 -------
 
 public import Any
+public import Data.Bool
+---
 
 public import Category.Eq
 
-public import Data.Bool showing {(&&)}
 
 public import ControlFlow
 
-public import Category.Eq hiding {(!=)}
+public import Category.Eq
 public import Category.Monoid
 public import Category.Mappable
 public import Category.Function
@@ -35,7 +36,7 @@ public import Num.Float
 
 public import Crypto.PubPrivAlgo
 ---
-
+---
 cat Dummy
 	> True
 
