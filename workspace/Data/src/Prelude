@@ -6,9 +6,6 @@ Each program imports these by default
 
 public import Any
 
-public import Collection.List
-import Collection.Tuple
-
 public import Category.Eq
 
 public import Data.Bool showing {(&&)}
@@ -19,7 +16,7 @@ public import Category.Eq hiding {(!=)}
 public import Category.Monoid
 public import Category.Mappable
 public import Category.Function
-
+public import Category.Boolean
 
 public import Type.Function
 

@@ -1,0 +1,11 @@
+Boolean
+-------
+Implementation of Booleans, things with &&, ||, and !, e.g. Bool and Set
+
+Do not confuse with Bool (True | False).
+-------
+
+cat Boolean
+	(&&)	: boolean -> boolean -> boolean
+	(||)	: boolean -> boolean -> boolean
+	(!)	: boolean -> boolean
