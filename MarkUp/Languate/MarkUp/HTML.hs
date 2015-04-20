@@ -37,7 +37,7 @@ renderHTML (Link text link)
 renderHTML (Table mus muss)
         = do    header <- mapM renderHTML mus
                 table  <- mapM (mapM renderHTML) muss
-                let header' = header |> inTag' "td" ["id=table_header"] & concat & inTag "tr"
+                let header' = header |> inTag' "td" ["class=table_header"] & concat & inTag "tr"
                 let table'  = table ||>> inTag "td" |> concat |> inTag "tr"
                 return $ inTag "table" $ inTag "tbody" $ concat $ header' : table'
 renderHTML (List mus)
@@ -47,11 +47,11 @@ renderHTML (OrderedList mus)
 renderHTML (InLink mu url)
 	= renderHTML $ Link mu url
 renderHTML mu
-	= return $ inTag "red" $ inTag "b" $ "Markup "++show mu++" can not be rendered to html" 
+	= return $ inTag "red" $ inTag "b" $ "Markup "++show mu++" can not be rendered to html"
 
 renderDoc2HTML::    Doc -> HTML
 renderDoc2HTML doc   = runstate (contents doc & renderHTML) 1 & fst
-            
+
 --------------- TOOLS ---------------
 
 inTag   :: String -> HTML -> HTML
@@ -63,8 +63,8 @@ inTag' tagN metas html
     = "<" ++ tagN ++ " " ++ unwords metas ++ ">" ++ html ++ "</" ++ tagN ++ ">"
 
 ogpTag  :: Name -> String -> HTML
-ogpTag name value 
-    = "<meta property=\"og:" ++ name ++ "\" content=\"" ++ value ++ "\" />" 
+ogpTag name value
+    = "<meta property=\"og:" ++ name ++ "\" content=\"" ++ value ++ "\" />"
 
 inSpan	:: String -> HTML -> HTML
 inSpan className html
