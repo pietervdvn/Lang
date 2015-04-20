@@ -109,7 +109,7 @@ calcTypes func arg
 		let smsg (((funcUnion, argUnion), _), Left msg)
 			= "The typeunion "++ (funcUnion |> st True & unwords)++" could not be applied on the types "++(argUnion |> st True & unwords)++":\n"++indent msg
 		let msg	= res |> smsg & unlines	:: String
-		let ok	= res	|> (first snd)
+		let ok	= res	|> first snd
 				& filter (isRight . snd) ||>> (\(Right t) -> t)
 		when (null ok) $ lift $ halt $ "Not a single type union gave a result:\n"++indent msg
 		return ok
@@ -130,7 +130,7 @@ Note that the associative dissappears
 calcTypeUnion	:: Ctx -> RTypeUnion -> RTypeUnion -> Exc RTypeUnion
 calcTypeUnion ctx rtu rtuArg
 	= do	let tps = [(baseType, argType) | baseType <- rtu, argType <- rtuArg]
-				|> (id &&& (uncurry $ calcType ctx))
+				|> (id &&& uncurry (calcType ctx))
 				||>> runExceptions ||>> thd3
 		let rst	= tps |> snd & rights	:: RTypeUnion
 		let msg	= tps |> (\((base, arg), Left msg) -> "The type "++st True base++" could not be applied with "++st True arg++"\n"++indent msg)
