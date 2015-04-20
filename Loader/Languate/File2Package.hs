@@ -26,11 +26,16 @@ import Languate.Manifest.ParseManifest (parseManifest)
 
 -- loadpackage, but crashes when imports are not found
 loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO Package
-loadPackage' world fqn fp
+loadPackage' bnfs fqn fp
+		= do	excPack	<- loadPackage bnfs fqn fp
+			runExceptionsIO' excPack
+
+loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Exceptions' String Package)
+loadPackage world fqn fp
 		= do	manifest		<- parseManifest world $ fp ++ "/Manifest"
-			(package, notFound)	<- loadPackage world fqn $ fp ++ "/src/"
+			(package, notFound)	<- _loadPackage world fqn $ fp ++ "/src/"
 			unless (null notFound) $ printErr notFound
-			runExceptionsIO' $ buildWorld manifest package
+			return $ buildWorld manifest package
 
 printErr	:: [(FQN,FQN)] -> IO ()
 printErr notFound
@@ -44,8 +49,8 @@ msg		= foldl (\acc (requestor, notF) -> acc++"\n\t"++show notF++" (needed by "++
 Imports of which the file was not found, are the second value in the tuple. It is a list, containing
 [this module wanted the import, this module was not found]
 -}
-loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN (Module, Set (FQN, Import)),[(FQN,FQN)])
-loadPackage bnfs fqn src
+_loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Map FQN (Module, Set (FQN, Import)),[(FQN,FQN)])
+_loadPackage bnfs fqn src
 		=  do	let FQN fqpn _ _	= fqn
 			let ctx	= Context bnfs fqpn [(fqn, fqn)] empty src []
 			(_, ctx)	<- runstateT loadRec ctx
