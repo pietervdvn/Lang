@@ -8,7 +8,6 @@ public import Any
 public import Data.Bool
 public import Type.Function
 public import Category.Function
----
 
 public import Category.Eq
 
@@ -37,20 +36,3 @@ public import Num.Float
 
 public import Crypto.PubPrivAlgo
 ---
----
-
-
-data X	= XTrue | XFalse
-data Y	= YTrue | YFalse
-
-(&&)		: X -> X -> X
- XTrue XTrue	= XTrue
- *		= XFalse
-(&&)		: Y -> Y -> Y
- YTrue YTrue	= YTrue
- *		= YFalse
-
-strue	: Bool
-	= True
-strue	: X
-	= XTrue

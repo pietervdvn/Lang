@@ -15,4 +15,4 @@ The syntactic sugar ''{a}'' desugars to ''Set a''
 cat Set (a:Eq)	is Collection a
 	head	: Set a -> (b:a)
 
-instance Set is Boolean
+instance Set a is Boolean
