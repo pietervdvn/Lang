@@ -37,20 +37,18 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 loadedPackage	= unsafePerformIO $ packageIO path
 tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 prelude		= toFQN' "pietervdvn:Data:Prelude"
-defaultReqs		= M.fromList [("a",[])]
 
-t	= tct (["X -> X -> X","Y -> Y -> Y"] |> pt) (["Bool"] |> pt)
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv
-			prelude defaultReqs expr
+			prelude expr
 		putStrLn "-- original expression --"
 		print expr
 		putStrLn "-- which has the type --"
-		print result
+		return result
 
 tct t args
-	= do	let ctx	= Ctx loadedPackage tablesOverv prelude defaultReqs
+	= do	let ctx	= Ctx loadedPackage tablesOverv prelude
 		texpr	<- runExceptionsIO' $ calcTypeUnion ctx t args
 		print texpr
 

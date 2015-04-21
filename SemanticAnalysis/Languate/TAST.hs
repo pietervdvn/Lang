@@ -82,6 +82,10 @@ type RType		= ResolvedType
 -- A function that is all of these. Note that frees are all regarded in the same context
 type RTypeUnion		= [RType]
 type RTypeReq		= (Name, ResolvedType)
+type RTypeReqs		= [(Name, [ResolvedType])]
+
+-- assumed that the treqs also contain all used free variables
+type RTypeInfo		= (RTypeUnion, RTypeReqs)
 
 {- a signature for a single implementation.
 All types (union + reqs) live withing the same context, thus a free type var is the same everywhere
@@ -100,11 +104,23 @@ asSignature (fqn, n, rtps, rtpreqs)
 
 
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
-			{- the first argument, [RType] are all the possible **return** types. E.g. '(&&) True False' -> Call [Bool] "&&" [..., ...]; '(&&) True' -> Call [Bool -> Bool] -}
-			| TApplication [RTypeUnion] TypedExpression [TypedExpression]
-			| TCall [Signature]
+	{- The TApplication represents the first expression, applied on the second as argument. As multiple implementations with the same types exist, multiple types could be returned. A TApplication however representats only one of those, and selects those TExpressions which makes it possible. This way, a typed expression, has only one possible TypeUnion and one implementation to choose from. -}
+			| TApplication (RTypeUnion, RTypeReqs) TypedExpression TypedExpression
+			| TCall Signature
 	deriving (Show, Eq)
 type TExpression	= TypedExpression
+
+
+typeOf		:: TExpression -> (RTypeUnion, RTypeReqs)
+typeOf (TNat _)	= ([natType, intType], [])
+typeOf (TFlt _)	= ([floatType], [])
+typeOf (TChr _)	= ([charType], [])
+typeOf (TCall sign)
+		= (signTypes sign, merge $ signTypeReqs sign)
+typeOf (TApplication typeInfo _ _)
+		= typeInfo
+
+
 
 data TPattern	= TAssign Name
 		| TDeconstruct (Name, RType) [TPattern]
@@ -118,6 +134,8 @@ data TClause		= TClause [TPattern] TExpression
 
 
 -------------------- Only utils, instance declaration and boring stuff below -------------------------------------
+
+
 
 instance Show ResolvedType where
 	show	= st False
@@ -186,17 +204,6 @@ nt (RCurry t0 t1)	= RCurry (nt t0) $ nt t1
 nt t			= t
 
 
-
-
-typeOf		:: TypedExpression -> [RTypeUnion]
-typeOf (TNat _)	=  [[natType], [intType]]
-typeOf (TFlt _)
-		=  [[floatType]]
-typeOf (TChr _)	=  [[charType]]
-typeOf (TCall signs)
-		= signs |> signTypes
-typeOf (TApplication tps _ _)
-		=  tps
 
 instance Show Kind where
 	show Kind	= "*"

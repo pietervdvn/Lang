@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, concatBindings, substituents, mergeBinding, asBinding, unbind) where
+module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, buildBinding', concatBindings, substituents, mergeBinding, asBinding, unbind, substituteReq) where
 
 {--
 This module implements substitute and friends
@@ -61,14 +61,18 @@ _substitute dict (RFree a)
 _substitute _ t	= t
 
 
--- Builds a binding, which substitutes away "bound" frees. e.g. [a,b,a0] -> Binding {a -> a1, b -> b0, a0 -> a11}
-buildBinding	= Binding . M.map RFree . _buildBinding
+substituteReq	:: Map Name Name -> (Name, [RType]) -> (Name, [RType])
+substituteReq dict (n, tps)
+	= (findWithDefault n n dict, tps |> substitute (asBinding dict))
 
 -- Builds a binding, which substitutes away "bound" frees. e.g. [a,b,a0] -> Binding {a -> a1, b -> b0, a0 -> a11}
-_buildBinding	:: [Name] -> Map Name Name
-_buildBinding []	= empty
-_buildBinding (a:as)
-		= let	base	= _buildBinding as
+buildBinding	= Binding . M.map RFree . buildBinding'
+
+-- Builds a binding, which substitutes away "bound" frees. e.g. [a,b,a0] -> Binding {a -> a1, b -> b0, a0 -> a11}
+buildBinding'	:: [Name] -> Map Name Name
+buildBinding' []	= empty
+buildBinding' (a:as)
+		= let	base	= buildBinding' as
 			bound	= keys base ++ elems base
 			canditates	= filter (`notElem` bound) [ a ++ show i | i <- [1..]]
 			replacement	= head canditates in

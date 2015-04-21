@@ -48,36 +48,31 @@ Builds a typed expression from a AST expression. This involves both typechecking
 The requirements should contain all used free type variables within the context
 
 -}
-expr2texpr	:: Package -> TableOverview -> FQN -> Map Name [RType] -> OperatorFreeExpression -> Exc TExpression
-expr2texpr p to fqn reqs e
-	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn reqs) |> fst
+expr2texpr	:: Package -> TableOverview -> FQN -> OperatorFreeExpression -> Exc [TExpression]
+expr2texpr p to fqn e
+	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn) |> fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
 		, location	:: FQN	-- the current location where to search
-		, reqs		:: Map Name [RType]
 		}
 
 type SCtx a	= StateT Ctx (Exceptions String String) a
 
-_e2te		:: Expression -> SCtx TExpression
-_e2te (Nat n)	= return $ TNat n
-_e2te (Flt f)	= return $ TFlt f
-_e2te (Chr c)	= return $ TChr c
+_e2te		:: Expression -> SCtx [TExpression]
+_e2te (Nat n)	= returns $ TNat n
+_e2te (Flt f)	= returns $ TFlt f
+_e2te (Chr c)	= returns $ TChr c
 _e2te (Call nm)	= do
 	fqn		<- get' location
 	funcTables	<- get' tables |> functionTables
 				|> unpackFTS
 	funcTable	<- lift $ M.lookup fqn funcTables ? errMsg fqn
 	signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
-	return $ TCall signs
-_e2te (Seq (function:args))= do
-	tfunction	<- _e2te function
-	targs		<- mapM _e2te args
-	-- TODO PICKUP
-	-- types	<- calcTypes (typeOf tfunction) (targs |> typeOf)
-	--return $ TApplication types tfunction targs
-	todo
+	signs |> TCall & return
+_e2te (Seq (function:args)) = do
+	tfunctions	<- _e2te function
+	calcApplications tfunctions args
 _e2te e		=
 	lift $ halt $ "Could not type the expression "++show e++"\n\t"++
 	case e of
@@ -94,22 +89,39 @@ _e2te e		=
 errMsg fqn	= "No function table found for "++show fqn++".\nThis is a bug in the compiler. (A compiler dev probably passed in a wrong FQN into expr2texpr"
 errMsg' fqn nm	= "No function with the name "++nm++" found in the module "++show fqn
 
+calcApplications	:: [TExpression] -> [Expression] -> SCtx [TExpression]
+calcApplications f []	= return f
+calcApplications f (arg:args)
+	= do	targ	<- _e2te arg
+		applied	<- calcApplication f targ
+		calcApplications applied args
+
+{- Applied the argument on the given expression. Deducts the types, and returns those in a TApplication-}
+calcApplication	:: [TExpression] -> [TExpression] -> SCtx [TExpression]
+calcApplication fs args
+	= do	let fsInfo	= fs |> (typeOf &&& id)
+		let argsInfo	= args |> (typeOf &&& id)
+		results		<- calcTypes fsInfo argsInfo
+		results |> (\((funcExp, argExpr), tinfo) -> TApplication tinfo funcExp argExpr) & return
 
 {- calculates the resulting types that a function has.
 
 There is room for an extra parameter, (e.g. the signature) which will be passed.
 
 -}
-calcTypes	:: [(RTypeUnion, a)] -> [(RTypeUnion,a)] ->
-			SCtx [((a,a), RTypeUnion)]
+calcTypes	:: [(RTypeInfo, a)] -> [(RTypeInfo,a)] ->
+			SCtx [((a,a), RTypeInfo)]
 calcTypes func arg
-	= do	let tps	= [ (((funcT, argT),(funcA,argA)), (funcT, argT)) | (funcT, funcA) <- func, (argT, argA) <- arg]
+	= do	let tps	= [ (((funcT, argT),(funcA,argA)), (funcT, argT))
+				| (funcT, funcA) <- func, (argT, argA) <- arg]
 		ctx	<- get
-		let res	= tps ||>> uncurry (calcTypeUnion ctx) ||>> runExceptions ||>> thd3 -- :: [((([RType], [RType]), (a,a)), Either String RTypeUnion)]
+		let res	= tps ||>> uncurry (calcTypeUnion ctx) ||>> runExceptions ||>> thd3 -- :: [((([RTypeInfo], [RTypeInfo]), (a,a)), Either String RTypeInfo)]
 		let smsg (((funcUnion, argUnion), _), Left msg)
-			= "The typeunion "++ (funcUnion |> st True & unwords)++" could not be applied on the types "++(argUnion |> st True & unwords)++":\n"++indent msg
+			= "The typeunion "++ (funcUnion & fst |> st True & unwords)++
+			" could not be applied on the types "++
+			(argUnion & fst |> st True & unwords)++":\n"++indent msg
 		let msg	= res |> smsg & unlines	:: String
-		let ok	= res	|> first snd
+		let ok	= res |> first snd
 				& filter (isRight . snd) ||>> (\(Right t) -> t)
 		when (null ok) $ lift $ halt $ "Not a single type union gave a result:\n"++indent msg
 		return ok
@@ -127,29 +139,35 @@ Results in
 Note that the associative dissappears
 
 -}
-calcTypeUnion	:: Ctx -> RTypeUnion -> RTypeUnion -> Exc RTypeUnion
-calcTypeUnion ctx rtu rtuArg
-	= do	let tps = [(baseType, argType) | baseType <- rtu, argType <- rtuArg]
+calcTypeUnion	:: Ctx -> RTypeInfo -> RTypeInfo -> Exc RTypeInfo
+calcTypeUnion ctx (rtu, funcReqs) (rtuArg, argReqs)
+	= do	let tps = [((baseType, funcReqs), (argType, argReqs))
+				| baseType <- rtu, argType <- rtuArg]
 				|> (id &&& uncurry (calcType ctx))
 				||>> runExceptions ||>> thd3
-		let rst	= tps |> snd & rights	:: RTypeUnion
-		let msg	= tps |> (\((base, arg), Left msg) -> "The type "++st True base++" could not be applied with "++st True arg++"\n"++indent msg)
+		let rst	= tps |> snd & rights & unzip |> concat
+				:: ([RType], RTypeReqs)
+		let msg	= tps |> (\((base, arg), Left msg) -> "The type "++(base & fst & st True) ++" could not be applied with "++(arg & fst & st True)++"\n"++indent msg)
 				& unlines
-		when (null rst) $ halt $ "No types left in the union. Tried types: \n"++indent msg
+		when (null $ fst rst) $ halt $ "No types left in the union. Tried types: \n"++indent msg
 		return rst
 
 
--- Calculates a applied type. Gives the rest of the types, and new, calculated type requirements
-calcType	:: Ctx -> RType -> RType -> Exc RType
-calcType ctx (RCurry t0 rest) arg
+-- Calculates a applied type. Gives the rest of the types, and new resting type
+calcType	:: Ctx -> (RType, RTypeReqs) -> (RType, RTypeReqs) -> Exc (RType, RTypeReqs)
+calcType ctx (RCurry t0 rest, reqs) (arg, argReqs)
 	= do	let tt		= ctx & tables & typeTable
-		let rqs		= ctx & reqs
 		-- the argument can come from a different context, we thus rename frees
-		let arg'	= substitute' (M.keys rqs) arg & fst
-		binding		<- either halt return $ bind tt rqs arg' t0
-		return $ substitute binding rest
+		let bindAway	= buildBinding' (reqs |> fst)
+		let arg'	= substitute (asBinding bindAway) arg
+		let argReqs'	= argReqs |> substituteReq bindAway	:: RTypeReqs
+		-- the actual requirements
+		let rqs		= merge (argReqs' ++ reqs) ||>> (nub . concat)	:: RTypeReqs
+		binding		<- either halt return $ bind tt (M.fromList rqs) arg' t0
+		return (substitute binding rest,
+			rqs & filter ((`notElem` M.keys bindAway) . fst))
 calcType ctx t0 arg
-	= halt $ "The type "++st True t0++" is applied to "++(arg & st True)++", but this is not possible"
+	= halt $ "The type "++(t0 & fst & st True)++" is applied to "++(arg & fst & st True)++", but this is not possible"
 
 
 preClean	:: Expression -> Expression
@@ -161,3 +179,6 @@ preClean e	= e
 
 preClean'	:: [Expression] -> [Expression]
 preClean' exps	= exps & filter (not . isExpNl) |> preClean
+
+
+returns a	= return [a]
