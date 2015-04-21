@@ -69,7 +69,7 @@ bind' (RFree a) (RFree b)
 	let ok	= succ |> or & and
 	assert ok $ "Could not bind the free '"++a++"' against the free '"++
 		b++"' as '"++b++"' has some requirements that '"++a++"' can't meet." ++
-		indent ("'"++a++"': "++show aReqs++"\n'"++b++"': "++show bReqs)
+		indent ("\n'"++a++"': "++show aReqs++"\n'"++b++"': "++show bReqs)
 bind' t0 (RFree b)
  = do	bReqs	<- requirementsOn b
 	addBinding (b, t0)
