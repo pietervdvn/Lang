@@ -17,7 +17,7 @@ _comparator	::= "<" | "=" | ">"
 _parOp		::= "\(" $op "\)"
 _opComparation ::= parOp comparator parOp
 
-precedence	::="precedence" "of" parOp "is" modifier ","  opComparation ("," opComparation)*
+precedence	::="precedence" "of" parOp "is" modifier ("," opComparation)*
 
 annotation	::= "@" ident ":" "(!\n){2,}"
 

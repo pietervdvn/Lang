@@ -60,7 +60,9 @@ s _ [Op o1, rel, Op o2]
 		= PrecRel $ relationToken2AST rel o1 o2
 s _ [CommaT, ast]
 		= ast
-s _ (PrecT:OfT:Op name:ColonT: mod: CommaT:rels)
+s _ [PrecT, OfT, Op name, ColonT, mod]
+		= PrecAnnotT $ PrecAnnot name (modToken2AST mod) []
+s _ (PrecT:OfT:Op name:ColonT: mod:rels)
 		= PrecAnnotT $ PrecAnnot name (modToken2AST mod) $ concatMap unpck rels
 			where 	unpck (PrecRel r)	= [r]
 				unpck (PrecRels rels)	= rels
