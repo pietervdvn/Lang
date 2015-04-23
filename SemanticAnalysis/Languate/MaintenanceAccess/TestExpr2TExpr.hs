@@ -22,6 +22,7 @@ import Languate.TableOverview
 import Languate.ParserStub
 import Languate.FunctionTable.Expr2Texpr
 import Languate.Precedence.Expr2PrefExpr
+import Languate.TAST
 import Data.Map
 import Data.Maybe
 import StdDef

@@ -150,7 +150,7 @@ calcTypeUnion ctx (rtu, funcReqs) (rtuArg, argReqs)
 		let msg	= tps |> (\((base, arg), Left msg) -> "The type "++(base & fst & st True) ++" could not be applied with "++(arg & fst & st True)++"\n"++indent msg)
 				& unlines
 		when (null $ fst rst) $ halt $ "No types left in the union. Tried types: \n"++indent msg
-		return rst
+		return $ first nub rst
 
 
 -- Calculates a applied type. Gives the rest of the types, and new resting type
@@ -164,8 +164,9 @@ calcType ctx (RCurry t0 rest, reqs) (arg, argReqs)
 		-- the actual requirements
 		let rqs		= merge (argReqs' ++ reqs) ||>> (nub . concat)	:: RTypeReqs
 		binding		<- either halt return $ bind tt (M.fromList rqs) arg' t0
-		return (substitute binding rest,
-			rqs & filter ((`notElem` M.keys bindAway) . fst))
+		let bindingReqs	= binding & unbind & M.toList & merge
+		let newRqs	= (rqs ++ bindingReqs) & merge ||>> concat
+		return (rest, newRqs )
 calcType ctx t0 arg
 	= halt $ "The type "++(t0 & fst & st True)++" is applied to "++(arg & fst & st True)++", but this is not possible"
 
