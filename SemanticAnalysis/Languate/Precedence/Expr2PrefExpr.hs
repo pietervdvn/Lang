@@ -75,3 +75,7 @@ bringInPrefix PrecPostfix (expr:Operator nm:rest)
 bringInPrefix PrecRight (e1:Operator nm: rest)
 		= let e2	= bringInPrefix PrecRight rest in
 			Seq [Call nm, e1, e2]
+bringInPrefix _ [e, Operator nm]
+		= Seq [Call nm, e]
+bringInPrefix _ [Operator nm, e]
+		= todos "With flip for strange sections" -- TODO #85

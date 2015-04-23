@@ -31,6 +31,7 @@ import Languate.MaintenanceAccess.TestBind (pt, pr)
 
 
 import qualified Data.Map as M
+import qualified Data.Set as S
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
@@ -38,18 +39,19 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 loadedPackage	= unsafePerformIO $ packageIO path
 tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 prelude		= toFQN' "pietervdvn:Data:Prelude"
+defFrees	= ["a","b","pubKey","privKey"]
 
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv
-			prelude expr
+			prelude defFrees expr
 		putStrLn "-- original expression --"
 		print expr
 		putStrLn "-- which has the type --"
 		return result
 
 tct t args
-	= do	let ctx	= Ctx loadedPackage tablesOverv prelude
+	= do	let ctx	= Ctx loadedPackage tablesOverv prelude $ S.fromList defFrees
 		texpr	<- runExceptionsIO' $ calcTypeUnion ctx t args
 		print texpr
 

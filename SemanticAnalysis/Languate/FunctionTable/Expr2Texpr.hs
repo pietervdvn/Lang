@@ -5,6 +5,8 @@ import Exceptions
 import Normalizable
 import HumanUtils hiding (when)
 
+import Graphs.TreeShake
+
 
 import Languate.AST
 import Languate.TAST
@@ -27,6 +29,7 @@ import qualified Data.Set as S
 import Data.List (nub)
 import Data.Either
 import Data.Tuple
+import Data.Maybe
 
 
 import StateT
@@ -48,13 +51,14 @@ Builds a typed expression from a AST expression. This involves both typechecking
 The requirements should contain all used free type variables within the context
 
 -}
-expr2texpr	:: Package -> TableOverview -> FQN -> OperatorFreeExpression -> Exc [TExpression]
-expr2texpr p to fqn e
-	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn) |> fst
+expr2texpr	:: Package -> TableOverview -> FQN -> [Name]-> OperatorFreeExpression -> Exc [TExpression]
+expr2texpr p to fqn frees e
+	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn $ S.fromList frees) |> fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
 		, location	:: FQN	-- the current location where to search
+		, knownFrees	:: Set Name	-- The frees which are used within this context.
 		}
 
 type SCtx a	= StateT Ctx (Exceptions String String) a
@@ -69,8 +73,10 @@ _e2te (Call nm)	= do
 				|> unpackFTS
 	funcTable	<- lift $ M.lookup fqn funcTables ? errMsg fqn
 	signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
-	signs |> TCall & return
+	signs'	<- mapM escapeSign signs
+	signs' |> TCall & return
 _e2te (Seq (function:args)) = do
+	-- types are renamed at this point, thus no further escape is needed
 	tfunctions	<- _e2te function
 	calcApplications tfunctions args
 _e2te e		=
@@ -102,7 +108,7 @@ calcApplication fs args
 	= do	let fsInfo	= fs |> (typeOf &&& id)
 		let argsInfo	= args |> (typeOf &&& id)
 		results		<- calcTypes fsInfo argsInfo
-		results |> (\((funcExp, argExpr), tinfo) -> TApplication tinfo funcExp argExpr) & return
+		results |> (\((funcExp, argExpr), tinfo) -> TApplication (cleanType tinfo) funcExp argExpr) & return
 
 {- calculates the resulting types that a function has.
 
@@ -125,6 +131,17 @@ calcTypes func arg
 				& filter (isRight . snd) ||>> (\(Right t) -> t)
 		when (null ok) $ lift $ halt $ "Not a single type union gave a result:\n"++indent msg
 		return ok
+
+escapeSign	:: Signature -> SCtx Signature
+escapeSign sign
+	= do	bindAway 	<- get' knownFrees |> S.toList |> buildBinding'
+		let tps'	= signTypes sign |> substitute (asBinding bindAway)
+		let tpReqs'	= signTypeReqs sign |> substituteReq bindAway
+		let frees	= (tps' >>= freesInRT)  ++ (tpReqs' |> snd & concat >>= freesInRT) ++ (tpReqs' |> fst)	:: [Name]
+		addFrees frees
+		return $ sign {signTypes = tps', signTypeReqs = tpReqs'}
+
+
 
 {-
 A function can have multiple typeunions, e.g.
@@ -171,6 +188,22 @@ calcType ctx t0 arg
 	= halt $ "The type "++(t0 & fst & st True)++" is applied to "++(arg & fst & st True)++", but this is not possible"
 
 
+
+cleanType	:: RTypeInfo -> RTypeInfo
+cleanType (rtpUnion, reqs)
+	= let	cleanedUnion	= rtpUnion >>= fetchType reqs	-- the first thing we do, is replacing single 'RFrees by their requirements'
+		usedFrees	= cleanedUnion >>= freesInRT
+		freeDepGraph	= reqs |||>>> freesInRT ||>> concat & M.fromList |> S.fromList
+		neededFrees	= treeshake (S.fromList usedFrees) freeDepGraph in	-- the free types which are still used
+		(cleanedUnion, reqs & filter ((`M.member` neededFrees) . fst) )
+
+
+fetchType	:: RTypeReqs -> RType -> [RType]
+fetchType reqs t@(RFree name)
+		= fromMaybe [t] (lookup name reqs)
+fetchType _ t	= [t]
+
+
 preClean	:: Expression -> Expression
 preClean (Seq exps)
 		= exps & preClean' & Seq
@@ -183,3 +216,7 @@ preClean' exps	= exps & filter (not . isExpNl) |> preClean
 
 
 returns a	= return [a]
+
+addFrees	:: [Name] -> SCtx ()
+addFrees nms	= do	ctx	<- get
+			put $ ctx {knownFrees = S.union (S.fromList nms) $ knownFrees ctx}

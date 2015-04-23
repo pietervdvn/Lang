@@ -80,7 +80,7 @@ functionIn' fqn tlt (stm, coor) = onLine coor $
 	do	let signs	= functionIn stm
 		mapM (\((nm, t, reqs),v) -> do	rt	<- mapM (resolveType tlt) t
 						rreqs	<- mapM (resolveTypeIn tlt) reqs
-						return (Signature fqn nm rt rreqs, v)  )  signs
+						return (Signature fqn nm rt $ merge rreqs, v)  )  signs
 
 
 

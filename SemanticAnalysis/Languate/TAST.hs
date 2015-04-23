@@ -94,11 +94,11 @@ data Signature		= Signature
 				{ signFQN	:: FQN	-- where the function is defined
 				, signName	:: Name	-- its name
 				, signTypes	:: RTypeUnion	-- all the types it obeys
-				, signTypeReqs	:: [RTypeReq]	-- needed requirements
+				, signTypeReqs	:: RTypeReqs	-- needed requirements
 				}
 	deriving (Show, Eq, Ord)
 
-asSignature	:: (FQN, Name, RTypeUnion, [RTypeReq]) -> Signature
+asSignature	:: (FQN, Name, RTypeUnion, RTypeReqs) -> Signature
 asSignature (fqn, n, rtps, rtpreqs)
 	= Signature fqn n rtps rtpreqs
 
@@ -116,7 +116,7 @@ typeOf (TNat _)	= ([natType, intType], [])
 typeOf (TFlt _)	= ([floatType], [])
 typeOf (TChr _)	= ([charType], [])
 typeOf (TCall sign)
-		= (signTypes sign, merge $ signTypeReqs sign)
+		= (signTypes sign, signTypeReqs sign)
 typeOf (TApplication typeInfo _ _)
 		= typeInfo
 
@@ -189,10 +189,9 @@ showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
 		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
 
-rTypeReqs2md	:: [RTypeReq] -> MarkUp
+rTypeReqs2md	:: RTypeReqs -> MarkUp
 rTypeReqs2md rqs
-		= rqs	& merge
-			|> showRTypeReq'
+		= rqs	|> showRTypeReq'
 			|> code & Mu.Seq
 
 instance Normalizable ResolvedType where
