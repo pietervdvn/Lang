@@ -58,7 +58,8 @@ t "freeType" s	= FreeType s []
 t "void"  _	= KnownType [] "Void"
 t "infer" _	= Unknown
 t "subTypeT" _	= InT
-t "typeConjT" _	= Comma
+t "typeConjTC" _
+		= Comma
 t _ "("		= ParO
 t _ ")"		= ParC
 t _ "["		= ParO
@@ -90,13 +91,13 @@ s "commaSepTypes" [typ, CommaSepTypes typs]
 		= CommaSepTypes $ typ:typs
 s "commaSepTypes" typs
 		= CommaSepTypes typs
-s "typeConj" [Comma, typ]
+s "typeConjComma" [Comma, typ]
 		= typ
-s "typeConj" [typ]
+s "typeConjComma" [typ]
 		= typ
-s "typeConj" [typ, CommaSepTypes typs]
+s "typeConjComma" [typ, CommaSepTypes typs]
 		= CommaSepTypes $ typ:typs
-s "typeConj" typs
+s "typeConjComma" typs
 		= CommaSepTypes typs
 
 s "list" [ParO, cont, ParC]

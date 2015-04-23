@@ -56,7 +56,7 @@ data AST	= Clss Name [Name] [Type] [TypeRequirement] [AST]
 		| FreeT [Name] [TypeRequirement]
 		| Type Type [TypeRequirement]
 		| ClassT	| SubClassT
-		| ColonT	| CommaT
+		| CommaT
 		| NlT
 	deriving (Show)
 
@@ -75,7 +75,6 @@ t "typeIdent" n
 t "globalIdent" n
 		=  Ident n
 t _ ('\n':_)	=  NlT
-t _ ":"		=  ColonT
 t _ "cat"	=  ClassT
 t _ "category" = ClassT
 t "subTypeT" _	= SubClassT

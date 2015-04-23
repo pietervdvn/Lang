@@ -19,7 +19,7 @@ type Coor	= (Line, Column)
 
 -- ## META STUFF
 data Law	= Law 	{ lawName		:: Maybe Name
-			, lawDeclarations	:: [(Name, Maybe Type)]
+			, lawDeclarations	:: [(Name, [Type])]
 			, typeReqs		:: [TypeRequirement]
 			, expr1 		:: Expression
 			, expr2 		:: Expression }
@@ -72,8 +72,8 @@ data Type	= Normal [Name] Name	-- A normal type, e.g. Bool. Extra names are to d
 		| Free String	-- A 'free' type, such as 'a', 'b'. (e.g. in id : a -> a)
 		| Applied Type [Type]
 		| Curry [Type]
-		-- represents a tuple type. When the types are converted to fully qualified types, the actual tuple type is used. 
-		| TupleType [Type]	
+		-- represents a tuple type. When the types are converted to fully qualified types, the actual tuple type is used.
+		| TupleType [Type]
 		| Infer
 	deriving (Eq, Ord)
 

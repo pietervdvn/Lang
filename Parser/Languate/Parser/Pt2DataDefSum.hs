@@ -106,7 +106,7 @@ hn		=  [("type",uncurry TypeN . pt2type)]
 tn		:: Name -> String -> ASTN
 tn "localIdent" id
 		=  IdentN id
-tn _ ":"	=  ColonT
+tn "subTypeT" _	=  ColonT
 tn nm cont	=  tokenErr modNameN nm cont
 
 

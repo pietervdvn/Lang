@@ -5,7 +5,9 @@ import Bnf.ParseTree
 import Bnf
 import Languate.Parser.Utils
 import Languate.Parser.Pt2Type
+import Languate.Parser.Pt2TypeConj
 import Languate.Parser.Pt2DataDef
+
 import Languate.AST
 
 {--
@@ -36,7 +38,7 @@ data AST	= Ident Name
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("freeTypes",uncurry FreeTypes . pt2freetypes),("type", uncurry Type . pt2type)]
+h		=  [("freeTypes",uncurry FreeTypes . pt2freetypes),("type", uncurry Type . pt2type),("typeConj", uncurry TypeTail . pt2typeConj)]
 
 t		:: Name -> String -> AST
 t "typeIdent" nm
@@ -44,7 +46,6 @@ t "typeIdent" nm
 t _ "subtype"	= SubTypeT
 t _ "="		= EqualT
 t _ "_"		= PrivT
-t _ "&"		= AndT
 t nm cont	= tokenErr modName nm cont
 
 
@@ -59,10 +60,8 @@ s r (SubTypeT:Ident nm:EqualT:tail)
 s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:PrivT:tail)
 		= let SubDefT (SubDef nm' _ frees' ts' trs') = s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:tail) in
 			SubDefT $ SubDef nm' Private frees' ts' trs'
-s r (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:Type t tr0:[])
-		= s r [ SubTypeT, Ident nm, FreeTypes frees tr, EqualT, Type t tr0, TypeTail [] []]
-s _ (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:Type t tr0:TypeTail ts trs:[])
-		= SubDefT $ SubDef nm Public frees (t:ts) (tr++tr0++trs)
+s _ (SubTypeT:Ident nm:FreeTypes frees tr:EqualT:TypeTail ts trs:[])
+		= SubDefT $ SubDef nm Public frees ts (tr++trs)
 
 
 s _ [ast]	= ast

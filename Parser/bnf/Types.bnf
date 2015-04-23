@@ -25,9 +25,10 @@ public import Prelude
 
 
  $subTypeT	::= "in" | "is" | ":"
- $typeConjT	::= "\&"  | ","
+ $typeConjT	::= "\&"
+ $typeConjTC	::= "," | typeConjT
  typeConj	::= type (typeConjT type)*
-
+ typeConjComma	::= type (typeConjTC type)*
 
  -----------
  -- TYPES --
@@ -37,7 +38,7 @@ public import Prelude
  $typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
  knownType	::= %((globalIdent moduleSep)* typeIdent)
  $freeType	::= localIdent & !subTypeT
- parFreeType	::= "\(" freeType (subTypeT typeConj) "\)"
+ parFreeType	::= "\(" freeType (subTypeT typeConjComma) "\)"
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
 _$infer		::= "_"		-- compiler should infer which is the type

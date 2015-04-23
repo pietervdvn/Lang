@@ -6,9 +6,12 @@ import Bnf
 import Languate.Parser.Utils
 import Languate.Parser.Pt2Type
 import Languate.Parser.Pt2Expr
+import Languate.Parser.Pt2TypeConj
 import Languate.AST
 
 import Data.Maybe
+
+import Control.Arrow
 {--
 
 This module converts the ParseTree into a law/example
@@ -30,23 +33,24 @@ data AST	= Tilde	| Bird	| Colon	| Equals
 		| ForAll	| Comma
 		| LawName Name
 		| Ident Name	| Idents [Name]
-		| Type Type [TypeRequirement]
-		| TypeDecl [(Name, Maybe Type)] [TypeRequirement]	-- name:Type; name:TypeRequirement
+		| Types [Type] [TypeRequirement]
+		| TypeDecl [(Name, [Type])] [TypeRequirement]	-- name:Type; name:TypeRequirement
 		| Expr Expression
 		| RightExpr Expression
 		-- simplelaw: has no declarations, thus easy for the interpreter
-		| DiffLaw (Maybe Name) [(Name, Maybe Type)] [TypeRequirement] Expression (Maybe Expression)	-- name; declaration:  name:Type; type constraints: name:TypeRequirement, expr1, expr2
+		| DiffLaw (Maybe Name) [(Name, [Type])] [TypeRequirement] Expression (Maybe Expression)	-- name; declaration:  name:Type; type constraints: name:TypeRequirement, expr1, expr2
 		| SimpleLaw (Maybe Name) Expression (Maybe Expression)
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("expr", Expr . pt2expr),("type", uncurry Type . pt2type)]
+h		=  [("expr", Expr . pt2expr),("type", uncurry Types. (first (:[])). pt2type),("typeConj", uncurry Types . pt2typeConj)]
 
 t		:: Name -> String -> AST
 t _ "~"		=  Tilde
 t _ ">"		=  Bird
 t _ ":"		=  Colon
+t "subTypeT" _	=  Colon
 t _ "="		=  Equals
 t _ "=>"	=  ForAll
 t _ ","		=  Comma
@@ -92,16 +96,16 @@ makeLawDecl (Ident nm:tail) idents
 		= makeLawDecl tail (nm:idents)
 makeLawDecl (Idents nms:tail) idents
 		= makeLawDecl tail (nms++idents)
-makeLawDecl [Type t reqs] idents
-		= TypeDecl (zip idents $ repeat $ Just t) reqs
+makeLawDecl [Types tps reqs] idents
+		= TypeDecl (zip idents $ repeat $ tps) reqs
 
-mergeTypeDecl	:: [AST] -> [(Name, Maybe Type)] -> [TypeRequirement] -> AST
+mergeTypeDecl	:: [AST] -> [(Name, [Type])] -> [TypeRequirement] -> AST
 mergeTypeDecl [] acc reqsAcc
 		= TypeDecl acc reqsAcc
 mergeTypeDecl (TypeDecl stuff reqs :tail) acc reqsAcc
 		= mergeTypeDecl tail (stuff++acc) (reqs ++ reqsAcc)
 mergeTypeDecl (Idents nms:tail) acc reqsAcc
-		= mergeTypeDecl tail (zip nms (repeat Nothing) ++acc) reqsAcc
+		= mergeTypeDecl tail (zip nms (repeat []) ++ acc) reqsAcc
 
 pt2law	:: ParseTree -> Law
 pt2law	= pt2a h t s convert
