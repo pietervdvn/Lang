@@ -1,0 +1,8 @@
+Char
+----
+Implementation of chars
+----
+
+import Num.Nat
+
+type Char	= Int
