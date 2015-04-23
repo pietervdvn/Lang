@@ -42,6 +42,9 @@ cat Collection a
 instance Collection is Mappable
 instance Collection a is Monoid
 instance Collection (a:Eq) is Eq
+
+precedence of (:) is Right
+
 ---
 map	: (a -> b) -> a* -> b*
 f empty	= empty

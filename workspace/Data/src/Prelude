@@ -5,6 +5,9 @@ Each program imports these by default
 -------
 
 public import Any
+
+public import Aliasses
+
 public import Data.Bool
 public import Type.Function
 public import Category.Function
@@ -28,6 +31,7 @@ public import Collection.More
 public import Collection.Maybe
 public import Collection.Dict
 public import Collection.Set
+public import Collection.List
 
 public import Graph.Graph
 

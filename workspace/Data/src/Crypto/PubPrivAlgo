@@ -3,6 +3,8 @@ PubPrivAlgo
 Generic algorithm implementation
 -----------
 
+import Aliasses
+
 -- The type representing the _private_ key of a public-key encryption scheme
 cat PrivateKey
 	> True
@@ -11,9 +13,12 @@ cat PrivateKey
 cat PublicKey
 	> True
 
+
+type Encrypted a	= a
+
 -- The type representing a public-key encryption scheme, with fixed keys
-cat PubPrivAlgo (a:PrivateKey) (b:PublicKey)
-	> True
+cat PubPrivAlgo (privKey:PrivateKey) (pubKey:PublicKey)
+	encrypt	: PubPrivAlgo privKey pubKey -> privKey -> Message -> Encrypted Message
 
 
 cat RSA is PubPrivAlgo RSAPrivKey RSAPubKey
@@ -26,3 +31,13 @@ instance RSAPubKey is PublicKey
 
 data RSAPrivKey	= A
 data RSAPubKey	= B
+
+rsa	: RSA
+	= 0
+
+
+rsaPub	: RSAPubKey
+	= 0
+
+rsaPriv	: RSAPrivKey
+	= 0
