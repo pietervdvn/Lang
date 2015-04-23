@@ -9,7 +9,7 @@ import Category.Boolean
 --## Definition
 
 -- The ''Bool'' datatype represents truth values of logic.
-data Bool	= False	-- Always keep false first!
+data Bool	= False	-- Always keep false first as it is a special builtin value in the interpreter!
 		| True
 
 instance Bool is Boolean

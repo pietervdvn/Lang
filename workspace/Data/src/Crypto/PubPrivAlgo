@@ -14,7 +14,8 @@ cat PublicKey
 	> True
 
 
-type Encrypted a	= a
+cat Encrypted a	is a
+	> True
 
 -- The type representing a public-key encryption scheme, with fixed keys
 cat PubPrivAlgo (privKey:PrivateKey) (pubKey:PublicKey)
@@ -41,3 +42,9 @@ rsaPub	: RSAPubKey
 
 rsaPriv	: RSAPrivKey
 	= 0
+
+str	: Message
+	= 0
+
+stuff	: Message -> Message
+m	= m
