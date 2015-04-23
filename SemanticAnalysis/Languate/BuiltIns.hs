@@ -1,4 +1,4 @@
-module Languate.Builtins where
+module Languate.BuiltIns where
 
 {--
 This module gives fixed signatures of builtin functions.

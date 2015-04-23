@@ -18,6 +18,8 @@ import Data.Maybe
 import Prelude hiding (lookup)
 import Data.Map hiding (filter, map)
 
+import Languate.BuiltIns
+
 import Normalizable
 
 
@@ -78,4 +80,8 @@ bringInPrefix PrecRight (e1:Operator nm: rest)
 bringInPrefix _ [e, Operator nm]
 		= Seq [Call nm, e]
 bringInPrefix _ [Operator nm, e]
-		= todos "With flip for strange sections" -- TODO #85
+		= Seq [Call $ flipSign & snd, Call nm, e]
+bringInPrefix _ []
+		= Seq []
+bringInPrefix mod es
+		= error $ "Error while converting the expression into prefix form: "++ (es |> show & unwords)
