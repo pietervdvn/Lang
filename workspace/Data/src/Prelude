@@ -39,4 +39,11 @@ public import Num.Nat
 public import Num.Float
 
 public import Crypto.PubPrivAlgo
----
+
+
+data X	= X
+data Y	= Y
+data Z	= Z
+
+f	: X -> Y -> Z
+	= 0
