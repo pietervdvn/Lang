@@ -39,7 +39,7 @@ packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 loadedPackage	= unsafePerformIO $ packageIO path
 tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
 prelude		= toFQN' "pietervdvn:Data:Prelude"
-defFrees	= ["a","b","pubKey","privKey"]
+defFrees	= [] -- "a","b","pubKey","privKey"]
 
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
@@ -58,12 +58,12 @@ tct t args
 bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
 		let cluster'	= add tablesOverv cluster
-		renderClusterTo (addFooter html)
+		renderClusterTo (extend addFooter html)
 				 (dir ++"/" ++ path ++ "/.gen" ++ "/html") cluster'
-		renderClusterTo (addFooter md) (dir ++"/" ++ path ++ "/.gen" ++ "/md") cluster'
+		renderClusterTo (extend addFooter md) (dir ++"/" ++ path ++ "/.gen" ++ "/md") cluster'
 
 
-addFooter	:: RenderSettings -> RenderSettings
+addFooter	:: RenderSettings' -> RenderSettings'
 addFooter rs	= let back = InLink (Base "Back to all pages") "All pages" in
 			rs {nonEmbedPreprocessor = preprocess
 				(\mu -> parags [back,mu,back]) . nonEmbedPreprocessor rs}

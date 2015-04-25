@@ -30,7 +30,7 @@ add docable (Cluster docs)
 		newDocs	= (doc:docs') |> (title &&& id) in
 		Cluster $ M.union docs $ M.fromList newDocs
 
-data RenderSettings	= RenderSettings
+data RenderSettings'	= RenderSettings
 	{ render	:: Doc -> String	-- main render function
 	, renderName	:: String -> FilePath
 	, embedder	:: Doc -> MarkUp	-- renderered to embed documents
@@ -40,13 +40,18 @@ data RenderSettings	= RenderSettings
 	, postprocessor	:: Doc -> String -> String
 				-- the string is processed with this one right before writing to file
 	, resources	:: [(String, String)]
-	, overviewPage	:: Maybe ([Doc] -> Doc)}
+	, overviewPage	:: Maybe ([Doc] -> Doc)
+	, resouceName	:: String -> URL	-- creates, from a resource name, the url on which it can be found. This way, resources don't get lost
+	}
 
-
+type RenderSettings	= (String -> URL) -> RenderSettings'
 
 renderClusterTo	:: RenderSettings -> FilePath -> Cluster -> IO ()
-renderClusterTo	settings fp (Cluster docsDict)= do
+renderClusterTo	settings' fp (Cluster docsDict)= do
 	let docs	= M.elems docsDict
+	let resouceName	nm
+			= fp++"/res/"++nm
+	let settings	= settings' resouceName
 	let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
 						return (overviewGen docs':docs))
 	let cluster	= docs' |> (title &&& id) & M.fromList
@@ -62,7 +67,7 @@ renderClusterTo	settings fp (Cluster docsDict)= do
 	putStrLn $ "Written document cluster to "++fp++" containing "++ show (length docs')++" docs"
 
 
-renderFile	:: Cluster -> RenderSettings -> FilePath -> Doc -> IO ()
+renderFile	:: Cluster -> RenderSettings' -> FilePath -> Doc -> IO ()
 renderFile cluster@(Cluster docs) rs fp doc = do
 	let inLinks	= search searchRefs $ contents doc
 	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
@@ -88,12 +93,12 @@ searchRefs _	= Nothing
 
 
 
-_renderInLink	:: RenderSettings -> FilePath -> MarkUp -> Maybe MarkUp
+_renderInLink	:: RenderSettings' -> FilePath -> MarkUp -> Maybe MarkUp
 _renderInLink rs fp (InLink mu docName)
 	= Just $ Link (rewrite (_renderInLink rs fp) mu) $ _targetName rs fp docName
 _renderInLink _ _ _	= Nothing
 
-_renderEmbed	:: Cluster -> RenderSettings -> MarkUp -> Maybe MarkUp
+_renderEmbed	:: Cluster -> RenderSettings' -> MarkUp -> Maybe MarkUp
 _renderEmbed (Cluster docs) rs (Embed docName)
 	= Just $ fromMaybe (Parag $ Seq [Base "Document ", imp docName,Base " not found"]) $ do
 		doc	<- M.lookup docName docs
@@ -101,7 +106,7 @@ _renderEmbed (Cluster docs) rs (Embed docName)
 _renderEmbed _ _ _	= Nothing
 
 
-_targetName	:: RenderSettings -> FilePath -> Name -> FilePath
+_targetName	:: RenderSettings' -> FilePath -> Name -> FilePath
 _targetName rs fp nm
 	= fp ++ "/" ++ _makeFPproof (renderName rs nm)
 

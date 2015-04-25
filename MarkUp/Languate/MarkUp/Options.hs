@@ -18,18 +18,20 @@ import Data.Set as S
 type Option	= (Doc -> String -> String, [(String, String)])
 type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
-addOption	:: Option -> RenderSettings -> RenderSettings
-addOption f rs	=  rs {postprocessor =
+addOption	:: Option -> RenderSettings' -> RenderSettings'
+addOption f rs	= rs {postprocessor =
 			\doc -> fst f doc . postprocessor rs doc,
 			resources	= snd f ++ resources rs}
 
+extend		:: (RenderSettings' -> RenderSettings') -> RenderSettings -> RenderSettings
+extend f rs	=  \rf -> f $ rs rf
 
 html	:: RenderSettings
-html	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id id (flip const) []
-		(Just defaultOverviewPage) & addOption (headers defaultHeader)
+html rf	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id id (flip const) []
+		(Just defaultOverviewPage) rf & addOption (headers (defaultHeader rf))
 
 md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id id (flip const) [] (Just defaultOverviewPage)
+md rf	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id id (flip const) [] (Just defaultOverviewPage) rf
 
 fancyEmbedder doc
 	= Parag $ Titling
@@ -57,8 +59,9 @@ mergeHeaders headers
 		= (headers |> fst & concat, headers |> snd & concat)
 
 
-defaultHeader	:: HeaderOption
-defaultHeader 	=  [titleHeader, ogpTags] |> headerTag & (cssTag defaultCSS:) & mergeHeaders
+defaultHeader	:: (String -> URL) -> HeaderOption
+defaultHeader resF
+		=  [titleHeader, ogpTags] |> headerTag & (cssTag resF defaultCSS:) & mergeHeaders
 
 headerTag	:: (Doc -> HTML) -> HeaderOption
 headerTag f	= ([f],[])
@@ -74,8 +77,8 @@ ogpTags doc
 		ogpTags = meta doc & M.toList & basicOgp |> uncurry ogpTag in
 			unlines ogpTags
 
-cssTag	:: CSS -> HeaderOption
-cssTag css
-	= ([const $ "<link rel=\"stylesheet\" href=\"res/"++ name css ++"\">"
+cssTag	:: (String -> URL) -> CSS -> HeaderOption
+cssTag resourceF css
+	= ([const $ "<link rel=\"stylesheet\" href=\""++ resourceF (name css) ++"\">"
 		, const $ inTag "style" $ styleTagConts css]
 		, [(name css, show css)])
