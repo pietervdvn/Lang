@@ -21,6 +21,8 @@ renderHTML (Emph mu)
 		= mu & renderHTML       |> inSpan "emph"
 renderHTML (Imp mu)
         = mu & renderHTML       |> inSpan "imp"
+renderHTML (NonImp mu)
+        = mu & renderHTML       |> inSpan "notImp"
 renderHTML (Code mu)
         = mu & renderHTML       |> inSpan "code"
 renderHTML (Incorr mu)

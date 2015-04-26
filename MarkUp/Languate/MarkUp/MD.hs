@@ -25,6 +25,8 @@ renderMD (Emph mu)
 		= renderMD mu |> between "_"
 renderMD (Imp mu)
         = renderMD mu |> between "**"
+renderMD (NonImp mu)
+	= renderMD mu	-- No special options for this in MD, we just render it normally
 renderMD (Code mu)
         = renderMD mu |> between "```"
 renderMD (Incorr mu)
@@ -50,7 +52,7 @@ renderMD (Table mus muss)
 renderMD (List mus)
         = do    i <- get' listDepth
                 setListDepth $ i + 1
-                list <- mapM renderMD mus   ||>> (++) "* " 
+                list <- mapM renderMD mus   ||>> (++) "* "
                                             ||>> (++) (replicate (i * 3) ' ')
                                             |> unlines
                 setListDepth i
@@ -58,8 +60,8 @@ renderMD (List mus)
 renderMD (OrderedList mus)
         = do    i <- get' listDepth
                 setListDepth $ i + 1
-                listItems <- mapM renderMD mus   
-                let list    = zip [1..] listItems 
+                listItems <- mapM renderMD mus
+                let list    = zip [1..] listItems
                                 |> (\(j, content) -> show j ++ ". " ++ content)
                                 |> (++) (replicate (i * 3) ' ')
                                  & unlines & ("\n" ++)

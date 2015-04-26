@@ -9,13 +9,14 @@ import Data.List
 
 -- Represents a snippet of markUpped code
 data MarkUp
-        = Base String		            -- Embeds a plaintext in markup
+        = Base String		        -- Embeds a plaintext in markup
         | Parag MarkUp                  -- Paragraph for markup
         | Seq [MarkUp]                  -- Sequence of markup
-        | Emph MarkUp		            -- Emphasized markup
-        | Imp MarkUp 		            -- Important markup
-        | Code MarkUp 		            -- Code section
-        | Incorr MarkUp 	            -- Incorrect code
+        | Emph MarkUp		        -- Emphasized markup
+        | Imp MarkUp 		        -- Important markup
+	| NonImp MarkUp			-- Not important stuff, e.g. "This page is automatically generated"
+        | Code MarkUp 		        -- Code section
+        | Incorr MarkUp 	        -- Incorrect code
         | Titling MarkUp MarkUp         -- Embedded titeling [title, markup]
         | Link MarkUp URL               -- A link with overlay text [markup, url]
 	| InLink MarkUp Name		-- A link to a document within the cluster
@@ -46,6 +47,8 @@ unpack (Emph mu)
             = One Emph mu
 unpack (Imp mu)
             = One Imp mu
+unpack (NonImp mu)
+	    = One NonImp mu
 unpack (Code mu)
             = One Code mu
 unpack (Incorr mu)
@@ -116,7 +119,7 @@ link' str
 inlink str
 	= InLink (Base str) str
 notImportant
-	= emph	-- TODO change to actual not important
+	= NonImp . Base
 table header
 	= Table (header |> Base)
 commas' mus

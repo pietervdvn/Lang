@@ -12,6 +12,7 @@ import Control.Applicative
 
 import Data.Map as M
 import Data.Set as S
+import Data.Char
 -- Implements somme options for the render html, e.g. to add a header, footer, scripts, stylesheet
 
 -- Represents a postprocessor + needed resource. Resources are always saved in res, relative to the cluster
@@ -27,7 +28,7 @@ extend		:: (RenderSettings' -> RenderSettings') -> RenderSettings -> RenderSetti
 extend f rs	=  \rf -> f $ rs rf
 
 html	:: RenderSettings
-html rf	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder id id (flip const) []
+html rf	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder (preprocess $ rewrite rewriteLinks) id (flip const) []
 		(Just defaultOverviewPage) rf & addOption (headers (defaultHeader rf))
 
 md	:: RenderSettings
@@ -82,3 +83,24 @@ cssTag resourceF css
 	= ([const $ "<link rel=\"stylesheet\" href=\""++ resourceF (name css) ++"\">"
 		, const $ inTag "style" $ styleTagConts css]
 		, [(name css, show css)])
+
+rewriteLinks	:: MarkUp -> Maybe MarkUp
+rewriteLinks (Link mu url)
+		= Just $ Link mu $ escapeURL url
+rewriteLinks _	= Nothing
+
+escapeURL	:: String -> URL
+escapeURL str	= str >>= escapeChar
+
+escapeChar	:: Char -> String
+escapeChar c
+	| c `elem` validChars	= [c]
+	| otherwise	= "%" ++asHex (ord c)
+
+validChars	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!$&'()*+,;="
+
+asHex	:: Int -> String
+asHex 0	= ""
+asHex i	= let 	j	= i `mod` 16
+		c	= "0123456789ABCDEF" !! j in
+		asHex (i `div` 16) ++ [c]

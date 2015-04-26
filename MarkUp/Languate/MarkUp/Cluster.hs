@@ -55,9 +55,10 @@ renderClusterTo	settings' fp (Cluster docsDict)= do
 	let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
 						return (overviewGen docs':docs))
 	let cluster	= docs' |> (title &&& id) & M.fromList
-	let cluster'	= cluster |> preprocessor settings
+	let cluster'	= cluster
 				|> preprocess (rewrite $ _renderEmbed cluster' settings)
 				|> preprocess (rewrite $ _renderInLink settings fp)
+				|> preprocessor settings
 				& Cluster
 	let cluster''	= docsIn cluster' |> nonEmbedPreprocessor settings & Cluster
 	mapM_ (renderFile cluster'' settings fp) (docsIn cluster'' & M.elems)
