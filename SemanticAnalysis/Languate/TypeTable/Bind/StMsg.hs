@@ -30,10 +30,11 @@ data Context	= Context 	{ frees		:: Map Name [RType]	-- keeps track of the super
                			, spareSuperTypes :: Map TypeID SpareSuperTypeTable
 				, allSupertypes :: Map TypeID FullSuperTypeTable
 				, binding_ 	:: Binding
-
+				, kinds		:: KindLookupTable
+				, recursive	:: Bool	-- Flag to enable recursive calls
 				}
 instance Show Context where
-	show (Context frees _ _ _ b)= "Context "++sd frees ++ ", "++show b
+	show (Context frees _ _ _ b _ _)= "Context "++sd frees ++ ", "++show b
 
 
 
@@ -57,7 +58,6 @@ getSstt tid
  | otherwise	= do	spareSTT	<- get |> spareSuperTypes |> lookup tid
 			assert (isJust spareSTT) $ "No spare STT for "++show tid
 			return $ fromJust spareSTT
-
 
 addBinding	:: (Name, RType) -> StMsg ()
 addBinding (n,t)

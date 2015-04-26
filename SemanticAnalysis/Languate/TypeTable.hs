@@ -141,8 +141,21 @@ findTypeOrigin' tlt id@(_, nm)
 		= do	fqn	<- findTypeOrigin tlt id
 			return (fqn, nm)
 
+{-
+Constructs the vanillaType of the given ID.
+The vanillaType is the type with frees, e.g.
+Dict a0 a1
+-}
+vanillaType'	:: KindLookupTable -> TypeID -> RType
+vanillaType' klt tid@(fqn, nm)
+	= let	nrOfArgs	= findWithDefault Kind tid klt & numberOfKindArgs
+		frees		= defaultFreeNames & take nrOfArgs |> RFree	in
+		Prelude.foldl RApplied (RNormal fqn nm) frees
 
-
+-- same a vanillaType', except this one fetches the KLT from the TT
+vanillaType	:: TypeTable -> TypeID -> RType
+vanillaType tt
+		= vanillaType' (kinds tt)
 
 resolveType	:: TypeLookupTable -> Type -> Exc RType
 resolveType tlt (Normal path name)

@@ -68,6 +68,6 @@ buildTypeTable w
 	supers		<- inside "While building the super type table" $ buildSuperTypeTable w tlts klt
 	let fstts	= supers |> stt2fstt & fixImplicitRequirements typeReqs
 	(allSupers, spareSupers)
-			<- expand fstts
+			<- expand klt fstts
 	inside "While checking the requirements table" $ validateReqTable klt typeReqs
 	return $ TypeTable knownTypes tlts klt typeReqs supers allSupers spareSupers docstrings freeNames

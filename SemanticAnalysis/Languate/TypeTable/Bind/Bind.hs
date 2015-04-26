@@ -25,7 +25,7 @@ import Prelude hiding (fail, lookup, catch)
 import Languate.TAST
 import Languate.TypeTable as TT
 import Languate.TypeTable.Bind.Substitute
-import Languate.TypeTable.Bind.StMsg
+import Languate.TypeTable.Bind.StMsg as StMsg
 
 
 import Control.Monad hiding (fail)
@@ -47,20 +47,28 @@ When free ''a'' is bound against free ''b'', each requirement on ''a'' is matche
 
 Assumes that t0 has no overlapping free names with t1.
 -}
-_bind	:: Map TypeID SpareSuperTypeTable -> Map TypeID FullSuperTypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
-_bind sstt fstt reqs t0 t1
+_bind'	:: Bool -> Map TypeID SpareSuperTypeTable -> Map TypeID FullSuperTypeTable -> KindLookupTable -> Map Name [RType] -> RType -> RType -> Either String Binding
+_bind' recursive sstt fstt klt reqs t0 t1
 	= let 	used	= (t0:t1:concat (M.elems reqs)) |> freesInRT & concat & S.fromList
-		ctx	= Context reqs used sstt fstt noBinding
+		ctx	= Context reqs used sstt fstt noBinding klt recursive
 		msg	= "While binding "++show t0++" in "++ show t1 in
 		runstateT (inside msg $ bind' t0 t1) ctx |> snd |> binding_
 
+_bind	= _bind' True
+
 bind	:: TypeTable -> Map Name [RType] -> RType -> RType -> Either String Binding
-bind tt	= _bind (TT.spareSuperTypes tt) (TT.allSupertypes tt)
+bind tt	= _bind (TT.spareSuperTypes tt) (TT.allSupertypes tt) (TT.kinds tt)
 
 
 isSubtype	:: TypeTable -> Map Name [RType] -> RType -> RType -> Bool
 isSubtype tt reqs t0 t1
 	= bind tt reqs t0 t1 & isRight
+
+cleanBind	:: Bool -> RType -> RType -> StMsg (Either String Binding)
+cleanBind recursive t0 t1
+	= do	ctx	<- get
+		return $ _bind' recursive (StMsg.spareSuperTypes ctx) (StMsg.allSupertypes ctx) (StMsg.kinds ctx)  M.empty t0 t1
+
 
 bind'	:: RType -> RType -> StMsg ()
 bind' (RFree a) (RFree b)
@@ -109,9 +117,10 @@ bind' t0@(RApplied bt at) t1
 -- tries to bind t0 into t1 via a super type table lookup
 superBind	:: RType -> RType -> StMsg ()
 superBind sub wantedSuper
-	= do	-- we calculate all possible super forms, which we try against match superBind
+	= try (lookupSuperFrees sub wantedSuper) $ -- first, try to bind via superfrees. If that fails, attempt conventional supertype lookup
+	 do	-- we calculate all possible super forms, which we try against match superBind
 		subTid	<- getBaseTID sub ? ("No tid for "++show sub)
-		availableForms	<- wantedFormsOf subTid wantedSuper
+		availableForms	<- wantedFormsOf sub subTid wantedSuper
 		let isLeft	= either (const True) (const False)
 		failed	<- whileM' isLeft (\availableForm -> catch' $
 				lookupSupersAgainst sub availableForm wantedSuper) availableForms
@@ -119,19 +128,50 @@ superBind sub wantedSuper
 			"Could not bind "++st True sub++" in "++st True wantedSuper++" as no form can be matched.\nTried supers: "++show (zip availableForms failed)
 
 -- gives available types, thus the types that the subType has as supertype which contain (more or less) the wanted super
-wantedFormsOf	:: TypeID -> RType -> StMsg [RType]
-wantedFormsOf subTid wantedSuper
+wantedFormsOf	:: RType -> TypeID -> RType -> StMsg [RType]
+wantedFormsOf subType subTid wantedSuper
  | isNormal wantedSuper
 	= do	supTid	<- getBaseTID wantedSuper ?
 				("Huh? wanted super "++show wantedSuper++" is normal!")
+		-- normal super types available from the supertypetables
 		getSstt subTid |> findWithDefault [] supTid
  | otherwise
 	= getFstt subTid |> keys |> L.filter (not . isNormal)
 
 {-
 
-Given a subtype, a form of a super type (from the FSTT) and the wanted super type, tries to perform binding (or fails)
+Constructions as "Encrypted a is a" are possible.
 
+This method binds those.
+
+"Encrypted (Encrypted Message)" "Message"
+
+-}
+lookupSuperFrees	:: RType -> RType -> StMsg ()
+lookupSuperFrees subT superT	= do
+		subTid		<- getBaseTID subT ? "Huh? subT should be normal!"
+		-- we get the frees which act as supertype. If one of the super types is a free, it might be the super type we need!
+		freeSupers	<- getFstt subTid |> M.keys |> Prelude.filter isRFree ||>> (\(RFree nm) -> nm)
+		-- lets build the substitution scheme! We use "bind" for that :p
+		klt	<- get' StMsg.kinds
+		cleanB	<- cleanBind False subT (vanillaType' klt subTid)
+		rec	<- get' recursive
+		let extract (Binding d)	= freeSupers |> (`M.lookup` d) & catMaybes	:: [RType]
+		let extracted	= case cleanB of
+					Left _	-> []
+					Right b	-> extract b
+		let recursiveSupers	= if rec then extracted else []	:: [RType]
+		let msg	= "Could not bind "++st True subT++" in "++st True superT++" recursively"
+		assert (not $ Prelude.null recursiveSupers) $ msg ++ " as it has no free super types."
+		-- actual binding
+		let isLeft	= either (const True) (const False)
+		failed	<- whileM' isLeft (\availableForm -> catch' $ bind' availableForm superT) recursiveSupers
+		assert (length failed /= length recursiveSupers) $
+			msg++" as no form can be matched.\nTried supers: "++show (zip recursiveSupers failed)
+
+
+{-
+Given a subtype, a form of a super type (from the FSTT) and the wanted super type, tries to perform binding (or fails)
 -}
 lookupSupersAgainst	:: RType -> RType -> RType -> StMsg ()
 lookupSupersAgainst t availableForm wantedType

@@ -45,9 +45,9 @@ buildSpareSuperTypeTable dict
 {-
 Makes the super type table complete, by recursively adding the supertypes of (known) super types.
 -}
-expand	:: (Map TypeID FullSuperTypeTable, ToBinds) ->
+expand	:: KindLookupTable -> (Map TypeID FullSuperTypeTable, ToBinds) ->
 		Exc (Map TypeID FullSuperTypeTable, Map TypeID SpareSuperTypeTable)
-expand (fstt, toCheck')
+expand klt (fstt, toCheck')
 	= let 	initSstt	= fstt |> buildSpareSuperTypeTable
 		initNotifTable	= initSstt	|> keys |> S.fromList & invertDict
 		initTodo	= fstt 		|> keys |> S.fromList
@@ -57,7 +57,7 @@ expand (fstt, toCheck')
 		toBind	= toCheck ctx'
 		fstts	= fstt_ ctx'
 		sstts	= sstt_ ctx' in do
-		fstts'	<- propagateRequirements sstts (notifyTable ctx') toBind fstts
+		fstts'	<- propagateRequirements sstts (notifyTable ctx') toBind fstts klt
 		return (fstts', sstts)
 
 

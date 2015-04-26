@@ -17,8 +17,7 @@ b	= Base
 
 instance Documentable TypeTable where
 	toDocument tt	=
-		let klt	= kinds tt
-		    fstts	= allSupertypes tt & M.toList |> fstt2doc klt
+		let fstts	= allSupertypes tt & M.toList |> fstt2doc tt
 		    types	= knownTypes tt & S.toList |> type2doc tt in
 			(typeTable2doc tt,  explanationFSTT:types ++ fstts)
 
@@ -55,18 +54,16 @@ synops tt tid
 		rest	= tail' descr in
 		(synopsis, rest)
 
-fstt2doc	:: KindLookupTable -> (TypeID, FullSuperTypeTable) -> Doc
-fstt2doc klt (tid, fstt)
-	= doc ("Types/Supertypes/Supertypes of "++showtid tid) "" $ fstt2mu klt tid fstt
+fstt2doc	:: TypeTable -> (TypeID, FullSuperTypeTable) -> Doc
+fstt2doc tt (tid, fstt)
+	= doc ("Types/Supertypes/Supertypes of "++showtid tid) "" $ fstt2mu tt tid fstt
 
 showtid (fqn, nm)
 	= show fqn++"."++nm
 
-fstt2mu	:: KindLookupTable -> TypeID -> FullSuperTypeTable -> MarkUp
-fstt2mu klt tid@(fqn, nm) fstt
-	= let	nrOfArgs	= findWithDefault Kind tid klt & numberOfKindArgs
-		tpname		= nm++" "++ unwords (take nrOfArgs defaultFreeNames)
-		titl		= Mu.Seq [b "Supertypes of ", code tpname]
+fstt2mu	:: TypeTable -> TypeID -> FullSuperTypeTable -> MarkUp
+fstt2mu tt tid@(fqn, nm) fstt
+	= let	titl		= Mu.Seq [b "Supertypes of ", code $ st True $ vanillaType tt tid]
 		tbl	= if M.null fstt then Parag $ emph "No supertypes" else
 				table ["Is type","Requirements","Via","Orig type","Origsuper -> actualsuper binding","Via -> Current binding"]
 				(M.toList fstt |> fsttKeyentry2mu)

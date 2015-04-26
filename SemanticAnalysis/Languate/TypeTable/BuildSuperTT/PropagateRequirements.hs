@@ -43,9 +43,9 @@ Dict k1 v1 is eq if (k1:Eq) and (v1:Eq).
 These indirect type requirements are added here to the FSTTs.
 Then all toBinds are checked and exceptions generated.
 --}
-propagateRequirements	:: SpareSuperTypeTables -> DG TypeID -> ToBinds -> FullSuperTypeTables -> Exc FullSuperTypeTables
-propagateRequirements sstts notifyTable toBinds fstts
-	= let 	ctx	= Context fstts sstts notifyTable []
+propagateRequirements	:: SpareSuperTypeTables -> DG TypeID -> ToBinds -> FullSuperTypeTables -> KindLookupTable -> Exc FullSuperTypeTables
+propagateRequirements sstts notifyTable toBinds fstts klt
+	= let 	ctx	= Context fstts sstts klt notifyTable []
 		-- If a type does not contain a free, no requiments can be deduced
 		-- toBinds' contains all the toBinds which might contain a free
 		toBinds'= [STB subTid isSuper ifThisType isThis
@@ -54,7 +54,7 @@ propagateRequirements sstts notifyTable toBinds fstts
 				, not (null $ freesInRT ifThisType)]
 		fstts'	= runstate (propagateReqs toBinds') ctx & snd & fstts_ in do
 		-- check if we really met all requirements
-		checkSuperBinds fstts' sstts toBinds
+		checkSuperBinds fstts' sstts klt toBinds
 		return fstts'
 
 data SingleToBind
@@ -65,6 +65,7 @@ data SingleToBind
 	deriving (Show)
 data Context	= Context 	{ fstts_	:: FullSuperTypeTables
 				, sstts_	:: SpareSuperTypeTables
+				, kinds_	:: KindLookupTable
 				-- queue representing: This fstt should be rechecked, as this fstt has a changed requirement for this supertype
 				, notifyTable ::  DG TypeID
 				, queue	:: [(TypeID, (TypeID, TypeID))]}
@@ -95,6 +96,7 @@ propagateReq  toBind@(STB baseSubTid baseSuper sub super)	-- We call ifThisType 
 		let superTid	= getBaseTID super & fromJust
 		fstts	<- get' fstts_
 		sstts	<- get' sstts_
+		klt	<- get' kinds_
 		subFstt	<- get' fstts_ |> findWithDefault M.empty subTid
 		subSstt	<- get' sstts_ |> findWithDefault M.empty subTid
 		{- We lookup the super (of which we need the requirements of) in the SSTT
@@ -109,7 +111,7 @@ propagateReq  toBind@(STB baseSubTid baseSuper sub super)	-- We call ifThisType 
 		if isNothing baseSuperEntry then return False else do
 		let knownFreeReqs
 			= baseSuperEntry & fromMaybe (error $ "No basesuperentry for "++show baseSuper++" in fstt of "++show baseSubTid) & reqs & M.fromList
-		let alreadyMet	= map (_bind sstts fstts (knownFreeReqs |> S.toList) sub) posSuperForms |> isRight & or
+		let alreadyMet	= map (_bind sstts fstts klt (knownFreeReqs |> S.toList) sub) posSuperForms |> isRight & or
 		if alreadyMet then return False else do
 		possReqs	<- forM posSuperForms $ \posSuperForm ->
 		  do	-- we calculate here what **extra** requirements are needed to meet the posSuperForm
@@ -159,19 +161,19 @@ This means that RSAPrivKey should be a PrivKey. This requirements are checked he
 
 -}
 
-checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBinds -> Check
-checkSuperBinds fstts sstts toCheck
+checkSuperBinds	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> KindLookupTable -> ToBinds -> Check
+checkSuperBinds fstts sstts klt toCheck
 	= inside "While checking that implicit type requirements are met" $ do
 		let toCheck'	= toCheck & filter (not . S.null . neededReqs)
-		mapM_ (checkSuperBinds' fstts sstts) toCheck'
+		mapM_ (checkSuperBinds' fstts sstts klt) toCheck'
 
-checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> ToBind -> Check
-checkSuperBinds' fstts sstts (ToBnd subTid superT sub shouldBeSupers msg)
+checkSuperBinds'	:: Map TypeID FullSuperTypeTable -> Map TypeID SpareSuperTypeTable -> KindLookupTable -> ToBind -> Check
+checkSuperBinds' fstts sstts klt (ToBnd subTid superT sub shouldBeSupers msg)
  = inside msg $ do
 	let metReqs	= findWithDefault M.empty subTid fstts
 				& M.lookup superT & fromMaybe (error $ "PropagateRequirements: No entry for "++show superT++" in the fstt of "++show subTid++"\n"++msg) & reqs
 				& M.fromList |> S.toList
-	let checkOne	= _bind sstts fstts metReqs sub
+	let checkOne	= _bind sstts fstts klt metReqs sub
 	let showMsg super msg
 		= inside ("The type requirement '"++st True sub++" is a "++st True super++"' could not be fullfilled") $ err msg
 	let checkOne' super	= either (showMsg super) (const pass) $ checkOne super
