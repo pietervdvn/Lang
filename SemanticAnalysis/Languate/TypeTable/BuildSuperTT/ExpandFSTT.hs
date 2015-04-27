@@ -31,8 +31,6 @@ import State
 import Control.Monad
 import Control.Arrow
 
-import Debug.Trace
-
 
 buildSpareSuperTypeTable	:: FullSuperTypeTable -> SpareSuperTypeTable
 buildSpareSuperTypeTable dict
@@ -128,8 +126,7 @@ Adds a supertypeentry to the basetype. The oldbinding takes the supertype(via) f
 -}
 _addEntry'	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
 _addEntry' base via oldBinding (superToAdd, entry)
-  = trace ("Adding "++show superToAdd++" as supertype of  "++show base) $
-    do	fstts		<- get' fstt_
+  = do	fstts		<- get' fstt_
 	-- the fstt that has to be changed
 	let fstt	= findWithDefault M.empty base fstts
 	-- the new, combined binding ...
@@ -141,7 +138,7 @@ _addEntry' base via oldBinding (superToAdd, entry)
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
 	let (toCheck, foreignReqs)
-			= trace (error "WTF?") $ reqs entry |> subReq binding & (lefts &&& rights)
+			= reqs entry |> subReq binding & (lefts &&& rights)
 	{- We might have some requirements on the via type too in our own FSTT.
 		These don't have to be checked, as these are already requirements in function of the frees of base -}
 	let viaReqs	= fstt & M.lookup via |> reqs & fromMaybe []
