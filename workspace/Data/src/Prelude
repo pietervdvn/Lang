@@ -6,7 +6,6 @@ Each program imports these by default
 
 public import Any
 
----
 public import Aliasses
 
 public import Data.Bool
@@ -40,13 +39,3 @@ public import Num.Nat
 public import Num.Float
 
 public import Crypto.PubPrivAlgo
----
-cat X
-	> True
-
-
-cat Y
-	> True
-
-instance X is Y
-instance Y is X
