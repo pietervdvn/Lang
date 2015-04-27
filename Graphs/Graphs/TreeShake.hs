@@ -23,7 +23,7 @@ growUntil dg known start
 		= let 	known'		= S.union known start
 			nextStep	= grow dg known start in
 			if S.null nextStep then known'
-				else growUntil dg (known') nextStep
+				else growUntil dg known' nextStep
 
 -- Gives a set of all nodes that can be reached from the given set (excluding the set itself). Gives back none visited nodes
 grow			:: (Ord n) => DirectedGraph n -> Set n -> Set n -> Set n

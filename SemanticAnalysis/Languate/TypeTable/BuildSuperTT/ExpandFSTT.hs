@@ -118,7 +118,7 @@ _addEntry	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
 _addEntry base via oldBinding (superToAdd, entry)
  | isNormal superToAdd
 		= do	let (Just superToAddID)	= getBaseTID superToAdd
-			if superToAddID == base then return $ False else
+			if superToAddID == base then return False else
 				_addEntry' base via oldBinding (superToAdd, entry)
  | otherwise	= _addEntry' base via oldBinding (superToAdd, entry)
 {-
@@ -134,7 +134,7 @@ _addEntry' base via oldBinding (superToAdd, entry)
 	-- ... aplied on the super
 	let super	= substitute binding superToAdd
 	-- if already added: skip this shit
-	if (super `M.member` fstt) then return False else do
+	if super `M.member` fstt then return False else do
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
 	let (toCheck, foreignReqs)
@@ -154,7 +154,7 @@ _addEntry' base via oldBinding (superToAdd, entry)
 	let mSuperTid	= getBaseTID superToAdd
 	-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
 	when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
-	return $ True	-- somethingChanged -> we return true
+	return True	-- somethingChanged -> we return true
 
 
 -----------

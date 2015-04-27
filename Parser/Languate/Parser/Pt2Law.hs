@@ -44,7 +44,9 @@ data AST	= Tilde	| Bird	| Colon	| Equals
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("expr", Expr . pt2expr),("type", uncurry Types. (first (:[])). pt2type),("typeConj", uncurry Types . pt2typeConj)]
+h		=  [ ("expr", Expr . pt2expr)
+			, ("type", uncurry Types . first (:[]) . pt2type)
+			, ("typeConj", uncurry Types . pt2typeConj)]
 
 t		:: Name -> String -> AST
 t _ "~"		=  Tilde
@@ -97,7 +99,7 @@ makeLawDecl (Ident nm:tail) idents
 makeLawDecl (Idents nms:tail) idents
 		= makeLawDecl tail (nms++idents)
 makeLawDecl [Types tps reqs] idents
-		= TypeDecl (zip idents $ repeat $ tps) reqs
+		= TypeDecl (zip idents $ repeat tps) reqs
 
 mergeTypeDecl	:: [AST] -> [(Name, [Type])] -> [TypeRequirement] -> AST
 mergeTypeDecl [] acc reqsAcc

@@ -141,9 +141,9 @@ addRequirement subTid super req
 					|> fromMaybe (error "PropagateRequirements: derp?")
 					|> reqs
 		let newReqs	= (origReqs ++ req) & merge ||>> S.unions
-		when (newReqs /= origReqs) $ do
-		modify . modFstts_ . flip M.adjust subTid . flip M.adjust super $
-			(\fsttEntry -> fsttEntry {reqs = newReqs})
+		when (newReqs /= origReqs) $
+			modify . modFstts_ . flip M.adjust subTid . flip M.adjust super $
+				(\fsttEntry -> fsttEntry {reqs = newReqs})
 
 
 

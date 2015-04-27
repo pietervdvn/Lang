@@ -25,14 +25,14 @@ addOption f rs	= rs {postprocessor =
 			resources	= snd f ++ resources rs}
 
 extend		:: (RenderSettings' -> RenderSettings') -> RenderSettings -> RenderSettings
-extend f rs	=  \rf -> f $ rs rf
+extend f rs	=  f . rs
 
 html	:: RenderSettings
 html rf	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder (preprocess $ rewrite rewriteLinks) id (flip const) []
 		(Just defaultOverviewPage) rf & addOption (headers (defaultHeader rf))
 
 md	:: RenderSettings
-md rf	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id id (flip const) [] (Just defaultOverviewPage) rf
+md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id id (flip const) [] (Just defaultOverviewPage)
 
 fancyEmbedder doc
 	= Parag $ Titling
