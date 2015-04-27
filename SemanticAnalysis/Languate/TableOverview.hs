@@ -37,6 +37,5 @@ buildAllTables w	= do	tt	<- buildTypeTable w
 
 
 instance Documentable TableOverview where
-	toDocument to	= (doc "Table overview" "All generated tables" $ Mu.Seq (["Type overview", "Precedence Overview"] |> Embed), 
+	toDocument to	= (doc "Table overview" "All generated tables" $ Mu.Seq (["Type overview", "Precedence Overview"] |> Embed),
 			addDocs' (precedenceTable to) $ addDocs' (functionTables to) $ addDocs' (typeTable to) [])
-	

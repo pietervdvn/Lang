@@ -57,6 +57,7 @@ tct t args
 
 bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
+		putStrLn $ seq tablesOverv "Evaluated tablesOverv"
 		let cluster'	= add tablesOverv cluster
 		renderClusterTo (extend addFooter html)
 				 (dir ++"/" ++ path ++ "/.gen" ++ "/html") cluster'

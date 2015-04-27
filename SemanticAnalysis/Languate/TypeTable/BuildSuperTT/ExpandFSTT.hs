@@ -87,7 +87,7 @@ _expandAll
 		(tid, changed)	<- pop
 		somethingChanged	<- mapM (_expand tid) changed |> or
 		notifyChanged tid
-		_expandAll
+		when somethingChanged _expandAll
 
 -- Adds the supertype of changedSuper to the FSTT of base
 _expand	:: TypeID -> RType -> St Bool
@@ -116,14 +116,20 @@ _expand base changedSuper
 	mapM (_addEntry base via oldBinding) supersToAdd |> or
 
 
-{-
-
-Adds a supertypeentry to the basetype. The oldbinding takes the supertype(via) from its baseform to the needed form,
-
--}
 _addEntry	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
 _addEntry base via oldBinding (superToAdd, entry)
-  = do	fstts		<- get' fstt_
+ | isNormal superToAdd
+		= do	let (Just superToAddID)	= getBaseTID superToAdd
+			if superToAddID == base then return $ False else
+				_addEntry' base via oldBinding (superToAdd, entry)
+ | otherwise	= _addEntry' base via oldBinding (superToAdd, entry)
+{-
+Adds a supertypeentry to the basetype. The oldbinding takes the supertype(via) from its baseform to the needed form,
+-}
+_addEntry'	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
+_addEntry' base via oldBinding (superToAdd, entry)
+  = trace ("Adding "++show superToAdd++" as supertype of  "++show base) $
+    do	fstts		<- get' fstt_
 	-- the fstt that has to be changed
 	let fstt	= findWithDefault M.empty base fstts
 	-- the new, combined binding ...
@@ -131,11 +137,11 @@ _addEntry base via oldBinding (superToAdd, entry)
 	-- ... aplied on the super
 	let super	= substitute binding superToAdd
 	-- if already added: skip this shit
-	if super `M.member` fstt then return False else do
+	if (super `M.member` fstt) then return False else do
 	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
 	let (toCheck, foreignReqs)
-			= reqs entry |> subReq binding & (lefts &&& rights)
+			= trace (error "WTF?") $ reqs entry |> subReq binding & (lefts &&& rights)
 	{- We might have some requirements on the via type too in our own FSTT.
 		These don't have to be checked, as these are already requirements in function of the frees of base -}
 	let viaReqs	= fstt & M.lookup via |> reqs & fromMaybe []
@@ -151,7 +157,7 @@ _addEntry base via oldBinding (superToAdd, entry)
 	let mSuperTid	= getBaseTID superToAdd
 	-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
 	when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
-	return True	-- somethingChanged -> we return true
+	return $ True	-- somethingChanged -> we return true
 
 
 -----------
