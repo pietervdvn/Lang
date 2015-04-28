@@ -1,6 +1,7 @@
 module Languate.MarkUp.Cluster where
 
 import StdDef
+import Normalizable
 import HumanUtils hiding (when)
 
 import Languate.MarkUp.MarkUp
@@ -84,4 +85,4 @@ _renderEmbed _ _ _	= Nothing
 
 -- Removes illegal characters out of names
 _makeFPproof	:: String -> FilePath
-_makeFPproof	= filter (`notElem` "\\\"'")
+_makeFPproof	= filter (`notElem` "\\\"")
