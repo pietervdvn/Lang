@@ -47,27 +47,20 @@ bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 
-t	= do
-	w	<- packageIO path
-	dir	<- getCurrentDirectory
-	print $ buildKnownTypes w
-	let knownTypes	= buildKnownTypes w
-	tlts		<- rio $ buildTLTs w
-	rio $ inside "While prechecking" $ validatePackage tlts w
-	typeReqs	<- rio $ inside "While building the requirements table" $ buildRequirementTable w tlts knownTypes
-	freeNames	<- rio $ inside "While building the free type variables name table" $ buildFreeNameTable w
-	klt		<- rio $ inside "While building the kind lookup table" $ buildKindTable w tlts typeReqs freeNames
-	docstrings	<- rio $ inside "While building the docstring table" $ buildDocstringTable w $ S.toList knownTypes
-	supers		<- rio $ inside "While building the super type table" $ buildSuperTypeTable w tlts klt
-	let fstts	= supers |> stt2fstt & fixImplicitRequirements typeReqs
-	putStrLn "FSTTS "
-	(allSupers, spareSupers)
-			<- rio $ expand klt fstts
-	putStrLn "Done"
-	rio $ inside "While checking the requirements table" $ validateReqTable klt typeReqs
-	putStrLn "Done0"
+loadedPackage	= unsafePerformIO $ packageIO path
+tablesOvervIO	= runExceptionsIO' $ buildAllTables loadedPackage
+tablesOverv	= unsafePerformIO tablesOvervIO
+prelude		= toFQN' "pietervdvn:Data:Prelude"
 
 
 
-rio e	= do	e' 	<- runExceptionsIO' e
-		return e'
+bDocs	= do	dir	<- getCurrentDirectory
+		let cluster	= buildCluster []
+		let cluster'	= add tablesOverv cluster
+		renderClusterTo ((extend addFooter html) $ dir ++"/" ++ path ++ "/.gen" ++ "/html")
+				cluster'
+
+
+addFooter	:: RenderSettings -> RenderSettings
+addFooter	= let back = NonImp $ InLink (Base "Back to all pages") "All pages" in
+			addPreprocessor' (\mu -> parags [back, mu, back])

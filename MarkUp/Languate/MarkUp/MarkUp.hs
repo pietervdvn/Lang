@@ -101,7 +101,8 @@ rewrite f mu = fromMaybe (repack (rewrite f) $ unpack mu) (f mu)
 
 deepRewrite	:: (MarkUp ->  Maybe MarkUp) -> MarkUp -> MarkUp
 deepRewrite f mu
-	= fromMaybe (repack (deepRewrite f) $ unpack mu) (f mu |> deepRewrite f)
+	= fromMaybe mu (f mu) & unpack & repack (deepRewrite f)
+
 
 ------ EASY ACCESS FUNCTIONS -------
 

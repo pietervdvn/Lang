@@ -3,41 +3,74 @@ module Languate.MarkUp.Options where
 import StdDef
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
-import Languate.MarkUp.Cluster
 import Languate.MarkUp.HTML
 import Languate.MarkUp.MD
-import Languate.MarkUp.Css
 
 import Control.Applicative
+import Control.Arrow
 
 import Data.Map as M
 import Data.Set as S
 import Data.Char
 -- Implements somme options for the render html, e.g. to add a header, footer, scripts, stylesheet
 
+
+data RenderSettings	= RenderSettings
+	{ renderName	:: String -> (FilePath, URL)
+		-- converts the document name to a directory (and links to their correct form). Inlinks are rewritten to links with the URL. Files will be rendered to the given filepath
+	, embedder	:: Doc -> MarkUp	-- rendering used to embed (happens before render of course :p)
+	, render	:: Doc -> String	-- main render function, always used
+	, postprocessor	:: Doc -> String -> String
+		-- the string is processed with this one right before writing to file
+	, overviewPage	:: Maybe ([Doc] -> Doc)	-- generates a nice overview page
+	, resources	:: [(String, String)]	-- names of resources, and the content in them
+	, resourceName	:: String -> (FilePath, URL)
+						-- creates, from a resource name, the url on which it can be found and the path to which it will be rendered. This way, resources don't get lost
+	}
+
 -- Represents a postprocessor + needed resource. Resources are always saved in res, relative to the cluster
 type Option	= (Doc -> String -> String, [(String, String)])
-type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
-addOption	:: Option -> RenderSettings' -> RenderSettings'
-addOption f rs	= rs {postprocessor =
-			\doc -> fst f doc . postprocessor rs doc,
-			resources	= snd f ++ resources rs}
+extend	:: (RenderSettings -> RenderSettings) -> (a -> RenderSettings) -> (a -> RenderSettings)
+extend f rs
+	= f . rs
 
-extend		:: (RenderSettings' -> RenderSettings') -> RenderSettings -> RenderSettings
-extend f rs	=  f . rs
+vanilla		:: RenderSettings
+vanilla	= RenderSettings (id &&& id) (Parag . contents) (show . Parag . contents)
+		(flip const) Nothing [] (id &&& id)
 
-html	:: RenderSettings
-html rf	= RenderSettings renderDoc2HTML (++".html") fancyEmbedder (preprocess $ rewrite rewriteLinks) id (flip const) []
-		(Just defaultOverviewPage) rf & addOption (headers (defaultHeader rf))
+-- Adds a preprocessor and corresponding resources
+addOption	:: Option -> RenderSettings -> RenderSettings
+addOption (f, res)
+	= addPostProcessor f . addResources res
 
-md	:: RenderSettings
-md	= RenderSettings renderDoc2MD (++".md") fancyEmbedder id id (flip const) [] (Just defaultOverviewPage)
 
+addPreprocessor	:: (Doc -> Doc) -> RenderSettings -> RenderSettings
+addPreprocessor fd rs
+	= rs {render = render rs . fd}
+
+addPreprocessor'	:: (MarkUp -> MarkUp) -> RenderSettings -> RenderSettings
+addPreprocessor' fmu
+	= addPreprocessor $ preprocess fmu
+
+addPostProcessor	:: (Doc -> String -> String) -> RenderSettings -> RenderSettings
+addPostProcessor f rs
+	= rs {postprocessor = \doc str -> f doc $ postprocessor rs doc str}
+
+addResources	:: [(String, String)] -> RenderSettings -> RenderSettings
+addResources res rs
+	= rs {resources = res ++ resources rs}
+
+addResource	= addResources . (:[])
+
+-- Default embedder
+fancyEmbedder	:: Doc -> MarkUp
 fancyEmbedder doc
 	= Parag $ Titling
-		(inlink $ title doc) $ Seq [notImportant $ description doc, Parag $ contents doc]
+		(inlink $ title doc) $ Seq
+		[Parag $ notImportant $ description doc, Parag $ contents doc]
 
+-- A simple overview page
 defaultOverviewPage	:: [Doc] -> Doc
 defaultOverviewPage docs
 	= let	titl	= "All pages"
@@ -47,60 +80,17 @@ defaultOverviewPage docs
 		tbl	= table ["Title", "Description"] $ docs |> genEntry in
 		doc titl descr $ titling titl tbl
 
+defaultNamer	:: FilePath -> URL -> String -> Name -> (FilePath, URL)
+defaultNamer fp site ext nm
+	= let f p	= p ++ "/" ++ nm ++ ext in
+		(f fp, f site)
 
-headers	:: HeaderOption -> Option
-headers (opts, resources)
+defaultNamer' fp site
+	= defaultNamer fp site ""
 
-	= (\doc body -> "<!DOCTYPE html>" ++ inTag' "html" ["lang=\"en\""] (
-		inTag "head" (unlines $ opts <*> [doc]) ++
-			inTag "body" (inTag "article" body)), resources)
-
-mergeHeaders	:: [HeaderOption] -> HeaderOption
-mergeHeaders headers
-		= (headers |> fst & concat, headers |> snd & concat)
-
-
-defaultHeader	:: (String -> URL) -> HeaderOption
-defaultHeader resF
-		=  [titleHeader, ogpTags] |> headerTag & (cssTag resF defaultCSS:) & mergeHeaders
-
-headerTag	:: (Doc -> HTML) -> HeaderOption
-headerTag f	= ([f],[])
+localNamer	:: FilePath -> String -> Name -> (FilePath, URL)
+localNamer fp
+	= defaultNamer fp fp
 
 
-titleHeader	= inTag "title" . title
-
-doctype	= const $ inTag "doctype"
-
-ogpTags	:: Doc -> HTML
-ogpTags doc
-	= let 	basicOgp ls =  ("title", title doc):("description",description doc) : ls
-		ogpTags = meta doc & M.toList & basicOgp |> uncurry ogpTag in
-			unlines ogpTags
-
-cssTag	:: (String -> URL) -> CSS -> HeaderOption
-cssTag resourceF css
-	= ([const $ "<link rel=\"stylesheet\" href=\""++ resourceF (name css) ++"\">"
-		, const $ inTag "style" $ styleTagConts css]
-		, [(name css, show css)])
-
-rewriteLinks	:: MarkUp -> Maybe MarkUp
-rewriteLinks (Link mu url)
-		= Just $ Link mu $ escapeURL url
-rewriteLinks _	= Nothing
-
-escapeURL	:: String -> URL
-escapeURL str	= str >>= escapeChar
-
-escapeChar	:: Char -> String
-escapeChar c
-	| c `elem` validChars	= [c]
-	| otherwise	= "%" ++asHex (ord c)
-
-validChars	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!$&'()*+,;="
-
-asHex	:: Int -> String
-asHex 0	= ""
-asHex i	= let 	j	= i `mod` 16
-		c	= "0123456789ABCDEF" !! j in
-		asHex (i `div` 16) ++ [c]
+localNamer' fp	= localNamer fp ""

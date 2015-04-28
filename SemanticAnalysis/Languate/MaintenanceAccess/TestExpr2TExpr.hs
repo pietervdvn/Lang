@@ -28,17 +28,11 @@ import Data.Maybe
 import StdDef
 import StateT
 import Languate.MaintenanceAccess.TestBind (pt, pr)
-
+import Languate.MaintenanceAccess.TestBuild
 
 import qualified Data.Map as M
 import qualified Data.Set as S
 
-bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
-path		= "../workspace/Data"
-packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
-loadedPackage	= unsafePerformIO $ packageIO path
-tablesOverv	= unsafePerformIO $ runExceptionsIO' $ buildAllTables loadedPackage
-prelude		= toFQN' "pietervdvn:Data:Prelude"
 defFrees	= [] -- "a","b","pubKey","privKey"]
 
 
@@ -55,19 +49,6 @@ tct t args
 		texpr	<- runExceptionsIO' $ calcTypeUnion ctx t args
 		print texpr
 
-bDocs	= do	dir	<- getCurrentDirectory
-		let cluster	= buildCluster []
-		putStrLn $ seq tablesOverv "Evaluated tablesOverv"
-		let cluster'	= add tablesOverv cluster
-		renderClusterTo (extend addFooter html)
-				 (dir ++"/" ++ path ++ "/.gen" ++ "/html") cluster'
-		renderClusterTo (extend addFooter md) (dir ++"/" ++ path ++ "/.gen" ++ "/md") cluster'
-
-
-addFooter	:: RenderSettings' -> RenderSettings'
-addFooter rs	= let back = InLink (Base "Back to all pages") "All pages" in
-			rs {nonEmbedPreprocessor = preprocess
-				(\mu -> parags [back,mu,back]) . nonEmbedPreprocessor rs}
 
 -- builds our parse tree
 parseExpr	:: String -> IO Expression

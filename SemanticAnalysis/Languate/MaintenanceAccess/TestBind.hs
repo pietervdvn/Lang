@@ -43,17 +43,11 @@ import qualified Data.Set as S
 import Data.List
 
 -- So we can rebuild the docs
-import Languate.MaintenanceAccess.TestBuild (t)
+import Languate.MaintenanceAccess.TestBuild
 import Languate.TypeTable.Bind.StMsg
 
 -- setup
-bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
-path		= "../workspace/Data"
-packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
-toIO	= do	world	<- packageIO path
-		runExceptionsIO' $ buildAllTables world
-
-to	= unsafePerformIO toIO
+to	= tablesOverv
 tt	= typeTable to
 tlt	= findWithDefault (error "Prelude not found")
 		(toFQN' "pietervdvn:Data:Prelude") $ typeLookups tt

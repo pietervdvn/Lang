@@ -8,6 +8,8 @@ import Data.Set (Set)
 import Data.List (sortBy)
 import Data.Function
 
+import System.Directory
+
 type Name 	= String
 type Message	= String
 type FileName	= String
@@ -203,3 +205,10 @@ splitOn		:: (a -> Bool) -> [a] -> [[a]]
 splitOn f []	=  []
 splitOn f ls	=  let (h,t)	= break f ls in
 			h:splitOn f (drop 1 t)
+
+-- Creates the file on the given path. If the needed directories don't exist, create them
+writeFile'	:: FilePath -> String -> IO ()
+writeFile' fp contents
+	= do	let dirPath	= fp & reverse & break ('/'==) & snd & reverse
+		createDirectoryIfMissing True dirPath
+		writeFile fp contents
