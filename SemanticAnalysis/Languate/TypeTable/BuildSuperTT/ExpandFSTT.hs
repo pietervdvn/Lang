@@ -113,19 +113,11 @@ _expand base changedSuper
 	supersToAdd	<- get' fstt_ |> findWithDefault M.empty viaTid |> M.toList
 	mapM (_addEntry base via oldBinding) supersToAdd |> or
 
-
-_addEntry	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
-_addEntry base via oldBinding (superToAdd, entry)
- | isNormal superToAdd
-		= do	let (Just superToAddID)	= getBaseTID superToAdd
-			if superToAddID == base then return False else
-				_addEntry' base via oldBinding (superToAdd, entry)
- | otherwise	= _addEntry' base via oldBinding (superToAdd, entry)
 {-
 Adds a supertypeentry to the basetype. The oldbinding takes the supertype(via) from its baseform to the needed form,
 -}
-_addEntry'	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
-_addEntry' base via oldBinding (superToAdd, entry)
+_addEntry	:: TypeID -> RType -> Binding -> FSTTKeyEntry -> St Bool
+_addEntry base via oldBinding (superToAdd, entry)
   = do	fstts		<- get' fstt_
 	-- the fstt that has to be changed
 	let fstt	= findWithDefault M.empty base fstts
