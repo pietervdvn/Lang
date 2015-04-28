@@ -6,6 +6,8 @@ import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
 import Data.Map hiding (null)
 
+import Data.Char
+
 -- This module renders HTML stuff
 
 type HTML     = String
@@ -29,7 +31,7 @@ renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
         = do    i <- get
-                title <- renderHTML mu |> inTag ("h"++show i)
+                title <- renderHTML mu |> inTag' ("h"++show i) ["id=\""++escapeURL (toText mu)++"\""]
                 put $ i + 1
                 text' <- renderHTML text
                 put i
@@ -76,3 +78,30 @@ ogpTag name value
 inSpan	:: String -> HTML -> HTML
 inSpan className html
 	= "<span class=\"" ++ className ++ "\">" ++ html ++ "</span>"
+
+escapeConts	:: MarkUp -> Maybe MarkUp
+escapeConts (Base str)
+		= (str >>= escapeChar) & Base & Just
+escapeConts _	= Nothing
+
+escapeChar	:: Char -> String
+escapeChar c
+	| c `notElem` " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!();=\""
+			= "&#x" ++ asHex (ord c) ++  ";"
+	| otherwise	= [c]
+
+escapeURL	:: String -> URL
+escapeURL str	= str >>= escapeURLChar
+
+escapeURLChar	:: Char -> String
+escapeURLChar c
+	| c `elem` validURLChars	= [c]
+	| otherwise	= "%" ++asHex (ord c)
+
+validURLChars	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!$&'()*+,;="
+
+asHex	:: Int -> String
+asHex 0	= ""
+asHex i	= let 	j	= i `mod` 16
+		c	= "0123456789ABCDEF" !! j in
+		asHex (i `div` 16) ++ [c]

@@ -79,32 +79,3 @@ css resourceF css
 		, const $ inTag "style" $ styleTagConts css]	-- extra headers for the file
 		, [(name css++".css", show css)]	-- name and content of css
 		)
-
-
-
-escapeConts	:: MarkUp -> Maybe MarkUp
-escapeConts (Base str)
-		= (str >>= escapeChar) & Base & Just
-escapeConts _	= Nothing
-
-escapeChar	:: Char -> String
-escapeChar c
-	| c `notElem` " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!();=\""
-			= "&#x" ++ asHex (ord c) ++  ";"
-	| otherwise	= [c]
-
-escapeURL	:: String -> URL
-escapeURL str	= str >>= escapeURLChar
-
-escapeURLChar	:: Char -> String
-escapeURLChar c
-	| c `elem` validURLChars	= [c]
-	| otherwise	= "%" ++asHex (ord c)
-
-validURLChars	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!$&'()*+,;="
-
-asHex	:: Int -> String
-asHex 0	= ""
-asHex i	= let 	j	= i `mod` 16
-		c	= "0123456789ABCDEF" !! j in
-		asHex (i `div` 16) ++ [c]

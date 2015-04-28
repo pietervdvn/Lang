@@ -153,6 +153,13 @@ isEmpty' (TableStructure mus muss)
 		= null mus || null muss ||
 			((mus |> isEmpty & and) && (muss ||>> isEmpty |> and & and))
 
+toText	:: MarkUp -> String
+toText 	= concat . search _toText
+
+_toText	:: MarkUp -> Maybe String
+_toText (Base str)	= Just str
+_toText _	= Nothing
+
 ------ EASY ACCESS FUNCTIONS -------
 
 parag  = Parag . Base
