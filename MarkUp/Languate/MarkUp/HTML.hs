@@ -4,7 +4,7 @@ import StdDef
 import State
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
-import Data.Map
+import Data.Map hiding (null)
 
 -- This module renders HTML stuff
 
@@ -14,7 +14,7 @@ renderHTML	:: MarkUp -> State Int HTML
 renderHTML (Base str)
 		= return str
 renderHTML (Parag mu)
-        = mu & renderHTML       |> inTag "p"
+        = mu & rewrite removePars & renderHTML       |> inTag "p" |> (++"\n")
 renderHTML (Seq mus)
         = mus & mapM renderHTML |> unwords
 renderHTML (Emph mu)
@@ -29,7 +29,7 @@ renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
         = do    i <- get
-                title <- renderHTML mu |> inSpan ("title" ++ show i)
+                title <- renderHTML mu |> inTag ("h"++show i)
                 put $ i + 1
                 text' <- renderHTML text
                 put i
@@ -56,13 +56,18 @@ renderDoc2HTML doc   = runstate (contents doc & renderHTML) 1 & fst
 
 --------------- TOOLS ---------------
 
+removePars	:: MarkUp -> Maybe MarkUp
+removePars (Parag mu)
+		= Just $ Seq [mu]
+removePars _	= Nothing
+
 inTag   :: String -> HTML -> HTML
 inTag tagN html
-	= "<" ++ tagN ++ ">" ++ html ++ "</" ++ tagN ++ ">"
+	= "<" ++ tagN ++ if null html then "/>" else ">" ++ html ++ "</" ++ tagN ++ ">"
 
 inTag'  :: String -> [String] -> HTML -> HTML
 inTag' tagN metas html
-    = "<" ++ tagN ++ " " ++ unwords metas ++ ">" ++ html ++ "</" ++ tagN ++ ">"
+    = "<" ++ tagN ++ " " ++ unwords metas ++ if null html then "/>" else ">" ++ html ++ "</" ++ tagN ++ ">"
 
 ogpTag  :: Name -> String -> HTML
 ogpTag name value

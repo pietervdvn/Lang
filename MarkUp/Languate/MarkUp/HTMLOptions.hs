@@ -26,7 +26,7 @@ html	:: FilePath -> RenderSettings
 html filePath
 	= let resF	= localNamer' $ filePath++"/res/" in
 	  RenderSettings
-		(localNamer filePath ".html")
+		(second escapeURL . localNamer filePath ".html")
 		fancyEmbedder
 		renderDoc2HTML
 		(flip const)
@@ -34,7 +34,8 @@ html filePath
 		[]
 		resF
 	  & addPreprocessor' (rewrite escapeLinks)
-	  & addOption (headers [titleHeader, ogpTags, css resF defaultCSS])
+	  & addPreprocessor' (rewrite escapeConts)
+	  & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css resF defaultCSS])
 
 
 
@@ -60,6 +61,9 @@ titleHeader	:: HeaderOption
 titleHeader	= headerTag (inTag "title" . title)
 
 
+encoding	:: String -> HeaderOption
+encoding enc	= headerTag (const $ inTag' "meta" ["charset=\""++enc++"\""] "")
+
 ogpTags	= headerTag ogpTags'
 
 ogpTags':: Doc -> HTML
@@ -78,6 +82,17 @@ css resourceF css
 
 
 
+escapeConts	:: MarkUp -> Maybe MarkUp
+escapeConts (Base str)
+		= (str >>= escapeChar) & Base & Just
+escapeConts _	= Nothing
+
+escapeChar	:: Char -> String
+escapeChar c
+	| c `notElem` " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!();=\""
+			= "&#x" ++ asHex (ord c) ++  ";"
+	| otherwise	= [c]
+
 -- rewrites all urls into valid urls
 escapeLinks	:: MarkUp -> Maybe MarkUp
 escapeLinks (Link mu url)
@@ -87,12 +102,12 @@ escapeLinks _	= Nothing
 escapeURL	:: String -> URL
 escapeURL str	= str >>= escapeChar
 
-escapeChar	:: Char -> String
-escapeChar c
-	| c `elem` validChars	= [c]
+escapeURLChar	:: Char -> String
+escapeURLChar c
+	| c `elem` validURLChars	= [c]
 	| otherwise	= "%" ++asHex (ord c)
 
-validChars	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!$&'()*+,;="
+validURLChars	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!$&'()*+,;="
 
 asHex	:: Int -> String
 asHex 0	= ""

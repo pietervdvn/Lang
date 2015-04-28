@@ -22,13 +22,15 @@ mu = parags
             , imp "important"
             , code  "x = \"code\""
             , incorr "wrong info"
+	    , code ">"
+	    , code "<"
             , titling "Main item" $ Seq
 			[ parag "Information"
 			, parag "More information"
 			, titling "SubItem" $ Base "Hi"
 			, titling "SubItem 2" $ Base "Hi again"]
             , InLink (Seq [Base "Some", emph "link"]) "Doc2"
-	    , Embed "Doc2"
+	    , Embed "Doc 2"
 	    , Embed "Doc3"
 	    , inlink "SubDir/Doc4"
 	        , Table [imp "Head 1", imp "Head 2"] [["Row 1","Row 1 again"] |> Base, [Base "Row 2", List [Base "Row 2 again", Base "Row 2 again"]]]
@@ -39,6 +41,6 @@ mu = parags
 mu0	= Seq [Base "Hallo!", Embed "Doc3"]
 
 doc1	= Doc "Doc1" "This is the first document" (fromList [("key", "value")]) mu
-doc2	= Doc "Doc2" "This is the second document" empty mu0
+doc2	= Doc "Doc 2" "This is the second document" empty mu0
 doc3	= Doc "Doc3" "The third document" empty $ Base "Contents of doc3"
 doc4	= Doc "SubDir/Doc4" "The fourth doc" empty $ Base "Hi"
