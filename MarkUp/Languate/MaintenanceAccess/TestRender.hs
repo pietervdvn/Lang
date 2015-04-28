@@ -10,10 +10,18 @@ import System.Directory
 fp	= "/test"
 
 t = do	dir	<- getCurrentDirectory
-	renderClusterTo (html (dir ++ fp ++ "/html")) cluster
+	renderClusterTo ((extend preproc html) (dir ++ fp ++ "/html")) cluster
 	renderClusterTo (md (dir ++ fp ++ "/md")) cluster
 
+back = NonImp $ InLink (Base "Back to all pages") "All pages"
+
+
+preproc		:: RenderSettings -> RenderSettings
+preproc rs	= addPreprocessor' (\mu -> parags [back, mu, back]) rs
+
+
 cluster	= buildCluster [doc1,doc2,doc3, doc4]
+
 
 mu = parags
 	    [ Base "Hallo"
@@ -29,7 +37,7 @@ mu = parags
 			, parag "More information"
 			, titling "SubItem" $ Base "Hi"
 			, titling "SubItem 2" $ Base "Hi again"]
-            , InLink (Seq [Base "Some", emph "link"]) "Doc2"
+            , InLink (Seq [Base "Some", emph "link"]) "Doc 2"
 	    , Embed "Doc 2"
 	    , Embed "Doc3"
 	    , inlink "SubDir/Doc4"

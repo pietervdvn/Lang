@@ -19,6 +19,7 @@ data RenderSettings	= RenderSettings
 	{ renderName	:: String -> (FilePath, URL)
 		-- converts the document name to a directory (and links to their correct form). Inlinks are rewritten to links with the URL. Files will be rendered to the given filepath
 	, embedder	:: Doc -> MarkUp	-- rendering used to embed (happens before render of course :p)
+	, preprocessor	:: Doc -> Doc		-- Invoked before link rewriting and rendering, use this to add headers and footers
 	, render	:: Doc -> String	-- main render function, always used
 	, postprocessor	:: Doc -> String -> String
 		-- the string is processed with this one right before writing to file
@@ -36,7 +37,7 @@ extend f rs
 	= f . rs
 
 vanilla		:: RenderSettings
-vanilla	= RenderSettings (id &&& id) (Parag . contents) (show . Parag . contents)
+vanilla	= RenderSettings (id &&& id) (Parag . contents) id (show . Parag . contents)
 		(flip const) Nothing [] (id &&& id)
 
 -- Adds a preprocessor and corresponding resources
@@ -47,7 +48,7 @@ addOption (f, res)
 
 addPreprocessor	:: (Doc -> Doc) -> RenderSettings -> RenderSettings
 addPreprocessor fd rs
-	= rs {render = render rs . fd}
+	= rs {preprocessor = preprocessor rs . fd}
 
 addPreprocessor'	:: (MarkUp -> MarkUp) -> RenderSettings -> RenderSettings
 addPreprocessor' fmu

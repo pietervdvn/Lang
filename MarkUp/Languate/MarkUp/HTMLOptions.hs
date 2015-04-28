@@ -28,12 +28,12 @@ html filePath
 	  RenderSettings
 		(second escapeURL . localNamer filePath ".html")
 		fancyEmbedder
+		id
 		renderDoc2HTML
 		(flip const)
 		(Just defaultOverviewPage)
 		[]
 		resF
-	  & addPreprocessor' (rewrite escapeLinks)
 	  & addPreprocessor' (rewrite escapeConts)
 	  & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css resF defaultCSS])
 
@@ -93,14 +93,8 @@ escapeChar c
 			= "&#x" ++ asHex (ord c) ++  ";"
 	| otherwise	= [c]
 
--- rewrites all urls into valid urls
-escapeLinks	:: MarkUp -> Maybe MarkUp
-escapeLinks (Link mu url)
-		= Just $ Link mu $ escapeURL url
-escapeLinks _	= Nothing
-
 escapeURL	:: String -> URL
-escapeURL str	= str >>= escapeChar
+escapeURL str	= str >>= escapeURLChar
 
 escapeURLChar	:: Char -> String
 escapeURLChar c

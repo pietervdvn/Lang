@@ -11,6 +11,7 @@ md	:: FilePath -> RenderSettings
 md fp	= RenderSettings
 		(localNamer fp ".md")
 		fancyEmbedder
+		id
 		renderDoc2MD
 		(flip const)
 		(Just defaultOverviewPage)
