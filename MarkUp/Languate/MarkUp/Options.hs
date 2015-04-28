@@ -19,7 +19,7 @@ data RenderSettings	= RenderSettings
 	{ renderName	:: String -> (FilePath, URL)
 		-- converts the document name to a directory (and links to their correct form). Inlinks are rewritten to links with the URL. Files will be rendered to the given filepath
 	, embedder	:: Doc -> MarkUp	-- rendering used to embed (happens before render of course :p)
-	, preprocessor	:: Doc -> Doc		-- Invoked before link rewriting and rendering, use this to add headers and footers
+	, preprocessor	:: Doc -> Doc		-- Invoked before link rewriting and rendering, use this to add headers and footers. It is **not** invoked for embedded rendering
 	, render	:: Doc -> String	-- main render function, always used
 	, postprocessor	:: Doc -> String -> String
 		-- the string is processed with this one right before writing to file

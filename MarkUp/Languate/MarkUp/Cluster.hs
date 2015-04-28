@@ -40,10 +40,16 @@ renderClusterTo	settings (Cluster docsDict)= do
 	let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
 						return (overviewGen docs':docs))
 	let cluster	= docs' |> (title &&& id) & M.fromList
+	-- cluster with documents for embedding
+	let embCluster	= cluster
+				|> preprocess normalize
+				|> preprocess (rewrite $ _renderEmbed embCluster settings)
+				|> preprocess (deepRewrite $ _renderInLink settings)
+				& Cluster
 	let cluster'	= cluster
 				|> preprocess normalize
-				|> preprocessor settings
-				|> preprocess (rewrite $ _renderEmbed cluster' settings)
+				|> preprocessor settings	-- do the preprocessing (not for embedded values)
+				|> preprocess (rewrite $ _renderEmbed embCluster settings)	-- embed all values (from the other cluster)
 				|> preprocess (deepRewrite $ _renderInLink settings)
 				& Cluster
 	mapM_ (renderFile cluster' settings) (docsIn cluster' & M.elems)

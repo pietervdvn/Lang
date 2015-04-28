@@ -132,7 +132,7 @@ _ns struc	= struc
 _nm		:: MarkUp -> MarkUp
 _nm (Seq mus)	= case mus & filter (not . isEmpty) of
 			[mu]	-> mu
-			mus	-> Seq []
+			mus	-> Seq mus
 _nm mu		=  repack id $ normalize $ unpack mu
 
 isEmpty		:: MarkUp -> Bool

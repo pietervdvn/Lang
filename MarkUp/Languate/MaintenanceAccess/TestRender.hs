@@ -23,7 +23,7 @@ preproc rs	= addPreprocessor' (\mu -> parags [back, mu, back]) rs
 cluster	= buildCluster [doc1,doc2,doc3, doc4]
 
 
-mu = parags
+mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ parags
 	    [ Base "Hallo"
             , OrderedList [Base "Item", OrderedList [Base "More", Base "Nested", Base "Lists"], Base "Item"]
             , emph "Test emph"
@@ -32,6 +32,8 @@ mu = parags
             , incorr "wrong info"
 	    , code ">"
 	    , code "<"
+	    , notImportant "Not important"
+	    , Incorr $ Base "Strikethrough?"
             , titling "Main item" $ Seq
 			[ parag "Information"
 			, parag "More information"

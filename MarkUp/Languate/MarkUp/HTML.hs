@@ -20,11 +20,11 @@ renderHTML (Seq mus)
 renderHTML (Emph mu)
 		= mu & renderHTML       |> inSpan "emph"
 renderHTML (Imp mu)
-        = mu & renderHTML       |> inSpan "imp"
+        = mu & renderHTML       |> inTag "strong"
 renderHTML (NonImp mu)
         = mu & renderHTML       |> inSpan "notImp"
 renderHTML (Code mu)
-        = mu & renderHTML       |> inSpan "code"
+        = mu & renderHTML       |> inTag "code"
 renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
