@@ -14,7 +14,7 @@ renderHTML	:: MarkUp -> State Int HTML
 renderHTML (Base str)
 		= return str
 renderHTML (Parag mu)
-        = mu & rewrite removePars & renderHTML       |> inTag "p" |> (++"\n")
+        = mu & rewrite removePars & renderHTML |> inTag "p" |> (++"\n")
 renderHTML (Seq mus)
         = mus & mapM renderHTML |> unwords
 renderHTML (Emph mu)

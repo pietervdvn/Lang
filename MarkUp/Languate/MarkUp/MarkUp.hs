@@ -7,6 +7,10 @@ import State
 import Data.Maybe
 import Data.List
 
+import Normalizable
+
+import Control.Arrow
+
 -- Represents a snippet of markUpped code
 data MarkUp
         = Base String		        -- Embeds a plaintext in markup
@@ -103,6 +107,51 @@ deepRewrite	:: (MarkUp ->  Maybe MarkUp) -> MarkUp -> MarkUp
 deepRewrite f mu
 	= fromMaybe mu (f mu) & unpack & repack (deepRewrite f)
 
+instance Normalizable MarkUp where
+	normalize	= _nm
+
+
+instance Normalizable MarkUpStructure where
+	normalize 	= _ns
+
+
+_ns		:: MarkUpStructure -> MarkUpStructure
+_ns (Multi cons mus)
+		= Multi cons (mus |> normalize & filter (not . isEmpty))
+_ns (TableStructure mus muss)
+		= TableStructure (mus |> normalize & filter (not . isEmpty))
+			(muss	||>> normalize
+				||>> (id &&& isEmpty)	-- [[(content, isEmpty)]]
+				|> unzip		-- [([content], [isEmpty])]
+				||>> and		-- [([content], isEmpty)]
+				& filter (not . snd)
+				|> fst)
+_ns struc	= struc
+
+
+_nm		:: MarkUp -> MarkUp
+_nm (Seq mus)	= case mus & filter (not . isEmpty) of
+			[mu]	-> mu
+			mus	-> Seq []
+_nm mu		=  repack id $ normalize $ unpack mu
+
+isEmpty		:: MarkUp -> Bool
+isEmpty mu	= unpack mu & isEmpty'
+
+isEmpty'	:: MarkUpStructure -> Bool
+isEmpty' (Str _ str)
+		= null $ strip str
+isEmpty' (One _ mu)
+		= isEmpty mu
+isEmpty' (Two _ mu0 mu1)
+		= isEmpty mu0 && isEmpty mu1
+isEmpty' (Multi _ mus)
+		= null mus || (mus |> isEmpty & and)
+isEmpty' (ExtraString _ mu str)
+		= isEmpty mu && null (strip str)
+isEmpty' (TableStructure mus muss)
+		= null mus || null muss ||
+			((mus |> isEmpty & and) && (muss ||>> isEmpty |> and & and))
 
 ------ EASY ACCESS FUNCTIONS -------
 

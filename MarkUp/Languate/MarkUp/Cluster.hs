@@ -40,6 +40,7 @@ renderClusterTo	settings (Cluster docsDict)= do
 						return (overviewGen docs':docs))
 	let cluster	= docs' |> (title &&& id) & M.fromList
 	let cluster'	= cluster
+				|> preprocess normalize
 				|> preprocessor settings
 				|> preprocess (rewrite $ _renderEmbed cluster' settings)
 				|> preprocess (deepRewrite $ _renderInLink settings)

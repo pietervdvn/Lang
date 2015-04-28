@@ -12,7 +12,7 @@ import Languate.File2Package
 import Languate.FQN
 import Languate.AST
 import Languate.Package
-import Languate.MarkUp
+import Languate.MarkUp as Mu
 
 import System.IO.Unsafe
 import System.Directory
@@ -41,7 +41,7 @@ import Languate.CheckUtils
 import Data.Set as S
 
 import Data.Map
-import StdDef
+import Data.Time.Clock
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
@@ -57,10 +57,17 @@ prelude		= toFQN' "pietervdvn:Data:Prelude"
 bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
 		let cluster'	= add tablesOverv cluster
-		renderClusterTo ((extend addFooter html) $ dir ++"/" ++ path ++ "/.gen" ++ "/html")
+		addFooter'	<- addFooter
+		renderClusterTo ((extend addFooter' $ extend addHeader html) $ dir ++"/" ++ path ++ "/.gen" ++ "/html")
 				cluster'
 
 
-addFooter	:: RenderSettings -> RenderSettings
-addFooter	= let back = NonImp $ InLink (Base "Back to all pages") "All pages" in
-			addPreprocessor' (\mu -> parags [back, mu, back])
+addFooter	:: IO (RenderSettings -> RenderSettings)
+addFooter	= do	let back = NonImp $ InLink (Base "Back to all pages") "All pages"
+			time	<- getCurrentTime
+			print time
+			return $ addPreprocessor' (\mu -> parags [back, mu,
+				notImportant $ "This doc was automatically generated on "++show time,notImportant "Do not edit it, as changes will be erased the next generation.", back])
+
+addHeader	:: RenderSettings -> RenderSettings
+addHeader	= addPreprocessor (\doc -> preprocess (\mu -> titling (title doc) $ Mu.Seq [notImportant $ description doc, contents doc ]) doc)
