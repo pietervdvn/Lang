@@ -169,18 +169,39 @@ code   = Code . Base
 incorr = Incorr . Base
 titling str
        = Titling (Base str)
-link str
-       = Link (Base str)
+titling' str mu
+	= if not $ isEmpty mu then titling str mu else Seq []
 link' str
-	= link str str
+       = Link (Base str)
+link str
+	= link' str str
 inlink str
-	= InLink (Base str) str
+	= inlink' str str
+inLink	= inlink
+inlink' str
+	= InLink (Base str)
+inLink'	= inlink'
 notImportant
 	= NonImp . Base
 table header
 	= Table (header |> Base)
+table' header mus
+	| null mus	= Seq []
+	| otherwise	= table header mus
 commas' mus
 	= Seq $ intersperse (Base ", ") mus
 parags mus
 	= mus |> Parag & Seq
 unwords'= Seq
+
+-- removes obsolete columns from the table
+cleanTable	:: MarkUp -> MarkUp
+cleanTable (Table mus muss)
+	= case (mus:muss) & transpose & filter (not . emptyRow . drop 1) & transpose of
+		[]	-> Seq []
+		(mus':muss')
+			-> Table mus' muss'
+cleanTable mu	= mu
+
+emptyRow	:: [MarkUp] -> Bool
+emptyRow row	= row |> isEmpty & and

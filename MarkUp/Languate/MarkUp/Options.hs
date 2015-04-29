@@ -11,9 +11,10 @@ import Control.Arrow
 
 import Data.Map as M
 import Data.Set as S
-import Data.Char
+import Data.List as L
+import Data.Maybe
 -- Implements somme options for the render html, e.g. to add a header, footer, scripts, stylesheet
-
+import Debug.Trace
 
 data RenderSettings	= RenderSettings
 	{ renderName	:: String -> (FilePath, URL)
@@ -76,10 +77,52 @@ defaultOverviewPage	:: [Doc] -> Doc
 defaultOverviewPage docs
 	= let	titl	= "All pages"
 		descr	= "Overview of all pages within the cluster"
-		genEntry doc
-			= [inlink $ title doc, Base $ description doc]
-		tbl	= table ["Title", "Description"] $ docs |> genEntry in
-		doc titl descr $ titling titl tbl
+		(rootDocs, subDocs)	= perDir docs
+		subs	= docs |> title & subDirs
+		subsFor nm
+			= M.findWithDefault [] nm subs |> (\sub -> link' (tail sub) ("#"++escapeURL (tail sub))) & Seq	in
+		doc titl descr $ titling titl $
+			if M.null subDocs then baseTable rootDocs else Seq
+				([ titling' "Root Documents" $ Seq [baseTable rootDocs,
+					cleanTable $ table ["Directory","Subdirectories"] $ subDocs & M.keys |> (\nm -> [link' nm $ "#"++escapeURL nm, subsFor nm])]
+				] ++ renderSubDirs "" subDocs)
+
+renderSubDirs	:: String -> Map String [Doc] -> [MarkUp]
+renderSubDirs superDir dict
+ | M.null dict	= []
+ | otherwise	= dict & M.mapWithKey (renderSubDir superDir) & M.toList & sortOn fst |> snd
+
+renderSubDir	:: String -> String -> [Doc] -> MarkUp
+renderSubDir superDir dir docs
+	= let	title'		= drop (1 + length dir + length superDir) . title
+		(rootDocs, subDocs)	= perDir' title' docs in
+		titling dir $ Seq
+			([ baseTable' title' rootDocs ] ++ renderSubDirs (superDir++"/"++dir) subDocs)
+
+baseTable	:: [Doc] -> MarkUp
+baseTable 	= baseTable' title
+
+baseTable'	:: (Doc -> String) -> [Doc] -> MarkUp
+baseTable' title' docs
+	= let	genEntry doc	= [inLink' (title' doc) $ title doc, Base $ description doc] in
+		table' ["Title", "Description"] $ docs |> genEntry
+
+-- Sorts the docs in a {"subdir" --> These docs} map + a 'rest' without docs
+perDir	:: [Doc] -> ([Doc], Map String [Doc])
+perDir	= perDir' title
+
+perDir'	:: (Doc -> String) -> [Doc] -> ([Doc], Map String [Doc])
+perDir' title docs
+	= let 	(rootDocs, filedDocs)	= docs |> (title &&& id) & L.partition ((notElem '/') . fst) in
+		(rootDocs |> snd, filedDocs |> first (fst . break (=='/')) & merge & M.fromList)
+
+subDirs	:: [String] -> Map String [String]
+subDirs paths
+	= paths & L.filter (elem '/')
+		|> reverse
+		|> break (=='/') |> snd |> drop 1	-- remove the actual ""file.html""
+		|> reverse & L.filter (elem '/')
+		|> break (=='/') & merge & M.fromList
 
 defaultNamer	:: FilePath -> URL -> String -> Name -> (FilePath, URL)
 defaultNamer fp site ext nm
