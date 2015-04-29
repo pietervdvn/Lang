@@ -19,14 +19,14 @@ instance Documentable TypeTable where
 	toDocument tt	=
 		let fstts	= allSupertypes tt & M.toList |> fstt2doc tt
 		    types	= knownTypes tt & S.toList |> type2doc tt in
-			(typeTable2doc tt,  explanationFSTT:types ++ fstts)
+			(typeTable2doc tt,  explanationFSTT:supertypesAny:types ++ fstts)
 
 
 
 typeTable2doc	:: TypeTable -> Doc
 typeTable2doc tt
 	= let	rows	= knownTypes tt & S.toList
-				|> (\tid -> [link (showtid tid) ("Types/"++showtid tid),
+				|> (\tid -> [link' (showtid tid) ("Types/"++showtid tid),
 						 b $ fst $ synops tt tid ])
 		superTables	=  knownTypes tt & S.toList
 				|> (Parag . Embed . ("Types/Supertypes/Supertypes of "++) . showtid)
@@ -87,7 +87,7 @@ req2mu (nm, reqs)
 
 explanationFSTT	:: Doc
 explanationFSTT	= doc "Full super type table explanation" "How to read a super type table" $
-	 titling "How to read a 'Supertypetable of T a0 a1'" $
+	 Titling (Seq [Base "How to read a", Emph $ Seq [Base "Supertypetable of ", code "T a0 a1"] ]) $
 	[ [code "T a0 a1",b "is the type given in", imp "Is Type",b ", if the", imp "requirements",b "on the free type variables are met.",
 		b "This table contains always the same number of frees, but a certain supertype can demand extra requirements."],
 	  [b "The ", imp "Via", b " column codes via what type this specific supertype was added. ",
@@ -103,3 +103,8 @@ explanationFSTT	= doc "Full super type table explanation" "How to read a super t
 		b"in the", code"Collection a0 a1", b"example, if we want it to be correct.",
 		b"The ", imp "Orig Type", b"show this type before the substitution."
 	]] |> Mu.Seq |> Parag & Mu.Seq
+
+
+supertypesAny	:: Doc
+supertypesAny	= doc "Types/Supertypes/Supertypes of pietervdvn:Data:Any.Any" "Or why this document is a paradox" $
+			Seq [Base "The", code "Any",Base "-type ",emph "has",Base  "no super types, as it is the supertype of any possible type in the languate system." ]

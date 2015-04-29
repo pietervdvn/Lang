@@ -122,7 +122,7 @@ subDirs paths
 		|> reverse
 		|> break (=='/') |> snd |> drop 1	-- remove the actual ""file.html""
 		|> reverse & L.filter (elem '/')
-		|> break (=='/') & merge & M.fromList
+		|> break (=='/')& merge ||>> nub & M.fromList
 
 defaultNamer	:: FilePath -> URL -> String -> Name -> (FilePath, URL)
 defaultNamer fp site ext nm
