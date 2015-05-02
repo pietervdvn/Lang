@@ -22,8 +22,8 @@ import Data.Char
 type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
 
-html	:: FilePath -> RenderSettings
-html filePath
+html	:: FilePath -> RenderSettings -> RenderSettings
+html filePath self
 	= let resF	= localNamer' $ filePath++"/res/" in
 	  RenderSettings
 		(second escapeURL . localNamer filePath ".html")
@@ -35,9 +35,10 @@ html filePath
 		[]
 		resF
 	  & addPreprocessor' (rewrite escapeConts)
-	  & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css resF defaultCSS])
+	  & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self defaultCSS])
 
-
+fix	:: (a -> a) -> a
+fix f	=  f $ fix f
 
 headers	:: [HeaderOption] -> Option
 headers options
@@ -73,9 +74,19 @@ ogpTags' doc
 			unlines ogpTags
 
 -- Adds a css, with the resource function
-css	:: (String -> (String,URL)) -> CSS -> HeaderOption
-css resourceF css
-	= ([const $ "<link rel=\"stylesheet\" href=\""++ (css & name & resourceF & snd) ++".css\">"
+css	:: RenderSettings -> CSS -> HeaderOption
+css self css
+	= ([const $ "<link rel=\"stylesheet\" href=\""++ (css & name & resourceName self & snd) ++".css\">"
 		, const $ inTag "style" $ styleTagConts css]	-- extra headers for the file
 		, [(name css++".css", show css)]	-- name and content of css
 		)
+
+
+reloader	:: RenderSettings -> HeaderOption
+reloader self	= ([const $ reloaderheader (snd $ resourceName self "reloader.js")]
+			, [("reloader.js", reloaderJS)])
+
+-- yeah, I know... very professional and clean :p
+reloaderheader src
+		= "<script type=\"text/javascript\" src=\""++src++"\"></script>"
+reloaderJS	= "\nvar url\t= document.URL\n\nvar lastVersion = \"\"\n\nvar xhr = new XMLHttpRequest();\nxhr.onreadystatechange = function() {\n    if (xhr.readyState == 4) {\n        console.log(\"Loaded initial version\");\n\tlastVersion = xhr.responseText\n    }\n}\nxhr.open('GET', url, true);\nxhr.send(null);\n\nfunction checkReloadNeeded(text) {\n\tif(text != lastVersion){\n\t\tconsole.log(\"RELOAD NEEDED\")\n\t\tlastVersion = text\n\t\twindow.location.reload(true);\n\t}\n}\n\nwindow.setInterval(function(){\n\tvar xhr = new XMLHttpRequest();\n\txhr.onreadystatechange = function() {\n\t    if (xhr.readyState == 4) {\n\t\tcheckReloadNeeded(xhr.responseText)\n\t    }\n\t}\n\txhr.open('GET', url, true);\n\txhr.send(null);\n}, 750);\n"
