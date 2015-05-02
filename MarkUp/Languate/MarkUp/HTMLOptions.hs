@@ -22,23 +22,35 @@ import Data.Char
 type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
 
-html	:: FilePath -> RenderSettings -> RenderSettings
-html filePath self
-	= let resF	= localNamer' $ filePath++"/res/" in
-	  RenderSettings
-		(second escapeURL . localNamer filePath ".html")
+html	:: RenderSettings -> RenderSettings
+html self
+	= let filePath = error $ "To use the html options, you should still add a filepath. Use 'fix $ (extend $ setFilePath \"/your/path\") html' (eventually with other options)" in
+	   RenderSettings
+		filePath
 		fancyEmbedder
 		id
 		renderDoc2HTML
 		(flip const)
 		(Just defaultOverviewPage)
 		[]
-		resF
-	  & addPreprocessor' (rewrite escapeConts)
-	  & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self defaultCSS])
+		filePath
+	 & addPreprocessor' (rewrite escapeConts)
+	 & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self defaultCSS, reloader self])
 
 fix	:: (a -> a) -> a
 fix f	=  f $ fix f
+
+setFilePath	:: FilePath -> RenderSettings -> RenderSettings
+setFilePath fp
+		= setSite fp "file://"
+
+
+setSite		:: FilePath -> URL -> RenderSettings -> RenderSettings
+setSite fp site self
+		= self {renderName = defaultNamer fp  ("file://"++fp) ".html" . escapeURL,
+			resourceName = let fp' = fp++"/res" in defaultNamer fp' ("file://"++fp') ""  .escapeURL
+			}
+
 
 headers	:: [HeaderOption] -> Option
 headers options

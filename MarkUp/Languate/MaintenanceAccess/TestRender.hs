@@ -10,7 +10,9 @@ import System.Directory
 fp	= "/test"
 
 t = do	dir	<- getCurrentDirectory
-	renderClusterTo ((extend preproc html) (dir ++ fp ++ "/html")) cluster
+	let fp'	= dir ++ fp
+	let html'	= fix $ (extend $ setFilePath (fp'++"/html")) html
+	renderClusterTo html' cluster
 	renderClusterTo (md (dir ++ fp ++ "/md")) cluster
 
 back = NonImp $ InLink (Base "Back to all pages") "All pages"
@@ -24,7 +26,7 @@ cluster	= buildCluster [doc1,doc2,doc3, doc4, doc5, doc6]
 
 
 mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ parags
-	    [ Base "Hallo"
+	    [ Base "Hallo Again!"
             , OrderedList [Base "Item", OrderedList [Base "More", Base "Nested", Base "Lists"], Base "Item"]
             , emph "Test emph"
             , imp "important"
