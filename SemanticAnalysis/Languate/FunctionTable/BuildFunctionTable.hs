@@ -48,8 +48,9 @@ buildFunctionTables p tt
 addKnown	:: Map FQN [Signature] -> FQN -> FunctionTable -> FunctionTable
 addKnown known fqn fts
 	= let	signs	= findWithDefault (error $ "no known table for "++show fqn) fqn known
-		dict	= signs |> (signName &&& id) & merge ||>> nub & M.fromList in
-		fts {known = dict}
+		dict	= signs |> (signName &&& id) & merge ||>> nub & M.fromList
+		msg	= "The implementation of the function (in the function table) is not yet added. The FTs should still be completed" in
+		fts {known = dict ||>> (id &&& const (error msg))}
 
 isRestricted	:: Package -> FQN -> FQN -> Signature -> Bool
 isRestricted pack currentModule importedFrom sign
