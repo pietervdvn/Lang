@@ -12,6 +12,8 @@ How do we do this? First, we split the flat expression ''1 + 1 * 2'' into parts.
 -}
 
 import StdDef
+import Normalizable
+
 import Languate.AST
 import Languate.Precedence.PrecedenceTable
 import Data.Maybe
@@ -20,7 +22,6 @@ import Data.Map hiding (filter, map)
 
 import Languate.BuiltIns
 
-import Normalizable
 
 
 expr2prefExpr		:: PrecedenceTable -> Expression -> OperatorFreeExpression

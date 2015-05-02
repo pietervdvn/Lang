@@ -37,7 +37,7 @@ precedence of (!) is prefix, (!) < (&&)
   > False || False		= False
   > False || True || False	= True
 (||)		: Bool -> Bool -> Bool & Associative Bool
-  False False	= False
+  False b	= b
   _ _		= True
 
 -- Logical 'not' function (aka invert).

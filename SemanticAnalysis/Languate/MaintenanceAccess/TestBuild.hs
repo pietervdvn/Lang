@@ -51,7 +51,7 @@ loadedPackage	= unsafePerformIO $ packageIO path
 tablesOvervIO	= runExceptionsIO' $ buildAllTables loadedPackage
 tablesOverv	= unsafePerformIO tablesOvervIO
 prelude		= toFQN' "pietervdvn:Data:Prelude"
-
+bool		= toFQN' "pietervdvn:Data:Data.Bool"
 
 
 bDocs	= do	dir	<- getCurrentDirectory

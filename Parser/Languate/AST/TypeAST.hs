@@ -12,6 +12,7 @@ It also contains meta things, as laws, comments, docstrings
 --}
 
 import StdDef
+import Normalizable
 
 type Line	= Int
 type Column	= Int

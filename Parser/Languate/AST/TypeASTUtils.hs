@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav, normalize) where
 
 {--
 This module implements utilities for type asts
@@ -107,6 +107,16 @@ isExpNl _		= False
 instance Normalizable Expression where
 	normalize	= ne
 
+
+ne		:: Expression -> Expression
+ne (Seq [e])	= ne e
+ne (Seq exprs)	= Seq $ nes exprs
+ne (Tuple exprs)= Tuple $ map ne exprs
+ne e		= e
+
+nes	:: [Expression] -> [Expression]
+nes	= filter (Seq [] /=) . map ne
+
 instance Show Expression where
 	show	= se . normalize
 
@@ -122,17 +132,6 @@ se AutoCast	= "~~"
 se (Call str)	= str
 se (Operator str)= str
 se _	= ""
-
-
-ne		:: Expression -> Expression
-ne (Seq [e])	= ne e
-ne (Seq exprs)	= Seq $ nes exprs
-ne (Tuple exprs)= Tuple $ map ne exprs
-ne e		= e
-
-nes	:: [Expression] -> [Expression]
-nes	= filter (Seq [] /=) . map ne
-
 
 
 instance Show ADTSum where

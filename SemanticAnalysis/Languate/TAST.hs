@@ -122,6 +122,11 @@ typeOf (TApplication typeInfo _ _)
 
 
 
+{-
+A local scope keeps track of what variable has what type.
+It is build based on the pattern matching of the function, while typing the patterns.
+-}
+type LocalScope	= Map Name RType
 data TPattern	= TAssign Name
 		| TDeconstruct (Name, RType) [TPattern]
 		| TMulti [TPattern]
@@ -131,7 +136,7 @@ data TPattern	= TAssign Name
 
 data TClause		= TClause [TPattern] TExpression
 	deriving (Show, Eq)
-
+type FuncBody	= TClause
 
 -------------------- Only utils, instance declaration and boring stuff below -------------------------------------
 
