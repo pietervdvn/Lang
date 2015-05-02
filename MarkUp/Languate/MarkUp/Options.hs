@@ -16,6 +16,8 @@ import Data.Maybe
 -- Implements somme options for the render html, e.g. to add a header, footer, scripts, stylesheet
 import Debug.Trace
 
+import Languate.MarkUp.HTML
+
 data RenderSettings	= RenderSettings
 	{ renderName	:: String -> (FilePath, URL)
 		-- converts the document name to a directory (and links to their correct form). Inlinks are rewritten to links with the URL. Files will be rendered to the given filepath
@@ -80,11 +82,11 @@ defaultOverviewPage docs
 		(rootDocs, subDocs)	= perDir docs
 		subs	= docs |> title & subDirs
 		subsFor nm
-			= M.findWithDefault [] nm subs |> (\sub -> link' (tail sub) ("#"++escapeURL (tail sub))) & Seq	in
-		doc titl descr $ titling titl $
+			= M.findWithDefault [] nm subs |> (\sub -> headerLink $ tail sub) & Seq	in
+		doc titl descr $
 			if M.null subDocs then baseTable rootDocs else Seq
 				([ titling' "Root Documents" $ Seq [baseTable rootDocs,
-					cleanTable $ table ["Directory","Subdirectories"] $ subDocs & M.keys |> (\nm -> [link' nm $ "#"++escapeURL nm, subsFor nm])]
+					cleanTable $ table ["Directory","Subdirectories"] $ subDocs & M.keys |> (\nm -> [headerLink nm, subsFor nm])]
 				] ++ renderSubDirs "" subDocs)
 
 renderSubDirs	:: String -> Map String [Doc] -> [MarkUp]

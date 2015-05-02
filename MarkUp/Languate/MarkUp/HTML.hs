@@ -79,6 +79,9 @@ inSpan	:: String -> HTML -> HTML
 inSpan className html
 	= "<span class=\"" ++ className ++ "\">" ++ html ++ "</span>"
 
+headerLink str
+	= link' str ("#"++escapeURL str)
+
 escapeConts	:: MarkUp -> Maybe MarkUp
 escapeConts (Base str)
 		= (str >>= escapeChar) & Base & Just

@@ -194,6 +194,7 @@ parags mus
 	= mus |> Parag & Seq
 unwords'= Seq
 
+
 -- removes obsolete columns from the table
 cleanTable	:: MarkUp -> MarkUp
 cleanTable (Table mus muss)
