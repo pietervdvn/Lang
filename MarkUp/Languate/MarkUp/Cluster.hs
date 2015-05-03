@@ -62,29 +62,30 @@ renderClusterTo	settings (Cluster docsDict)= do
 renderBar	:: (a -> IO ()) -> [(String, a)] -> IO ()
 renderBar action ls
 		= do	let l	= length ls
-			putStr $ bar 75 l 0
+			putStr $ bar 80 l "" 0
 			ls & zip [1..]
-				|> (\(i, (msg',a)) -> do
-					let msg	= reverse $ take 60 $ reverse msg'
-					let br	= bar (79 - length msg) l i
-					putStr $ "\r"++br++" "++msg
+				|> (\(i, (msg,a)) -> do
+					putStr $ "\r" ++ bar 80 l msg i
 					action a)
 				& sequence_
-			putStrLn $ "\r" ++ bar 75 l l ++ " Done"
+			putStrLn $ "\r" ++ bar 80 l "" l
 
-bar		:: Int -> Int -> Int -> String
-bar width total current
+bar		:: Int -> Int -> String -> Int -> String
+bar width total msg' current
  | total < current
-	= bar width current total
+	= bar width current msg' total
  | otherwise
 	= let 	current'= fromIntegral current	:: Float
 		total'	= fromIntegral total	:: Float
 		width'	= fromIntegral width	:: Float
 		perc'	= (current' / total') * (width' - 2)
 		perc	= round perc'
-		bars	= replicate perc '-'
-		spaces	= replicate (width - perc -2) ' ' in
-		"["++ bars ++ spaces ++"]"
+		msg	= "--"++take (width - 2) msg'
+		preMsg	= take perc msg
+		postMsg	= drop perc msg
+		bars	= take perc $ preMsg ++ repeat '-'
+		conts	= bars++"#"++postMsg++repeat ' '	in
+		"["++(take (width-2) conts ) ++"]"
 
 
 

@@ -12,6 +12,7 @@ fp	= "/test"
 t = do	dir	<- getCurrentDirectory
 	let fp'	= dir ++ fp
 	let html'	= fix $ (extend $ setFilePath (fp'++"/html")) html
+	removeDirectoryRecursive fp'
 	renderClusterTo html' cluster
 	renderClusterTo (md (dir ++ fp ++ "/md")) cluster
 

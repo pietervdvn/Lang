@@ -47,8 +47,8 @@ setFilePath fp
 
 setSite		:: FilePath -> URL -> RenderSettings -> RenderSettings
 setSite fp site self
-		= self {renderName = defaultNamer fp  ("file://"++fp) ".html" . escapeURL,
-			resourceName = let fp' = fp++"/res" in defaultNamer fp' ("file://"++fp') ""  .escapeURL
+		= self {renderName = defaultNamer fp  ("file://"++fp) ".html",
+			resourceName = let fp' = fp++"/res" in defaultNamer fp' ("file://"++fp') ""
 			}
 
 
