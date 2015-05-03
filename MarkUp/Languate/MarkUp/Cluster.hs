@@ -55,8 +55,35 @@ renderClusterTo	settings (Cluster docsDict)= do
 	-- first render and write resources, as automatic browser reloads already need those
 	resources settings	|> first (fst . resourceName settings)
 				|> (uncurry writeFile') & sequence_
-	mapM_ (renderFile cluster' settings) (docsIn cluster' & M.elems)
+	renderBar (renderFile cluster' settings) (docsIn cluster' & M.elems)
 	putStrLn $ "Written document cluster to "++(renderName settings "" & fst)++" containing "++ show (length docs')++" docs"
+
+renderBar	:: (a -> IO ()) -> [a] -> IO ()
+renderBar action ls
+		= do	let l	= length ls
+			putStr $ bar 80 l 0
+			ls & zip [1..] |> (first $ bar 80 l)
+				|> (\(bar, a) -> do	putStr $ "\r"++bar
+							action a)
+				& sequence_
+			putStrLn ""
+
+
+bar		:: Int -> Int -> Int -> String
+bar width total current
+ | total < current
+	= bar width current total
+ | otherwise
+	= let 	current'= fromIntegral current	:: Float
+		total'	= fromIntegral total	:: Float
+		width'	= fromIntegral width	:: Float
+		perc'	= (current' / total') * (width' - 2)
+		perc	= round perc'
+		bars	= replicate perc '-'
+		spaces	= replicate (width - perc -2) ' ' in
+		"["++ bars ++ spaces ++"]"
+
+
 
 
 renderFile	:: Cluster -> RenderSettings -> Doc -> IO ()

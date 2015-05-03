@@ -11,7 +11,7 @@ fi
 FOUND=0
 DONE=0
 
-for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/
+for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ # SemanticAnalysis/
 do
 	DONE=$(($DONE+1))
 	echo $DONE
@@ -32,6 +32,9 @@ do
 		echo "Skipping $pack"
 	fi
 done
+
+echo "Stopping for now. Once semantal is finished, edit installall!"
+exit
 
 cd Main
 ghc Main.hs
