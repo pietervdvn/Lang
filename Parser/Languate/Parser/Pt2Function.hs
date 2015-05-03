@@ -3,6 +3,7 @@ module Languate.Parser.Pt2Function (pt2func) where
 import StdDef
 import Bnf.ParseTree hiding (Line)
 import Bnf
+import Normalizable
 import Languate.Parser.Utils
 import Languate.Parser.Pt2TypeConj
 import Languate.Parser.Pt2Expr
@@ -57,9 +58,8 @@ h		=  	[ ("declaration", Decl   . pt2decl)
 s _ [ast]	= ast
 s _ asts	= Root asts
 
-
-normalize	:: AST -> AST
-normalize ast	=  Root $ unflatten ast
+instance Normalizable AST where
+	normalize ast	=  Root $ unflatten ast
 
 unflatten	:: AST -> [AST]
 unflatten (Root asts)
