@@ -58,8 +58,9 @@ bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
 		let cluster'	= add tablesOverv cluster
 		addFooter'	<- addFooter
-		renderClusterTo ((extend addFooter' $ extend addHeader html) $ dir ++"/" ++ path ++ "/.gen" ++ "/html")
-				cluster'
+		let path'	= dir ++"/" ++ path ++ "/.gen" ++ "/html"
+		removeDirectoryRecursive path'
+		renderClusterTo (fix $ extend (addFooter' . addHeader . setFilePath path') html) cluster'
 
 
 addFooter	:: IO (RenderSettings -> RenderSettings)
