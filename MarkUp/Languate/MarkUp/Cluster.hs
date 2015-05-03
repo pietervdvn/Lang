@@ -68,26 +68,7 @@ renderBar action ls
 					putStr $ "\r" ++ bar 80 l msg i
 					action a)
 				& sequence_
-			putStrLn $ "\r" ++ bar 80 l "" l
-
-bar		:: Int -> Int -> String -> Int -> String
-bar width total msg' current
- | total < current
-	= bar width current msg' total
- | otherwise
-	= let 	current'= fromIntegral current	:: Float
-		total'	= fromIntegral total	:: Float
-		width'	= fromIntegral width	:: Float
-		perc'	= (current' / total') * (width' - 2)
-		perc	= round perc'
-		msg	= "--"++take (width - 2) msg'
-		preMsg	= take perc msg
-		postMsg	= drop perc msg
-		bars	= take perc $ preMsg ++ repeat '-'
-		conts	= bars++"#"++postMsg++repeat ' '	in
-		"["++(take (width-2) conts ) ++"]"
-
-
+			putStrLn $ "\r" ++ bar 80 l (show l++" docs written") l
 
 
 renderFile	:: Cluster -> RenderSettings -> Doc -> IO ()
