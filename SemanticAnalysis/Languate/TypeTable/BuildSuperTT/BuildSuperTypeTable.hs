@@ -72,7 +72,7 @@ superTypeIn tlt (ClassDefStm cd)
 superTypeIn (tlt, klt) (ADTDefStm (ADTDef nm frees reqs _))
 		= do	fqn	<- findTypeOrigin tlt ([], nm)
 			reqs'	<- resolveReqs tlt reqs
-			let ((tid, frees', reqs''), t)	= normalize klt
+			let ((tid, frees', reqs''), t)	= normalizeEntry klt
 				(((fqn, nm), frees, reqs'), anyType)
 			return [(tid, frees', reqs'', [t])]
 superTypeIn _ _	= return []
@@ -108,13 +108,13 @@ superTypeFor (tlt,klt) path nm frees supers reqs
 			let unsplit4 ((a, b, c), d)	= (a, b, c, d)
 
 			let sttfs	= unmerge [((tId, frees, reqs'), supers')]
-			let normed	= sttfs |> normalize klt
+			let normed	= sttfs |> normalizeEntry klt
 			return (merge normed |> unsplit4)
 
 
-normalize	:: KindLookupTable -> ((TypeID, [Name], Reqs), RType) ->
+normalizeEntry	:: KindLookupTable -> ((TypeID, [Name], Reqs), RType) ->
 			((TypeID, [Name], Reqs), RType)
-normalize klt entry
+normalizeEntry klt entry
 	= entry & normalizeSTF & normalizeLength klt
 
 --  Transforms "List a is Collection a" into "List a0 is Collection a0"

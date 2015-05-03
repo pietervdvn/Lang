@@ -37,6 +37,6 @@ isEqRel (PrecEQ _ _)
 		= True
 isEqRel	_	= False
 
-normalize	:: Ord a => (a,a) -> (a,a)
-normalize (a0,a1)
+normalizeTuple	:: Ord a => (a,a) -> (a,a)
+normalizeTuple (a0,a1)
 		= (min a0 a1, max a0 a1)

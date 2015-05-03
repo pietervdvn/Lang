@@ -45,7 +45,7 @@ checkPrecStms available p@(PrecAnnot {operator = op, relations = rels})
 
 checkPrecRels	:: [PrecRelation] -> Check
 checkPrecRels rels
-	= do	let eqs	= eqRelations rels |> normalize
+	= do	let eqs	= eqRelations rels |> normalizeTuple
 		let showEq (op0, op1)	= op0 ++ " = "++ op1
 		assert' (unique eqs) $ "You stated a same precedence relationship multiple times: " ++ intercalate ", " (dubbles eqs |> showEq)
 		let lts	= ltRelations rels
