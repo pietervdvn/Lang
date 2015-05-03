@@ -13,6 +13,7 @@ import qualified Data.Map as M
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Maybe
+import Data.Tuple
 
 import Control.Arrow
 import Control.Monad
@@ -55,19 +56,21 @@ renderClusterTo	settings (Cluster docsDict)= do
 	-- first render and write resources, as automatic browser reloads already need those
 	resources settings	|> first (fst . resourceName settings)
 				|> (uncurry writeFile') & sequence_
-	renderBar (renderFile cluster' settings) (docsIn cluster' & M.elems)
+	renderBar (renderFile cluster' settings) (docsIn cluster' & M.elems |> (title &&& id) )
 	putStrLn $ "Written document cluster to "++(renderName settings "" & fst)++" containing "++ show (length docs')++" docs"
 
-renderBar	:: (a -> IO ()) -> [a] -> IO ()
+renderBar	:: (a -> IO ()) -> [(String, a)] -> IO ()
 renderBar action ls
 		= do	let l	= length ls
-			putStr $ bar 80 l 0
-			ls & zip [1..] |> (first $ bar 80 l)
-				|> (\(bar, a) -> do	putStr $ "\r"++bar
-							action a)
+			putStr $ bar 75 l 0
+			ls & zip [1..]
+				|> (\(i, (msg',a)) -> do
+					let msg	= reverse $ take 60 $ reverse msg'
+					let br	= bar (79 - length msg) l i
+					putStr $ "\r"++br++" "++msg
+					action a)
 				& sequence_
-			putStrLn ""
-
+			putStrLn $ "\r" ++ bar 75 l l ++ " Done"
 
 bar		:: Int -> Int -> Int -> String
 bar width total current

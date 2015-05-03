@@ -26,6 +26,7 @@ do
 		if [[ $EXITCODE -ne 0 ]]
 		then
 			echo "Installing $pack failed"
+			bell; bell; bell
 			exit
 		fi
 	else
@@ -33,6 +34,7 @@ do
 	fi
 done
 
+bell 1
 echo "Stopping for now. Once semantal is finished, edit installall!"
 exit
 
