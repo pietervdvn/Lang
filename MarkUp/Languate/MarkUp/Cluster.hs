@@ -52,9 +52,10 @@ renderClusterTo	settings (Cluster docsDict)= do
 				|> preprocess (rewrite $ _renderEmbed embCluster settings)	-- embed all values (from the other cluster)
 				|> preprocess (deepRewrite $ _renderInLink settings)
 				& Cluster
-	mapM_ (renderFile cluster' settings) (docsIn cluster' & M.elems)
+	-- first render and write resources, as automatic browser reloads already need those
 	resources settings	|> first (fst . resourceName settings)
 				|> (uncurry writeFile') & sequence_
+	mapM_ (renderFile cluster' settings) (docsIn cluster' & M.elems)
 	putStrLn $ "Written document cluster to "++(renderName settings "" & fst)++" containing "++ show (length docs')++" docs"
 
 
