@@ -14,19 +14,19 @@ type HTML     = String
 
 renderHTML	:: MarkUp -> State Int HTML
 renderHTML (Base str)
-		= return str
+		= (str >>= (\c -> if c == '\n' then "<br />" else [c])) & return
 renderHTML (Parag mu)
-        = mu & rewrite removePars & renderHTML |> inTag "p" |> (++"\n")
+        = mu & rewrite removePars & renderHTML |> whenTag "p" |> (++"\n")
 renderHTML (Seq mus)
         = mus & mapM renderHTML |> unwords
 renderHTML (Emph mu)
 		= mu & renderHTML       |> inSpan "emph"
 renderHTML (Imp mu)
-        = mu & renderHTML       |> inTag "strong"
+        = mu & renderHTML       |> whenTag "strong"
 renderHTML (NonImp mu)
         = mu & renderHTML       |> inSpan "notImp"
 renderHTML (Code mu)
-        = mu & renderHTML       |> inTag "code"
+        = mu & renderHTML       |> whenTag "code"
 renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
@@ -60,12 +60,17 @@ renderDoc2HTML doc   = runstate (contents doc & renderHTML) 1 & fst
 
 removePars	:: MarkUp -> Maybe MarkUp
 removePars (Parag mu)
-		= Just $ Seq [mu]
+		= Just $ Seq [mu, Base "\n"]
 removePars _	= Nothing
 
 inTag   :: String -> HTML -> HTML
 inTag tagN html
 	= "<" ++ tagN ++ if null html then "/>" else ">" ++ html ++ "</" ++ tagN ++ ">"
+
+-- renders the tag if not empty
+whenTag	:: String -> HTML -> HTML
+whenTag tagN html
+	= if null $ strip html then "" else inTag tagN html
 
 inTag'  :: String -> [String] -> HTML -> HTML
 inTag' tagN metas html
@@ -77,7 +82,8 @@ ogpTag name value
 
 inSpan	:: String -> HTML -> HTML
 inSpan className html
-	= "<span class=\"" ++ className ++ "\">" ++ html ++ "</span>"
+ | null html	= ""
+ | otherwise	= "<span class=\"" ++ className ++ "\">" ++ html ++ "</span>"
 
 headerLink str
 	= link' str ("#"++escapeURL str)
@@ -91,6 +97,7 @@ escapeChar	:: Char -> String
 escapeChar c
 	| c `notElem` " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/?#[]@!();=\""
 			= "&#x" ++ asHex (ord c) ++  ";"
+	| c == '\n'	= "<br />"
 	| otherwise	= [c]
 
 escapeURL	:: String -> URL

@@ -14,6 +14,7 @@ import Data.Set (Set)
 import qualified Data.Set as S
 
 b	= Base
+nl	= Base "\n"
 
 instance Documentable TypeTable where
 	toDocument tt	=
@@ -42,9 +43,10 @@ type2doc tt tid
 		kind	= kinds tt & M.findWithDefault Kind tid in
 		doc ("Types/"++showtid tid) synopsis $
 		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid])
-			$ Mu.Seq [Imp $ code $ show kind
-				, imp synopsis, parag $ unlines rest,
-				if tid == anyTypeID then Mu.Seq [] else
+			$ Mu.Seq [Parag $ Imp $ code $ show kind, nl
+				, imp synopsis
+				, parag $ unlines $ filter (/="") rest
+				, if tid == anyTypeID then Mu.Seq [] else
 					Embed $ "Types/Supertypes/Supertypes of "++showtid tid]
 
 synops	:: TypeTable -> TypeID -> (String, [String])
