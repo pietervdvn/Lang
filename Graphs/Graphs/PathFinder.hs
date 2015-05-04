@@ -9,7 +9,6 @@ import StdDef
 import Data.Maybe
 import Data.Map hiding (filter, null)
 import Data.Set (Set)
-import Data.Function (fix)
 import qualified Data.Set as S
 
 

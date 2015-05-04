@@ -37,9 +37,6 @@ html self
 	 & addPreprocessor' (rewrite escapeConts)
 	 & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self defaultCSS, reloader self])
 
-fix	:: (a -> a) -> a
-fix f	=  f $ fix f
-
 setFilePath	:: FilePath -> RenderSettings -> RenderSettings
 setFilePath fp
 		= setSite fp "file://"

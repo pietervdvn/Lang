@@ -6,7 +6,8 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Set (Set)
 import Data.List (sortBy)
-import Data.Function
+import Data.Function (on)
+import qualified Data.Function
 
 import System.Directory
 
@@ -212,3 +213,5 @@ writeFile' fp contents
 	= do	let dirPath	= fp & reverse & break ('/'==) & snd & reverse
 		createDirectoryIfMissing True dirPath
 		writeFile fp contents
+
+fix	=  Data.Function.fix
