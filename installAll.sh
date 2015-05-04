@@ -35,7 +35,8 @@ do
 done
 
 bell 1
-echo "Stopping for now. Once semantal is finished, edit installall!"
+cd "SemanticAnalysis"
+echo -e "bDocs\n:q" | ghci "Languate/MaintenanceAccess/TestBuild"
 exit
 
 cd Main
