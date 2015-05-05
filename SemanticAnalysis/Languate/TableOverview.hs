@@ -32,7 +32,7 @@ data TableOverview	= TableOverview { typeTable		:: TypeTable
 buildAllTables	:: Package -> Exc TableOverview
 buildAllTables w	= do	tt	<- buildTypeTable w
 				precT	<- buildPrecTable' w
-				fts	<- buildFunctionTables w tt
+				fts	<- buildFunctionTables w tt |> fst
 				return $ TableOverview tt fts precT
 
 

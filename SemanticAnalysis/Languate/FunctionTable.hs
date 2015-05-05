@@ -20,7 +20,9 @@ The function table is associated with a single module and keeps track of all kno
 data FunctionTable	= FunctionTable
 	{ defined	:: Set Signature-- signatures of locally defined functions, which might be private
 	, public	:: Set Signature --all public functions
-	, known		:: Map Name [(Signature, FuncBody)]	-- all functions known withing local scope
+	, known		:: Map Name [Signature]	-- all functions known withing local scope
+	, implementations
+			:: Map Signature [TClause]
 	}
 	deriving (Show)
 

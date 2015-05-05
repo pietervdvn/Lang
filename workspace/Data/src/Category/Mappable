@@ -7,7 +7,9 @@ import Data.Bool
 import Category.Eq
 
 ---
-A _container_ on which ''map'' is defined. Also known as ''Functor'' in most other functional programming languages.
+A _container_ on which ''map'' is defined.
+
+Also known as ''Functor'' in most other functional programming languages.
 ---
 cat Mappable b
 	~ identity: map id	= id

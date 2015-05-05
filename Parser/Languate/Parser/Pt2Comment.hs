@@ -36,7 +36,7 @@ s "nlcomment" (Nl:terms)
 s "nlcomment" []
 		= Nl
 s "nlcomment" (Comment str:_)
-		= Comment str
+		= Comment $ str
 s _ [MlCommDelim, Nl]
 		= Comment ""	-- emtpy comment detected!
 s _ [ast]  	= ast
@@ -54,7 +54,7 @@ sNl n asts	= s n asts
 
 -- used to parse "nl" and "nltab", which might contain a comment
 pt2nl		:: ParseTree -> Maybe Comment
-pt2nl		=  pt2a hNl t sNl (\ ast -> 
+pt2nl		=  pt2a hNl t sNl (\ ast ->
 			case ast of
 				(Comment str)	-> Just str
 				(Nl)		-> Nothing)

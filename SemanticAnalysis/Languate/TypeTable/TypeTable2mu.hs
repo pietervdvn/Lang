@@ -45,7 +45,7 @@ type2doc tt tid
 		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid])
 			$ Mu.Seq [Parag $ Imp $ code $ show kind, nl
 				, imp synopsis
-				, parag $ unlines $ filter (/="") rest
+				, rest & filter (/="") |> Base & parags
 				, if tid == anyTypeID then Mu.Seq [] else
 					Embed $ "Types/Supertypes/Supertypes of "++showtid tid]
 

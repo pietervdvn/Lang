@@ -11,8 +11,11 @@ import Languate.TAST
 import Languate.FQN
 import Languate.Package
 import Languate.TypeTable
+import Languate.Precedence.PrecedenceTable
 
 import Languate.FunctionTable
+import Languate.FunctionTable.FunctionsIn
+
 
 import Graphs.DirectedGraph
 import Graphs.ExportCalculator hiding (importGraph)
@@ -26,15 +29,16 @@ import Data.List
 
 import Control.Arrow
 
-buildFunctionTables	:: Package -> TypeTable -> Exc FunctionTables
+buildFunctionTables	:: Package -> TypeTable -> Exc (FunctionTables, Map Module (Map Signature [Clause]))
 buildFunctionTables p tt
 	= do	let bft (fqn, m)= do	ft 	<- buildFunctionTable p tt fqn m
-					return (fqn, ft)
+					return (fqn, fst ft)
 		-- TODO check for doubly defined functions
 		functiontables	<- p & modules & toList & mapM bft |> fromList
 		let impGr	= importGraph p
 		let getPubl fqn	= fromMaybe S.empty (M.lookup fqn functiontables
 					|> public)
+					-- :: (FunctionTable, Map Signature [Clause])
 		let restrictions fqn (impFrom, funcSign)
 				= isRestricted p fqn impFrom funcSign
 		let exported	= calculateExports impGr (invert impGr) getPubl restrictions
@@ -43,14 +47,15 @@ buildFunctionTables p tt
 					|> S.toList ||>> fst
 		let ftsWithKnown
 			= mapWithKey (addKnown known) ftsWithPub
-		return $ FunctionTables ftsWithKnown
+		let rawDict	= todo	-- TODO
+		return (FunctionTables ftsWithKnown, rawDict)
 
 addKnown	:: Map FQN [Signature] -> FQN -> FunctionTable -> FunctionTable
 addKnown known fqn fts
 	= let	signs	= findWithDefault (error $ "no known table for "++show fqn) fqn known
-		dict	= signs |> (signName &&& id) & merge ||>> nub & M.fromList
-		msg	= "The implementation of the function (in the function table) is not yet added. The FTs should still be completed" in
-		fts {known = dict ||>> (id &&& const (error msg))}
+		-- TODO
+		dict	= signs |> (signName &&& id) & merge ||>> nub & M.fromList in
+		fts {known = dict}
 
 isRestricted	:: Package -> FQN -> FQN -> Signature -> Bool
 isRestricted pack currentModule importedFrom sign
@@ -67,42 +72,10 @@ mergeTables exported
 			ft {public = S.union exp $ public ft}
 
 
-buildFunctionTable		:: Package -> TypeTable -> FQN -> Module -> Exc FunctionTable
-buildFunctionTable p tt fqn m = inFile fqn $
-	do	tlt	<- (typeLookups tt & M.lookup fqn) ? ("No tlt for "++show fqn)
-		signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat
-		let defined	= signs |> fst
-		let public	= signs & filter ((==) Public . snd) |> fst
-		return $ FunctionTable (S.fromList defined) (S.fromList public) (error $ "Non overwritten known table in function table for "++show fqn++", this is a bug")
-
-functionIn'	:: FQN -> TypeLookupTable -> (Statement, Coor) ->
-			Exc [(Signature, Visible)]
-functionIn' fqn tlt (stm, coor) = onLine coor $
-	do	let signs	= functionIn stm
-		mapM (\((nm, t, reqs),v) -> do	rt	<- mapM (resolveType tlt) t
-						rreqs	<- mapM (resolveTypeIn tlt) reqs
-						return (Signature fqn nm rt $ merge rreqs, v)  )  signs
-
-
-
-{-
-Searches for function declarations within the statements
--}
-functionIn	:: Statement -> [((Name, [Type], [TypeRequirement]), Visible)]
-functionIn (FunctionStm f)
-	= zip (signs f) (repeat $ visibility f)
-functionIn (ClassDefStm cd)
-	= let	signs	= decls cd |> third3 (classReqs cd ++) in
-		zip signs $ repeat Public
-functionIn (ADTDefStm (ADTDef nm frees reqs sums))
-	= let	typ	= Applied (Normal [] nm) (frees |> Free) in
-		sums |> functionsInADTSum (typ, reqs) & concat
-functionIn _
-	= []
-
-functionsInADTSum 	:: (Type, [TypeRequirement]) -> ADTSum ->
-				[((Name, [Type], [TypeRequirement]), Visible)]
-functionsInADTSum (t,treqs) (ADTSum consName vis args)
-	= let	argTypes	= args |> snd
-		constructor	= ((consName, [Curry $ argTypes++[t]], treqs), vis) in
-		[constructor]	-- TODO add field getters, setters and modders
+buildFunctionTable		:: Package -> TypeTable -> FQN -> Module -> Exc (FunctionTable, Map Signature [Clause])
+buildFunctionTable p tt fqn m	= inFile fqn $ do
+	tlt	<- (typeLookups tt & M.lookup fqn) ? ("No tlt for "++show fqn)	:: Exc TypeLookupTable
+	signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat ||>> fst
+	let defined	= signs |> fst
+	let public	= signs & filter ((==) Public . snd) |> fst
+	return (FunctionTable (S.fromList defined) (S.fromList public) (todos "Known table") (todos "Implementation table"), todos "Raw table")	-- TODO

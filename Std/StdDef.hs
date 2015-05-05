@@ -8,6 +8,7 @@ import Data.Set (Set)
 import Data.List (sortBy)
 import Data.Function (on)
 import qualified Data.Function
+import Data.Maybe (mapMaybe)
 
 import System.Directory
 
@@ -46,6 +47,10 @@ unpackMaybeTuple (ma,b)
 		= do	a	<- ma
 			return (a,b)
 
+
+unpackMaybeTuples	:: [(Maybe a, b)] -> [(a,b)]
+unpackMaybeTuples ls
+		=  mapMaybe unpackMaybeTuple ls
 
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []

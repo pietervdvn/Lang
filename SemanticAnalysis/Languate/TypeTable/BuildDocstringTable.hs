@@ -20,6 +20,8 @@ import Data.Set (Set)
 import Data.Maybe
 import Data.Tuple
 
+import Debug.Trace
+
 buildDocstringTable	:: Package -> [TypeID] -> Exc (Map TypeID String)
 buildDocstringTable w typeIds
 		= docstringsFor w typeIds |> fromList
@@ -28,7 +30,8 @@ buildDocstringTable w typeIds
 docstringsFor	:: Package -> [TypeID] -> Exc [(TypeID, String)]
 docstringsFor w typeIds
 		= do	docs	<- mapM (try' Nothing . docstringFor w) typeIds
-			return $ map swap $ mapMaybe unpackMaybeTuple $ zip docs typeIds
+			zip docs typeIds & unpackMaybeTuples |> swap
+				||>> strip ||>> stripnl & return
 
 
 docstringFor	:: Package -> TypeID -> Exc (Maybe Comment)

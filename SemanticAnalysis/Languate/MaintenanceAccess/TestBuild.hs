@@ -5,6 +5,7 @@ This module builds all the stuff!
 --}
 
 import qualified Bnf
+import StdDef
 import Exceptions
 
 
@@ -67,8 +68,8 @@ addFooter	:: IO (RenderSettings -> RenderSettings)
 addFooter	= do	let back = NonImp $ InLink (Base "Back to all pages") "All pages"
 			time	<- getCurrentTime
 			print time
-			return $ addPreprocessor' (\mu -> parags [back, mu,
-				notImportant $ "This doc was automatically generated on "++show time,notImportant "Do not edit it, as changes will be erased the next generation.", back])
+			return $ addPreprocessor' (\mu -> Mu.Seq [back, mu,
+				NonImp $ parags $ [Base $ "This doc was automatically generated on "++show time, Base "Do not edit it, as changes will be erased the next generation.", back]])
 
 addHeader	:: RenderSettings -> RenderSettings
 addHeader	= addPreprocessor (\doc -> preprocess (\mu -> titling (title doc) $ Mu.Seq [notImportant $ description doc, contents doc ]) doc)
