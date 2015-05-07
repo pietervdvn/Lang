@@ -20,11 +20,13 @@ The function table is associated with a single module and keeps track of all kno
 data FunctionTable	= FunctionTable
 	{ defined	:: Set Signature-- signatures of locally defined functions, which might be private
 	, public	:: Set Signature --all public functions
-	, known		:: Map Name [Signature]	-- all functions known withing local scope
-	, implementations
-			:: Map Signature [TClause]
+	, known		:: Map Name [Signature]	-- all functions known within local scope
 	}
 	deriving (Show)
+
+
+type ImplementationTable
+	= Map Signature TClause
 
 newtype FunctionTables	= FunctionTables {unpackFTS	:: Map FQN FunctionTable }
 
@@ -45,7 +47,12 @@ functiontable2mu ft	=
 	let header	= ["Name","Types","Requirements"]
 	    contents f	= f ft & toList |> funcSign2mu
 	    tableFor f	= table' header $ contents f
-	    mu		= [ titling' "Defined" (tableFor defined), titling' "Exported" (tableFor public)] & Mu.Seq
+	    knowns	= known ft & M.toList |> (\(nm, signs) ->
+				[imp nm, signs |> show |> code & Mu.Seq])
+	    mu		= [ titling' "Defined" (tableFor defined)
+			  , titling' "Exported" (tableFor public)
+			  , titling' "Known" $ table' ["Name","Signatures"] knowns
+			  ] & Mu.Seq
 			in
 		if isEmpty mu then notImportant "No functions are defined!" else mu
 

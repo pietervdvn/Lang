@@ -14,7 +14,6 @@ import Languate.Package
 import Languate.TypeTable
 
 import Languate.FunctionTable
-import Languate.FunctionTable.TypeClause
 import Languate.Precedence.PrecedenceTable
 
 data SimpleFunc	= SimpleFunc {	funcName	:: Name,
@@ -25,12 +24,13 @@ data SimpleFunc	= SimpleFunc {	funcName	:: Name,
 
 
 functionIn'	:: FQN -> TypeLookupTable -> (Statement, Coor) ->
-			Exc [((Signature, Visible), [Clause])]
+			Exc [((Signature, Visible), (Signature, [Clause]))]
 functionIn' fqn tlt (stm, coor) = onLine coor $
 	do	let signs	= functionIn stm
 		signs	|> (\func -> do	rt	<- mapM (resolveType tlt)	$ funcTypes func
 					rreqs	<- mapM (resolveTypeIn tlt)	$ funcTypeReqs func
-					return ((Signature fqn (funcName func) rt $ merge rreqs, funcVisibility func), funcClauses func)  )
+					let sign	= Signature fqn (funcName func) rt $ merge rreqs
+					return ((sign, funcVisibility func), (sign, funcClauses func))  )
 			& sequence
 
 {-

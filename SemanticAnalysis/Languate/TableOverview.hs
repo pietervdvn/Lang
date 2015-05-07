@@ -29,10 +29,12 @@ data TableOverview	= TableOverview { typeTable		:: TypeTable
 					, functionTables	:: FunctionTables
 					, precedenceTable	:: PrecedenceTable}
 
+
 buildAllTables	:: Package -> Exc TableOverview
 buildAllTables w	= do	tt	<- buildTypeTable w
 				precT	<- buildPrecTable' w
-				fts	<- buildFunctionTables w tt |> fst
+				(fts, rawClauses)
+					<- buildFunctionTables w tt
 				return $ TableOverview tt fts precT
 
 

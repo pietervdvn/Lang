@@ -1,4 +1,4 @@
-module Languate.FunctionTable.BuildFunctionTable where
+module Languate.FunctionTable.BuildFunctionTable (buildFunctionTables) where
 
 import StdDef
 
@@ -29,31 +29,33 @@ import Data.List
 
 import Control.Arrow
 
-buildFunctionTables	:: Package -> TypeTable -> Exc (FunctionTables, Map Module (Map Signature [Clause]))
+-- Builds the function tables without implementation tablek, which will still get filled by buildFunctionTable itself. The raw refers to the untyped clauses
+buildFunctionTables	:: Package -> TypeTable -> Exc (FunctionTables, Map FQN (Map Signature [Clause]))
 buildFunctionTables p tt
-	= do	let bft (fqn, m)= do	ft 	<- buildFunctionTable p tt fqn m
-					return (fqn, fst ft)
-		-- TODO check for doubly defined functions
-		functiontables	<- p & modules & toList & mapM bft |> fromList
+	= do	-- TODO check for doubly defined functions
+		functiontables'	<- p & modules & toList & mapM (buildFunctionTable' p tt)
+					:: Exc [(FQN, (FunctionTable, Map Signature [Clause]))]
+		let rawDict	= functiontables' ||>> snd & M.fromList
+		let functiontables	= functiontables' ||>> fst & M.fromList
 		let impGr	= importGraph p
 		let getPubl fqn	= fromMaybe S.empty (M.lookup fqn functiontables
 					|> public)
-					-- :: (FunctionTable, Map Signature [Clause])
 		let restrictions fqn (impFrom, funcSign)
 				= isRestricted p fqn impFrom funcSign
 		let exported	= calculateExports impGr (invert impGr) getPubl restrictions
 		let ftsWithPub	= mergeTables exported functiontables
-		let known	= calculateImports impGr getPubl exported
+		let knowns	= calculateImports impGr getPubl exported
 					|> S.toList ||>> fst
 		let ftsWithKnown
-			= mapWithKey (addKnown known) ftsWithPub
-		let rawDict	= todo	-- TODO
+			= mapWithKey (addKnown knowns) ftsWithPub
 		return (FunctionTables ftsWithKnown, rawDict)
 
+-- sets the known field
 addKnown	:: Map FQN [Signature] -> FQN -> FunctionTable -> FunctionTable
-addKnown known fqn fts
-	= let	signs	= findWithDefault (error $ "no known table for "++show fqn) fqn known
-		-- TODO
+addKnown knowns fqn fts
+	= let	-- picks the correct known table out of the dict, which has been importcalced
+		signs	= findWithDefault (error $ "no known table for "++show fqn) fqn knowns
+		-- brings all in the correct form
 		dict	= signs |> (signName &&& id) & merge ||>> nub & M.fromList in
 		fts {known = dict}
 
@@ -72,10 +74,16 @@ mergeTables exported
 			ft {public = S.union exp $ public ft}
 
 
+buildFunctionTable'		:: Package -> TypeTable -> (FQN, Module) -> Exc (FQN, (FunctionTable, Map Signature [Clause]))
+buildFunctionTable' p tt (fqn, m)
+	=  do	ft 	<- buildFunctionTable p tt fqn m
+		return (fqn, ft)
+
 buildFunctionTable		:: Package -> TypeTable -> FQN -> Module -> Exc (FunctionTable, Map Signature [Clause])
 buildFunctionTable p tt fqn m	= inFile fqn $ do
 	tlt	<- (typeLookups tt & M.lookup fqn) ? ("No tlt for "++show fqn)	:: Exc TypeLookupTable
-	signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat ||>> fst
-	let defined	= signs |> fst
-	let public	= signs & filter ((==) Public . snd) |> fst
-	return (FunctionTable (S.fromList defined) (S.fromList public) (todos "Known table") (todos "Implementation table"), todos "Raw table")	-- TODO
+	signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat
+	let rawTable	= signs |> snd & M.fromList
+	let defined	= signs |> fst |> fst & S.fromList
+	let public	= signs |> fst & filter ((==) Public . snd) |> fst & S.fromList
+	return (FunctionTable defined public (todos "Known tables. Should be filled") , rawTable)

@@ -1,4 +1,3 @@
-
 module Languate.TAST where
 
 {--
@@ -275,6 +274,11 @@ appliedTypes (RApplied bt at)
 	= appliedTypes bt ++ [at]
 appliedTypes _
 	= []
+
+curriedTypes	:: RType -> [RType]
+curriedTypes (RCurry arg ret)
+		= arg:curriedTypes ret
+curriedTypes t	= [t]
 
 
 
