@@ -39,6 +39,8 @@ t nm cont	=  tokenErr modName nm cont
 s		:: Name -> [MetaValue] -> MetaValue
 s "version" [Int i]
 		= Version [i]
+s "version" [Int i, Int j]
+		= Version [i,j]
 s "version" [Int i, Version is]
 		= Version $ i:is
 s "dictValue" [k,v]
