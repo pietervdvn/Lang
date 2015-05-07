@@ -220,3 +220,9 @@ writeFile' fp contents
 		writeFile fp contents
 
 fix	=  Data.Function.fix
+
+
+-- dictMapM	:: (Monad m, Ord k) => (k -> v -> m v) -> Map k v -> m (Map k v)
+dictMapM dict f
+	= dict & Map.toList & mapM (\(k,v) -> do	a 	<- f k v
+							return (k,a)) |> Map.fromList
