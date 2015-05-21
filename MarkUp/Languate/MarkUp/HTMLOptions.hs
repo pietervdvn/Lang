@@ -35,7 +35,7 @@ html self
 		[]
 		filePath
 	 & addPreprocessor' (rewrite escapeConts)
-	 & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self defaultCSS, reloader self])
+	 & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self blackCSS, reloader self])
 
 setFilePath	:: FilePath -> RenderSettings -> RenderSettings
 setFilePath fp
