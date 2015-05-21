@@ -48,8 +48,15 @@ charTypeID	= (toFQN' "pietervdvn:Data:Data.Char", "Char")
 natType		= uncurry RNormal natTypeID
 natTypeID	= (toFQN' "pietervdvn:Data:Num.Nat", "Nat")
 
+natType'	= uncurry RNormal natTypeID'
+natTypeID'	= (toFQN' "pietervdvn:Data:Num.Nat", "Nat'")
+
 intType		= uncurry RNormal intTypeID
 intTypeID	= (toFQN' "pietervdvn:Data:Num.Nat", "Int")
+
+intType'	= uncurry RNormal intTypeID'
+intTypeID'	= (toFQN' "pietervdvn:Data:Num.Nat", "Int'")
+
 
 floatType	= uncurry RNormal floatTypeID
 floatTypeID	= (toFQN' "pietervdvn:Data:Num.Float", "Float")
@@ -106,19 +113,24 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 	{- The TApplication represents the first expression, applied on the second as argument. As multiple implementations with the same types exist, multiple types could be returned. A TApplication however representats only one of those, and selects those TExpressions which makes it possible. This way, a typed expression, has only one possible TypeUnion and one implementation to choose from. -}
 			| TApplication (RTypeUnion, RTypeReqs) TypedExpression TypedExpression
 			| TCall Signature
+			| TLocalCall Name (RTypeUnion, RTypeReqs)
 	deriving (Show, Eq)
 type TExpression	= TypedExpression
 
 
 typeOf		:: TExpression -> (RTypeUnion, RTypeReqs)
-typeOf (TNat _)	= ([natType, intType], [])
+typeOf (TNat i)
+ | i > 0	= ([natType'], [])
+ | i < 0	= ([intType'], [])
+ | i == 0	= ([natType], [])
 typeOf (TFlt _)	= ([floatType], [])
 typeOf (TChr _)	= ([charType], [])
 typeOf (TCall sign)
 		= (signTypes sign, signTypeReqs sign)
 typeOf (TApplication typeInfo _ _)
 		= typeInfo
-
+typeOf (TLocalCall _ t)
+		= t
 
 
 {-
