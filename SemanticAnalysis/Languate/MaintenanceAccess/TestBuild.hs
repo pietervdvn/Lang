@@ -20,6 +20,7 @@ import System.Directory
 
 
 import Languate.TableOverview
+import Languate.BuildTableOverview
 
 import Languate.Package
 import Languate.TypeTable
@@ -43,6 +44,7 @@ import Data.Set as S
 
 import Data.Map
 import Data.Time.Clock
+import Data.Time.LocalTime
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
@@ -60,8 +62,11 @@ bDocs	= do	dir	<- getCurrentDirectory
 		let cluster'	= add tablesOverv cluster
 		addFooter'	<- addFooter
 		let path'	= dir ++"/" ++ path ++ "/.gen" ++ "/html"
+		time	<- getCurrentTime |> utctDayTime |> realToFrac |> round
+		let hour = 2 + time `div` (60*60)
+		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
 		removeDirectoryRecursive path'
-		renderClusterTo (fix $ extend (addFooter' . addHeader . setFilePath path') html) cluster'
+		renderClusterTo (fix $ extend (addFooter' . addHeader . setFilePath path') $ html $ defaultHeader css) cluster'
 
 
 addFooter	:: IO (RenderSettings -> RenderSettings)
