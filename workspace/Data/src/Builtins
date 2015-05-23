@@ -3,5 +3,8 @@ Builtins
 Stub, will be filled in by compiler.
 --------
 
+import Data.Bool
+import Collection.Maybe
+
 -- An int! This is a temporary representation, which will be replaced by a truly builtin one
 data BIInt = Zero | Succ BIInt | Prev BIInt | Inf

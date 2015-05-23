@@ -4,9 +4,10 @@ The implementation of the float data type and functions
 -----
 
 import Num.Nat
+import Data.Bool
+import Collection.Maybe
 
 ---
 A floating point number, to represent numerical values with commas. Note that this type has only a limited precision.
 ---
 data Float	= Float Int Int
-

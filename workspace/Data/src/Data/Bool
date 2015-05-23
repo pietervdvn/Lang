@@ -5,6 +5,7 @@ The bool type is a type which represents logical values.
 
 import Category.Function
 import Category.Boolean
+import Collection.Maybe
 
 --## Definition
 
