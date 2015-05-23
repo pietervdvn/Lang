@@ -34,3 +34,20 @@ _dict		::= "\{" dictPart ("," dictPart)* (":" patternRoot)? "\}"
 _list		::= "\[" freePattern ("," freePattern)* (":" freePattern)? "\]"
 
 _tuple		::= "\(" freePattern ("," freePattern)+ "\)"
+
+
+
+{-
+_	= ignore this argument
+$expr	= evaluate expression. It should match the argument (requires Eq)
+Constructor	= should match the constructor
+a	= give argument the name "a"
+5	= be exactly 5
+patterns	= see other comment
+
+
+
+
+
+
+-}
