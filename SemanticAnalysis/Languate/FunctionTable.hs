@@ -23,12 +23,13 @@ data FunctionTable	= FunctionTable
 	, known		:: Map Name [Signature]	-- all functions known within local scope
 	}
 	deriving (Show)
-
-
-type ImplementationTable
-	= Map Signature TClause
-
 newtype FunctionTables	= FunctionTables {unpackFTS	:: Map FQN FunctionTable }
+
+data ImplementationTable
+	= ImplementationTable {	imps		:: Map Signature [TClause]}
+newtype ImplementationTables
+	= ImplementationTables {unpackITS	:: Map FQN ImplementationTable }
+
 
 
 funcSign2mu	:: Signature -> [MarkUp]
@@ -66,3 +67,21 @@ functiontables2docs (FunctionTables fts)
 		embeds	= all |> fst |> docname |> Embed & Mu.Seq in
 		(doc "Functiontable overview" "Overview of all functions in all modules" embeds,
 			docs)
+
+
+instance Documentable ImplementationTables where
+	toDocument	= implTables2docs
+
+
+implTables2docs	:: ImplementationTables -> (Doc, [Doc])
+implTables2docs impDoc
+		= let	all	= impDoc & unpackITS & M.toList
+			docs	= all |> uncurry implTable2doc	:: [Doc]
+			embeds	= docs |> title |> Embed & Mu.Seq  in
+			(doc "Implementation table" "All signatures and typed clauses" embeds, docs)
+
+
+implTable2doc	:: FQN -> ImplementationTable -> Doc
+implTable2doc fqn it
+	= let	mu	= table ["Signature","TClauses"] [] in
+		doc ("Modules/ImplementationTable/"++show fqn) "Signature and clause implementations" mu

@@ -61,6 +61,11 @@ intTypeID'	= (toFQN' "pietervdvn:Data:Num.Nat", "Int'")
 floatType	= uncurry RNormal floatTypeID
 floatTypeID	= (toFQN' "pietervdvn:Data:Num.Float", "Float")
 
+maybeType	= uncurry RNormal maybeTypeID
+maybeTypeID	= (toFQN' "pietervdvn:Data:Collection.Maybe", "Maybe")
+
+
+
 {- Each type has a kind. You can think of those as the 'type of the type'
 E.g. a 'Maybe' is always in function of a second argument, e.g. 'Maybe Int' or 'Maybe String'.
 'String' and ''Functor Int'' have a kind ''a'' (no arguments), whereas ''Functor'' has a kind ''a -> b''
@@ -139,7 +144,7 @@ It is build based on the pattern matching of the function, while typing the patt
 -}
 type LocalScope	= Map Name RType
 data TPattern	= TAssign Name
-		| TDeconstruct (Name, RType) [TPattern]
+		| TDeconstruct Signature [TPattern]
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression
@@ -291,6 +296,16 @@ curriedTypes	:: RType -> [RType]
 curriedTypes (RCurry arg ret)
 		= arg:curriedTypes ret
 curriedTypes t	= [t]
+
+
+tupledTypes	:: RType -> [RType]
+tupledTypes t@(RApplied (RApplied tupleT a) rest)
+ | tupleT == tupleType
+		= a:tupledTypes rest
+ | otherwise	= [t]
+tupledTypes t
+ | t == voidType= []
+ | otherwise	= [t]
 
 
 

@@ -12,6 +12,7 @@ import Languate.TAST
 import Languate.FQN
 import Languate.Package
 import Languate.TypeTable
+import Languate.BuiltIns
 
 import Languate.FunctionTable
 import Languate.Precedence.PrecedenceTable
@@ -52,10 +53,14 @@ functionsInADTSum 	:: (Type, [TypeRequirement]) -> ADTSum ->
 				[SimpleFunc]
 functionsInADTSum (t,treqs) (ADTSum consName vis args)
 	= let	argTypes	= args |> snd
-		constructor	= (consName, [Curry $ argTypes++[t]], treqs) in
+		constructor	= (consName, [Curry $ argTypes++[t]], treqs)
 		-- TODO add field getters, setters and modders
 		-- TODO add implementation
-		makeFunc [constructor] vis []
+		cons	= makeFunc [constructor] vis []
+		isCons	= makeFunc [("is"++consName, [Curry [t, boolType']], treqs )] vis []
+		fromCons= makeFunc [("from"++consName, [Curry [t,maybeType' $ [TupleType argTypes]]], treqs)] vis [] in
+		cons ++ isCons ++ fromCons
+
 
 makeFunc	:: [(Name, [Type], [TypeRequirement])] -> Visible -> [Clause] -> [SimpleFunc]
 makeFunc signs vis clauses

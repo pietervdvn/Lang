@@ -7,9 +7,15 @@ Also see TAST, where FQNs of builtin types are given.
 
 import StdDef
 import Languate.TAST
+import Languate.AST
 import Languate.FQN
 
 
 -- gives fqn of flip, which is needed to desugar sections: (:1) -> flip (:) 1
 flipSign	:: (FQN, Name)
 flipSign	= (toFQN' "pietervdvn:Data:ControlFlow","flip"  )
+
+-- some types with more meaning (and a broken liskov substitution)
+
+boolType'	= Normal ["Data","Bool"] "Bool"
+maybeType' on	= Applied (Normal ["Collection","Maybe"] "Maybe") on

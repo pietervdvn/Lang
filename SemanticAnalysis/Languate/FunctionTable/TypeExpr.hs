@@ -1,4 +1,4 @@
-module Languate.FunctionTable.Expr2Texpr where
+module Languate.FunctionTable.TypeExpr where
 
 import StdDef
 import Exceptions
@@ -51,13 +51,14 @@ Builds a typed expression from a AST expression. This involves both typechecking
 The requirements should contain all used free type variables within the context
 
 -}
-expr2texpr	:: Package -> TableOverview -> FQN -> [Name]-> OperatorFreeExpression -> Exc [TExpression]
-expr2texpr p to fqn frees e
-	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn $ S.fromList frees) |> fst
+expr2texpr	:: Package -> TableOverview -> FQN -> [Name] -> Map Name (RTypeUnion, RTypeReqs) -> OperatorFreeExpression -> Exc [TExpression]
+expr2texpr p to fqn frees localScope e
+	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn localScope $ S.fromList frees) |> fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
-		, location	:: FQN	-- the current location where to search
+		, location	:: FQN		-- the current location where to search
+		, localScope	:: Map Name (RTypeUnion, RTypeReqs)	-- Locally defined variables
 		, knownFrees	:: Set Name	-- The frees which are used within this context.
 		}
 
@@ -67,7 +68,12 @@ _e2te		:: Expression -> SCtx [TExpression]
 _e2te (Nat n)	= returns $ TNat n
 _e2te (Flt f)	= returns $ TFlt f
 _e2te (Chr c)	= returns $ TChr c
-_e2te (Call nm)	= do
+_e2te (Call nm) = do
+	scope	<- get' localScope
+	if nm `M.member` scope then do
+		t	<- lift $ (M.lookup nm scope) ? (nm++" should be in the local scope")
+		return 	$ [TLocalCall nm t]
+	else do
 	fqn		<- get' location
 	funcTables	<- get' tables |> functionTables
 				|> unpackFTS
