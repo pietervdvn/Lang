@@ -7,5 +7,6 @@ import Languate.MarkUp.Classes as M
 import Languate.MarkUp.Options as M
 import Languate.MarkUp.HTMLOptions as M
 import Languate.MarkUp.MDOptions as M
+import Languate.MarkUp.Css as M
 
 -- Stub for reexporting markup

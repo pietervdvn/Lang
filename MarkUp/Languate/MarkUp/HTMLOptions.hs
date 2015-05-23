@@ -22,8 +22,8 @@ import Data.Char
 type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
 
-html	:: RenderSettings -> RenderSettings
-html self
+html	:: (RenderSettings -> [HeaderOption]) -> RenderSettings -> RenderSettings
+html headrs self
 	= let filePath = error $ "To use the html options, you should still add a filepath. Use 'fix $ (extend $ setFilePath \"/your/path\") html' (eventually with other options)" in
 	   RenderSettings
 		filePath
@@ -35,7 +35,11 @@ html self
 		[]
 		filePath
 	 & addPreprocessor' (rewrite escapeConts)
-	 & addOption (headers [titleHeader,  encoding "UTF-8", ogpTags, css self blackCSS, reloader self])
+	 & addOption (headers $ headrs self)
+
+defaultHeader	:: CSS -> RenderSettings -> [HeaderOption]
+defaultHeader cssFile settings
+		= [titleHeader,  encoding "UTF-8", ogpTags, css settings cssFile, reloader settings]
 
 setFilePath	:: FilePath -> RenderSettings -> RenderSettings
 setFilePath fp

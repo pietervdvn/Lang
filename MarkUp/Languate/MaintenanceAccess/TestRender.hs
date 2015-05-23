@@ -3,6 +3,8 @@ module Languate.MaintenanceAccess.TestRender where
 import StdDef
 import State
 import Languate.MarkUp
+import Languate.MarkUp.Css
+
 import Data.Map
 
 import System.Directory
@@ -11,7 +13,8 @@ fp	= "/test"
 
 t = do	dir	<- getCurrentDirectory
 	let fp'	= dir ++ fp
-	let html'	= fix $ (extend $ setFilePath (fp'++"/html")) html
+	let headers	= defaultHeader defaultCSS
+	let html'	= fix $ (extend $ setFilePath (fp'++"/html")) $ html headers
 	removeDirectoryRecursive fp'
 	renderClusterTo html' cluster
 	renderClusterTo (md (dir ++ fp ++ "/md")) cluster

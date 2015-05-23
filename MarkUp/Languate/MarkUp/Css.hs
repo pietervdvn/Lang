@@ -1,4 +1,4 @@
-module Languate.MarkUp.Css where
+module Languate.MarkUp.Css (defaultCSS, blackCSS, CSS (CSS), name, styleTagConts, renderCSS) where
 
 import StdDef
 
@@ -9,10 +9,10 @@ import qualified Data.Set as S
 
 data CSS	= CSS 	{ name	:: Name
 			, styleTagConts	:: String
-			, render	:: String}
+			, renderCSS	:: String}
 
 instance Show CSS where
-	show	= render
+	show	= renderCSS
 
 defaultCSS	:: CSS
 defaultCSS	= defaultCSSCons cssCont
