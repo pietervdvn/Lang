@@ -37,7 +37,7 @@ append	: Sum -> Sum -> Sum
 a b	= a + b
 
 neutral	: Sum
-neutral	= 0
+neutral	= zero
 
 
 precedence of (^) is Left, (^) < (*)
@@ -53,7 +53,7 @@ append	: Product -> Product -> Product
 a b	= a * b
 
 neutral	: Product
-neutral	= 1
+neutral	= one
 
 (^)	: Product -> Nat -> Product
 _ 0	= neutral

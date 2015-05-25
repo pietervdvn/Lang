@@ -34,19 +34,3 @@ instance RSAPubKey is PublicKey
 
 data RSAPrivKey	= A
 data RSAPubKey	= B
-
-rsa	: RSA
-	= 0
-
-
-rsaPub	: RSAPubKey
-	= 0
-
-rsaPriv	: RSAPrivKey
-	= 0
-
-str	: Message
-	= 0
-
-stuff	: Message -> Message
-m	= m

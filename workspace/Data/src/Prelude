@@ -39,3 +39,6 @@ public import Num.Nat
 public import Num.Float
 
 public import Crypto.PubPrivAlgo
+
+two	: Int
+	= 1 + 1
