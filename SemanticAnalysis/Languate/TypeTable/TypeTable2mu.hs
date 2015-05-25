@@ -20,30 +20,34 @@ instance Documentable TypeTable where
 	toDocument tt	=
 		let fstts	= allSupertypes tt & M.toList |> fstt2doc tt
 		    types	= knownTypes tt & S.toList |> type2doc tt in
-			(typeTable2doc tt,  explanationFSTT:supertypesAny:types ++ fstts)
+			(typeTable2doc tt,  explanationFSTT:explantionCurryNumber:supertypesAny:types ++ fstts)
 
 
 
 typeTable2doc	:: TypeTable -> Doc
 typeTable2doc tt
 	= let	rows	= knownTypes tt & S.toList
-				|> (\tid -> [link' (showtid tid) ("Types/"++showtid tid),
+				|> (\tid -> [inlink' (showtid tid) ("Types/"++showtid tid),
+						 let curryN = curryNumber' tt tid in if curryN == 0 then  b"" else b $ show curryN ,
 						 b $ fst $ synops tt tid ])
 		superTables	=  knownTypes tt & S.toList
 				|> (Parag . Embed . ("Types/Supertypes/Supertypes of "++) . showtid)
 				& Mu.Seq in
 
 		doc "Type overview" "Everything we know about every type we know of" $
-		Mu.Seq [titling "Known types" $ table ["Type", "Synopsis"] rows,
+		Mu.Seq [titling "Known types" $ Table [b "Type", link' "Args" "Curry Number explanation", b "Synopsis"] rows,
 			titling "Supertype overview" superTables]
 
 type2doc	:: TypeTable -> TypeID -> Doc
 type2doc tt tid
 	= let	(synopsis, rest) = synops tt tid
-		kind	= kinds tt & M.findWithDefault Kind tid in
+		kind	= kinds tt & M.findWithDefault Kind tid
+		kind'	= Imp $ code $ show kind
+		curryN	= curryNumber' tt tid
+		curryN'	= if curryN == 0 then b "" else Parag $ Mu.Seq [link' "Curry number" "Curry Number explanation", b ": ", code $ show curryN] in
 		doc ("Types/"++showtid tid) synopsis $
 		Titling (Mu.Seq [b "Overview for ", Code $ imp $ showtid tid])
-			$ Mu.Seq [Parag $ Imp $ code $ show kind, nl
+			$ Parag $ Mu.Seq [Parag kind', curryN', nl
 				, imp synopsis
 				, rest & filter (/="") |> Base & parags
 				, if tid == anyTypeID then Mu.Seq [] else
@@ -106,6 +110,14 @@ explanationFSTT	= doc "Full super type table explanation" "How to read a super t
 		b"The ", imp "Orig Type", b"show this type before the substitution."
 	]] |> Mu.Seq |> Parag & Mu.Seq
 
+
+explantionCurryNumber	:: Doc
+explantionCurryNumber	= doc "Curry Number explanation" "What is a curry number?" $
+		Titling (Seq [b "What is a ", Imp $ b "Curry Number", b "?"]) $ parags $ map Mu.Seq $
+		[ [b "Most types, e.g. ", ["Int","Bool","Dict Int String","Functor a"] |> code & commas' , b " represent simple data. These have a ", imp "curry number", b " of zero."],
+ 		  [b "Some types represent functions, e.g. ", ["Int -> Int", "a -> a", "a -> (a -> b) -> b"] |> code & commas' ,b ".", b "We define the curry number as ", imp "the number of arguments", b "that this function takes."],
+		  [b "Some special types, e.g.", ["Associative Bool", "Curry a b", "Commutative Bool Int"] |> code & commas', b " represent functions too, but their type does not show explicitly how many arguments the type needs. The curry number show explicitly how many arguments are needed."]
+		]
 
 supertypesAny	:: Doc
 supertypesAny	= doc "Types/Supertypes/Supertypes of pietervdvn:Data:Any.Any" "Or why this document is a paradox" $

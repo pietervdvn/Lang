@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, buildBinding', concatBindings, substituents, mergeBinding, asBinding, unbind, substituteReq) where
+module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, buildBinding', concatBindings, substituents, mergeBinding, asBinding, unbind, substituteReq, substituteAway) where
 
 {--
 This module implements substitute and friends
@@ -9,6 +9,7 @@ import Data.Map hiding (filter)
 import qualified Data.Map as M
 
 import Languate.TAST
+import Data.List (nub)
 
 
 -- execute substitution of b1 everywhere in b0. e.g. concatBindings {a --> b, x --> y} {b --> c} = {a --> c}
@@ -60,6 +61,15 @@ _substitute dict (RFree a)
 		= findWithDefault (RFree a) a dict
 _substitute _ t	= t
 
+
+-- given the used frees, substitutes given types + reqs so no clashes persist
+substituteAway	:: [Name] -> ([RType], RTypeReqs) -> ([RType], RTypeReqs)
+substituteAway frees (rtps, reqs)
+	= let	frees' = nub $ frees ++  (rtps >>= freesInRT) ++ (reqs >>= freesInReq)
+		binding	= buildBinding' frees'
+		binding'	= asBinding binding in
+		(rtps |> substitute binding',
+			reqs |> substituteReq binding)
 
 substituteReq	:: Map Name Name -> (Name, [RType]) -> (Name, [RType])
 substituteReq dict (n, tps)

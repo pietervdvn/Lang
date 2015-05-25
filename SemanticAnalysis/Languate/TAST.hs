@@ -279,12 +279,14 @@ isNormal 	= isJust . getBaseTID
 
 
 freesInRT	:: RType -> [Name]
-freesInRT	= foldRT frees concat
+freesInRT	=  nub . foldRT frees concat
 			where 	frees	:: RType -> [Name]
 				frees (RFree a)	= [a]
 				frees _		= []
 
-
+freesInReq	:: (Name, [RType]) -> [Name]
+freesInReq (nm, tps)
+		= nm:(tps >>= freesInRT) & nub
 
 appliedTypes	:: RType -> [RType]
 appliedTypes (RApplied bt at)

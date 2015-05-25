@@ -20,13 +20,17 @@ import Data.Map as M
 import Data.Set as S
 import Data.List (intercalate)
 import Languate.AST
-import Languate.TAST
+import Languate.TAST as TAST
 import Languate.FQN
 import Languate.CheckUtils
 
+import Data.Maybe
 
 import Control.Arrow
 import Normalizable
+
+import Debug.Trace
+
 {-
 The type table contains all known types within a certain module.
 -}
@@ -202,7 +206,32 @@ resolveTypesIn tlt (a,tps)
 	= do	rtps	<- mapM (resolveType tlt) tps
 		return (a,rtps)
 
+{-
+How much arguments takes this type?
+e.g.
+""Int""	0
+(function with one argument)
+""Int -> Int"" 1
+""Associative a" takes 2 arguments
+-}
+curryNumber	:: TypeTable -> RType -> Int
+curryNumber tt (RCurry _ b)
+		= 1 + curryNumber tt b
+curryNumber tt rt
+ | isNormal rt	= curryNumber' tt $ fromJust $ getBaseTID rt
+ | otherwise	= 0 -- TODO error $ "Curry numbers do not make sense for free type variables"
 
+
+curryNumber'	:: TypeTable -> TypeID -> Int
+curryNumber' tt tid
+ | tid == anyTypeID	= 0
+ | otherwise	= let	errMsg	= "No super tt for "++show tid++", weird..."
+			superTT	= tt & allSupertypes & findWithDefault (error errMsg) tid  in
+			if anyType `M.member`  superTT then 0 else
+			-- TODO might loop infinitely with linked types
+			-- TODO we assume all curry numbers are the same for the super types
+			let super	= head $ M.keys superTT in
+			curryNumber tt super
 
 _construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
 _construct tlt e tps cons

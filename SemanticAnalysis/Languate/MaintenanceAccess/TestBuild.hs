@@ -66,8 +66,13 @@ bDocs	= do	dir	<- getCurrentDirectory
 		let hour = 2 + time `div` (60*60)
 		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
 		removeDirectoryRecursive path'
-		renderClusterTo (fix $ extend (addFooter' . addHeader . setFilePath path') $ html $ defaultHeader css) cluster'
+		renderClusterTo (fix $ extend (setFilePath path' . addFooter' . addHeader) $ html $ defaultHeader css) cluster'
 
+
+links		:: MarkUp -> Maybe MarkUp
+links (InLink mu nm)
+		= Just $ InLink mu (nm ++ ".html")
+links _		= Nothing
 
 addFooter	:: IO (RenderSettings -> RenderSettings)
 addFooter	= do	let back = NonImp $ InLink (Base "Back to all pages") "All pages"

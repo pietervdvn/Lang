@@ -17,6 +17,8 @@ import Languate.FunctionTable.TypeClause
 
 import Data.Map as M
 
+import Debug.Trace
+
 buildImplementationTables	:: Package -> TableOverview -> Map FQN (Map Signature [Clause]) -> Exc ImplementationTables
 buildImplementationTables p to dict
 	= dict & dictMapM (buildImpTable p to) |> ImplementationTables
@@ -30,4 +32,6 @@ buildImpTable p to fqn dict
 
 tClause	:: Package -> TableOverview -> FQN -> Signature -> Clause -> Exc TClause
 tClause p to fqn sign
-	=  typeClause p to fqn (signTypes sign) (signTypeReqs sign)
+	= inFile fqn .
+	  inside ("While typing " ++signName sign) .
+		typeClause p to fqn (signTypes sign) (signTypeReqs sign)

@@ -26,5 +26,5 @@ buildAllTables w
 	= do	tt		<- buildTypeTable w
 		precT		<- buildPrecTable' w
 		(fts, rawClaus)	<- buildFunctionTables w tt
-		-- implTable	<- buildImplementationTables w (TableOverview tt fts precT (error "You're building the IMP table dummy, don't try to fetch it!")) rawClaus
-		return $ TableOverview tt fts precT todo -- implTable
+		implTable	<- buildImplementationTables w (TableOverview tt fts precT (error "You're building the IMP table dummy, don't try to fetch it!")) rawClaus
+		return $ TableOverview tt fts precT implTable

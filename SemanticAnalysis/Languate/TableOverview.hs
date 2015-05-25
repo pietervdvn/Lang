@@ -26,4 +26,8 @@ data TableOverview	= TableOverview { typeTable		:: TypeTable
 
 instance Documentable TableOverview where
 	toDocument to	= (doc "Table overview" "All generated tables" $ Mu.Seq (["Type overview", "Precedence Overview"] |> Embed),
-			addDocs' (precedenceTable to) $ addDocs' (functionTables to) $ addDocs' (typeTable to) [])
+			addDocs' (precedenceTable to)	$
+			addDocs' (functionTables to) 	$
+			addDocs' (typeTable to)		$
+			addDocs' (implementations to)	$
+			[])

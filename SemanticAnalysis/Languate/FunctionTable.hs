@@ -25,6 +25,9 @@ data FunctionTable	= FunctionTable
 	deriving (Show)
 newtype FunctionTables	= FunctionTables {unpackFTS	:: Map FQN FunctionTable }
 
+{-
+Keeps the implementations of the locally defined functions
+-}
 data ImplementationTable
 	= ImplementationTable {	imps		:: Map Signature [TClause]}
 newtype ImplementationTables
@@ -83,5 +86,16 @@ implTables2docs impDoc
 
 implTable2doc	:: FQN -> ImplementationTable -> Doc
 implTable2doc fqn it
-	= let	mu	= table ["Signature","TClauses"] [] in
-		doc ("Modules/ImplementationTable/"++show fqn) "Signature and clause implementations" mu
+	= let	conts	= it & imps & M.toList |> showEntry
+		mu	= table ["Name","Type","TClauses"] conts in
+		doc ("Modules/ImplementationTable/"++show fqn) ("Signature and clause implementations for "++show fqn) $
+			if Prelude.null conts then (Base "No locally defined functions") else mu
+
+showEntry	:: (Signature, [TClause]) -> [MarkUp]
+showEntry (sign, clauses)
+	= [code $ signName sign,
+		signTypes sign |> st True |> code & parags',
+		clauses |> show |> code & parags']
+
+parags' [a]	= a
+parags' mus	= parags mus
