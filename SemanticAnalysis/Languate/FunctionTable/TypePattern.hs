@@ -32,8 +32,8 @@ typePattern ft tp pat@(Multi pats)
 		= do	(tpat, dicts) 	<- pats	|> typePattern ft tp & sequence
 						|> unzip |> first TMulti
 			inside ("While typing the pattern "++show pat) $ do
-			dict	<- mergeDicts dicts
-			return (tpat, dict)
+				dict	<- mergeDicts dicts
+				return (tpat, dict)
 typePattern _ _ DontCare
 		= return (TDontCare, M.empty)
 typePattern ft tp (Deconstruct nm pats)

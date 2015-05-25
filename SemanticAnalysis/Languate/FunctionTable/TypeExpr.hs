@@ -74,13 +74,13 @@ _e2te (Call nm) = do
 		t	<- lift $ (M.lookup nm scope) ? (nm++" should be in the local scope")
 		return 	$ [TLocalCall nm t]
 	else do
-	fqn		<- get' location
-	funcTables	<- get' tables |> functionTables
-				|> unpackFTS
-	funcTable	<- lift $ M.lookup fqn funcTables ? errMsg fqn
-	signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
-	signs'	<- mapM escapeSign signs
-	signs' |> TCall & return
+		fqn		<- get' location
+		funcTables	<- get' tables |> functionTables
+					|> unpackFTS
+		funcTable	<- lift $ M.lookup fqn funcTables ? errMsg fqn
+		signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
+		signs'	<- mapM escapeSign signs
+		signs' |> TCall & return
 _e2te (Seq (function:args)) = do
 	-- types are renamed at this point, thus no further escape is needed
 	tfunctions	<- _e2te function

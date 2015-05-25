@@ -103,29 +103,28 @@ propagateReq  toBind@(STB baseSubTid baseSuper sub super)	-- We call ifThisType 
 			If no supertype shows up, we know that this requirement can never be met, and we stop here.
 			This missing requirement will be found in the checks afterwards-}
 		if superTid `M.notMember` subSstt then return False else do
-		let posSuperForms= findWithDefault [] superTid subSstt
-		-- fisrt we check if the requiment can be met right now against one of the possible super types
-		let baseSuperEntry
-			= fstts & findWithDefault M.empty baseSubTid & M.lookup baseSuper
-		-- base super is not configured correctly, as all frees are already in the right context
-		if isNothing baseSuperEntry then return False else do
-		let knownFreeReqs
+		 let posSuperForms= findWithDefault [] superTid subSstt
+		 -- fisrt we check if the requiment can be met right now against one of the possible super types
+		 let baseSuperEntry
+		 	= fstts & findWithDefault M.empty baseSubTid & M.lookup baseSuper
+		 -- base super is not configured correctly, as all frees are already in the right context
+		 if isNothing baseSuperEntry then return False else do
+		  let knownFreeReqs
 			= baseSuperEntry & fromMaybe (error $ "No basesuperentry for "++show baseSuper++" in fstt of "++show baseSubTid) & reqs & M.fromList
-		let alreadyMet	= map (_bind sstts fstts klt (knownFreeReqs |> S.toList) sub) posSuperForms |> isRight & or
-		if alreadyMet then return False else do
-		possReqs	<- forM posSuperForms $ \posSuperForm ->
-		  do	-- we calculate here what **extra** requirements are needed to meet the posSuperForm
+		  let alreadyMet	= map (_bind sstts fstts klt (knownFreeReqs |> S.toList) sub) posSuperForms |> isRight & or
+		  if alreadyMet then return False else do
+		   let possReqs	= posSuperForms |> \posSuperForm -> -- we calculate here what **extra** requirements are needed to meet the posSuperForm
 			let fsstEntry	= M.lookup posSuperForm subFstt & fromMaybe (error $ "PropagateRequirements: "++show posSuperForm++" not found in subFstt of "++show sub)
-			let oldReqs	= reqs fsstEntry
-			-- what requiments didn't we meet?
-			let missingReqs	= calculateMissingReqs oldReqs knownFreeReqs
-			return missingReqs
-		{- did we find possible, new requirement config such that the supertype is met? If not -> return false, the postcheck will figure it out	-}
-		if null possReqs then return False else do
-		-- what is the best? The one with the least new free types with requiments
-		let chosenReq	= head $ sortOn length possReqs
-		addRequirement baseSubTid baseSuper chosenReq
-		return True
+			    oldReqs	= reqs fsstEntry
+			    -- what requiments didn't we meet?
+			    missingReqs	= calculateMissingReqs oldReqs knownFreeReqs in
+			missingReqs
+		   {- did we find possible, new requirement config such that the supertype is met? If not -> return false, the postcheck will figure it out	-}
+		   if null possReqs then return False else do
+		    -- what is the best? The one with the least new free types with requiments
+		    let chosenReq	= head $ sortOn length possReqs
+		    addRequirement baseSubTid baseSuper chosenReq
+		    return True
 
 calculateMissingReqs	:: [(Name, Set RType)] -> Map Name (Set RType) ->
 				[(Name, Set RType)]

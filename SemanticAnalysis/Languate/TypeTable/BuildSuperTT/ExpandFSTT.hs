@@ -82,10 +82,10 @@ _expandAll	:: St ()
 _expandAll
 	= do	isDone	<- done
 		unless isDone $ do
-		(tid, changed)	<- pop
-		somethingChanged	<- mapM (_expand tid) changed |> or
-		notifyChanged tid
-		when somethingChanged _expandAll
+		 (tid, changed)	<- pop
+		 somethingChanged	<- mapM (_expand tid) changed |> or
+		 notifyChanged tid
+		 when somethingChanged _expandAll
 
 -- Adds the supertype of changedSuper to the FSTT of base
 _expand	:: TypeID -> RType -> St Bool
@@ -127,26 +127,26 @@ _addEntry base via oldBinding (superToAdd, entry)
 	let super	= substitute binding superToAdd
 	-- if already added: skip this shit
 	if super `M.member` fstt then return False else do
-	{- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
+	 {- We calculate the requirements after substitution. These are the requirements we get from the foreign FSTT
 		It is tested against the full binding -}
-	let (toCheck, foreignReqs)
+	 let (toCheck, foreignReqs)
 			= reqs entry |> subReq binding & (lefts &&& rights)
-	{- We might have some requirements on the via type too in our own FSTT.
+	 {- We might have some requirements on the via type too in our own FSTT.
 		These don't have to be checked, as these are already requirements in function of the frees of base -}
-	let viaReqs	= fstt & M.lookup via |> reqs & fromMaybe []
-	let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
-	-- add the tochecks
-	let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show super++" which has been added via "++show via++")"
-	mapM_ addReqs $ toCheck |> (\(ifType, isTypes) ->
+	 let viaReqs	= fstt & M.lookup via |> reqs & fromMaybe []
+	 let newReqs	= (foreignReqs ++ viaReqs) & merge ||>> S.unions & filter (not . S.null . snd)
+	 -- add the tochecks
+	 let msg	= "In the expansion of the supertype table of "++show base++" (adding the super "++show super++" which has been added via "++show via++")"
+	 mapM_ addReqs $ toCheck |> (\(ifType, isTypes) ->
 		ToBnd base super ifType isTypes msg)
-	let entry	= FSTTEntry newReqs (Just via) superToAdd binding (Just $ origBinding entry)	-- TODO or oldbinding?
-	let fstt'	= M.insert super entry fstt
-	let fstts'	= M.insert base fstt' fstts
-	modify (\ctx -> ctx {fstt_ = fstts'})
-	let mSuperTid	= getBaseTID superToAdd
-	-- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
-	when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
-	return True	-- somethingChanged -> we return true
+	 let entry	= FSTTEntry newReqs (Just via) superToAdd binding (Just $ origBinding entry)	-- TODO or oldbinding?
+	 let fstt'	= M.insert super entry fstt
+	 let fstts'	= M.insert base fstt' fstts
+	 modify (\ctx -> ctx {fstt_ = fstts'})
+	 let mSuperTid	= getBaseTID superToAdd
+	 -- adds notifications. If mSuperTid does not exists -> superToAdd is a curry -> No notifications needed anyway
+	 when (isJust mSuperTid) $ notifyMe base (fromJust mSuperTid, superToAdd)
+	 return True	-- somethingChanged -> we return true
 
 
 -----------
@@ -197,9 +197,9 @@ notifyMe tidToNotif (changedTid, because)
 		let sstt	= findWithDefault M.empty tidToNotif fsstt
 		let baseSet	= findWithDefault [] changedTid sstt
 		unless (because `elem` baseSet) $ do	-- because is not added yet
-		let sstt'	= M.insert changedTid (because: baseSet) sstt
-		let fsstt'	= M.insert tidToNotif sstt' fsstt
-		modify (\ctx -> ctx {sstt_ = fsstt'})
+		 let sstt'	= M.insert changedTid (because: baseSet) sstt
+		 let fsstt'	= M.insert tidToNotif sstt' fsstt
+		 modify (\ctx -> ctx {sstt_ = fsstt'})
 
 
 

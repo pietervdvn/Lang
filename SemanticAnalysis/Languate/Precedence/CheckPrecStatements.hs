@@ -52,11 +52,11 @@ checkPrecRels rels
 		let showLt (op0, op1)	= op0 ++ " < "++ op1
 		assert' (unique lts) $ "You stated a lower precedence relationship multiple times: " ++ intercalate ", " (dubbles lts |> showLt)
 		inside "Contradictory precedence statement:" $ do
-		let checkOne f lt	= assert (f lt `notElem` eqs) $ "You defined both "++ showEq (f lt) ++" and "++ showEq lt
-		mapM_ (checkOne id)   lts
-		mapM_ (checkOne swap) lts
-		let checkOne' lt	= assert (swap lt `notElem` lts) $ "You defined both "++ showLt (swap lt) ++" and "++ showLt lt
-		mapM_ checkOne' lts
+			let checkOne f lt	= assert (f lt `notElem` eqs) $ "You defined both "++ showEq (f lt) ++" and "++ showEq lt
+			mapM_ (checkOne id)   lts
+			mapM_ (checkOne swap) lts
+			let checkOne' lt	= assert (swap lt `notElem` lts) $ "You defined both "++ showLt (swap lt) ++" and "++ showLt lt
+			mapM_ checkOne' lts
 
 
 

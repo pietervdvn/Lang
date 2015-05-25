@@ -50,17 +50,17 @@ _bindReqKinds klt treqt rt
 	= inside ("While calculating the kinds of free type requirements in the requirements on "++st True rt) $ do
 		let mtid	= getBaseTID rt
 		if isNothing mtid then return empty else do
-		let tid	= fromJust mtid
-		kind	<- lookup tid klt ? ("No klt-entry for "++show tid)
-		let nrFrees	= numberOfKindArgs kind
-		-- we now have the actual requirements for each type var of rt
-		reqs	<- lookup tid treqt ? ("No requirements in the treqtable for "++show tid)
-		let frees	= reqs |> snd |> S.toList |> listToMaybe
-		-- we bind to each index the kind of the type variable
-		let kindOf	= appliedKinds kind
-		let kindFrees	= zip frees kindOf |> unpackMaybeTuple & catMaybes
-		binds	<- mapM (uncurry $ bindKind klt) kindFrees
-		_mergeBind binds
+			let tid	= fromJust mtid
+			kind	<- lookup tid klt ? ("No klt-entry for "++show tid)
+			let nrFrees	= numberOfKindArgs kind
+			-- we now have the actual requirements for each type var of rt
+			reqs	<- lookup tid treqt ? ("No requirements in the treqtable for "++show tid)
+			let frees	= reqs |> snd |> S.toList |> listToMaybe
+			-- we bind to each index the kind of the type variable
+			let kindOf	= appliedKinds kind
+			let kindFrees	= zip frees kindOf |> unpackMaybeTuple & catMaybes
+			binds	<- mapM (uncurry $ bindKind klt) kindFrees
+			_mergeBind binds
 
 _mergeBind	:: [Map Name Kind] -> Exc (Map Name Kind)
 _mergeBind dicts

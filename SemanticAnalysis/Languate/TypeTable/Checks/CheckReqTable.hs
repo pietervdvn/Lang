@@ -38,6 +38,6 @@ validateOneReq klt freeKinds i (nm, reqs)
 	  do	let rqs	= S.toList reqs
 		kinds	<- mapM (kindOf klt freeKinds) rqs
 		if L.null kinds then pass else do
-		let allSame	= all ((==) $ head kinds) $ tail kinds
-		let showReq rq kind	= show rq ++ " has the kind "++show kind
-		assert allSame $ zip rqs kinds |> uncurry showReq & unlines
+			let allSame	= all ((==) $ head kinds) $ tail kinds
+			let showReq rq kind	= show rq ++ " has the kind "++show kind
+			assert allSame $ zip rqs kinds |> uncurry showReq & unlines
