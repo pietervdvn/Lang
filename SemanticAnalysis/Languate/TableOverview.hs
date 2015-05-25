@@ -20,6 +20,7 @@ import Control.Applicative
 
 data TableOverview	= TableOverview { typeTable		:: TypeTable
 					, functionTables	:: FunctionTables
+					, docstringTable	:: DocstringTable
 					, precedenceTable	:: PrecedenceTable
 					, implementations	:: ImplementationTables}
 
@@ -30,4 +31,4 @@ instance Documentable TableOverview where
 			addDocs' (functionTables to) 	$
 			addDocs' (typeTable to)		$
 			addDocs' (implementations to)	$
-			[])
+			[docstrings2mu $ docstringTable to])

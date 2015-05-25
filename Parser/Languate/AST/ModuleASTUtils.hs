@@ -9,7 +9,7 @@ import Normalizable
 
 
 import Data.Either
-import Data.Maybe (mapMaybe, listToMaybe)
+import Data.Maybe (mapMaybe, listToMaybe, catMaybes)
 import Control.Arrow
 import Control.Applicative
 
@@ -83,7 +83,7 @@ isDocstr (DocStringStm docs)
 		= map (about &&& comment) docs
 isDocstr _	= []
 
--- Docstrings for consructors in ADTs, or for functions within categories
+-- Docstrings for consructors in ADTs, or for functions within categories (Typename, functionname)
 docstringFor	:: Module -> (Name,Name) -> Maybe Comment
 docstringFor m ident
 		= lookup ident $ docStrings m
@@ -92,6 +92,11 @@ docstringFor m ident
 -- Searches the comment just above the declaration you asked for
 searchCommentAbove	:: Module -> (Statement -> Bool) -> Maybe Comment
 searchCommentAbove m n 	= _sca (statements m) n Nothing
+
+-- Searches the comment just above the given coordinate
+searchCommentAbove'	:: Module -> Coor -> Maybe Comment
+searchCommentAbove' m c	= statements' m & break ((==) c . snd) & fst	-- take the statements before the coordinate
+				|> fst & reverse |> commentIn & catMaybes & listToMaybe
 
 _sca		:: [Statement] -> (Statement -> Bool) -> Maybe Comment -> Maybe Comment
 _sca (stm:stms) f lastComment

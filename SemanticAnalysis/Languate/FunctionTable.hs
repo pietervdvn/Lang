@@ -2,6 +2,7 @@ module Languate.FunctionTable where
 
 import StdDef
 
+import Languate.AST (Coor)
 import Languate.FQN
 import Languate.TAST
 
@@ -18,7 +19,7 @@ The function table is associated with a single module and keeps track of all kno
 
 -}
 data FunctionTable	= FunctionTable
-	{ defined	:: Set Signature-- signatures of locally defined functions, which might be private
+	{ defined	:: Map Signature Coor -- signatures of locally defined functions, which might be private, and where they are defined
 	, public	:: Set Signature --all public functions
 	, known		:: Map Name [Signature]	-- all functions known within local scope
 	}
@@ -34,6 +35,7 @@ newtype ImplementationTables
 	= ImplementationTables {unpackITS	:: Map FQN ImplementationTable }
 
 
+type DocstringTable	= Map Signature String
 
 funcSign2mu	:: Signature -> [MarkUp]
 funcSign2mu sign	=
@@ -53,7 +55,7 @@ functiontable2mu ft	=
 	    tableFor f	= table' header $ contents f
 	    knowns	= known ft & M.toList |> (\(nm, signs) ->
 				[imp nm, signs |> show |> code & Mu.Seq])
-	    mu		= [ titling' "Defined" (tableFor defined)
+	    mu		= [ titling' "Defined" (tableFor (M.keysSet . defined))
 			  , titling' "Exported" (tableFor public)
 			  , titling' "Known" $ table' ["Name","Signatures"] knowns
 			  ] & Mu.Seq
@@ -99,3 +101,9 @@ showEntry (sign, clauses)
 
 parags' [a]	= a
 parags' mus	= parags mus
+
+docstrings2mu	:: DocstringTable -> Doc
+docstrings2mu docs
+	= let	rows	= docs & M.toList |> (\(sign, doc) -> [code $ show sign, Base doc]) in
+		doc "Docstringtable" "All docstrings of all functions" $
+		titling "Docstrings" $ table ["Signature","Comment"] rows

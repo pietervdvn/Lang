@@ -82,7 +82,7 @@ defaultOverviewPage docs
 		(rootDocs, subDocs)	= perDir docs
 		subs	= docs |> title & subDirs
 		subsFor nm
-			= M.findWithDefault [] nm subs |> (\sub -> headerLink $ tail sub) & Seq	in
+			= M.findWithDefault [] nm subs |> (\sub -> headerLink $ tail sub) & commas'	in
 		doc titl descr $
 			if M.null subDocs then baseTable rootDocs else Seq
 				([ titling' "Root Documents" $ Seq [baseTable rootDocs,

@@ -39,7 +39,7 @@ data Statement	= FunctionStm 	Function
 		| ClassDefStm	ClassDef
 		| InstanceStm 	Instance
 		| Comments [Comment]
-		| DocStringStm [DocString (Name, Name)]
+		| DocStringStm [DocString (Name, Name)]	-- a docstringstatement (in the declaration from "Type"), about "function"
 		| AnnotationStm	Annotation
 		| PrecedenceStm PrecedenceAnnot
 	deriving (Show)

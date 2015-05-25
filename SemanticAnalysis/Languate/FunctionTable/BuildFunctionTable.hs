@@ -16,7 +16,6 @@ import Languate.Precedence.PrecedenceTable
 import Languate.FunctionTable
 import Languate.FunctionTable.FunctionsIn
 
-
 import Graphs.DirectedGraph
 import Graphs.ExportCalculator hiding (importGraph)
 
@@ -82,8 +81,8 @@ buildFunctionTable' p tt (fqn, m)
 buildFunctionTable		:: Package -> TypeTable -> FQN -> Module -> Exc (FunctionTable, Map Signature [Clause])
 buildFunctionTable p tt fqn m	= inFile fqn $ do
 	tlt	<- (typeLookups tt & M.lookup fqn) ? ("No tlt for "++show fqn)	:: Exc TypeLookupTable
-	signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat
-	let rawTable	= signs |> snd & M.fromList
-	let defined	= signs |> fst |> fst & S.fromList
-	let public	= signs |> fst & filter ((==) Public . snd) |> fst & S.fromList
+	signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat		:: Exc [((Signature, Visible), (Signature, [Clause]), Coor)]
+	let rawTable	= signs |> snd3 & M.fromList
+	let defined	= signs |> (fst3 &&& thd3) |> (first fst) & M.fromList
+	let public	= signs |> fst3 & filter ((==) Public . snd) |> fst & S.fromList
 	return (FunctionTable defined public (todos "Known tables. Should be filled") , rawTable)

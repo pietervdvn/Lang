@@ -25,13 +25,13 @@ data SimpleFunc	= SimpleFunc {	funcName	:: Name,
 
 
 functionIn'	:: FQN -> TypeLookupTable -> (Statement, Coor) ->
-			Exc [((Signature, Visible), (Signature, [Clause]))]
+			Exc [((Signature, Visible), (Signature, [Clause]), Coor)]
 functionIn' fqn tlt (stm, coor) = onLine coor $
 	do	let signs	= functionIn stm
 		signs	|> (\func -> do	rt	<- mapM (resolveType tlt)	$ funcTypes func
 					rreqs	<- mapM (resolveTypeIn tlt)	$ funcTypeReqs func
 					let sign	= Signature fqn (funcName func) rt $ merge rreqs
-					return ((sign, funcVisibility func), (sign, funcClauses func))  )
+					return ((sign, funcVisibility func), (sign, funcClauses func), coor)  )
 			& sequence
 
 {-
