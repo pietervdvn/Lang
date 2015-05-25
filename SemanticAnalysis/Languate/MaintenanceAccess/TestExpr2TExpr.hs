@@ -18,7 +18,6 @@ import Languate.MarkUp
 import System.IO.Unsafe
 import System.Directory
 
-
 import Languate.TableOverview
 import Languate.ParserStub
 import Languate.FunctionTable
