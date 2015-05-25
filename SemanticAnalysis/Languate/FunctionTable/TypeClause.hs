@@ -27,6 +27,8 @@ import Control.Arrow
 
 typeClause	:: Package -> TableOverview -> FQN -> RTypeUnion -> RTypeReqs -> Clause -> Exc TClause
 typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
+
+	{- set up -}
 	ft		<- (to & functionTables & unpackFTS & M.lookup fqn) ?
 				"No function table found?"
 	let tt		= to & typeTable
@@ -38,30 +40,48 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 	-- returns true if binding is successfull
 	let bnd' reqs' t0 t1	= isRight $ bnd reqs' t0 t1
 
+	-- calculate, for each type, how many arguments it needs
+	let curryNumbers	= rtypeUn |> curryNumber tt
+	let currErr rt curryN	= st True rt ++"\t takes "++ plural curryN "argument"
+	assert (allSame curryNumbers) $ "The types in the union take a different number of arguments: "++indent ('\n' : zip rtypeUn curryNumbers |> uncurry currErr & unlines )
+
+	-- the number of arguments the function takes
+	let numberOfArg	= head curryNumbers
+	let numberOfPat	= length patterns
+	errIf (numberOfPat > numberOfArg) $ "Too much patterns: "++plural numberOfPat "pattern match"++" "++isAre numberOfPat++
+		" given, but at most "++number numberOfArg++" "++isAre numberOfArg++" expected."++indent "\n(This is not Haskell, you don't have to type the function name :p )"
+
+	-- actual argument types of the function
 	let curries	= rtypeUn |> curriedTypes
-	let argTypes'	= curries |> tail' & L.filter (not . L.null)
-	let returns	= curries |> last & nub
-	if L.null argTypes' then do
-		-- the expression is a constant
-		texpr	<- expr2texpr p to fqn frees M.empty expr
-		errIf (L.null texpr) $ "The expression "++show expr++" is not typeable"
-		-- there are no arguments. The expression we return, should be every needed return type
-		-- we bind every type
-		let texpr' = texpr |> (id &&& typeOf)
+	let argTypes'	= curries |> init' & L.filter (not . L.null)
+	let returns	= curries |> (drop numberOfPat) & L.filter (not . L.null) |> uncurriedTypes & nub
+	(texprs, pats)	<- if L.null argTypes' then do
+				-- the expression is a constant
+				texprs'	<- expr2texpr p to fqn frees M.empty expr
+				return (texprs', [])
+			    else do
+				-- TODO argument types are slightly more complicated than just selecting a random one
+				let argTypes	= head argTypes'
+				(tpats, scopes)	<- patterns & zip argTypes |> uncurry (typePattern ft)
+							& sequence |> unzip
+				localScope	<- mergeDicts scopes ||>> (\t -> ([t],[]))
+				texprs'		<- expr2texpr p to fqn frees localScope $ expr2prefExpr (precedenceTable to) e
+				return (texprs', tpats)
+
+
+	errIf (L.null texprs) $ "The expression "++show expr++" is not typeable"
+	-- The expression we return, should be every needed return type.
+	-- we bind every type
+	let texprs' = texprs |> (id &&& typeOf)
 				||>> substituteAway frees
 				||>> returnsValid bnd' returns & L.filter snd
 				|> fst
-		haltIf (L.null texpr') $ "The expression "++show expr++" does not meet the required types."++indent ("\nNeeded types:\t"++ (returns |> show & commas)++"\nAvailable types:\t"++(texpr |> typeOf |> fst ||>> show |> commas & unlines))
-		return $ TClause [] $ head texpr'
-	else do
-	let argTypes	= head argTypes'
-	--(tpats, scopes)	<- patterns	& zip argTypes |> uncurry (typePattern ft)
-	--				& sequence |> unzip
-	--localScope	<- mergeDicts scopes ||>> (\t -> ([t],[]))
-	--tes		<- expr2texpr p to fqn frees localScope $ expr2prefExpr (precedenceTable to) e
-	--assert (not $ L.null tes) "Could not type expression"
-	-- TODO select appropriate Texp
-	return $ TClause [] $ TLocalCall "Abc" ([anyType],[])
+	haltIf (L.null texprs') $ "The expression "++show expr++" does not meet the required types."++
+			indent ("\nNeeded types:\t"++ (returns |> show & commas)++
+				"\nAvailable types:\t"++(texprs' |> typeOf |> fst ||>> show |> commas & unlines))
+	-- TODO select best one
+	let texpr	= head texprs'
+	return $ TClause pats texpr
 
 {-
 Each wanted type should be satisfied by at least one available type.

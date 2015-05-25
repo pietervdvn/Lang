@@ -29,6 +29,8 @@ expr2prefExpr t (Seq exprs)
 			= normalize $ makePref t $ map (expr2prefExpr t) exprs
 expr2prefExpr t (Tuple exprs)
 			= Tuple $ map (expr2prefExpr t) exprs
+expr2prefExpr _ (Operator str)
+			= Call str
 expr2prefExpr _ e	= e
 
 makePref	:: PrecedenceTable -> [Expression] -> Expression

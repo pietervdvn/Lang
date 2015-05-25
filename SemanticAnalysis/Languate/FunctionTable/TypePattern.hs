@@ -42,15 +42,21 @@ typePattern ft tp (Deconstruct nm pats)
 			-- the type we want: tp -> Maybe (a,b,...)
 			let posSigns	= signs |> (deconsType tp . head . signTypes &&& id)
 						|> unpackMaybeTuple & catMaybes
-			assert (length posSigns == 1) $ "Multiple deconstructions are possible for "++show nm
+			haltIf (null posSigns) $ "The deconstructor "++show ("from"++nm)++ " is not applicable to "++st True tp
+			assert (length posSigns == 1) $ "Multiple deconstructions are possible for "++show nm++".\nThe following function are usable: "++
+				indent ('\n': posSigns |> snd |> show & unlines)
 			let (args, sign)= head posSigns	:: ([RType], Signature)
 			assert (length args == length pats) $ show nm ++ " deconstructs into "++plural (length args) "argument" ++", but "++plural (length pats) "pattern" ++ "are given:"++indent ("\n"++nm++" -> "++ args |> show & intercal "\t" ++ "\nPatterns: "++pats |> show & intercal "\t")
 			(tpats, scopes)	<- zip args pats |> uncurry (typePattern ft)
 							& sequence |> unzip
 			scope	<- mergeDicts scopes
 			return (TDeconstruct sign tpats, scope)
+typePattern ft tp (Eval (Nat i))
+		= do	-- TODO check if type *is* a numerical type
+			return (TEval $ TNat i, M.empty)
 typePattern _ tp pat
-		= return $ trace (show $ "Non-coverable pattern "++show pat) $ (TDontCare, M.empty)
+		= do	err $ "Non-coverable pattern "++show pat
+			return (TDontCare, M.empty)
 
 {- given the argument type, is the given function type the one deconstructing it?
 Returns the types to which it deconstructs

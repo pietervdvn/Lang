@@ -299,6 +299,13 @@ curriedTypes (RCurry arg ret)
 		= arg:curriedTypes ret
 curriedTypes t	= [t]
 
+uncurriedTypes	:: [RType] -> RType
+uncurriedTypes []
+		= error "Uncurrying types with empty list..."
+uncurriedTypes [t]
+		= t
+uncurriedTypes (t:ts)
+		= RCurry t $ uncurriedTypes ts
 
 tupledTypes	:: RType -> [RType]
 tupledTypes t@(RApplied (RApplied tupleT a) rest)

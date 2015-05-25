@@ -37,7 +37,7 @@ append	: Sum -> Sum -> Sum
 a b	= a + b
 
 neutral	: Sum
-neutral	= zero
+	= zero
 
 
 precedence of (^) is Left, (^) < (*)
@@ -49,11 +49,11 @@ s i	= s + (s * (i - 1))
 
 instance Product is Monoid
 
-append	: Product -> Product -> Product
+append	: (product:Product) -> product -> product
 a b	= a * b
 
 neutral	: Product
-neutral	= one
+	= one
 
 (^)	: Product -> Nat -> Product
 _ 0	= neutral
