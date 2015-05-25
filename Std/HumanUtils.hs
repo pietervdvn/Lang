@@ -69,4 +69,12 @@ pluralize "woman"	=  "women"
 pluralize "man"		=  "men"
 pluralize "gender"	=  "queer"
 pluralize "was"		=  "were"
+pluralize "match"	= "matches"
+pluralize "pattern match"
+			= "pattern matches"
+pluralize "is"		= "are"
 pluralize str		=  str ++ "s"
+
+isAre		:: Int -> String
+isAre 1		= "is"
+isAre _		= "are"
