@@ -74,8 +74,8 @@ _e2te (Chr c)	= returns $ TChr c
 _e2te (Call nm) = do
 	scope	<- get' localScope
 	if nm `M.member` scope then do
-		t	<- lift $ (M.lookup nm scope) ? (nm++" should be in the local scope")
-		return 	$ [TLocalCall nm t]
+		t	<- lift $ M.lookup nm scope ? (nm++" should be in the local scope")
+		returns $ TLocalCall nm t
 	else do
 		fqn		<- get' location
 		funcTables	<- get' tables |> functionTables

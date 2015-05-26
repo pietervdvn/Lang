@@ -28,7 +28,7 @@ typeTable2doc	:: TypeTable -> Doc
 typeTable2doc tt
 	= let	rows	= knownTypes tt & S.toList
 				|> (\tid -> [inlink' (showtid tid) ("Types/"++showtid tid),
-						 let curryN = curryNumber' tt tid in if curryN == 0 then  b"" else b $ show curryN ,
+						 let curryN = curryNumber' tt tid in b (if curryN == 0 then  "" else show curryN) ,
 						 b $ fst $ synops tt tid ])
 		superTables	=  knownTypes tt & S.toList
 				|> (Parag . Embed . ("Types/Supertypes/Supertypes of "++) . showtid)
@@ -113,7 +113,7 @@ explanationFSTT	= doc "Full super type table explanation" "How to read a super t
 
 explantionCurryNumber	:: Doc
 explantionCurryNumber	= doc "Curry Number explanation" "What is a curry number?" $
-		Titling (Seq [b "What is a ", Imp $ b "Curry Number", b "?"]) $ parags $ map Mu.Seq $
+		Titling (Seq [b "What is a ", Imp $ b "Curry Number", b "?"]) $ parags $ map Mu.Seq
 		[ [b "Most types, e.g. ", ["Int","Bool","Dict Int String","Functor a"] |> code & commas' , b " represent simple data. These have a ", imp "curry number", b " of zero."],
  		  [b "Some types represent functions, e.g. ", ["Int -> Int", "a -> a", "a -> (a -> b) -> b"] |> code & commas' ,b ".", b "We define the curry number as ", imp "the number of arguments", b "that this function takes."],
 		  [b "Some special types, e.g.", ["Associative Bool", "Curry a b", "Commutative Bool Int"] |> code & commas', b " represent functions too, but their type does not show explicitly how many arguments the type needs. The curry number show explicitly how many arguments are needed."]

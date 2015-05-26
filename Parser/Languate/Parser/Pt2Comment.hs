@@ -36,7 +36,7 @@ s "nlcomment" (Nl:terms)
 s "nlcomment" []
 		= Nl
 s "nlcomment" (Comment str:_)
-		= Comment $ str
+		= Comment str
 s _ [MlCommDelim, Nl]
 		= Comment ""	-- emtpy comment detected!
 s _ [ast]  	= ast

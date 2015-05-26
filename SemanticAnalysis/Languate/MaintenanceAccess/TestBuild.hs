@@ -12,7 +12,6 @@ import Exceptions
 import Languate.File2Package
 import Languate.FQN
 import Languate.AST
-import Languate.Package
 import Languate.MarkUp as Mu
 
 import System.IO.Unsafe
@@ -79,7 +78,7 @@ addFooter	= do	let back = NonImp $ InLink (Base "Back to all pages") "All pages"
 			time	<- getCurrentTime
 			print time
 			return $ addPreprocessor' (\mu -> Mu.Seq [back, mu,
-				NonImp $ parags $ [Base $ "This doc was automatically generated on "++show time, Base "Do not edit it, as changes will be erased the next generation.", back]])
+				NonImp $ parags [Base $ "This doc was automatically generated on "++show time, Base "Do not edit it, as changes will be erased the next generation.", back]])
 
 addHeader	:: RenderSettings -> RenderSettings
 addHeader	= addPreprocessor (\doc -> preprocess (\mu -> titling (title doc) $ Mu.Seq [notImportant $ description doc, contents doc ]) doc)

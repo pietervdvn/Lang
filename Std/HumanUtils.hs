@@ -56,7 +56,7 @@ bar width total msg' current
 		postMsg	= drop perc msg
 		bars	= take perc $ preMsg ++ repeat '-'
 		conts	= bars++"█"++postMsg++repeat ' '	in
-		"["++(take (width-2) conts ) ++"]"
+		"["++ take (width-2) conts ++"]"
 
 -- fills i positions after str with char
 fill		:: Int -> Char -> String -> String

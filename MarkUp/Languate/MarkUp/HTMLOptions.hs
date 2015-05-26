@@ -24,7 +24,7 @@ type HeaderOption	= ([Doc -> HTML], [(String, String)])
 
 html	:: (RenderSettings -> [HeaderOption]) -> RenderSettings -> RenderSettings
 html headrs self
-	= let filePath = error $ "To use the html options, you should still add a filepath. Use 'fix $ (extend $ setFilePath \"/your/path\") html' (eventually with other options)" in
+	= let filePath = error "To use the html options, you should still add a filepath. Use 'fix $ (extend $ setFilePath \"/your/path\") html' (eventually with other options)" in
 	   RenderSettings
 		filePath
 		fancyEmbedder

@@ -14,7 +14,7 @@ fp	= "/test"
 t = do	dir	<- getCurrentDirectory
 	let fp'	= dir ++ fp
 	let headers	= defaultHeader defaultCSS
-	let html'	= fix $ (extend $ setFilePath (fp'++"/html")) $ html headers
+	let html'	= fix $ extend (setFilePath (fp'++"/html")) $ html headers
 	removeDirectoryRecursive fp'
 	renderClusterTo html' cluster
 	renderClusterTo (md (dir ++ fp ++ "/md")) cluster
@@ -22,8 +22,8 @@ t = do	dir	<- getCurrentDirectory
 back = NonImp $ InLink (Base "Back to all pages") "All pages"
 
 
-preproc		:: RenderSettings -> RenderSettings
-preproc rs	= addPreprocessor' (\mu -> parags [back, mu, back]) rs
+preproc	:: RenderSettings -> RenderSettings
+preproc	= addPreprocessor' (\mu -> parags [back, mu, back])
 
 
 cluster	= buildCluster [doc1,doc2,doc3, doc4, doc5, doc6]

@@ -83,6 +83,6 @@ buildFunctionTable p tt fqn m	= inFile fqn $ do
 	tlt	<- (typeLookups tt & M.lookup fqn) ? ("No tlt for "++show fqn)	:: Exc TypeLookupTable
 	signs	<- mapM (functionIn' fqn tlt) (statements' m) |> concat		:: Exc [((Signature, Visible), (Signature, [Clause]), Coor)]
 	let rawTable	= signs |> snd3 & M.fromList
-	let defined	= signs |> (fst3 &&& thd3) |> (first fst) & M.fromList
+	let defined	= signs |> (fst3 &&& thd3) |> first fst & M.fromList
 	let public	= signs |> fst3 & filter ((==) Public . snd) |> fst & S.fromList
 	return (FunctionTable defined public (todos "Known tables. Should be filled") , rawTable)

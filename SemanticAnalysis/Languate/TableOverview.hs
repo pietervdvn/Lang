@@ -30,5 +30,5 @@ instance Documentable TableOverview where
 			addDocs' (precedenceTable to)	$
 			addDocs' (functionTables to) 	$
 			addDocs' (typeTable to)		$
-			addDocs' (implementations to)	$
+			addDocs' (implementations to)
 			[docstrings2mu $ docstringTable to])

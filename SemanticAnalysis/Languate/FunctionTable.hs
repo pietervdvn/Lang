@@ -91,7 +91,8 @@ implTable2doc fqn it
 	= let	conts	= it & imps & M.toList |> showEntry
 		mu	= table ["Name","Type","TClauses"] conts in
 		doc ("Modules/ImplementationTable/"++show fqn) ("Signature and clause implementations for "++show fqn) $
-			if Prelude.null conts then (Base "No locally defined functions") else mu
+			if Prelude.null conts then Base "No locally defined functions"
+				else mu
 
 showEntry	:: (Signature, [TClause]) -> [MarkUp]
 showEntry (sign, clauses)

@@ -58,7 +58,7 @@ functionsInADTSum tpinf@(t,treqs) (index, ADTSum consName vis args)
 		-- TODO add implementation
 		cons	= makeFunc [constructor] vis [BuiltIn.construct (length argTypes)index tpinf ]
 		isCons	= makeFunc [("is"++consName, [Curry [t, boolType']], treqs )] vis []
-		fromCons= makeFunc [("from"++consName, [Curry [t,maybeType' $ [TupleType argTypes]]], treqs)] vis [] in
+		fromCons= makeFunc [("from"++consName, [Curry [t,maybeType' [TupleType argTypes]]], treqs)] vis [] in
 		cons ++ isCons ++ fromCons
 
 

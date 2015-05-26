@@ -16,8 +16,6 @@ import Data.Maybe
 -- Implements somme options for the render html, e.g. to add a header, footer, scripts, stylesheet
 import Debug.Trace
 
-import Languate.MarkUp.HTML
-
 data RenderSettings	= RenderSettings
 	{ renderName	:: String -> (FilePath, URL)
 		-- converts the document name to a directory (and links to their correct form). Inlinks are rewritten to links with the URL. Files will be rendered to the given filepath
@@ -35,7 +33,7 @@ data RenderSettings	= RenderSettings
 -- Represents a postprocessor + needed resource. Resources are always saved in res, relative to the cluster
 type Option	= (Doc -> String -> String, [(String, String)])
 
-extend	:: (RenderSettings -> RenderSettings) -> (a -> RenderSettings) -> (a -> RenderSettings)
+extend	:: (RenderSettings -> RenderSettings) -> (a -> RenderSettings) -> a -> RenderSettings
 extend f rs
 	= f . rs
 
@@ -82,12 +80,14 @@ defaultOverviewPage docs
 		(rootDocs, subDocs)	= perDir docs
 		subs	= docs |> title & subDirs
 		subsFor nm
-			= M.findWithDefault [] nm subs |> (\sub -> headerLink $ tail sub) & commas'	in
+			= M.findWithDefault [] nm subs |> (headerLink . tail) & commas'	in
 		doc titl descr $
 			if M.null subDocs then baseTable rootDocs else Seq
-				([ titling' "Root Documents" $ Seq [baseTable rootDocs,
-					cleanTable $ table ["Directory","Subdirectories"] $ subDocs & M.keys |> (\nm -> [headerLink nm, subsFor nm])]
-				] ++ renderSubDirs "" subDocs)
+				(titling' "Root Documents" (Seq
+					[baseTable rootDocs,
+					cleanTable $ table ["Directory","Subdirectories"] $
+						subDocs & M.keys |> (\nm -> [headerLink nm, subsFor nm])]
+				): renderSubDirs "" subDocs)
 
 renderSubDirs	:: String -> Map String [Doc] -> [MarkUp]
 renderSubDirs superDir dict
@@ -99,7 +99,7 @@ renderSubDir superDir dir docs
 	= let	title'		= drop (1 + length dir + length superDir) . title
 		(rootDocs, subDocs)	= perDir' title' docs in
 		titling dir $ Seq
-			([ baseTable' title' rootDocs ] ++ renderSubDirs (superDir++"/"++dir) subDocs)
+			(baseTable' title' rootDocs:renderSubDirs (superDir++"/"++dir) subDocs)
 
 baseTable	:: [Doc] -> MarkUp
 baseTable 	= baseTable' title
@@ -115,8 +115,8 @@ perDir	= perDir' title
 
 perDir'	:: (Doc -> String) -> [Doc] -> ([Doc], Map String [Doc])
 perDir' title docs
-	= let 	(rootDocs, filedDocs)	= docs |> (title &&& id) & L.partition ((notElem '/') . fst) in
-		(rootDocs |> snd, filedDocs |> first (fst . break (=='/')) & merge & M.fromList)
+	= let 	(rootDocs, filedDocs)	= docs |> (title &&& id) & L.partition (notElem '/' . fst) in
+		(rootDocs |> snd, filedDocs |> first (takeWhile (/= '/')) & merge & M.fromList)
 
 subDirs	:: [String] -> Map String [String]
 subDirs paths

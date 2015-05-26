@@ -52,8 +52,7 @@ typePattern ft tp (Deconstruct nm pats)
 			scope	<- mergeDicts scopes
 			return (TDeconstruct sign tpats, scope)
 typePattern ft tp (Eval (Nat i))
-		= do	-- TODO check if type *is* a numerical type
-			return (TEval $ TNat i, M.empty)
+		= return (TEval $ TNat i, M.empty)	-- TODO check if type *is* a numerical type
 typePattern _ tp pat
 		= do	err $ "Non-coverable pattern "++show pat
 			return (TDontCare, M.empty)

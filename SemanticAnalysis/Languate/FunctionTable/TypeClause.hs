@@ -35,10 +35,9 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 	let expr	= expr2prefExpr (precedenceTable to) e
 	let frees	= (rtypeUn >>= freesInRT) ++ (reqs >>= freesInReq)
 	-- bind function with context. Reminder: t0 is the subtype, t1 the supertype
-	let bnd	reqs' t0 t1
-			= bind tt (M.fromList $ reqs ++ reqs') t0 t1
+	let bnd	reqs'	= bind tt (M.fromList $ reqs ++ reqs')
 	-- returns true if binding is successfull
-	let bnd' reqs' t0 t1	= isRight $ bnd reqs' t0 t1
+	let bnd' reqs' t0	= isRight . bnd reqs' t0
 
 	-- calculate, for each type, how many arguments it needs
 	let curryNumbers	= rtypeUn |> curryNumber tt
@@ -54,7 +53,7 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 	-- actual argument types of the function
 	let curries	= rtypeUn |> curriedTypes
 	let argTypes'	= curries |> init' & L.filter (not . L.null)
-	let returns	= curries |> (drop numberOfPat) & L.filter (not . L.null) |> uncurriedTypes & nub
+	let returns	= curries |> drop numberOfPat & L.filter (not . L.null) |> uncurriedTypes & nub
 	(texprs, pats)	<- if L.null argTypes' then do
 				-- the expression is a constant
 				texprs'	<- expr2texpr p to fqn frees M.empty expr

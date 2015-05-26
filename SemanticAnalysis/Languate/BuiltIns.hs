@@ -18,7 +18,9 @@ flipSign	= (toFQN' "pietervdvn:Data:ControlFlow","flip"  )
 -- some types with more meaning (and a broken liskov substitution)
 
 boolType'	= Normal ["Data","Bool"] "Bool"
-maybeType' on	= Applied (Normal ["Collection","Maybe"] "Maybe") on
+
+maybeType'	:: [Type] -> Type
+maybeType'	= Applied (Normal ["Collection","Maybe"] "Maybe")
 
 -- Special function for constructing ADTS
 construct	:: Int -> Int -> (Type, [TypeRequirement]) -> Clause

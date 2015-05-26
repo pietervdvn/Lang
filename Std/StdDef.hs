@@ -49,8 +49,7 @@ unpackMaybeTuple (ma,b)
 
 
 unpackMaybeTuples	:: [(Maybe a, b)] -> [(a,b)]
-unpackMaybeTuples ls
-		=  mapMaybe unpackMaybeTuple ls
+unpackMaybeTuples	=  mapMaybe unpackMaybeTuple
 
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []
