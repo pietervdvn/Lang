@@ -5,10 +5,14 @@ Each program imports these by default
 -------
 
 public import Any
+public import Data.Bool
+public import Collection.Maybe
+public import Num.Nat
+
+---
 
 public import Aliasses
 
-public import Data.Bool
 public import Type.Function
 public import Category.Function
 
@@ -28,7 +32,6 @@ public import Collection.Void
 public import Collection.Tuple
 public import Collection.Collection
 public import Collection.More
-public import Collection.Maybe
 public import Collection.Dict
 public import Collection.Set
 public import Collection.List
@@ -39,6 +42,4 @@ public import Num.Nat
 public import Num.Float
 
 public import Crypto.PubPrivAlgo
-
-two	: Int
-	= 1 + 1
+---

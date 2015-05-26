@@ -126,7 +126,8 @@ se (Flt flt)	= show flt
 se (Chr c)	= show c
 se (Seq expr)	= "("++unwords (map show expr) ++ ")"
 se (Tuple exprs)= "("++intercalate ", " (map show exprs) ++ ")"
-se (BuiltIn str)= '#':str
+se (BuiltIn str typeInfo)
+		= '#':str++" "++show typeInfo
 se (Cast t)	= "~("++show t++")"
 se AutoCast	= "~~"
 se (Call str)	= str

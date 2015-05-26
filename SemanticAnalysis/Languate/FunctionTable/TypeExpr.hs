@@ -20,7 +20,7 @@ import Languate.TypeTable hiding (reqs)
 
 import Languate.TypeTable.Bind.Bind
 import Languate.TypeTable.Bind.Substitute
-
+import qualified Languate.BuiltIns as BuiltIn
 
 import Data.Map (Map, findWithDefault)
 import qualified Data.Map as M
@@ -53,13 +53,16 @@ The requirements should contain all used free type variables within the context
 -}
 expr2texpr	:: Package -> TableOverview -> FQN -> [Name] -> Map Name (RTypeUnion, RTypeReqs) -> OperatorFreeExpression -> Exc [TExpression]
 expr2texpr p to fqn frees localScope e
-	=  runstateT (_e2te $ normalize $ preClean e) (Ctx p to fqn localScope $ S.fromList frees) |> fst
+	=  do	tlt	<- to & typeTable & typeLookups & M.lookup fqn ? ("No tlt found for "++show fqn)
+		let ctx	= Ctx p to fqn localScope (S.fromList frees) tlt
+		runstateT (_e2te $ normalize $ preClean e) ctx |> fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
 		, location	:: FQN		-- the current location where to search
 		, localScope	:: Map Name (RTypeUnion, RTypeReqs)	-- Locally defined variables
 		, knownFrees	:: Set Name	-- The frees which are used within this context.
+		, typeLookupT	:: TypeLookupTable
 		}
 
 type SCtx a	= StateT Ctx (Exceptions String String) a
@@ -81,7 +84,15 @@ _e2te (Call nm) = do
 		signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
 		signs'	<- mapM escapeSign signs
 		signs' |> TCall & return
-_e2te (Seq (function:args)) = do
+_e2te (Seq (BuiltIn "construct" resultType:Nat i:args))
+	= do	rtype	<- resolveTps resultType
+		let nrOfArgs	= length args
+		let constructor	= BuiltIn.constructTCall rtype nrOfArgs
+		let argNames	= args |> (\(Call nm) -> nm)
+		mapM_ addLocalVar argNames
+		calcApplications [constructor] (Nat i : args)
+
+_e2te seq@(Seq (function:args)) = do
 	-- types are renamed at this point, thus no further escape is needed
 	tfunctions	<- _e2te function
 	calcApplications tfunctions args
@@ -93,8 +104,8 @@ _e2te e		=
 			-> "Seems like the expression didn't go through prefix rewritting (to remove ops)"
 		Cast _	-> "Casts are for a next version :p"
 		AutoCast-> "Autocasts are for a next verion :p"
-		BuiltIn _
-			-> "Builtins?"	-- TODO
+		BuiltIn _ _
+			-> "Some builtin slipped through... This is a bug"
 		Tuple _	-> "Tuples?"	-- TODO
 
 
@@ -226,3 +237,15 @@ returns a	= return [a]
 addFrees	:: [Name] -> SCtx ()
 addFrees nms	= do	ctx	<- get
 			put $ ctx {knownFrees = S.union (S.fromList nms) $ knownFrees ctx}
+
+-- adds a local variable with any type. For use with constructors only
+addLocalVar	:: Name -> SCtx ()
+addLocalVar nm	= do	ctx 	<- get
+			put $ ctx {localScope = M.insert nm ([anyType],[]) $ localScope ctx}
+
+resolveTps	:: (Type, [(Name, Type)]) -> SCtx (RType, RTypeReqs)
+resolveTps (t,treqs)
+		= do	tlt	<- get' typeLookupT
+			rtp	<- lift $ resolveType tlt t
+			rtreqs	<- lift $ mapM (resolveTypeIn tlt) treqs
+			return (rtp, rtreqs & merge)

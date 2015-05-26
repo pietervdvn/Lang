@@ -12,7 +12,7 @@ import Languate.TAST
 import Languate.FQN
 import Languate.Package
 import Languate.TypeTable
-import Languate.BuiltIns
+import Languate.BuiltIns as BuiltIn
 
 import Languate.FunctionTable
 import Languate.Precedence.PrecedenceTable
@@ -45,18 +45,18 @@ functionIn (ClassDefStm cd)
 		makeFunc signs Public []
 functionIn (ADTDefStm (ADTDef nm frees reqs sums))
 	= let	typ	= Applied (Normal [] nm) (frees |> Free) in
-		sums >>= functionsInADTSum (typ, reqs)
+		zip [0..] sums >>= functionsInADTSum (typ, reqs)
 functionIn _
 	= []
 
-functionsInADTSum 	:: (Type, [TypeRequirement]) -> ADTSum ->
+functionsInADTSum 	:: (Type, [TypeRequirement]) -> (Int, ADTSum) ->
 				[SimpleFunc]
-functionsInADTSum (t,treqs) (ADTSum consName vis args)
+functionsInADTSum tpinf@(t,treqs) (index, ADTSum consName vis args)
 	= let	argTypes	= args |> snd
 		constructor	= (consName, [Curry $ argTypes++[t]], treqs)
 		-- TODO add field getters, setters and modders
 		-- TODO add implementation
-		cons	= makeFunc [constructor] vis []
+		cons	= makeFunc [constructor] vis [BuiltIn.construct (length argTypes)index tpinf ]
 		isCons	= makeFunc [("is"++consName, [Curry [t, boolType']], treqs )] vis []
 		fromCons= makeFunc [("from"++consName, [Curry [t,maybeType' $ [TupleType argTypes]]], treqs)] vis [] in
 		cons ++ isCons ++ fromCons

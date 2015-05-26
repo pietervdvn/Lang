@@ -42,7 +42,7 @@ convert ast	= convErr "Pt2Expr" ast
 
 desugareString	:: String -> Expression
 desugareString s
-		= Languate.Seq [BuiltIn "toString", desugareList $ map Languate.Chr s]
+		= Languate.Seq [Call "toString", desugareList $ map Languate.Chr s]
 
 desugareList	:: [Expression] -> Expression
 desugareList []	=  Call "empty"

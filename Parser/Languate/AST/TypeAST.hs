@@ -55,7 +55,7 @@ data Expression	= Nat Int
 		| Chr Char
 		| Seq [Expression]
 		| Tuple [Expression]
-		| BuiltIn String	-- Calls a built-in function, e.g. 'toString',
+		| BuiltIn String (Type, [TypeRequirement])	-- Calls a built-in function, e.g. 'toString',
 		| Cast Type	| AutoCast
 		| Call String
 		| Operator String

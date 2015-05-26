@@ -19,3 +19,23 @@ flipSign	= (toFQN' "pietervdvn:Data:ControlFlow","flip"  )
 
 boolType'	= Normal ["Data","Bool"] "Bool"
 maybeType' on	= Applied (Normal ["Collection","Maybe"] "Maybe") on
+
+-- Special function for constructing ADTS
+construct	:: Int -> Int -> (Type, [TypeRequirement]) -> Clause
+construct nrOfArgs i typInfo
+		=  let argNames	= [0..nrOfArgs-1] |> show |> ("arg"++) in
+			Clause (argNames |> Assign) $
+			Seq ([BuiltIn "construct" typInfo, Nat i] ++ argNames |> Call)
+
+-- Construction primitves which can not be encoded as code (e.g. construct, destruct) and are language features live in the nameless package by pietervdvn
+
+constructTCall	:: (RType, RTypeReqs) -> Int -> TExpression
+constructTCall (rt, reqs) i
+	= let	frees	= freesInRT rt ++ (reqs >>= freesInReq)
+		argTps	= defaultFreeNames & filter (not . (`elem` frees)) & take i
+		typ	= uncurriedTypes $ natType:(argTps |> RFree)++[rt] in
+		TCall $ Signature (toFQN' "pietervdvn::BuiltIns") "construct" [typ] reqs
+
+destruct	:: Int -> (Type, [TypeRequirement]) -> Expression
+destruct i (t,treqs)
+		= todo
