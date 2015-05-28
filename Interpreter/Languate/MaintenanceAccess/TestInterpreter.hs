@@ -19,18 +19,27 @@ import Data.Maybe
 import Languate.TableOverview
 import Languate.BuildTableOverview
 import Languate.Semantal
+import Languate.TAST
+
+import Languate.Interpreter
+import Languate.Value
 
 import Data.Map as M
 
 --------------------------------------
 -- i : Parse, Interpret and Execute --
 --------------------------------------
-i	:: String -> IO String
+i	:: String -> IO [String]
 i str	=  do	expr	<- parseExpr str
 		texprs	<- runExceptionsIO' $ typeExpr loadedPackage tablesOverv prelude [] M.empty expr
+		putStrLn "--- expr ---"
 		print expr
+		putStrLn "--- texpr ---"
 		print texprs
-		return "Hi!"
+		let context	= Ctx tablesOverv prelude M.empty
+		let val		= texprs |> evalExpr context
+		putStrLn "--- result ---"
+		return $ val |> show
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
