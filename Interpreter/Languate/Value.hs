@@ -37,3 +37,11 @@ sv (ADT i t vals)
 	= "ADT: "++show i++" <"++show t++"> " ++ show vals
 sv (Thunk texpr)
 	= "THUNK: " ++ (texpr |> snd & show)
+
+instance Eq Value where
+	(==)	= eq
+
+eq	:: Value -> Value -> Bool
+eq (ADT i t args) (ADT i' t' args')
+	= i == i' && t == t' && args == args'
+eq _ _	= False

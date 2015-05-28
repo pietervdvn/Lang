@@ -3,6 +3,7 @@ module Languate.MaintenanceAccess.TestInterpreter where
 import qualified Bnf
 import Bnf.ParseTree
 import StdDef
+import Languate.CheckUtils
 import Exceptions
 
 
@@ -26,19 +27,16 @@ import Languate.Value
 
 import Data.Map as M
 
---------------------------------------
--- i : Parse, Interpret and Execute --
---------------------------------------
+-----------------------------------
+-- i : Parse, type and Interpret --
+-----------------------------------
 i	:: String -> IO [String]
 i str	=  do	expr	<- parseExpr str
-		texprs	<- runExceptionsIO' $ typeExpr loadedPackage tablesOverv prelude [] M.empty expr
-		putStrLn "--- expr ---"
+		texprs	<- runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
+				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
 		print expr
-		putStrLn "--- texpr ---"
-		print texprs
 		let context	= Ctx tablesOverv prelude M.empty
 		let val		= texprs |> evalExpr context
-		putStrLn "--- result ---"
 		return $ val |> show
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
