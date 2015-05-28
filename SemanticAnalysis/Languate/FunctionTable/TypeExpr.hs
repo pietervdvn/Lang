@@ -83,7 +83,7 @@ _e2te (Call nm) = do
 		funcTable	<- lift $ M.lookup fqn funcTables ? errMsg fqn
 		signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
 		signs'	<- mapM escapeSign signs
-		signs' |> TCall & return
+		zip signs signs' |> (\(origSign, sign') -> TCall (signTypes sign', signTypeReqs sign') origSign) & return
 _e2te (Seq (BuiltIn "construct" resultType:Nat i:args))
 	= do	rtype	<- resolveTps resultType
 		let nrOfArgs	= length args

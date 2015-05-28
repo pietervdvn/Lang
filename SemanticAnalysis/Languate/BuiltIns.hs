@@ -51,14 +51,14 @@ constructTCall (rt, reqs) i
 	= let	frees	= freesInRT rt ++ (reqs >>= freesInReq)
 		argTps	= defaultFreeNames & filter (not . (`elem` frees)) & take i
 		typ	= uncurriedTypes $ natType:(argTps |> RFree)++[rt] in
-		TCall $ Signature builtInFQN "construct" [typ] reqs
+		TCall ([typ], reqs) $ Signature builtInFQN "construct" [typ] reqs
 
 destructTCall	:: (RType, RTypeReqs) -> TExpression
 destructTCall (RCurry value result,reqs)
 		= let typ	= RCurry natType $ RCurry value result in
- 			TCall $ Signature builtInFQN "deconstruct" [typ] reqs
+ 			TCall ([typ], reqs) $ Signature builtInFQN "deconstruct" [typ] reqs
 
 isTCall		:: (RType, RTypeReqs) -> TExpression
 isTCall (value, reqs)
 		= let typ	= RCurry natType $ RCurry value boolType in
-			TCall $ Signature builtInFQN "is" [typ] reqs
+			TCall ([typ], reqs) $ Signature builtInFQN "is" [typ] reqs

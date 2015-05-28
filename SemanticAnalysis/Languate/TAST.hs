@@ -120,7 +120,7 @@ asSignature (fqn, n, rtps, rtpreqs)
 data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 	{- The TApplication represents the first expression, applied on the second as argument. As multiple implementations with the same types exist, multiple types could be returned. A TApplication however representats only one of those, and selects those TExpressions which makes it possible. This way, a typed expression, has only one possible TypeUnion and one implementation to choose from. -}
 			| TApplication (RTypeUnion, RTypeReqs) TypedExpression TypedExpression
-			| TCall Signature
+			| TCall (RTypeUnion, RTypeReqs) Signature	-- we save the type independently as not to change the signature - we need it to look up the implementation
 			| TLocalCall Name (RTypeUnion, RTypeReqs)
 	deriving (Show, Eq)
 type TExpression	= TypedExpression
@@ -133,8 +133,8 @@ typeOf (TNat i)
  | i == 0	= ([natType], [])
 typeOf (TFlt _)	= ([floatType], [])
 typeOf (TChr _)	= ([charType], [])
-typeOf (TCall sign)
-		= (signTypes sign, signTypeReqs sign)
+typeOf (TCall typeInfo _)
+		= typeInfo
 typeOf (TApplication typeInfo _ _)
 		= typeInfo
 typeOf (TLocalCall _ t)

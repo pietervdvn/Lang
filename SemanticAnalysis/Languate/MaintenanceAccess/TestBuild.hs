@@ -58,6 +58,8 @@ bool		= toFQN' "pietervdvn:Data:Data.Bool"
 
 bDocs	= do	dir	<- getCurrentDirectory
 		let cluster	= buildCluster []
+		package		<- packageIO path
+		tablesOverv	<- runExceptionsIO' $ buildAllTables package
 		let cluster'	= add tablesOverv cluster
 		addFooter'	<- addFooter
 		let path'	= dir ++"/" ++ path ++ "/.gen" ++ "/html"

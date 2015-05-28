@@ -22,16 +22,22 @@ import Data.Map hiding (filter, map)
 
 import Languate.BuiltIns
 
+expr2prefExpr	:: PrecedenceTable -> Expression -> OperatorFreeExpression
+expr2prefExpr t (Operator nm)
+		= Call nm
+expr2prefExpr t e
+		= expr2prefExpr' t e
 
 
-expr2prefExpr		:: PrecedenceTable -> Expression -> OperatorFreeExpression
-expr2prefExpr t (Seq exprs)
-			= normalize $ makePref t $ map (expr2prefExpr t) exprs
-expr2prefExpr t (Tuple exprs)
-			= Tuple $ map (expr2prefExpr t) exprs
-expr2prefExpr _ (Operator str)
-			= Call str
-expr2prefExpr _ e	= e
+-- internally used expr2prefExpr
+expr2prefExpr'		:: PrecedenceTable -> Expression -> OperatorFreeExpression
+expr2prefExpr' t (Seq exprs)
+			= normalize $ makePref t $ map (expr2prefExpr' t) exprs
+expr2prefExpr' t (Tuple exprs)
+			= Tuple $ map (expr2prefExpr' t) exprs
+expr2prefExpr' _ (Operator name)
+			= Operator name	-- yes, this lines does nothing. It is imortant that operators -even lonely ones- stay operators. It breaks thing in the recursive call when it gets normalized into a (Call nm). Only the root call should do that!
+expr2prefExpr' _ e	= e
 
 makePref	:: PrecedenceTable -> [Expression] -> Expression
 makePref tb exprs
