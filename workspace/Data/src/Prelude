@@ -8,6 +8,7 @@ public import Any
 public import Data.Bool
 public import Collection.Maybe
 public import Num.Nat
+public import ControlFlow
 
 ---
 
@@ -19,7 +20,6 @@ public import Category.Function
 public import Category.Eq
 
 
-public import ControlFlow
 
 public import Category.Eq
 public import Category.Monoid

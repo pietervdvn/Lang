@@ -38,12 +38,6 @@ succ	: Int 		-> Int
 succ	: IntInf 	-> IntInf
 n	= Succ n
 
-abs	: Int 		-> Nat
-abs	: Int' 		-> Nat'
-abs	: IntInf 	-> NatInf
-abs	: IntInf' 	-> NatInf'
-i	= #abs
-
 
 precedence of (*) is Left, (*) = (%), (*) = (/), (*) = (//)
 precedence of (+) is Left, (+) = (-)
