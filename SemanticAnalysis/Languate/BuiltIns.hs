@@ -55,10 +55,10 @@ constructTCall (rt, reqs) i
 
 destructTCall	:: (RType, RTypeReqs) -> TExpression
 destructTCall (RCurry value result,reqs)
-		= let typ	= RCurry value $ RCurry natType result in
+		= let typ	= RCurry natType $ RCurry value result in
  			TCall $ Signature builtInFQN "deconstruct" [typ] reqs
 
 isTCall		:: (RType, RTypeReqs) -> TExpression
-isTCall (valueT, reqs)
-		= let typ	= RCurry valueT $ RCurry natType boolType in
+isTCall (value, reqs)
+		= let typ	= RCurry natType $ RCurry value boolType in
 			TCall $ Signature builtInFQN "is" [typ] reqs

@@ -93,16 +93,15 @@ _e2te (Seq (BuiltIn "construct" resultType:Nat i:args))
 		calcApplications [constructor] (Nat i : args)
 _e2te (Seq [BuiltIn "deconstruct" funcType, Nat i, Call val])
 	= do	rtype@(funcRT, reqs)	<- resolveTps funcType
-		let destructor	= BuiltIn.destructTCall rtype
-		let destructor'	= TApplication ([funcRT], reqs) destructor (TNat i)
 		let (RCurry valType _)	= funcRT
 		addLocalVar' val valType
-		calcApplications [destructor'] [Call val]
+		let destructor	= BuiltIn.destructTCall rtype
+		calcApplications [destructor] [Nat i, Call val]
 _e2te (Seq [BuiltIn "is" valType, Nat i, Call val])
 	= do	rtype@(valRType, reqs)	<- resolveTps valType
 		let is	= BuiltIn.isTCall rtype
 		addLocalVar' val valRType
-		calcApplications [is] [Call val, Nat i]
+		calcApplications [is] [Nat i, Call val]
 _e2te seq@(Seq (function:args)) = do
 	-- types are renamed at this point, thus no further escape is needed
 	tfunctions	<- _e2te function
