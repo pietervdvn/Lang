@@ -1,66 +1,19 @@
 Nat
 ---
-Home of Nat, Nat', NatInf, NatInf', Int, Int', IntInf, IntInf'
+Simple, naive natural number implementation.
 ---
 
-import Builtins
-import Category.Function
 import Category.Eq
+import Data.Bool
+import Collection.Maybe
 
--- TODO add associative and commutative where needed
+-- A natural number, which might be zero
+data Nat	= Zero | Succ Nat
 
-
-instance BIInt is Nat'
--- An _integer_ or positive or negative _Infinity_ (''Inf'').
-   type IntInf		= Builtins.BIInt
--- An _integer_ which is not zero, or positive or negative _Infinity_ (''Inf'').
-subtype IntInf'		= _ IntInf
--- An _integer_
-subtype Int		= _ IntInf
--- An _integer_ which is not zero
-subtype Int'		= _ IntInf' & Int	-- No Inf, no zero
-
--- A natural number or _infinity_ (''Inf'').
-subtype NatInf		= _ IntInf
--- A natural number (which is not zero) or _infinity_ (''Inf'').
-subtype NatInf'		= _ NatInf & IntInf'
--- A natural number
-subtype Nat		= _ NatInf & Int
--- A natural number, which is not zero.
-subtype Nat'		= _ Nat & Int'
-
-instance IntInf is Eq
-
--- Adds one to a number. A natural number + 1 is guaranteed not to be zero.
-succ	: Nat 		-> Nat'
-succ	: NatInf 	-> NatInf'
-succ	: Int 		-> Int
-succ	: IntInf 	-> IntInf
-n	= Succ n
+type Nat'	= Nat
 
 
-precedence of (*) is Left, (*) = (%), (*) = (/), (*) = (//)
-precedence of (+) is Left, (+) = (-)
---- Adds two numbers
 
-(+) is Associative and Commutative for IntInf -> IntInf, out of which follows it is these too for (+) which work for subtypes of IntInf
----
-(+)	: IntInf -> IntInf	-> IntInf & Associative IntInf & Commutative IntInf IntInf
-(+)	: Nat -> Nat 	-> Nat
-(+)	: Nat -> Nat' 	-> Nat'
-(+)	: Nat' -> Nat 	-> Nat'
-(+)	: NatInf -> NatInf -> NatInf
-(+)	: Int -> Int	-> Int
-i 0	= i
+(+)	: Nat -> Nat -> Nat
 0 j	= j
-i (Succ j)	= succ (i + j)
-
-
-
---- Multiply two numbers ---
-(*)	: IntInf -> IntInf	-> IntInf & Associative IntInf & Commutative IntInf IntInf
-_ 0		= 0
-0 _		= 0
-i 1		= i
-1 i		= i
-i (Succ j) 	= i + (i*j)
+i 0	= i

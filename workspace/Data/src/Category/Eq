@@ -7,7 +7,6 @@ import Data.Bool
 import Category.Function
 
 precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
-precedence of (!=) is Left, (!=) = (==)
 
 ---
 The category which defines _equality_ ''=='' and _inequality_ ''!=''
@@ -18,9 +17,4 @@ cat Eq
 	> True == True || False	= False
 	~ operator precedence: a,b,c,d:Bool => a == b && c == d	= (a == b) && (c == d)
 	> a,b : Bool & X => !a == b	= (!a) == b
-	(==)	: eq -> eq -> Bool	& Commutative eq Bool
-
--- The opposite of ''==''.
-~ excluded third : a,b : Eq => a != b	=   ! (a == b)
-(!=)	: (eq:Eq) -> eq -> Bool	& Commutative eq Bool
-a b	= ! (a == b)
+	(==)	: eq -> eq -> Bool

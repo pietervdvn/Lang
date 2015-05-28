@@ -26,7 +26,7 @@ precedence of (!) is prefix, (!) < (&&)
   > True && True	= True
   > True && False	= False
 (&&)		: Bool -> Bool -> Bool
-  True True	= True
+  True b	= b
   _ _		= False
 
 -- Logical 'or'-function. Returns False if, and only if both arguments are False
