@@ -29,12 +29,15 @@ import Control.Arrow
 anyType		= uncurry RNormal anyTypeID
 anyTypeID	= (toFQN' "pietervdvn:Data:Any", "Any")
 
--- The representation of a tuple
-tupleType	= uncurry RNormal tupleTypeID
-tupleTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Tuple")
+boolType	= uncurry RNormal boolTypeID
+boolTypeID	= (toFQN' "pietervdvn:Data:Data.Bool", "Bool")
 
 voidType	= uncurry RNormal voidTypeID
 voidTypeID	= (toFQN' "pietervdvn:Data:Collection.Void","Void")
+
+-- The representation of a tuple
+tupleType	= uncurry RNormal tupleTypeID
+tupleTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Tuple")
 
 listType	= uncurry RNormal listTypeID
 listTypeID	= (toFQN' "pietervdvn:Data:Collection.List","List")

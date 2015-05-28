@@ -91,7 +91,18 @@ _e2te (Seq (BuiltIn "construct" resultType:Nat i:args))
 		let argNames	= args |> (\(Call nm) -> nm)
 		mapM_ addLocalVar argNames
 		calcApplications [constructor] (Nat i : args)
-
+_e2te (Seq [BuiltIn "deconstruct" funcType, Nat i, Call val])
+	= do	rtype@(funcRT, reqs)	<- resolveTps funcType
+		let destructor	= BuiltIn.destructTCall rtype
+		let destructor'	= TApplication ([funcRT], reqs) destructor (TNat i)
+		let (RCurry valType _)	= funcRT
+		addLocalVar' val valType
+		calcApplications [destructor'] [Call val]
+_e2te (Seq [BuiltIn "is" valType, Nat i, Call val])
+	= do	rtype@(valRType, reqs)	<- resolveTps valType
+		let is	= BuiltIn.isTCall rtype
+		addLocalVar' val valRType
+		calcApplications [is] [Call val, Nat i]
 _e2te seq@(Seq (function:args)) = do
 	-- types are renamed at this point, thus no further escape is needed
 	tfunctions	<- _e2te function
@@ -242,6 +253,11 @@ addFrees nms	= do	ctx	<- get
 addLocalVar	:: Name -> SCtx ()
 addLocalVar nm	= do	ctx 	<- get
 			put $ ctx {localScope = M.insert nm ([anyType],[]) $ localScope ctx}
+
+addLocalVar'	:: Name -> RType -> SCtx ()
+addLocalVar' nm	tp
+	= do	ctx 	<- get
+		put $ ctx {localScope = M.insert nm ([tp],[]) $ localScope ctx}
 
 resolveTps	:: (Type, [(Name, Type)]) -> SCtx (RType, RTypeReqs)
 resolveTps (t,treqs)

@@ -22,22 +22,43 @@ boolType'	= Normal ["Data","Bool"] "Bool"
 maybeType'	:: [Type] -> Type
 maybeType'	= Applied (Normal ["Collection","Maybe"] "Maybe")
 
+-- UnResolved nat type
+natTypeUR	= Normal ["Data","Nat"] "Nat"
+
 -- Special function for constructing ADTS
 construct	:: Int -> Int -> (Type, [TypeRequirement]) -> Clause
-construct nrOfArgs i typInfo
+construct nrOfArgs i typeInfo
 		=  let argNames	= [0..nrOfArgs-1] |> show |> ("arg"++) in
 			Clause (argNames |> Assign) $
-			Seq ([BuiltIn "construct" typInfo, Nat i] ++ argNames |> Call)
+			Seq ([BuiltIn "construct" typeInfo, Nat i] ++ argNames |> Call)
+
+-- special function for deconstructing ADTS. The passed typeInfo should be the type "value -> Maybe (a,b,c)"
+deconstruct	:: Int -> (Type, [TypeRequirement]) -> Clause
+deconstruct index typeInfo
+	= Clause [Assign "value"] $ Seq ([BuiltIn "deconstruct" typeInfo, Nat index, Call "value"])
+
+is		:: Int -> (Type, [TypeRequirement]) -> Clause
+is index typeInfo
+	= Clause [Assign "value"] $ Seq ([BuiltIn "is" typeInfo, Nat index, Call "value"])
 
 -- Construction primitves which can not be encoded as code (e.g. construct, destruct) and are language features live in the nameless package by pietervdvn
+
+builtInFQN	:: FQN
+builtInFQN	= toFQN' "pietervdvn::BuiltIns"
 
 constructTCall	:: (RType, RTypeReqs) -> Int -> TExpression
 constructTCall (rt, reqs) i
 	= let	frees	= freesInRT rt ++ (reqs >>= freesInReq)
 		argTps	= defaultFreeNames & filter (not . (`elem` frees)) & take i
 		typ	= uncurriedTypes $ natType:(argTps |> RFree)++[rt] in
-		TCall $ Signature (toFQN' "pietervdvn::BuiltIns") "construct" [typ] reqs
+		TCall $ Signature builtInFQN "construct" [typ] reqs
 
-destruct	:: Int -> (Type, [TypeRequirement]) -> Expression
-destruct i (t,treqs)
-		= todo
+destructTCall	:: (RType, RTypeReqs) -> TExpression
+destructTCall (RCurry value result,reqs)
+		= let typ	= RCurry value $ RCurry natType result in
+ 			TCall $ Signature builtInFQN "deconstruct" [typ] reqs
+
+isTCall		:: (RType, RTypeReqs) -> TExpression
+isTCall (valueT, reqs)
+		= let typ	= RCurry valueT $ RCurry natType boolType in
+			TCall $ Signature builtInFQN "is" [typ] reqs

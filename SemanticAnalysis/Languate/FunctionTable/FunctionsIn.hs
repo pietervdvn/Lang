@@ -55,10 +55,12 @@ functionsInADTSum tpinf@(t,treqs) (index, ADTSum consName vis args)
 	= let	argTypes	= args |> snd
 		constructor	= (consName, [Curry $ argTypes++[t]], treqs)
 		-- TODO add field getters, setters and modders
-		-- TODO add implementation
-		cons	= makeFunc [constructor] vis [BuiltIn.construct (length argTypes)index tpinf ]
-		isCons	= makeFunc [("is"++consName, [Curry [t, boolType']], treqs )] vis []
-		fromCons= makeFunc [("from"++consName, [Curry [t,maybeType' [TupleType argTypes]]], treqs)] vis [] in
+		cons	= makeFunc [constructor] vis [BuiltIn.construct (length argTypes) index tpinf ]
+		deconstructorTp	= Curry [t,maybeType' [TupleType argTypes]]
+		deconstructor	= ("from"++consName, [deconstructorTp], treqs)
+		fromCons= makeFunc [deconstructor] vis [BuiltIn.deconstruct index (deconstructorTp, treqs)]
+
+		isCons	= makeFunc [("is"++consName, [Curry [t, boolType']], treqs )] vis [BuiltIn.is index tpinf] in
 		cons ++ isCons ++ fromCons
 
 

@@ -25,4 +25,4 @@ typeExpr	:: Package -> TableOverview -> FQN -> [Name] -> Map Name (RTypeUnion, R
 			Expression -> Exc [TExpression]
 typeExpr package tablesOverv location frees localScope expr
 	= do	let prefExpr	= expr & expr2prefExpr (precedenceTable tablesOverv)
-		expr2texpr package tablesOverv location frees localScope expr
+		expr2texpr package tablesOverv location frees localScope prefExpr
