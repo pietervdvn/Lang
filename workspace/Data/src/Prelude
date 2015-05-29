@@ -10,6 +10,17 @@ public import Collection.Maybe
 public import Num.Nat
 public import ControlFlow
 
+
+cat X is Bool -> Bool
+	> True
+
+cat Y is Bool -> Bool
+	> True
+
+
+instance X is Y
+instance Y is X
+
 ---
 
 public import Aliasses

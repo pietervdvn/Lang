@@ -25,6 +25,7 @@ import Languate.FQN
 import Languate.CheckUtils
 
 import Data.Maybe
+import Data.List as L
 
 import Control.Arrow
 import Normalizable
@@ -214,23 +215,31 @@ e.g.
 ""Int -> Int"" 1
 ""Associative a" takes 2 arguments
 -}
+
 curryNumber	:: TypeTable -> RType -> Int
-curryNumber tt (RCurry _ b)
-		= 1 + curryNumber tt b
 curryNumber tt rt
- | isNormal rt	= curryNumber' tt $ fromJust $ getBaseTID rt
+		= _curryNumber tt [] rt
+
+
+_curryNumber	:: TypeTable -> [RType] -> RType -> Int
+_curryNumber tt _ (RCurry _ b)
+		= 1 + curryNumber tt b
+_curryNumber tt visited rt
+ | isNormal rt	= _curryNumber' tt (rt:visited) $ fromJust $ getBaseTID rt
  | otherwise	= 0 -- TODO error $ "Curry numbers do not make sense for free type variables"
 
-
 curryNumber'	:: TypeTable -> TypeID -> Int
-curryNumber' tt tid
+curryNumber' tt	= _curryNumber' tt []
+
+_curryNumber'	:: TypeTable -> [RType] -> TypeID -> Int
+_curryNumber' tt visited tid
  | tid == anyTypeID	= 0
  | otherwise	= let	errMsg	= "No super tt for "++show tid++", weird..."
 			superTT	= tt & allSupertypes & findWithDefault (error errMsg) tid  in
 			if anyType `M.member`  superTT then 0 else
-			-- TODO might loop infinitely with linked types
-			let super	= head $ M.keys superTT in
-			curryNumber tt super
+			let super	= head $ L.filter (`notElem` visited) $
+						M.keys superTT in
+			_curryNumber tt visited super
 
 _construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
 _construct tlt e tps cons
