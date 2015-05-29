@@ -6,6 +6,7 @@ The list category declaration.
 import Collection.Maybe
 import Data.Bool
 import Collection.Tuple
+import Category.Mappable
 
 ---
 A ''Collection'' which preserves order and allows duplicate elements.
@@ -15,7 +16,24 @@ The syntactic sugar ''[a]'' desugars to ''List a''
 ---
 data List a	= Empty | Elem a (List a)
 
+instance List is Mappable
 
-mapl	: (a -> b) -> List a -> List b
+map	: (a -> b) -> List a -> List b
 _ Empty	= Empty
-f (Elem head tail)	= Elem (f head) (mapl f tail)
+f (Elem head tail)	= Elem (f head) (map f tail)
+
+
+-- Gives the first element of the list, Nothing if this list was empty
+head		: [a] -> a?
+(Elem a _)	= Just a
+Empty		= Nothing
+
+-- Drops the first element of the list, returns nothing for an empty list
+tail		: [a] -> [a]?
+(Elem _ tail)	= Just tail
+Empty		= Nothing
+
+-- Drops the first element of the list. Returns an empty list if no tail exists
+tail'		: [a] -> [a]
+(Elem _ tail)	= tail
+Empty		= Empty

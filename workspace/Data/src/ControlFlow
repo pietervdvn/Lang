@@ -4,6 +4,7 @@ Some miscallaneous, control flow functions, such as id, const, flip, if, ...
 -----------
 
 import Data.Bool
+import Category.Mappable
 
 -- The identity function, returns it's argument
 > id 42		= 42
@@ -28,3 +29,7 @@ False _ b	= b
 -- Takes a function with two arguments; returns a function with its arguments inversed
 flip	: (a -> b -> c) -> b -> a -> c
 f b a	= f a b
+
+-- Same as "map", but with inversed arguments
+(|)		: functor a -> (a -> b) -> (functor: Mappable)
+functor	f	= map f functor
