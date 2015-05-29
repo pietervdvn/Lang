@@ -59,6 +59,7 @@ apply' f ctx texpr arg
 			valArg	= evalExpr f ctx arg in
 			apply f valFun valArg
 
+-- TODO typecheck to much patterns!
 apply		:: Evaluators -> Value -> Value -> Value
 apply f (ADT i typeInfo args) arg
 		= ADT i typeInfo (args++[arg])

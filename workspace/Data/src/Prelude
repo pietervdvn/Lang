@@ -8,6 +8,8 @@ public import Any
 public import Data.Bool
 public import Collection.Maybe
 public import Collection.Tuple
+public import Collection.List
+
 public import Num.Nat
 public import ControlFlow
 

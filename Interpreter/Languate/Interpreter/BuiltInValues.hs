@@ -7,6 +7,8 @@ import StdDef
 import Languate.TAST
 import Languate.Value
 
+import Debug.Trace
+
 falseVal	= ADT 0 ([boolType],[]) []
 trueVal		= ADT 1 ([boolType],[]) []
 
@@ -30,8 +32,8 @@ untuple		:: Value -> [Value]
 untuple val@(ADT i (tp, tpreqs) args)
  | val	== voidVal	= []
  | (tp |> isTupleType & or)
-			= head args:untuple (last args)
- | otherwise		= args	-- args will be a single value
+			= head args : untuple (last args)
+ | otherwise		= [val]
 
 
 isTupleType	:: RType -> Bool
