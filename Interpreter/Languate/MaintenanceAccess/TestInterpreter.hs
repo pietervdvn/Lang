@@ -39,6 +39,14 @@ i str	=  do	expr	<- parseExpr str
 		let val		= texprs |> evalExpr context
 		return $ val |> show
 
+
+t	:: String -> IO [String]
+t str	=  do	expr	<- parseExpr str
+		texprs	<- runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
+				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
+		return $ texprs |> typeOf |> show
+
+
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
 packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
