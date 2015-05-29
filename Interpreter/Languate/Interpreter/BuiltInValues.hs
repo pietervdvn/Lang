@@ -18,7 +18,7 @@ justVal	cont	= ADT 1 ([maybeType], []) [cont]
 voidVal		= ADT 0 ([voidType], []) []
 
 tupleVal	:: [Value] -> Value
-tupleVal conts	= ADT 0 ([tupleType], []) conts
+tupleVal	= ADT 0 ([tupleType], [])
 
 -- builds a normalized tuple for given values
 tupleVals	:: [Value] -> Value
@@ -31,7 +31,7 @@ tupleVals (val:vals)
 untuple		:: Value -> [Value]
 untuple val@(ADT i (tp, tpreqs) args)
  | val	== voidVal	= []
- | (tp |> isTupleType & or)
+ | tp |> isTupleType & or
 			= head args : untuple (last args)
  | otherwise		= [val]
 

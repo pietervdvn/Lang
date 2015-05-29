@@ -12,7 +12,7 @@ import Data.Map as M
 import Control.Arrow
 
 checkTypeTable	:: TypeTable -> Check
-checkTypeTable tt	= checkCurryNumbers tt
+checkTypeTable	= checkCurryNumbers
 
 -- we calculate the curry number for each supertype and check wether these are the same
 checkCurryNumbers	:: TypeTable -> Check

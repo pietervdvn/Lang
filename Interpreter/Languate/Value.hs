@@ -50,4 +50,4 @@ eq _ _	= False
 
 typeOfVal	:: Value -> RTypeInfo
 typeOfVal (ADT _ inf _)	= inf
-typeOfVal (Thunk _)	= error $ "Type of thunk?"
+typeOfVal (Thunk _)	= error "Type of thunk?"

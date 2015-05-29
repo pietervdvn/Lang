@@ -227,7 +227,7 @@ cleanType	:: RTypeInfo -> RTypeInfo
 cleanType inf@(rtpUnion, reqs)
 	= let	-- all known frees
 		frees		= (rtpUnion >>= freesInRT) ++ (reqs >>= freesInReq)
-		fullReqs	= ((zip frees []) ++ reqs) & merge ||>> concat
+		fullReqs	= (zip frees [] ++ reqs) & merge ||>> concat
 					& filter (not . idiotReq)	:: RTypeReqs
 		singleReqs	= fullReqs & filter ((==) 1 . length . snd) ||>> head
 		binding		= Binding $ M.fromList singleReqs

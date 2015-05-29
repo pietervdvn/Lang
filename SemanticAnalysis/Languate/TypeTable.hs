@@ -217,8 +217,7 @@ e.g.
 -}
 
 curryNumber	:: TypeTable -> RType -> Int
-curryNumber tt rt
-		= _curryNumber tt [] rt
+curryNumber tt	= _curryNumber tt []
 
 
 _curryNumber	:: TypeTable -> [RType] -> RType -> Int
