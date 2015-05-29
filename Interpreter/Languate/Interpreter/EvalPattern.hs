@@ -7,6 +7,8 @@ import Languate.TAST
 import Languate.Interpreter.BuiltInValues
 
 import Data.Map as M
+import Control.Monad
+
 
 import Debug.Trace
 
@@ -25,7 +27,7 @@ evalPattern f ctx v (TDeconstruct sign patterns)
 			let [tuple]	= mtuple
 			let args	= untuple tuple
 			if length args /= length patterns then error "Number of patterns and values do not match!" else do
-			scopes	<- zipWithM (uncurry $ evalPattern f ctx) args patterns
+			scopes	<- zipWithM (evalPattern f ctx) args patterns
 			return $ M.unions scopes
 evalPattern _ _ _ pat
 		= todos $ show pat

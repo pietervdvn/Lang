@@ -3,7 +3,7 @@ module Languate.Interpreter.BuiltInValues where
 {--
 Some builtin values which are used by default throughout the interpreter
 --}
-
+import StdDef
 import Languate.TAST
 import Languate.Value
 
@@ -15,13 +15,26 @@ justVal	cont	= ADT 1 ([maybeType], []) [cont]
 
 voidVal		= ADT 0 ([voidType], []) []
 
+tupleVal	:: [Value] -> Value
+tupleVal conts	= ADT 0 ([tupleType], []) conts
+
 -- builds a normalized tuple for given values
 tupleVals	:: [Value] -> Value
 tupleVals []	= voidVal
 tupleVals [val]	= val
+tupleVals (val:vals)
+		= tupleVal [val, tupleVals vals]
 
 
 untuple		:: Value -> [Value]
-untuple val
+untuple val@(ADT i (tp, tpreqs) args)
  | val	== voidVal	= []
- | otherwise		= [val]
+ | (tp |> isTupleType & or)
+			= head args:untuple (last args)
+ | otherwise		= args	-- args will be a single value
+
+
+isTupleType	:: RType -> Bool
+isTupleType (RApplied rt _)
+		= isTupleType rt
+isTupleType rt	= rt == tupleType

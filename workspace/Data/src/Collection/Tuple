@@ -3,9 +3,9 @@ Tuple
 This module gives the data declaration of ''Tuple''.
 -----
 
-import Category.Mappable
-import Category.Eq
+import Data.Bool
 import Collection.Maybe
+import Category.Eq
 
 ---
 The data structure representing tuples.
@@ -19,4 +19,5 @@ data Tuple a b	= Tuple a b
 
 instance Tuple (a:Eq) (b:Eq) is Eq
 
-instance Tuple a is Mappable
+map	: (a -> b) -> Tuple a rest  -> Tuple b rest
+f (Tuple a rest)	= Tuple (f a) rest

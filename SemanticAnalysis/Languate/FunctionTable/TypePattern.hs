@@ -12,6 +12,7 @@ import Languate.TypeTable
 import Languate.TableOverview
 import Languate.FunctionTable
 import Languate.BuiltIns
+import Languate.TypeTable.Bind.Bind
 
 import Data.Map (Map)
 import qualified Data.Map as M
@@ -25,47 +26,48 @@ import Control.Arrow
 import Debug.Trace
 
 -- Types the given pattern (or gives an exception)
-typePattern	:: FunctionTable -> RType -> Pattern -> Exc (TPattern, Map Name RType)
-typePattern _ tp (Assign nm)
+typePattern	:: (RType -> RType -> Bool) -> FunctionTable -> RType -> Pattern -> Exc (TPattern, Map Name RType)
+typePattern _ _ tp (Assign nm)
 		= return (TAssign nm, M.singleton nm tp)
-typePattern ft tp pat@(Multi pats)
-		= do	(tpat, dicts) 	<- pats	|> typePattern ft tp & sequence
+typePattern isSubType ft tp pat@(Multi pats)
+		= do	(tpat, dicts) 	<- pats	|> typePattern isSubType ft tp & sequence
 						|> unzip |> first TMulti
 			inside ("While typing the pattern "++show pat) $ do
 				dict	<- mergeDicts dicts
 				return (tpat, dict)
-typePattern _ _ DontCare
+typePattern _ _ _ DontCare
 		= return (TDontCare, M.empty)
-typePattern ft tp (Deconstruct nm pats)
+typePattern isSubType ft tp (Deconstruct nm pats)
 		= do	-- searches all constructors (functions) we want the "fromNm"
 			signs	<- (ft & known & M.lookup ("from"++nm)) ? ("The constructor "++nm++" (desugared to 'from"++ nm ++"') is not in scope")
 			-- the type we want: tp -> Maybe (a,b,...)
-			let posSigns	= signs |> (deconsType tp . head . signTypes &&& id)
+			let posSigns	= signs |> (deconsType isSubType tp . head . signTypes &&& id)
 						|> unpackMaybeTuple & catMaybes
-			haltIf (null posSigns) $ "The deconstructor "++show ("from"++nm)++ " is not applicable to "++st True tp
+			haltIf (null posSigns) $ "The deconstructor "++show nm++ " is not applicable to "++st True tp++", no applicable function (from"++nm++") found"
 			assert (length posSigns == 1) $ "Multiple deconstructions are possible for "++show nm++".\nThe following function are usable: "++
 				indent ('\n': posSigns |> snd |> show & unlines)
 			let (args, sign)= head posSigns	:: ([RType], Signature)
 			assert (length args == length pats) $ show nm ++ " deconstructs into "++plural (length args) "argument" ++", but "++plural (length pats) "pattern" ++ "are given:"++indent ("\n"++nm++" -> "++ args |> show & intercal "\t" ++ "\nPatterns: "++pats |> show & intercal "\t")
-			(tpats, scopes)	<- zip args pats |> uncurry (typePattern ft)
+			(tpats, scopes)	<- zip args pats |> uncurry (typePattern isSubType ft)
 							& sequence |> unzip
 			scope	<- mergeDicts scopes
 			return (TDeconstruct sign tpats, scope)
-typePattern ft tp (Eval (Nat i))
+typePattern _ ft tp (Eval (Nat i))
 		= return (TEval $ TNat i, M.empty)	-- TODO check if type *is* a numerical type
-typePattern _ tp pat
-		= do	err $ "Non-coverable pattern "++show pat
+typePattern _ _ tp pat
+		= do	err $ "Non-covered pattern "++show pat
 			return (TDontCare, M.empty)
 
 {- given the argument type, is the given function type the one deconstructing it?
 Returns the types to which it deconstructs
 -}
-deconsType	:: RType -> RType -> Maybe [RType]
-deconsType argType (RCurry deconsType (RApplied maybeT args))
- | deconsType == argType 	-- the type we get (arg) should be the type the function deconstructs (deconsType)
+deconsType	:: (RType -> RType -> Bool) -> RType -> RType -> Maybe [RType]
+deconsType isSubtype argType (RCurry deconsType (RApplied maybeT args))
+ | argType `isSubtype` deconsType	-- the type we get (arg) should be a subtype of the type that function deconstructs (deconsType)
    && maybeT == maybeType	-- we cant check equality in pattern matches :p
 	= Just $ tupledTypes args
-deconsType _ _	= Nothing
+deconsType _ _ _
+	= Nothing
 
 
 mergeDicts	:: [Map Name RType] -> Exc (Map Name RType)

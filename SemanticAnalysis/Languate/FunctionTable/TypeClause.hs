@@ -34,6 +34,7 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 	let tt		= to & typeTable
 	let expr	= expr2prefExpr (precedenceTable to) e
 	let frees	= (rtypeUn >>= freesInRT) ++ (reqs >>= freesInReq)
+	let isSubT	= isSubtype tt (reqs & M.fromList)
 	-- bind function with context. Reminder: t0 is the subtype, t1 the supertype
 	let bnd	reqs'	= bind tt (M.fromList $ reqs ++ reqs')
 	-- returns true if binding is successfull
@@ -61,10 +62,12 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 			    else do
 				-- TODO argument types are slightly more complicated than just selecting a random one
 				let argTypes	= head argTypes'
-				(tpats, scopes)	<- patterns & zip argTypes |> uncurry (typePattern ft)
+				(tpats, scopes)	<- inside "While typing the patterns" $
+							patterns & zip argTypes |> uncurry (typePattern isSubT ft)
 							& sequence |> unzip
 				localScope	<- mergeDicts scopes ||>> (\t -> ([t],[]))
-				texprs'		<- expr2texpr p to fqn frees localScope $ expr2prefExpr (precedenceTable to) e
+				texprs'		<- inside "While typing the expression" $
+							expr2texpr p to fqn frees localScope $ expr2prefExpr (precedenceTable to) e
 				return (texprs', tpats)
 
 
