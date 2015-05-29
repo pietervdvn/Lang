@@ -5,14 +5,11 @@ Declaration and utils of Set, an unorderd colletion.
 
 import Collection.Collection
 import Category.Eq
-import Category.Boolean
 
 ---
 A ''Collection'' without order and duplicates.
 
 The syntactic sugar ''{a}'' desugars to ''Set a''
 ---
-cat Set (a:Eq)	is Collection a
+cat Set (a:Eq)
 	head	: Set a -> (b:a)
-
-instance Set a is Boolean

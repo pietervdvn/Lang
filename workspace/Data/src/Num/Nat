@@ -12,6 +12,7 @@ data Nat	= Zero | Succ Nat
 
 type Nat'	= Nat
 
+instance Nat is Eq
 
 
 (+)	: Nat -> Nat -> Nat

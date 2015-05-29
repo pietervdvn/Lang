@@ -9,9 +9,14 @@ public import Data.Bool
 public import Collection.Maybe
 public import Collection.Tuple
 public import Collection.List
+public import Collection.Set
 
 public import Num.Nat
 public import ControlFlow
+
+
+public import Category.Eq
+public import Category.Mappable
 
 ---
 
@@ -20,13 +25,7 @@ public import Aliasses
 public import Type.Function
 public import Category.Function
 
-public import Category.Eq
-
-
-
-public import Category.Eq
 public import Category.Monoid
-public import Category.Mappable
 public import Category.Function
 public import Category.Boolean
 
@@ -36,7 +35,6 @@ public import Collection.Tuple
 public import Collection.Collection
 public import Collection.More
 public import Collection.Dict
-public import Collection.Set
 public import Collection.List
 
 public import Graph.Graph

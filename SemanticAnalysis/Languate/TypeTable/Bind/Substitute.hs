@@ -12,7 +12,9 @@ import Languate.TAST
 import Data.List (nub)
 
 
--- execute substitution of b1 everywhere in b0. e.g. concatBindings {a --> b, x --> y} {b --> c} = {a --> c}
+{- execute substitution of b1 everywhere in b0. e.g. concatBindings {a --> b, x --> y} {b --> c} = {a --> c}
+Equivalent to first substituting b0, then b1
+-}
 concatBindings	:: Binding -> Binding -> Binding
 concatBindings (Binding dict) b1
 	= let dict'	= b1 & unbind & filterWithKey (\k _ -> k `notMember` dict) in	-- binding without a and x of

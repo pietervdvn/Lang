@@ -4,12 +4,15 @@ The bool type is a type which represents logical values.
 ----
 
 import Collection.Maybe
+import Category.Eq
 
 --## Definition
 
 -- The ''Bool'' datatype represents truth values of logic.
 data Bool	= False	-- Always keep false first as it is a special builtin value in the interpreter!
 		| True
+
+instance Bool is Eq
 
 
 --## Logical operations

@@ -139,6 +139,9 @@ indent	:: String -> String
 indent str
 	= str >>= (\c -> if c == '\n' then "\n   " else [c])
 
+indentl	:: String -> String
+indentl	= indent . (++) "\n"
+
 indent'	:: String -> String -> String
 indent' msg str
 	= msg ++ indent ("\n" ++  str)
@@ -225,3 +228,7 @@ dictMapM	:: (Monad m, Functor m, Ord k) => (k -> v -> m w) -> Map k v -> m (Map 
 dictMapM f dict
 	= dict & Map.toList & mapM (\(k,v) -> do	a 	<- f k v
 							return (k,a)) |> Map.fromList
+
+-- unlines with extra newline at the start
+unlines'	:: [String] -> String
+unlines' str	= "\n" ++ unlines str

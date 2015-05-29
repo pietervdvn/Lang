@@ -95,21 +95,21 @@ t2	= bnd "Nat" "Any"
 -- fails
 t3	= bnd "Any" "Nat"
 -- binds {a --> natT, b --> intT} by recursive binding
-t4	= bnd "Curry Nat Int" "a -> b"
+t4	= bnd "Curry Nat Bool" "a -> b"
 -- binds {a --> List Nat, b --> Nat}. The "b" is bound via the type requirements
 t5	= bnd "List Nat" "(a:List b)"
 
 -- simple curry binding
-t6	= bnd "Nat -> Int" "a -> b"
+t6	= bnd "Nat -> Bool" "a -> b"
 -- conflicting binding for a
-t7	= bnd "Nat -> Int" "a -> a"
+t7	= bnd "Nat -> Bool" "a -> a"
 -- Binding in, a--> intT
-t8	= bnd "Nat -> Int" "Int -> a"
+t8	= bnd "Nat' -> Bool" "Nat -> a"
 
 -- Binding via application
 t9	= bnd "List Nat" "List a"
 -- conflicting bindings
-t10	= bnd "Int -> Bool" "a -> a"
+t10	= bnd "Nat -> Bool" "a -> a"
 
 -- binding via the super type tables
 t11	= bnd "[Nat]" "{a}"

@@ -48,6 +48,7 @@ requirementsOn a
 getFstt	:: TypeID -> StMsg FullSuperTypeTable
 getFstt tid
 	= do	mFstt	<- get |> allSupertypes |> lookup tid
+		assert (tid /= anyTypeID) "Any is the supertype of everything. It thus has no supertypes."
 		assert (isJust mFstt) $ "No full super type table found for "++show tid
 		return $ fromJust mFstt
 
@@ -75,6 +76,12 @@ addFrees bound
 	= do	ctx	<- get
 		let frees'	= S.union (usedFrees ctx) (S.fromList bound)
 		put $ ctx {usedFrees = frees'}
+
+
+cleanFrees	:: StMsg ()
+cleanFrees
+	= do	ctx	<- get
+		put $ ctx {usedFrees = S.empty}
 
 getUsedFrees	:: StMsg (Set Name)
 getUsedFrees	= get' usedFrees
@@ -109,12 +116,17 @@ catch' stmsg
 			(Right (a,ctx))	-> put ctx >> return (Right a)
 
 
-try		:: StMsg a -> StMsg a -> StMsg a
-try first backup
+try'		:: StMsg a -> (String -> StMsg a) -> StMsg a
+try' first backup
 	= do	ctx	<- get
  		case runstateT first ctx of
-			Left msg	-> backup
+			Left msg	-> backup msg
 			Right (a, ctx')	-> put ctx' >> return a
+
+try		:: StMsg a -> StMsg a -> StMsg a
+try first backup
+	= try' first (const backup)
+
 
 inside		:: String -> StMsg a -> StMsg a
 inside msg m	=  do	ctx	<- get

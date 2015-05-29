@@ -7,16 +7,16 @@ import Collection.Maybe
 import Data.Bool
 import Collection.Tuple
 import Category.Mappable
+import Collection.Set
 
 ---
 A ''Collection'' which preserves order and allows duplicate elements.
 
 The syntactic sugar ''[a]'' desugars to ''List a''
-
 ---
 data List a	= Empty | Elem a (List a)
 
-instance List is Mappable
+instance List a is Set a
 
 map	: (a -> b) -> List a -> List b
 _ Empty	= Empty
