@@ -229,7 +229,6 @@ curryNumber' tt tid
 			superTT	= tt & allSupertypes & findWithDefault (error errMsg) tid  in
 			if anyType `M.member`  superTT then 0 else
 			-- TODO might loop infinitely with linked types
-			-- TODO we assume all curry numbers are the same for the super types
 			let super	= head $ M.keys superTT in
 			curryNumber tt super
 

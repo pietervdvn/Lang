@@ -17,6 +17,8 @@ import Languate.FunctionTable.BuildFunctionTable
 import Languate.FunctionTable.BuildImplementationTable
 import Languate.FunctionTable.BuildDocstringTable
 
+import Languate.TypeTable.Checks.CheckTypeTable
+
 import Languate.CheckUtils
 
 import Languate.MarkUp as Mu
@@ -28,6 +30,7 @@ import Control.Applicative
 buildAllTables	:: Package -> Exc TableOverview
 buildAllTables w
 	= do	tt		<- buildTypeTable w
+		checkTypeTable tt
 		precT		<- buildPrecTable' w
 		(fts, rawClaus)	<- buildFunctionTables w tt
 		implTable	<- buildImplementationTables w (TableOverview tt fts (error "No docs needed!") precT (error "You're building the IMP table dummy, don't try to fetch it!")) rawClaus
