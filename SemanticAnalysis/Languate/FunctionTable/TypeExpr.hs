@@ -5,6 +5,7 @@ import Exceptions
 import Normalizable
 import HumanUtils hiding (when)
 
+import Graphs.DirectedGraph
 import Graphs.TreeShake
 
 
@@ -36,6 +37,8 @@ import StateT
 import Control.Monad
 import Control.Monad.Trans
 import Control.Arrow
+
+import Debug.Trace
 
 {-
 
@@ -83,7 +86,9 @@ _e2te (Call nm) = do
 		funcTable	<- lift $ M.lookup fqn funcTables ? errMsg fqn
 		signs 	<- lift $ M.lookup nm (known funcTable) ? errMsg' fqn nm
 		signs'	<- mapM escapeSign signs
-		zip signs signs' |> (\(origSign, sign') -> TCall (signTypes sign', signTypeReqs sign') origSign) & return
+		let tpInf sign'	= cleanType (signTypes sign', signTypeReqs sign')
+		zip signs signs' |> (\(origSign, sign') -> TCall (tpInf sign') origSign)
+			& return
 _e2te (Seq (BuiltIn "construct" resultType:Nat i:args))
 	= do	rtype	<- resolveTps resultType
 		let nrOfArgs	= length args
@@ -216,21 +221,32 @@ calcType ctx t0 arg
 
 
 
+
+
 cleanType	:: RTypeInfo -> RTypeInfo
-cleanType (rtpUnion, reqs)
-	= let	cleanedUnion	= rtpUnion >>= fetchType reqs	-- the first thing we do, is replacing single 'RFrees by their requirements'
-		usedFrees	= cleanedUnion >>= freesInRT
-		freeDepGraph	= reqs |||>>> freesInRT ||>> concat & M.fromList |> S.fromList
-		neededFrees	= treeshake (S.fromList usedFrees) freeDepGraph in	-- the free types which are still used
-		(cleanedUnion, reqs & filter ((`M.member` neededFrees) . fst) )
+cleanType inf@(rtpUnion, reqs)
+	= let	-- all known frees
+		frees		= (rtpUnion >>= freesInRT) ++ (reqs >>= freesInReq)
+		fullReqs	= ((zip frees []) ++ reqs) & merge ||>> concat
+					& filter (not . idiotReq)	:: RTypeReqs
+		singleReqs	= fullReqs & filter ((==) 1 . length . snd) ||>> head
+		binding		= Binding $ M.fromList singleReqs
+		rtpUnion'	= rtpUnion |> substitute binding
+		reqs'		= fullReqs |||>>> substitute binding
+		rootFrees	= rtpUnion' >>= freesInRT
+		freeDepGraph	= reqs' |||>>> freesInRT ||>> concat & M.fromList |> S.fromList
+		neededFrees	= treeshake (S.fromList rootFrees) $ makeComplete freeDepGraph
+		cleanReqs	= reqs' & filter ((`M.member` neededFrees) . fst) in
+		(rtpUnion', cleanReqs)
 
 
-fetchType	:: RTypeReqs -> RType -> [RType]
-fetchType reqs t@(RFree name)
-		= fromMaybe [t] (lookup name reqs)
-fetchType _ t	= [t]
+-- true is the given type requirement is idiotic/trivial: ("a", RFree a) is idiotic
+idiotReq	:: (Name, [RType]) -> Bool
+idiotReq (a, [RFree b])
+		= a == b
+idiotReq _	= False
 
-
+-- expression cleanup before actual typing
 preClean	:: Expression -> Expression
 preClean (Seq exps)
 		= exps & preClean' & Seq

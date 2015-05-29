@@ -90,12 +90,14 @@ bind' t0 (RFree b)
 	inside ("While binding "++show t0++" against the type requirements on '"++b++"'") $
 		mapM_ (bind' t0) bReqs
 bind' (RFree a) t1
- = do	-- if the free has the right super type, we can assume binding is OK
-	aReqs	<- requirementsOn a
-	ok	<- mapM (\sub -> succeeded $ bind' sub t1) aReqs |> or
+ = bind' t1 (RFree a)
+	--do	-- if the free has the right super type, we can assume binding is OK
+	--aReqs	<- requirementsOn a
+	{-}ok	<- mapM (\sub -> succeeded $ bind' sub t1) aReqs |> or
 	assert ok $ "Could not bind the free '"++a++"'"++
 			" as it does not have the necessary super type "++st True t1++
 			".\nIt has the supertypes "++show aReqs
+			TODO can this check really be ommited?-}
 bind' (RCurry t0 t1) (RCurry t0' t1')
  = do	bind' t0 t0'
 	bind' t1 t1'

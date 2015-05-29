@@ -37,26 +37,16 @@ import qualified Data.Set as S
 
 defFrees	= [] -- "a","b","pubKey","privKey"]
 
+tp	= tst "mapl (!) (Elem True Empty)" |> head & unsafePerformIO
 
-t	= tp "True" "Bool"
+
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv prelude defFrees M.empty expr
 		putStrLn "-- original expression --"
 		print expr
 		putStrLn "-- which has the type --"
-		return result
-
-tp str rt
-	= do	pat	<- parsePattern str
-		let typ	= pt rt
-		putStrLn "-- pattern --"
-		print pat
-		let ft'	= (to & functionTables & unpackFTS & M.lookup prelude) ? "NO FT"
-		ft	<- runExceptionsIO' ft'
-		result	<- runExceptionsIO' $ typePattern ft typ pat
-		putStrLn "-- which is typed as --"
-		return result
+		return $ result |> typeOf
 
 parseExpr s	= parse "expr" s 	|> pt2expr
 parsePattern s	= parse "patternRoot" s |> pt2pattern
