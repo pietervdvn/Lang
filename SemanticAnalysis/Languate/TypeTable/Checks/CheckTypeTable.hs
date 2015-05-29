@@ -26,4 +26,4 @@ checkFSTT tt fstt	=
 		let msg (nr, rtps)
 			= plural nr "argument"++" "++isAre nr++" needed by "++ rtps |> st True & commas
 		let msgs	= curries & merge |> msg & unlines
-		assert (curries |> snd & allSame) $ "Not all supertypes take the same number of arguments: "++indent ("\n" ++msgs )
+		assert (curries |> fst & allSame) $ "Not all supertypes take the same number of arguments: "++indent ("\n" ++msgs )
