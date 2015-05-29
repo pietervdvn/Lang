@@ -35,11 +35,11 @@ construct nrOfArgs i typeInfo
 -- special function for deconstructing ADTS. The passed typeInfo should be the type "value -> Maybe (a,b,c)"
 deconstruct	:: Int -> (Type, [TypeRequirement]) -> Clause
 deconstruct index typeInfo
-	= Clause [Assign "value"] $ Seq ([BuiltIn "deconstruct" typeInfo, Nat index, Call "value"])
+	= Clause [Assign "value"] $ Seq [BuiltIn "deconstruct" typeInfo, Nat index, Call "value"]
 
 is		:: Int -> (Type, [TypeRequirement]) -> Clause
 is index typeInfo
-	= Clause [Assign "value"] $ Seq ([BuiltIn "is" typeInfo, Nat index, Call "value"])
+	= Clause [Assign "value"] $ Seq [BuiltIn "is" typeInfo, Nat index, Call "value"]
 
 -- Construction primitves which can not be encoded as code (e.g. construct, destruct) and are language features live in the nameless package by pietervdvn
 

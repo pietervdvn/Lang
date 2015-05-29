@@ -50,7 +50,7 @@ evalExpr f ctx (TCall _ sign)
 -- When a thunk is ready for unpacking (no more needed args in head), it unpacks
 evalThunk	:: Evaluators -> Value -> Value
 evalThunk evals (Thunk ((ctx, TClause [] texpr):_))
-		= (evalExpr' evals) ctx texpr
+		= evalExpr' evals ctx texpr
 evalThunk _ v	= v
 
 apply'		:: Evaluators -> Context -> TExpression -> TExpression -> Value
@@ -64,12 +64,12 @@ apply f (ADT i typeInfo args) arg
 		= ADT i typeInfo (args++[arg])
 apply f (Thunk clauses) arg
 		= let clauses'	= clauses |> uncurry (evalClauses f arg) & catMaybes in
-			if L.null clauses' then error $ "Pattern fallthrough. No clauses match!"
+			if L.null clauses' then error "Pattern fallthrough. No clauses match!"
 			else evalThunk f $ Thunk clauses'
 
 
 evalClauses	:: Evaluators -> Value -> Context -> TClause -> Maybe (Context, TClause)
 evalClauses f arg ctx (TClause (pat:pats) expr)
-	= do	scope	<- (evalPattern' f) ctx arg pat
+	= do	scope	<- evalPattern' f ctx arg pat
 		let ctx'=  ctx {localScope = M.union scope $ localScope ctx}
-		return $ (ctx', TClause pats expr)
+		return (ctx', TClause pats expr)

@@ -25,7 +25,7 @@ evalPattern f ctx v (TDeconstruct sign patterns)
 			let [tuple]	= mtuple
 			let args	= untuple tuple
 			if length args /= length patterns then error "Number of patterns and values do not match!" else do
-			scopes	<- mapM (uncurry $ evalPattern f ctx) $ zip args patterns
+			scopes	<- zipWithM (uncurry $ evalPattern f ctx) args patterns
 			return $ M.unions scopes
 evalPattern _ _ _ pat
 		= todos $ show pat
