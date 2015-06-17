@@ -45,7 +45,7 @@ precedence of (*) is Left, (*) < (+)
 precedence of (+) is Left, (+) < (<)
 (*)	: Sum -> Nat -> Sum
 _ 0	= neutral
-s i	= s + (s * (i - 1))
+s i	= s + (s * pred i)
 
 instance Product is Monoid
 
@@ -57,4 +57,4 @@ neutral	: Product
 
 (^)	: Product -> Nat -> Product
 _ 0	= neutral
-p i	= p * (p * (i - 1))
+p i	= p * (p * pred i)
