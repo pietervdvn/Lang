@@ -184,7 +184,7 @@ lookupSupersAgainst t availableForm wantedType
  | isNormal t
    = inside ("Looking up supers of "++st True t++", these are: "++show availableForm++", wanted super: "++show wantedType) $ do
 	tidSub		<- getBaseTID t ? "Huh? T0 should be normal!"
-	stt		<-  getFstt tidSub
+	stt		<- getFstt tidSub
 	-- gives the applied types, which should get bound against the requirements
 	-- substitution gives ""availableForm --> t""
 	let baseBinding	= appliedTypes t & zip defaultFreeNames
@@ -201,43 +201,14 @@ lookupSupersAgainst t availableForm wantedType
 		show (length freeReqs)++" "++isAre (length freeReqs)++ " needed (or "++show wantedType++" has been applied to too many arguments)"
 	-- the binding which converts the the wanted type into available form
 	-- wantedType --> availableForm
-	form2type	<- bind' availableForm wantedType >> getBinding
-	{-
-		Binds the type requirement, imposed by the availableForm.
-		Gives a bind away, to prevent name collision, and recursively bound values
-	-}
-	(bindAwayRaw, reqBound)
-			<- isolate $ _fixRequirements freeReqs baseBinding
-	let bindAwayRev	= bindAwayRaw & M.toList |> swap & M.fromList
-	-- empty bindaway: a0 -> a0, k1 --> k1 to ease the concatBindings
-	let bindAwayId	= substituents form2type
-				& L.filter (`L.notElem` M.elems bindAwayRaw)
-				|> (\free -> (free, free))
-				& M.fromList & asBinding
-	-- ""wantedType --> wantedType (escaped)""
-	let bindAway	= mergeBinding (asBinding bindAwayRaw) bindAwayId
-	-- ""wantedType --> availableForm (escaped)""
-	let form2type'	= concatBindings bindAway form2type
+	form2type	<- isolate $ bind' availableForm wantedType >> getBinding
+	-- gives the full binding in the opposite direction
+	let fullBind	= chainBindings form2type (baseBinding & M.fromList & Binding) & unbind & M.toList	:: [(Name,RType)]
+	mapM_ addBinding fullBind
 
-	-- basebinding with escaped frees applied
-	let baseBinding'= baseBinding |> first
-				(\free -> findWithDefault free free bindAwayRev)
-	-- ... which got merged with baseBinding'
-	let reqBound'	= mergeBinding (Binding $ M.fromList baseBinding') reqBound
-	let debugMsg	=zip 	["freeReqs","reqBound","bindAway","form2type","form2type'","baseBinding","baseBinding'","reqBound'"]
-[show freeReqs,show reqBound,show bindAway,show form2type,show form2type',show baseBinding,show baseBinding', show reqBound']
-				|> uncurry (\nm str ->"\t"++ nm++": "++str) & unlines
-	()	<- trace (show t++" bind in "++show wantedType++" -->> \n" ++ debugMsg) $ return ()
 
-	{-
-	Recap:
-		reqBound'	= bound via requirements, in the escaped namespace of available types;
-					basically 	subtype -> availableForm (escaped)
-		form2type'	= wantedForm --> availableForm (escaped namespace)
 
-	-}
-	-- bind the applied types
-	bindSameAgainst (unbind reqBound' & M.toList) (unbind form2type')
+
  | otherwise	= fail $ "The type "++show t++" is not normal"
 
 

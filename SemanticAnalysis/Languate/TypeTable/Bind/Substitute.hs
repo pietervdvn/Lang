@@ -1,4 +1,4 @@
-module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, buildBinding', concatBindings, substituents, mergeBinding, asBinding, unbind, substituteReq, substituteAway) where
+module Languate.TypeTable.Bind.Substitute (substitute, substitute', buildBinding, buildBinding', concatBindings, substituents, mergeBinding, asBinding, unbind, substituteReq, substituteAway, chainBindings) where
 
 {--
 This module implements substitute and friends
@@ -12,16 +12,24 @@ import Languate.TAST
 import Data.List (nub)
 
 
-{- execute substitution of b1 everywhere in b0. e.g. concatBindings {a --> b, x --> y} {b --> c} = {a --> c}
+{- execute substitution of b1 everywhere in b0. e.g. concatBindings {a --> b, x --> y} {b --> c} = {a --> c, b --> c, x --> y}
 Equivalent to first substituting b0, then b1
 -}
 concatBindings	:: Binding -> Binding -> Binding
 concatBindings (Binding dict) b1
-	= let dict'	= b1 & unbind & filterWithKey (\k _ -> k `notMember` dict) in	-- binding without a and x of
+	= let 	dict'	= b1 & unbind & filterWithKey (\k _ -> k `notMember` dict) in	-- throw away "invisible" values
 		dict |> substitute b1 & filterWithKey (\k v -> not $ isSame k v) & M.union dict' & Binding
 		where isSame	a (RFree b)	= a == b
 		      isSame	_ _		= False
 
+{-
+chainBindings {a --> b,x --> y} {b --> c, g --> h} = {a --> c, x --> y}
+Drops starting links
+-}
+chainBindings	:: Binding -> Binding -> Binding
+chainBindings (Binding dict) b1
+	= let	dict'	= b1 & unbind & filterWithKey (\k _ -> k `notMember` dict) in	-- throw away "invisible" values
+		dict |> substitute (Binding dict') & Binding
 
 -- Gets variables which will be substituted
 substituents	:: Binding -> [Name]
@@ -88,4 +96,4 @@ buildBinding' (a:as)
 			bound	= keys base ++ elems base
 			canditates	= filter (`notElem` bound) [ a ++ show i | i <- [1..]]
 			replacement	= head canditates in
-			insert a replacement base
+			insert a replacement base	
