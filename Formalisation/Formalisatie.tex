@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.9,0.9,0.9}
+\definecolor{red}{rgb}{1.0,0.9,1.0	}
+\usepackage[margin=0.7in]{geometry}
+
+\begin{document}
+\newcommand{\infrule}[2]{~\\ \begin{tabular}{c}#1\\ \hline#2 \end{tabular}}
+\newcommand{\infruleC}[3]{\infrule{#1}{#2} (#3)}
+\newcommand{\code}[1]{\textbf{#1}}
+\newcommand{\syntax}[1]{\colorbox{grey}{#1} }
+\newcommand{\val}[1]{\colorbox{red}{#1} }
+\newcommand{\arr}{$\rightarrow$}
+\newcommand{\amp}{\&}
+\newcommand{\n}{$\backslash$n }
+\newcommand{\perc}{$\%$}
+\title{Formalisatie Languate}
+\author{Pieter Vander Vennet}
+\maketitle
+
+\input{Syntax}
+\clearpage
+\input{Typering}
+\clearpage
+
+\section{Evaluatieregels}
+
+\subsection{Expressies}
+
+Een expressie wordt ge\"evalueerd binnen een context $\xi$ naar een \emph{waarde}. Deze waarde is enerzijds een \emph{Constructor},
+of anderzijds een \emph{Thunk}, die de resterende expressie en context bijhoudt.
+Op deze manier kan lazyness en parti\"ele applicatie voorgesteld worden.
+~\\
+
+\infruleC{$\xi \vdash$ f : T, \syntax{f}}{\val{Thunk [$\xi0$ clause0, $\xi1$ clause1, \ldots]}}{Wrapping in context}
+~\\
+
+\infruleC{\val{Thunk [clause0, clause1, \ldots]} \val{val}}{\val{Thunk[clause0 val, clause1, \ldots]}}{Applicatie}
+~\\
+
+\infruleC{\val{Thunk [$\xi0$ \code{= \syntax{expr} \syntax{a} \syntax{b}}, \ldots]}} {$\Gamma$, \val{expr} \val{a} \val{b}}
+{Selectie eerste matchende clause}
+
+De eerste clause waar alle patterns matchen wordt geselecteerd. 
+De variabelen in de context $\xi$ worden gesubstitueerd in de overblijvende expressie. 
+Aangezien ook functies variabelen zijn, worden deze allemaal gesubstitueerd tot values, waarna deze met applicatie of andere regels verder ge\"evalueerd worden.
+~\\
+\infruleC{\val{$\xi \vdash$ P0 : T , val : T, (P0 P1 \ldots = expr) val}}
+{\val{$\xi \cup P0 \perc val$, P1 \ldots = expr}}
+{Pattern matching}
+
+Een constructor wordt ge\"evalueerd tot een \val{ADT} waarbij de index van de constructor wordt gebruikt.
+
+\infruleC{\val{Thunk $\xi$, \code{Constructor val0 val1 \ldots}}}{\val{ADT i val0 val1 \ldots}}{Constructor evaluatie}
+
+
+\subsection{Patterns}
+
+Patterns worden uit elkaar getrokken en geven aanleiding tot een lokale scope.
+
+\infruleC{$\xi, \syntax{a} \perc \val{val} $ }{a = \val{val}}{Variabele-toekenning}
+
+\infruleC{$\xi$, \syntax{(Constructor i P0 P1 \ldots)} \perc \val{ADT i val0 va1 \ldots}}
+ {\syntax{P0}\perc \val{val0}$\cup$ \syntax{P1}\perc \val{val1} $\cup$ \ldots }{Deconstructie}
+
+\end{document}

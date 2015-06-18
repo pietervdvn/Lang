@@ -1,0 +1,85 @@
+\section{Syntax}
+
+Zie de bnf-bestanden voor de volledige syntax met syntactische suiker. 
+
+Hieronder volgt er een kort, involledig overzicht van de belangerijkste regels.
+
+\subsection{Expressies}
+
+\begin{lstlisting}[frame=single]
+functionName	::= [a..z][a..zA..Z0..9]
+constructorName ::= [A..Z][a..zA..Z0..9]
+-- een expressie is een functieoproep met argumenten
+-- een functionName kan ook een locale variabele zijn
+expression ::= (functionName | constructor) expression* 
+		| "(" expression ")"
+\end{lstlisting}
+
+Een constructor is bv. \code{True}, \code{False}, maar ook \code{Nil} en
+\code{Elem}.
+
+Een expressie is bv \code{Elem True (Elem False Nil)}
+
+\subsection{Types}
+\begin{lstlisting}[frame=single]
+knownType	::= [A..Z][a..zA..Z0..9]
+freeType	::= [a..z][a..zA..Z0..9]
+constrainedType	::= "("
+simpleType	::= knownType | freeType | "(" type ")" 
+appliedType	::= simpleType+	 
+type		::= appliedType ("->" type) *
+\end{lstlisting}
+
+Types zijn bv. \code{Bool}, \code{Bool \arr Bool}, \code{(a \arr b) \arr
+List a \arr List b}
+
+\subsection{Nieuwe types}
+
+\begin{lstlisting}[frame=single]
+data	::= "data" knownType freeType* "=" 
+	   (constructor type*) ("|" constructor type*)*
+cat		::= "cat" knownType freeTypes 
+			("\n" functionDeclaration)+
+instance	::= "instance" type "is" type
+\end{lstlisting}
+
+Voorbeelden hiervan zijn:
+
+\begin{lstlisting}[backgroundcolor=\color{grey}]
+data Bool 	= True | False
+data List a	= Nil | Elem a (List a)
+
+cat Functor a
+     map : (a -> b) -> (functor:Functor) a -> functor b
+	
+instance List is Functor
+
+\end{lstlisting}
+
+
+\subsection{Functiedeclaraties en pattern matching}
+
+\begin{lstlisting}[frame=single]
+variable::= functionName
+pattern	::= variable | constructor | "(" pattern+ ")"
+function::= functionName ":" type ("&" type)* "\n" 
+	(pattern "=" expression)+
+\end{lstlisting}
+
+Examples of functions are:
+
+\begin{lstlisting}[backgroundcolor=\color{grey}]
+
+not	: Bool -> Bool
+True	= False
+False	= True
+
+and		: Bool -> Bool -> Bool
+True True	= True
+_ _		= False
+
+map		: (a -> b) -> List a -> List b
+_ Nil		= Nil
+f (Elem a list)	= Elem (f a) (map f list)
+
+\end{lstlisting}

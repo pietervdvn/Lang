@@ -1,0 +1,76 @@
+\section{Typeringsregels}
+
+$\Xi$ is de typeringscontext en houdt bij welke functie welk type heeft op een globaal niveau.
+Expressies worden ge\"evalueerd binnen een omgeving $\xi$, welke de types (en waardes) van lokale variabelen bijhoudt.
+$\Gamma$ houdt de subtyperingsrelatie bij. $\theta$ weet welke clause van welk
+type is.
+Wanneer deze tabellen niet nodig zijn, worden ze niet vermeld in de
+typeringsregels.
+\syntax{De grijze text} stelt een ingegeven lijn code voor, \code{syntax in het vet} duiden op variabele namen.
+\newline
+
+
+
+\subsection{Typering van constructoren}
+
+
+\infruleC{$\Xi$, \syntax{data \code{T} = \code{Cons}}}
+	{$\Xi \cup $ \code{Cons} : \code{T}}{Simpele constructor}
+	
+\infruleC{$\Xi$, \syntax{data \code{T} = \code{Cons T0 T1 \ldots}}}
+	{$\Xi \cup $ \code{Cons} : \code{T0 \arr T1 \arr \ldots \arr T}}{Constructor met type argumenten}
+
+\infruleC{$\Xi$, \syntax{data \code{T} = \code{Cons0 \ldots} $|$ Cons1 \ldots $|$ \ldots}}
+	{$\Xi \cup $ \code{Cons0} : \code{\ldots \arr T} $\cup$ \code{Const1} : \code{\ldots \arr T} $\cup$ \ldots}{Data met meerdere constructoren}
+
+\subsection{Typering van patterns}
+
+Patterns halen een waarde uit elkaar, en slaan die op in een lokale variabele, binnen de tabel $\xi$ (lokale context).
+Patterns worden getypeerd met behulp van een type, hier altijd $T$ genoemd.
+
+\infruleC{$\xi$, \syntax{\code{a}}, T}{$\xi \cup $ \code{a} : T}
+	{Variabele-toekenning}
+	
+\infruleC{$\xi$, $\Gamma \vdash $ \code{Cons} $\in$ \code {T}, \syntax{Cons}, T}
+{$\xi \cup$ Cons $\in$ T}{Simpele Patternmatch}
+
+\infruleC{$\xi \vdash$ P0 $\in$ T0, P1 $\in$ T1, \ldots , $\Gamma \vdash $
+\code{Cons} $\in$ T0 \arr T1 \arr \ldots \arr T, \syntax{\code{Cons
+\code{P0} \code{P1} \ldots }}, T}
+{$\xi \cup$ \code{Cons} \code{P0} \code{P1} \ldots $\in$ T} {Recursieve
+patroontypering}
+
+\subsection{Typering van clauses}
+We voeren nog een tabel in: $\theta$. Deze is een 'lokale variabele' die
+bijhoudt welke expressie van welk type is.
+
+De eerste regel ziet er vreemd uit, dit is omdat er geen patterns zijn.
+
+\infruleC{$\theta, \Xi \vdash$ \code{expr} : T, \syntax{ = \code{expr}}}
+	{$\theta \cup$ \code{ = expr} : T}
+	{No patterns-clause}
+
+\infruleC{$\theta \vdash$ \code{P1 \ldots = expr} : T0 \arr T, $\Xi , \xi \vdash$
+\code{P0} : T0, \syntax{\code{P0} \code{P1} \ldots = \code{expr}}}
+{$\theta \cup $ P0 P1 \ldots = \code{expr} : T} {Recursive-pattern application}
+
+
+\subsection{Typering van functies}
+
+
+\infruleC{$\Gamma, \Xi, \xi, \theta \vdash $ clause0 : T0, T1, \ldots, clause1 : T0, T1, \ldots \\
+ \syntax{f : T0 \amp T1 \amp \ldots \n clause0 \n clause1 \ldots} }
+{$\Gamma \cup $ f : T0 \amp T1 \amp \ldots} {functie-declaratie}
+
+Technisch gezien is $\xi$ en $\theta$ verschillend per clause. Dit is immer de local scope die bij de bijbehorende pattern match hoort.
+Elke clause moet een supertype zijn van $f$. Elke clause moet dus een supertype zijn van $T0$,$T1$, \ldots
+
+\subsection{Subtyperingsregels}
+
+Om de regels simpel te houden, houden we geen rekening met de vrije type
+variabelen. Deze kunnen immers hernoemd worden wanneer nodig, we gaan ervan uit
+dat dit impliciet gebeurt.
+
+\infruleC{$\Gamma \vdash$ e : T, \syntax{instance \code{T} is \code{SuperT}}}
+{e : SuperT}{instantie-declaratie}
+
