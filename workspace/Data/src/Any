@@ -4,9 +4,12 @@ Implementation of Any
 ---
 
 ---
-The supertype of every single type. Each type has ''Any'' implicitly as supertype.![Supertype.jpg](../doc/res/Supertype.jpg)
+The supertype of every single type. Each type has ''Any'' implicitly as supertype.
 
 The type ''.'' desugars to ''Any''.
+
+![Supertype.jpg](../doc/res/Supertype.jpg)
+
 
 ---
 cat Any
