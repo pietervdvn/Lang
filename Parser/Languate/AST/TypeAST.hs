@@ -75,7 +75,8 @@ data Type	= Normal [Name] Name	-- A normal type, e.g. Bool. Extra names are to d
 		| Curry [Type]
 		-- represents a tuple type. When the types are converted to fully qualified types, the actual tuple type is used.
 		| TupleType [Type]
-		| Infer
+		-- gets used e.g. in ''map : (a -> b) -> Mappable (_:a) -> Mappable c''
+		| DontCareType
 	deriving (Eq, Ord)
 
 {- The data structure representing a type requirement of the form "a has a supertype Ord".

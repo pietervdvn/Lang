@@ -41,8 +41,8 @@ public import Prelude
  parFreeType	::= "\(" freeType (subTypeT typeConjComma) "\)"
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
-_$infer		::= "_"		-- compiler should infer which is the type
-_simpleType	::= knownType | constrFreeType | void | infer | "\(" type "\)"
+_$dontCare	::= "_"		-- we don't care about the type
+_simpleType	::= knownType | constrFreeType | void | dontCare | "\(" type "\)"
 
 
 -- used for lists of tuples. ''[Int, Bool]'' = ''[(Int, Bool)]''

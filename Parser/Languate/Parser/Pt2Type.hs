@@ -33,7 +33,7 @@ convert (KnownType nms id)
 convert (FreeType id constraints)
 		= let (isTypes, reqs)	= unzip $ map convert constraints in
 			(Free id, concat reqs ++ [(id, tp) | tp <- isTypes])
-convert Unknown	= noReq Infer
+convert Unknown	= noReq DontCareType
 convert (AppliedType ast asts)
 		= packReqs (\tps -> Applied (head tps) (tail tps)) (ast:asts)
 convert (Tuple asts)
@@ -56,7 +56,7 @@ t "globalIdent" s
 t "typeIdent" s	= Ident s
 t "freeType" s	= FreeType s []
 t "void"  _	= KnownType [] "Void"
-t "infer" _	= Unknown
+t "dontCare" _	= Unknown
 t "subTypeT" _	= InT
 t "typeConjTC" _
 		= Comma

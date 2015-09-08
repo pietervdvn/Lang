@@ -64,7 +64,7 @@ st (Applied t tps)
 st (Curry tps)	=  "("++intercalate " -> " (map st tps)++")"
 st (TupleType tps)
 		=  "(" ++ intercalate ", " (map st tps) ++")"
-st Infer	= "_"
+st DontCareType	= "_"
 
 
 freesIn	:: Type -> [Name]
