@@ -42,12 +42,28 @@ Clone the repo and install all
     cd Lang
     ./installAll
 
-Play around by starting the interpreter:
-    ./Main
+Start the interpreter:
 
-You will now get a lot of text (with some instructions). Try out boolean operators:
+    cd Interpreter
+    ghci Languate/MaintenanceAccess/TestInterpreter.hs 
+    -- You are now into an interactive haskell session
+    -- type "i" to evaluate a languate expression
+    i "True && True"
+    
+    
+The result you get is a `Value`. It'll give you the type of the value, and which what contstructor it was built.
+(e.g. `False` is `ADT: 0 <([pietervdvn:Data:Data.Bool.Bool],[])> []`, `True` is `ADT: 1 <([pietervdvn:Data:Data.Bool.Bool],[])> []`, a list `Elem True Empty` is `ADT: 1 <([(a0 -> (a1 -> [a]))],[])> [ADT: 1 <([pietervdvn:Data:Data.Bool.Bool],[])> [],ADT: 0 <([[a]],[])> []]`)
+
+
+Try out boolean operators:
+
     True && False
     !False
+    
+Lists:
+
+    Elem True (Elem False Empty)
+    map (!) (Elem True (Elem False Empty))
 
 
 If you want to use the BNF-lib to  parse another languate, see the readme in bnf which contains a complete tutorial.
@@ -110,31 +126,11 @@ Interpreter
 
 A simple program which executes 'compiled' programs.
 
-ExampleChecker
---------------
-
-Goes over all the loaded examples and executes them. Makes a lot of noise if an example is incorrect.
-
-Main<X>
--------
-
-A working version of an interpreter. X denotes which increment it is.
-
-
 BinArch
 -------
 
 Binary archive, which keeps all versions.
 
-Experiments
------------
-
-Haskell code experiments to try out concepts
-
-Thoughts
---------
-
-Each programming languate needs a blog!
 
 Selling points
 ==============
