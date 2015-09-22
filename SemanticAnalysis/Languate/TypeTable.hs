@@ -191,8 +191,8 @@ resolveType tlt e@(TupleType (t:tps))
 			tail	<- resolveType tlt (TupleType tps)
 			return $ RApplied (RApplied tupleType rt) tail
 
-resolveType _ Infer
-		= halt "Unresolved infer"
+resolveType _ DontCareType
+		= halt "Unresolved dont care type"
 resolveTypes tlt
 		= mapM (resolveType tlt)
 

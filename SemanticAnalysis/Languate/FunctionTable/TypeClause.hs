@@ -66,7 +66,7 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 							patterns & zip argTypes |> uncurry (typePattern isSubT ft)
 							& sequence |> unzip
 				localScope	<- mergeDicts scopes ||>> (\t -> ([t],[]))
-				texprs'		<- inside "While typing the expression" $
+				texprs'		<- inside ("While typing the expression "++ show e) $
 							expr2texpr p to fqn frees localScope $ expr2prefExpr (precedenceTable to) e
 				return (texprs', tpats)
 

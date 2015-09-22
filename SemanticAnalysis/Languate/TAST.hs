@@ -122,8 +122,29 @@ data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
 			| TApplication (RTypeUnion, RTypeReqs) TypedExpression TypedExpression
 			| TCall (RTypeUnion, RTypeReqs) Signature	-- we save the type independently as not to change the signature - we need it to look up the implementation
 			| TLocalCall Name (RTypeUnion, RTypeReqs)
-	deriving (Show, Eq)
+	deriving (Eq)
 type TExpression	= TypedExpression
+
+instance Show TypedExpression where
+	show 	= showTE
+
+-- Typed Expression to string
+showTE	:: TypedExpression -> String
+showTE (TNat i)
+	= show i ++ " :Nat"
+showTE (TFlt f)
+	= show f ++ " :Float"
+showTE (TChr c)
+	= show c ++ " :Char"
+showTE (TApplication (retTps, reqs) func arg)
+	= let	funcStr	= HumanUtils.pars (show func)
+		argStr	= HumanUtils.pars (show arg)
+		tpStr	= show retTps in
+		funcStr ++ " " ++ argStr ++ " :"++tpStr
+showTE (TCall _ sign)
+	= signName sign
+showTE (TLocalCall nm _)
+	= show nm
 
 
 typeOf		:: TExpression -> (RTypeUnion, RTypeReqs)

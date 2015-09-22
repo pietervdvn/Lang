@@ -25,6 +25,7 @@ import Languate.TAST
 import Languate.Interpreter
 import Languate.Value
 
+import Data.List
 import Data.Map as M
 
 -----------------------------------
@@ -40,12 +41,20 @@ i str	=  do	expr	<- parseExpr str
 		return $ val |> show
 
 
-t	:: String -> IO [String]
-t str	=  do	expr	<- parseExpr str
-		texprs	<- runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
-				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
-		return $ texprs |> typeOf |> show
+t	:: String -> IO ()
+t str	=  do	texprs <- typedExpr str
+		texprs |> typeOf & nub |> show |> ("\t"++) & unlines & ("Possible types are:\n"++) & putStrLn
 
+
+typedExpr	:: String -> IO [TypedExpression]
+typedExpr str
+	= do	expr	<- parseExpr str
+		runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
+				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
+
+info	= [("i 'expression'", "Interpret given expression"),("t 'expression'","Type given expression"),("parse 'bnf-rule' 'expression'", "Parse given expression to it's parse tree'"),("typedExpr 'expression'", "Parse and type expression, give back in a typed form"), ("parseExpr 'expression'","Parse expression"),("help","Give this help")]
+
+help	= info |> (\(a,b) -> "  "++ a ++ "\t"++b) & unlines & ("\nInterpreter help:\n-----------------\n\n"++) & putStrLn
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
