@@ -6,7 +6,6 @@ The list category declaration.
 import Collection.Maybe
 import Data.Bool
 import Collection.Tuple
-import Category.Mappable
 import Collection.Set
 
 ---
@@ -25,8 +24,8 @@ f (Elem head tail)	= Elem (f head) (map f tail)
 
 -- Gives the first element of the list, Nothing if this list was empty
 head		: [a] -> a?
-(Elem a _)	= Just a
 Empty		= Nothing
+(Elem a _)	= Just a
 
 -- Drops the first element of the list, returns nothing for an empty list
 tail		: [a] -> [a]?
@@ -37,3 +36,9 @@ Empty		= Nothing
 tail'		: [a] -> [a]
 (Elem _ tail)	= tail
 Empty		= Empty
+
+prepend		: a -> [a] -> [a]
+		= Elem
+
+empty		: [a]
+		= Empty

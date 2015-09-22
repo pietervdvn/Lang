@@ -9,7 +9,6 @@ This module gives the category declaration of each collection.
 
 import Category.Monoid
 import Category.Function
-import Category.Mappable
 import Category.Eq
 import Collection.Maybe
 import Collection.Void
@@ -39,7 +38,6 @@ cat Collection a
 	(:)	: (a:b) -> collection b -> collection b
 
 
-instance Collection is Mappable
 instance Collection a is Monoid
 instance Collection (a:Eq) is Eq
 

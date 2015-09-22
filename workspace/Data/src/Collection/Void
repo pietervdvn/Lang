@@ -4,7 +4,6 @@ Implementation of ''Void''
 ----
 
 import Category.Monoid
-import Category.Mappable
 import Data.Bool
 import Collection.Maybe
 

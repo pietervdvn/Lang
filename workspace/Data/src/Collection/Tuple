@@ -7,7 +7,6 @@ import Any
 import Data.Bool
 import Collection.Maybe
 import Category.Eq
-import Category.Mappable
 
 ---
 The data structure representing tuples.
@@ -21,7 +20,6 @@ data Tuple a b	= Tuple a b
 
 instance Tuple (a:Eq) (b:Eq) is Eq
 
-instance Tuple a rest is Mappable a
 
 map	: (a -> b) -> (a, rest) -> (b, rest)
 f (Tuple a rest)	= Tuple (f a) rest

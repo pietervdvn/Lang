@@ -1,13 +1,16 @@
 module Languate.Value where
 
 import StdDef
+import HumanUtils
 
 import Languate.FQN
 import Languate.TAST
 import Languate.Semantal
 import Languate.TableOverview
+import Data.Char (ord, chr)
 
 import Data.Map as M
+import Data.Maybe
 
 {--
 A value is either:
@@ -20,7 +23,17 @@ data Value	= ADT Int RTypeInfo [Value]
 
 data Context	= Ctx {	package		:: TableOverview
 		  	, location	:: FQN
-			, localScope	:: Map Name Value}
+			, localScope	:: Map Name Value
+			, stack		:: [String]}
+
+
+printStackTrace	:: String -> Context -> a
+printStackTrace msg ctx
+	= error ("\n\n!!!!!!!!!!!!!!!!!!!\n"++msg ++ ":\n" ++ stack ctx & showStackTrace & unlines)
+
+showStackTrace	:: [String] -> [String]
+showStackTrace signs
+		= signs |> ("In the function "++) ++ ["End of stack"]
 
 -- Dependency injection
 data Evaluators	= Evaluators {
@@ -33,10 +46,36 @@ instance Show Value where
 
 
 sv	:: Value -> String
-sv (ADT i t vals)
-	= "ADT: "++show i++" <"++show t++"> " ++ show vals
+sv val@(ADT i t vals)
+	= fromMaybe ("ADT: "++show i++" <"++show t++"> " ++ show vals)
+		(fancyShow val)
 sv (Thunk texpr)
 	= "THUNK: " ++ (texpr |> snd & show)
+
+
+fancyShow	:: Value -> Maybe String
+fancyShow val@(ADT i _ vals)
+	-- TODO change those over so that only string needs a fancy show
+	| [natType, natType'] |> (`elem` typesOfVal val) & or
+		= Just ("Int: "++ show (extractNatValue val) )
+	| charType `elem` typesOfVal val
+		= Just ("Char: "++[chr $ extractNatValue $ head vals])
+fancyShow _	= Nothing
+
+
+-- extracts the integer value of encoded, natural values as (Succ (Succ Zero))
+extractNatValue	:: Value -> Int
+{-- no arguments means either
+	- the value was in-lang constructed with 'Zero', ADT 0 Nat []
+	- the value was natively built, e.g. 128 -> ADT 128 Nat []
+--}
+extractNatValue (ADT i _ [])	= i
+-- The constructor 'Succ' was used
+extractNatValue (ADT 1 _ [val])
+	= 1 + extractNatValue val
+extractNatValue v
+	= error $ "This is a strange NAT-value: "++show v
+
 
 instance Eq Value where
 	(==)	= eq
@@ -46,8 +85,10 @@ eq (ADT i t args) (ADT i' t' args')
 	= i == i' && t == t' && args == args'
 eq _ _	= False
 
-
+typesOfVal	:: Value -> RTypeUnion
+typesOfVal 	= fst . typeOfVal
 
 typeOfVal	:: Value -> RTypeInfo
-typeOfVal (ADT _ inf _)	= inf
+typeOfVal (ADT _ inf vals)
+			= inf
 typeOfVal (Thunk _)	= error "Type of thunk?"

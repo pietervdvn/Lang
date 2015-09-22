@@ -35,8 +35,12 @@ i	:: String -> IO [String]
 i str	=  do	expr	<- parseExpr str
 		texprs	<- runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
 				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
+		putStrLn "\nExpression:"
 		print expr
-		let context	= Ctx tablesOverv prelude M.empty
+		putStrLn "Typed expression:"
+		texprs |> show |> ("\n"++)& unlines & putStrLn
+		putStrLn "----------------------------\n"
+		let context	= Ctx tablesOverv prelude M.empty []
 		let val		= texprs |> evalExpr context
 		return $ val |> show
 

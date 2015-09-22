@@ -12,11 +12,18 @@ public import Collection.List
 public import Collection.Set
 
 public import Num.Nat
+public import Data.Char
 public import ControlFlow
 
 
 public import Category.Eq
-public import Category.Mappable
+
+
+test	: (a -> b) -> a -> b
+f a	= f a
+
+
+
 
 ---
 
@@ -39,8 +46,6 @@ public import Collection.List
 
 public import Graph.Graph
 
-public import Num.Nat
-public import Num.Float
 
 public import Crypto.PubPrivAlgo
 ---

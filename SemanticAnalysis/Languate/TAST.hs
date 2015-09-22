@@ -171,7 +171,7 @@ data TPattern	= TAssign Name
 		| TDeconstruct Signature [TPattern]
 		| TMulti [TPattern]
 		| TDontCare
-		| TEval TExpression
+		| TEval TExpression	-- The value should be the same as the result of this expression
 	deriving (Show, Eq)
 
 data TClause		= TClause [TPattern] TExpression

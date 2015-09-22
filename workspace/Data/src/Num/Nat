@@ -15,9 +15,11 @@ type Nat'	= Nat
 instance Nat is Eq
 
 
-(+)	: Nat -> Nat -> Nat
-0 j	= j
-i 0	= i
+(+)		: Nat -> Nat -> Nat
+(Succ i) j	= Succ (i + j)
+0 j		= j
 
-pred	: Nat' -> Nat
-1	= 0
+
+pred		: Nat' -> Nat
+(Succ i)	= i
+Zero		= Zero

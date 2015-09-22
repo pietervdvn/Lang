@@ -1,8 +1,10 @@
 Char
 ----
-Implementation of chars
+Home of the representation of a Character
 ----
 
 import Num.Nat
+import Data.Bool
+import Collection.Maybe
 
-type Char	= Int
+data Char	= Char Nat
