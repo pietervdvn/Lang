@@ -39,12 +39,14 @@ defFrees	= [] -- "a","b","pubKey","privKey"]
 
 tp	= tst "mapl (!) (Elem True Empty)" |> head & unsafePerformIO
 
-
+help	= putStrLn "parse String String: builds parse tree\nparseExpr\nparsePattern\ntst str: show expression together with type"
 
 tst str	= do	expr	<- parseExpr str |> expr2prefExpr (precedenceTable tablesOverv)
 		result	<- runExceptionsIO' $ expr2texpr loadedPackage tablesOverv prelude defFrees M.empty expr
 		putStrLn "-- original expression --"
 		print expr
+		putStrLn "-- got typed to --"
+		print result
 		putStrLn "-- which has the type --"
 		return $ result |> typeOf
 

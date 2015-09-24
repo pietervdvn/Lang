@@ -18,21 +18,18 @@ import Languate.FunctionTable
 import Languate.FunctionTable.TypeExpr
 import Languate.FunctionTable.TypePattern
 
-import Languate.Precedence.Expr2PrefExpr
-
 import Data.Map as M
 import Data.List as L
 
 import Control.Arrow
 
 typeClause	:: Package -> TableOverview -> FQN -> RTypeUnion -> RTypeReqs -> Clause -> Exc TClause
-typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
+typeClause p to fqn rtypeUn reqs clause@(Clause patterns expr)= do
 
 	{- set up -}
 	ft		<- (to & functionTables & unpackFTS & M.lookup fqn) ?
 				"No function table found?"
 	let tt		= to & typeTable
-	let expr	= expr2prefExpr (precedenceTable to) e
 	let frees	= (rtypeUn >>= freesInRT) ++ (reqs >>= freesInReq)
 	let isSubT	= isSubtype tt (reqs & M.fromList)
 	-- bind function with context. Reminder: t0 is the subtype, t1 the supertype
@@ -55,19 +52,24 @@ typeClause p to fqn rtypeUn reqs clause@(Clause patterns e)= do
 	let curries	= rtypeUn |> curriedTypes
 	let argTypes'	= curries |> init' & L.filter (not . L.null)
 	let returns	= curries |> drop numberOfPat & L.filter (not . L.null) |> uncurriedTypes & nub
+
+	-- a function to type the expressions. Merely a helping function
+	-- typeExpr : LocalScope -> Expression -> TypedExpression
+	let typeExpr	= expr2texpr p to fqn frees
 	(texprs, pats)	<- if L.null argTypes' then do
 				-- the expression is a constant
-				texprs'	<- expr2texpr p to fqn frees M.empty expr
+				texprs'	<- typeExpr M.empty expr
 				return (texprs', [])
 			    else do
 				-- TODO argument types are slightly more complicated than just selecting a random one
 				let argTypes	= head argTypes'
 				(tpats, scopes)	<- inside "While typing the patterns" $
-							patterns & zip argTypes |> uncurry (typePattern isSubT ft)
+							patterns & zip argTypes |> uncurry (typePattern (typeExpr M.empty) isSubT ft)
 							& sequence |> unzip
+
 				localScope	<- mergeDicts scopes ||>> (\t -> ([t],[]))
-				texprs'		<- inside ("While typing the expression "++ show e) $
-							expr2texpr p to fqn frees localScope $ expr2prefExpr (precedenceTable to) e
+				texprs'		<- inside ("While typing the expression "++ show expr) $
+							typeExpr localScope expr
 				return (texprs', tpats)
 
 

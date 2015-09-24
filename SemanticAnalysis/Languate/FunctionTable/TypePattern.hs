@@ -26,18 +26,18 @@ import Control.Arrow
 import Debug.Trace
 
 -- Types the given pattern (or gives an exception)
-typePattern	:: (RType -> RType -> Bool) -> FunctionTable -> RType -> Pattern -> Exc (TPattern, Map Name RType)
-typePattern _ _ tp (Assign nm)
+typePattern	:: (Expression -> Exc [TExpression]) -> (RType -> RType -> Bool) -> FunctionTable -> RType -> Pattern -> Exc (TPattern, Map Name RType)
+typePattern _ _ _ tp (Assign nm)
 		= return (TAssign nm, M.singleton nm tp)
-typePattern isSubType ft tp pat@(Multi pats)
-		= do	(tpat, dicts) 	<- pats	|> typePattern isSubType ft tp & sequence
+typePattern typeExpr isSubType ft tp pat@(Multi pats)
+		= do	(tpat, dicts) 	<- pats	|> typePattern typeExpr isSubType ft tp & sequence
 						|> unzip |> first TMulti
 			inside ("While typing the pattern "++show pat) $ do
 				dict	<- mergeDicts dicts
 				return (tpat, dict)
-typePattern _ _ _ DontCare
+typePattern _ _ _ _ DontCare
 		= return (TDontCare, M.empty)
-typePattern isSubType ft tp (Deconstruct nm pats)
+typePattern typeExpr isSubType ft tp (Deconstruct nm pats)
 		= do	-- searches all constructors (functions) we want the "fromNm"
 			signs	<- (ft & known & M.lookup ("from"++nm)) ? ("The constructor "++nm++" (desugared to 'from"++ nm ++"') is not in scope")
 			-- the type we want: tp -> Maybe (a,b,...)
@@ -48,13 +48,19 @@ typePattern isSubType ft tp (Deconstruct nm pats)
 				indent ('\n': posSigns |> snd |> show & unlines)
 			let (args, sign)= head posSigns	:: ([RType], Signature)
 			assert (length args == length pats) $ show nm ++ " deconstructs into "++plural (length args) "argument" ++", but "++plural (length pats) "pattern" ++ "are given:"++indent ("\n"++nm++" -> "++ args |> show & intercal "\t" ++ "\nPatterns: "++pats |> show & intercal "\t")
-			(tpats, scopes)	<- zip args pats |> uncurry (typePattern isSubType ft)
+			(tpats, scopes)	<- zip args pats |> uncurry (typePattern typeExpr isSubType ft)
 							& sequence |> unzip
 			scope	<- mergeDicts scopes
 			return (TDeconstruct sign tpats, scope)
-typePattern _ ft tp (Eval (Nat i))
-		= return (TEval $ TNat i, M.empty)	-- TODO check if type *is* a numerical type
-typePattern _ _ tp pat
+typePattern typeExpr _ ft tp (Eval expr)
+		= do	typedExprs	<- typeExpr expr
+			typedExpr	<- case length typedExprs of
+						0	-> halt $ "Typing the eval pattern "++show expr++" has no result"
+						1	-> return $ head typedExprs
+						_	-> do	warn $ "Typing the eval pattern "++show expr++" has multiple results"
+								return $ head typedExprs
+			return (TEval $ typedExpr, M.empty)	-- TODO check if type *is* a subtype type
+typePattern _ _ _ tp pat
 		= do	err $ "Non-covered pattern "++show pat
 			return (TDontCare, M.empty)
 

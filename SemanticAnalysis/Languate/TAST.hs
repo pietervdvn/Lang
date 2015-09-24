@@ -48,17 +48,30 @@ setTypeID	= (toFQN' "pietervdvn:Data:Collection.Set","Set")
 charType	= uncurry RNormal charTypeID
 charTypeID	= (toFQN' "pietervdvn:Data:Data.Char", "Char")
 
+natFQN		= toFQN' "pietervdvn:Data:Num.Nat"
+
 natType		= uncurry RNormal natTypeID
-natTypeID	= (toFQN' "pietervdvn:Data:Num.Nat", "Nat")
+natTypeID	= (natFQN, "Nat")
 
 natType'	= uncurry RNormal natTypeID'
-natTypeID'	= (toFQN' "pietervdvn:Data:Num.Nat", "Nat'")
+natTypeID'	= (natFQN, "Nat'")
+
+-- Zero Constructor for the natural type
+natTypeZero	:: TExpression
+natTypeZero	= TCall ([natType],[]) $ Signature natFQN "Zero" [natType] []
+
+natTypeSucc	:: TExpression
+natTypeSucc	= TCall ([ RCurry natType natType'],[]) $
+			Signature natFQN "Succ" [RCurry natType natType'] []
+
+natTypeSucc'	:: TExpression -> TExpression
+natTypeSucc'	= TApplication ([natType'], []) natTypeSucc
 
 intType		= uncurry RNormal intTypeID
-intTypeID	= (toFQN' "pietervdvn:Data:Num.Nat", "Int")
+intTypeID	= (natFQN, "Int")
 
 intType'	= uncurry RNormal intTypeID'
-intTypeID'	= (toFQN' "pietervdvn:Data:Num.Nat", "Int'")
+intTypeID'	= (natFQN, "Int'")
 
 
 floatType	= uncurry RNormal floatTypeID
@@ -117,7 +130,7 @@ asSignature (fqn, n, rtps, rtpreqs)
 	= Signature fqn n rtps rtpreqs
 
 
-data TypedExpression	= TNat Int	| TFlt Float	| TChr Char	-- primitives
+data TypedExpression	= TFlt Float	| TChr Char	-- primitives
 	{- The TApplication represents the first expression, applied on the second as argument. As multiple implementations with the same types exist, multiple types could be returned. A TApplication however representats only one of those, and selects those TExpressions which makes it possible. This way, a typed expression, has only one possible TypeUnion and one implementation to choose from. -}
 			| TApplication (RTypeUnion, RTypeReqs) TypedExpression TypedExpression
 			| TCall (RTypeUnion, RTypeReqs) Signature	-- we save the type independently as not to change the signature - we need it to look up the implementation
@@ -130,8 +143,6 @@ instance Show TypedExpression where
 
 -- Typed Expression to string
 showTE	:: TypedExpression -> String
-showTE (TNat i)
-	= show i ++ " :Nat"
 showTE (TFlt f)
 	= show f ++ " :Float"
 showTE (TChr c)
@@ -148,10 +159,6 @@ showTE (TLocalCall nm _)
 
 
 typeOf		:: TExpression -> (RTypeUnion, RTypeReqs)
-typeOf (TNat i)
- | i > 0	= ([natType'], [])
- | i < 0	= ([intType'], [])
- | i == 0	= ([natType], [])
 typeOf (TFlt _)	= ([floatType], [])
 typeOf (TChr _)	= ([charType], [])
 typeOf (TCall typeInfo _)

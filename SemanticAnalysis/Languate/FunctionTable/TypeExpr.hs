@@ -21,6 +21,8 @@ import Languate.TypeTable hiding (reqs)
 
 import Languate.TypeTable.Bind.Bind
 import Languate.TypeTable.Bind.Substitute
+import Languate.Precedence.Expr2PrefExpr
+
 import qualified Languate.BuiltIns as BuiltIn
 
 import Data.Map (Map, findWithDefault)
@@ -58,7 +60,7 @@ expr2texpr	:: Package -> TableOverview -> FQN -> [Name] -> Map Name (RTypeUnion,
 expr2texpr p to fqn frees localScope e
 	=  do	tlt	<- to & typeTable & typeLookups & M.lookup fqn ? ("No tlt found for "++show fqn)
 		let ctx	= Ctx p to fqn localScope (S.fromList frees) tlt
-		runstateT (_e2te $ normalize $ preClean e) ctx |> fst
+		runstateT (_e2te $ normalize $ expr2prefExpr (precedenceTable to) $ preClean e) ctx |> fst
 
 data Ctx = Ctx	{ package	:: Package
 		, tables	:: TableOverview
@@ -67,11 +69,11 @@ data Ctx = Ctx	{ package	:: Package
 		, knownFrees	:: Set Name	-- The frees which are used within this context.
 		, typeLookupT	:: TypeLookupTable
 		}
-
 type SCtx a	= StateT Ctx (Exceptions String String) a
 
 _e2te		:: Expression -> SCtx [TExpression]
-_e2te (Nat n)	= returns $ TNat n
+_e2te (Nat 0)	= returns natTypeZero
+_e2te (Nat n)	= _e2te (Nat (n-1)) ||>> natTypeSucc'
 _e2te (Flt f)	= returns $ TFlt f
 _e2te (Chr c)	= returns $ TChr c
 _e2te (Call nm) = do
