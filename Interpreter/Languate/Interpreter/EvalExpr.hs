@@ -13,28 +13,29 @@ import Data.List as L
 import Data.Maybe
 
 
+-- Eval to WHNF
 evalExpr	:: Evaluators -> Context -> TExpression -> Value
-evalExpr f ctx nat@(TNat i)
-	= ADT i (typeOf nat) []
 evalExpr f ctx (TLocalCall nm tpinf)
 	= let 	errMsg	=  "Local variable "++show nm++" not found" in
 		ctx & localScope & findWithDefault (printStackTrace errMsg ctx) nm
--- builtin function to check constructorx
+-- builtin function to check constructors
 evalExpr f ctx (TApplication _
-		(TApplication _ (TCall _ (Signature{signName="is"})) (TNat exp))	-- function which is called (check)
+		(TApplication _ (TCall _ (Signature{signName="is"})) number)	-- function which is called (check)
 			valExpr)							-- argument
-	= let (ADT i typ _)	= evalExpr f ctx valExpr in
+	= let	exp	= evalNatValue f ctx number
+		(ADT i typ _)	= evalExpr f ctx valExpr in
 		if exp == i then trueVal else falseVal
 -- deconstructtion of a value
 evalExpr f ctx (TApplication _
-		(TApplication _ (TCall _ (Signature{signName="deconstruct"})) (TNat exp))	-- function which is called (check)
+		(TApplication _ (TCall _ (Signature{signName="deconstruct"})) number)	-- function which is called (check)
 			valExpr)							-- argument used in the constructor
-	= let (ADT i typ args)	= evalExpr f ctx valExpr in
+	= let 	exp	= evalNatValue f ctx number
+		(ADT i typ args)	= evalExpr f ctx valExpr in
 		if exp /= i then nothingVal else	-- deconstructor failed, not the right constructor
 			justVal $ tupleVals args
 -- construct a new value
-evalExpr _ _ (TApplication typ (TCall _ (Signature{signName = "construct"})) (TNat i))
-	= ADT i typ []
+evalExpr f ctx (TApplication typ (TCall _ (Signature{signName = "construct"})) i)
+	= ADT (evalNatValue f ctx i) typ []
 evalExpr f ctx tapp@(TApplication typeInf func arg)
 	= apply' f ctx func arg
 evalExpr f ctx (TCall _ sign)
@@ -50,6 +51,22 @@ evalExpr f ctx (TCall _ sign)
 		ctxStacked	= ctx {stack = newStack}	in
 		evalThunk f $ Thunk $ zip (repeat ctxStacked) clauses
 
+
+-- extracts the integer value of encoded, natural values as (Succ (Succ Zero))
+evalNatValue	:: Evaluators -> Context -> TExpression -> Int
+evalNatValue f ctx texpr@(TApplication (_,_) succ a)
+	| succ == natTypeSucc
+		= 1 + evalNatValue f ctx a
+	| otherwise
+		= _errMsg texpr
+evalNatValue f ctx texpr
+	| texpr == natTypeZero
+		= 0
+	| otherwise
+		= _errMsg texpr
+
+
+_errMsg texpr	= error $ "This is not a natural value: "++show texpr++"(internal error in evalNatValue, probably an abused constructor function or something like that; file a bug)"
 
 -- When a thunk is ready for unpacking (no more needed args in head), it unpacks
 evalThunk	:: Evaluators -> Value -> Value

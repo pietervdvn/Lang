@@ -37,9 +37,9 @@ i str	=  do	expr	<- parseExpr str
 				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
 		putStrLn "\nExpression:"
 		print expr
-		putStrLn "Typed expression:"
-		texprs |> show |> ("\n"++)& unlines & putStrLn
-		putStrLn "----------------------------\n"
+		--putStrLn "Typed expression:"
+		--texprs |> show |> ("\n"++)& unlines & putStrLn
+		--putStrLn "----------------------------\n"
 		let context	= Ctx tablesOverv prelude M.empty []
 		let val		= texprs |> evalExpr context
 		return $ val |> show

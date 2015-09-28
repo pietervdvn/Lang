@@ -62,7 +62,7 @@ natTypeZero	= TCall ([natType],[]) $ Signature natFQN "Zero" [natType] []
 
 natTypeSucc	:: TExpression
 natTypeSucc	= TCall ([ RCurry natType natType'],[]) $
-			Signature natFQN "Succ" [RCurry natType natType'] []
+			Signature natFQN "Succ" [RCurry natType natType] []
 
 natTypeSucc'	:: TExpression -> TExpression
 natTypeSucc'	= TApplication ([natType'], []) natTypeSucc
