@@ -3,7 +3,6 @@ Void
 Implementation of ''Void''
 ----
 
-import Category.Monoid
 import Data.Bool
 import Collection.Maybe
 

@@ -4,7 +4,6 @@ Implements the category of types which can be compared for equivalence, together
 ---
 
 import Data.Bool
-import Category.Function
 
 precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
 

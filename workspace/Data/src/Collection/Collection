@@ -7,8 +7,6 @@ You have found the root of all data, the root of each collection.
 This module gives the category declaration of each collection.
 ----------
 
-import Category.Monoid
-import Category.Function
 import Category.Eq
 import Collection.Maybe
 import Collection.Void
@@ -38,22 +36,6 @@ cat Collection a
 	(:)	: (a:b) -> collection b -> collection b
 
 
-instance Collection a is Monoid
 instance Collection (a:Eq) is Eq
 
 precedence of (:) is Right
-
----
-map	: (a -> b) -> a* -> b*
-f empty	= empty
-f (a:as)= add (f a) as
-
-
-reduce	: Associative a -> a+ -> a
-f (singleton a)	= a
-f (unpack a as)	= f a $ reduce f as
-
-reduce	: (m:Monoid)* -> m
-empty	= neutral
-(m:ms)	= append m $ reduce ms
----

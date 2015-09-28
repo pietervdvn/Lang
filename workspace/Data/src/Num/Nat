@@ -19,7 +19,25 @@ instance Nat is Eq
 (Succ i) j	= Succ (i + j)
 0 j		= j
 
+(*)		: Nat -> Nat -> Nat
+(Succ i) j	= j + (i*j)
+0 j		= 0
+
+-- Subtraction which returns zero instead of negative numbers
+> 5 - 6 = 0
+(-)		: Nat -> Nat -> Nat
+(Succ i) (Succ j)= i - j
+0 j		= 0
+i 0		= i
+
+(<)		: Nat -> Nat -> Bool
+_ 0		= False
+0 j		= True
+(Succ i) (Succ j)= i < j
 
 pred		: Nat' -> Nat
 (Succ i)	= i
 Zero		= Zero
+
+succ		: Nat -> Nat'
+		= Succ

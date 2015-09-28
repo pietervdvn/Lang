@@ -12,40 +12,4 @@ public import Collection.List
 public import Collection.Set
 
 public import Num.Nat
-public import Data.Char
 public import ControlFlow
-
-
-public import Category.Eq
-
-
-test	: (a -> b) -> a -> b
-f a	= f a
-
-
-
-
----
-
-public import Aliasses
-
-public import Type.Function
-public import Category.Function
-
-public import Category.Monoid
-public import Category.Function
-public import Category.Boolean
-
-
-public import Collection.Void
-public import Collection.Tuple
-public import Collection.Collection
-public import Collection.More
-public import Collection.Dict
-public import Collection.List
-
-public import Graph.Graph
-
-
-public import Crypto.PubPrivAlgo
----
