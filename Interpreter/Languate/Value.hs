@@ -47,20 +47,16 @@ instance Show Value where
 
 sv	:: Value -> String
 sv val@(ADT i t vals)
-	= fromMaybe ("ADT: "++show i++" <"++show t++"> " ++ show vals)
-		(fancyShow val)
+	= "ADT: "++show i++" <"++show t++"> " ++ show vals
 sv (Thunk texpr)
 	= "THUNK: " ++ (texpr |> snd & show)
 
-
-fancyShow	:: Value -> Maybe String
-fancyShow val@(ADT i _ vals)
-	-- TODO change those over so that only string needs a fancy show
-	| [natType, natType'] |> (`elem` typesOfVal val) & or
-		= Just ("Int: "++ show (extractNatValue val) )
-	| charType `elem` typesOfVal val
-		= Just ("Char: "++[chr $ extractNatValue $ head vals])
-fancyShow _	= Nothing
+-- shows a string value
+showStringValue	:: Value -> String
+showStringValue (ADT _ _ [])
+		= ""
+showStringValue (ADT _ _ (ADT _ _ [i]:[rest]))
+		= (chr $ extractNatValue i) : showStringValue rest
 
 
 -- extracts the integer value of encoded, natural values as (Succ (Succ Zero))

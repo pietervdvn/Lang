@@ -100,6 +100,8 @@ floatTypeID	= (toFQN' "pietervdvn:Data:Num.Float", "Float")
 maybeType	= uncurry RNormal maybeTypeID
 maybeTypeID	= (toFQN' "pietervdvn:Data:Collection.Maybe", "Maybe")
 
+stringType	= RApplied listType charType
+
 
 
 {- Each type has a kind. You can think of those as the 'type of the type'

@@ -5,6 +5,8 @@ The bool type is a type which represents logical values.
 
 import Collection.Maybe
 import Category.Eq
+import Data.Char
+import Collection.List
 
 --## Definition
 
@@ -53,3 +55,8 @@ precedence of (!) is prefix, (!) < (&&)
 -- Some extremely private function
 _priv	: Bool -> Bool
 t	= t
+
+
+stringify	: Bool -> [Char]
+True		= "True"
+False		= "False"

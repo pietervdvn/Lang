@@ -24,6 +24,7 @@ import Languate.TAST
 
 import Languate.Interpreter
 import Languate.Value
+import HumanUtils
 
 import Data.List
 import Data.Map as M
@@ -32,17 +33,15 @@ import Data.Map as M
 -- i : Parse, type and Interpret --
 -----------------------------------
 i	:: String -> IO [String]
-i str	=  do	expr	<- parseExpr str
+i str'	=  do	let str	= "stringify "++pars str'
+		expr	<- parseExpr str
+		print expr
 		texprs	<- runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
 				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
-		putStrLn "\nExpression:"
-		print expr
-		putStrLn "Typed expression:"
-		texprs |> show |> ("\n"++)& unlines & putStrLn
-		putStrLn "----------------------------\n"
+		let typ	= texprs |> typeOf
 		let context	= Ctx tablesOverv prelude M.empty []
 		let val		= texprs |> evalExpr context
-		return $ val |> show
+		return $ val |> showStringValue
 
 
 t	:: String -> IO ()

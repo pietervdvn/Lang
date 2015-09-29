@@ -5,6 +5,7 @@ The list category declaration.
 
 import Collection.Maybe
 import Data.Bool
+import Data.Char
 import Collection.Tuple
 import Collection.Set
 
@@ -37,8 +38,18 @@ tail'		: [a] -> [a]
 (Elem _ tail)	= tail
 Empty		= Empty
 
-prepend		: a -> [a] -> [a]
+(+)		: [a] -> [a] -> [a]
+Empty ls	= ls
+(Elem a tail) ls= a : tail + ls
+
+prepend		: (b:a) -> [a] -> [a]
 		= Elem
 
 empty		: [a]
 		= Empty
+
+([])		: [a]
+		= Empty
+
+(:)		: (b:a) -> [a] -> [a]
+		= Elem

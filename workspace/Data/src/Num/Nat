@@ -6,6 +6,9 @@ Simple, naive natural number implementation.
 import Category.Eq
 import Data.Bool
 import Collection.Maybe
+import ControlFlow
+import Data.Char
+import Collection.List
 
 -- A natural number, which might be zero
 data Nat	= Zero | Succ Nat
@@ -30,6 +33,12 @@ instance Nat is Eq
 0 j		= 0
 i 0		= i
 
+(/)		: Nat -> Nat' -> Nat
+i q		= if (i < q) 0 (1 + ((i-q)/q))
+
+(%)		: Nat -> Nat' -> Nat
+i q		= if (i < q) i ((i-q) % q)
+
 (<)		: Nat -> Nat -> Bool
 _ 0		= False
 0 j		= True
@@ -41,3 +50,8 @@ Zero		= Zero
 
 succ		: Nat -> Nat'
 		= Succ
+
+
+
+stringify	: Nat -> [Char]
+i		= if (i < 10) [Char (48+i)] (stringify (i/10) + stringify (i%10))
