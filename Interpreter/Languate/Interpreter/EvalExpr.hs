@@ -50,6 +50,7 @@ evalExpr f ctx (TCall _ sign)
 		clauses	= impTbl & M.findWithDefault (printStackTrace errMsg' ctx') sign
 		ctxStacked	= ctx {stack = newStack}	in
 		evalThunk f $ Thunk $ zip (repeat ctxStacked) clauses
+evalExpr _ _ e	= todos $ "Eval expr fallthrough: "++show e
 
 
 -- extracts the integer value of encoded, natural values as (Succ (Succ Zero))

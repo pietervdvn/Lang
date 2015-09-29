@@ -33,6 +33,7 @@ import Data.List (nub)
 import Data.Either
 import Data.Tuple
 import Data.Maybe
+import Data.Char
 
 
 import StateT
@@ -75,7 +76,7 @@ _e2te		:: Expression -> SCtx [TExpression]
 _e2te (Nat 0)	= returns natTypeZero
 _e2te (Nat n)	= _e2te (Nat (n-1)) ||>> natTypeSucc'
 _e2te (Flt f)	= returns $ TFlt f
-_e2te (Chr c)	= returns $ TChr c
+_e2te (Chr c)	= _e2te (Nat $ ord c) ||>> charTypeConstr'
 _e2te (Call nm) = do
 	scope	<- get' localScope
 	if nm `M.member` scope then do
@@ -113,6 +114,14 @@ _e2te seq@(Seq (function:args)) = do
 	-- types are renamed at this point, thus no further escape is needed
 	tfunctions	<- _e2te function
 	calcApplications tfunctions args
+_e2te (Tuple [])
+	= returns voidTypeCons
+_e2te (Tuple [a])
+		= _e2te a
+_e2te (Tuple [a,b])
+		= _e2te $ Seq [tupleCall, a ,b]
+_e2te (Tuple (a:as))
+		= _e2te $ Seq [tupleCall, a, Tuple as]
 _e2te e		=
 	lift $ halt $ "Could not type the expression "++show e++"\n\t"++
 	case e of
@@ -123,7 +132,6 @@ _e2te e		=
 		AutoCast-> "Autocasts are for a next verion :p"
 		BuiltIn _ _
 			-> "Some builtin slipped through... This is a bug"
-		Tuple _	-> "Tuples?"	-- TODO
 
 
 errMsg fqn	= "No function table found for "++show fqn++".\nThis is a bug in the compiler. (A compiler dev probably passed in a wrong FQN into expr2texpr"

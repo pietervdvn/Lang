@@ -6,10 +6,12 @@ Each program imports these by default
 
 public import Any
 public import Data.Bool
+public import Data.String
 public import Collection.Maybe
 public import Collection.Tuple
 public import Collection.List
 public import Collection.Set
 
 public import Num.Nat
+public import Data.Char
 public import ControlFlow

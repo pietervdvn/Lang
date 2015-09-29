@@ -33,11 +33,24 @@ boolType	= uncurry RNormal boolTypeID
 boolTypeID	= (toFQN' "pietervdvn:Data:Data.Bool", "Bool")
 
 voidType	= uncurry RNormal voidTypeID
-voidTypeID	= (toFQN' "pietervdvn:Data:Collection.Void","Void")
+voidTypeID	= (voidTypeFQN,"Void")
+voidTypeFQN	= toFQN' "pietervdvn:Data:Collection.Void"
+voidTypeCons	:: TExpression
+voidTypeCons	= TCall ([voidType], []) $ Signature voidTypeFQN "Void" [voidType] []
 
 -- The representation of a tuple
 tupleType	= uncurry RNormal tupleTypeID
-tupleTypeID	= (toFQN' "pietervdvn:Data:Collection.Tuple","Tuple")
+tupleType'	:: String -> String -> RType
+tupleType' a b	= RApplied (RApplied tupleType $ RFree a) $ RFree b
+tupleTypeID	= (tupleTypeFQN,"Tuple")
+tupleCall	= Call "Tuple"
+tupleTypeFQN	= toFQN' "pietervdvn:Data:Collection.Tuple"
+tupleTypeCons	:: TExpression
+tupleTypeCons	= let tp = RCurry (RFree "a")
+			  (RCurry (RFree "b")
+			  (tupleType' "a" "b")) in
+			 TCall ([ tp ],[]) $
+		     Signature tupleTypeFQN "Tuple" [tp] []
 
 listType	= uncurry RNormal listTypeID
 listTypeID	= (toFQN' "pietervdvn:Data:Collection.List","List")
@@ -46,7 +59,14 @@ setType	= uncurry RNormal setTypeID
 setTypeID	= (toFQN' "pietervdvn:Data:Collection.Set","Set")
 
 charType	= uncurry RNormal charTypeID
-charTypeID	= (toFQN' "pietervdvn:Data:Data.Char", "Char")
+charTypeID	= (charTypeFQN, "Char")
+charTypeFQN		= toFQN' "pietervdvn:Data:Data.Char"
+charTypeConstr	= TCall ([ RCurry natType charType],[]) $
+		     Signature charTypeFQN "Char" [RCurry natType charType] []
+charTypeConstr' charInd
+		= TApplication ([charType], []) charTypeConstr charInd
+
+
 
 natFQN		= toFQN' "pietervdvn:Data:Num.Nat"
 
@@ -130,7 +150,7 @@ asSignature (fqn, n, rtps, rtpreqs)
 	= Signature fqn n rtps rtpreqs
 
 
-data TypedExpression	= TFlt Float	| TChr Char	-- primitives
+data TypedExpression	= TFlt Float	-- primitives
 	{- The TApplication represents the first expression, applied on the second as argument. As multiple implementations with the same types exist, multiple types could be returned. A TApplication however representats only one of those, and selects those TExpressions which makes it possible. This way, a typed expression, has only one possible TypeUnion and one implementation to choose from. -}
 			| TApplication (RTypeUnion, RTypeReqs) TypedExpression TypedExpression
 			| TCall (RTypeUnion, RTypeReqs) Signature	-- we save the type independently as not to change the signature - we need it to look up the implementation
@@ -145,8 +165,6 @@ instance Show TypedExpression where
 showTE	:: TypedExpression -> String
 showTE (TFlt f)
 	= show f ++ " :Float"
-showTE (TChr c)
-	= show c ++ " :Char"
 showTE (TApplication (retTps, reqs) func arg)
 	= let	funcStr	= HumanUtils.pars (show func)
 		argStr	= HumanUtils.pars (show arg)
@@ -160,7 +178,6 @@ showTE (TLocalCall nm _)
 
 typeOf		:: TExpression -> (RTypeUnion, RTypeReqs)
 typeOf (TFlt _)	= ([floatType], [])
-typeOf (TChr _)	= ([charType], [])
 typeOf (TCall typeInfo _)
 		= typeInfo
 typeOf (TApplication typeInfo _ _)
