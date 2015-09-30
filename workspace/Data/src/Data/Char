@@ -1,0 +1,16 @@
+Char
+----
+Home of the built in char type
+----
+
+import Num.Nat
+import Data.Bool
+import Collection.Maybe
+import Collection.List
+
+
+data Char = Char Nat
+
+
+stringify	: Char -> [Char]
+c		= "'" + [c] + "'"

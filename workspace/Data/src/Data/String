@@ -1,0 +1,12 @@
+String
+------
+The home of the 'String' datatype
+------
+
+import Collection.List
+import Data.Char
+import Data.Bool
+import Collection.Maybe
+
+stringify	: [Char] -> [Char]
+str		= "\""+str+"\""
