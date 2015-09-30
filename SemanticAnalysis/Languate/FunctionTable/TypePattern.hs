@@ -59,7 +59,7 @@ typePattern typeExpr _ ft tp (Eval expr)
 						1	-> return $ head typedExprs
 						_	-> do	warn $ "Typing the eval pattern "++show expr++" has multiple results"
 								return $ head typedExprs
-			return (TEval $ typedExpr, M.empty)	-- TODO check if type *is* a subtype type
+			return (TEval typedExpr, M.empty)	-- TODO check if type *is* a subtype type
 typePattern _ _ _ tp pat
 		= do	err $ "Non-covered pattern "++show pat
 			return (TDontCare, M.empty)

@@ -62,7 +62,7 @@ commands	= [ help, exit, loadCmd, interpret, buildDocs, typeExprCmd, loadBuild, 
 {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 
 command		:: String -> Maybe Command
-command name	= commands & filter (\cmd -> (name `elem` names cmd)) & listToMaybe
+command name	= commands & filter (\cmd -> name `elem` names cmd) & listToMaybe
 
 
 loadCmd		= Command ["load","reload","l"] "Loads the prelude and all context" "You should do this before any other command that needs actual code"
@@ -156,7 +156,7 @@ _parseTreeCmd expr
 
 
 parseExprCmd	= Command ["parseexpr","pe"] "[advanced] Gives the parsed expression (not yet typed)"
-			("Usefull to debug pt2ast")
+			"Usefull to debug pt2ast"
 			(continue $ _argNeeded _parseExprCmd)
 _parseExprCmd	:: String -> IO ()
 _parseExprCmd expr
@@ -165,16 +165,15 @@ _parseExprCmd expr
 
 
 parsePrefExprCmd	= Command ["parseprefexpr","ppe"] "[advanced] Gives the parsed expression with all operators brought as prefix (not yet typed)"
-			("This is usefull to test the precedence of the operators, also see 'Precedence Table' in the documentation!")
+			"This is usefull to test the precedence of the operators, also see 'Precedence Table' in the documentation!"
 			(continue' _parsePrefExprCmd)
 _parsePrefExprCmd	:: Context -> Maybe String -> IO ()
-_parsePrefExprCmd ctx expr
-		= _argNeeded (either putStrLn print . Pipeline.parsePrefExpr ctx) expr
+_parsePrefExprCmd ctx 	= _argNeeded (either putStrLn print . Pipeline.parsePrefExpr ctx)
 
 
 
 parseTExprCmd	= Command ["parsetypedexpr","pte"] "[advanced] Gives the possible typed expressions"
-			("This is usefull to test the typing algorithm")
+			"This is usefull to test the typing algorithm"
 			(continue' _parseTExprCmd)
 _parseTExprCmd	:: Context -> Maybe String -> IO ()
 _parseTExprCmd ctx expr
@@ -183,7 +182,7 @@ _parseTExprCmd ctx expr
 
 
 typeExprCmd	= Command ["type","t"] "Types the given expression"
-			("Parses the given expression and tries to type it. If the error message is unclear, ask someone for help")
+			"Parses the given expression and tries to type it. If the error message is unclear, ask someone for help"
 			(continue' _typeExprCmd)
 _typeExprCmd	:: Context -> Maybe String -> IO ()
 _typeExprCmd ctx expr
@@ -206,7 +205,7 @@ versionCmd	= Command ["v","version"] ("Shows the version number (which is "++ver
 version'	= putStrLn version
 
 
-creditsCmd	= Command ["credit","credits","author","authors"] ("Shows the credits")
+creditsCmd	= Command ["credit","credits","author","authors"] "Shows the credits"
 				"Credit where credit is due!"
 				(continue $ const credit')
 credit'		= credits & unlines & putStrLn

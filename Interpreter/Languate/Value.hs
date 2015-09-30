@@ -56,7 +56,7 @@ showStringValue	:: Value -> String
 showStringValue (ADT _ _ [])
 		= ""
 showStringValue (ADT _ _ (ADT _ _ [i]:[rest]))
-		= (chr $ extractNatValue i) : showStringValue rest
+		= chr (extractNatValue i) : showStringValue rest
 
 
 -- extracts the integer value of encoded, natural values as (Succ (Succ Zero))
