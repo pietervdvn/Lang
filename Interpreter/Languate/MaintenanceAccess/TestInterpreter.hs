@@ -38,7 +38,6 @@ i str'	=  do	let str	= "stringify "++pars str'
 		print expr
 		texprs	<- runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
 				 typeExpr loadedPackage tablesOverv prelude [] M.empty expr
-		let typ	= texprs |> typeOf
 		let context	= Ctx tablesOverv prelude M.empty []
 		let val		= texprs |> evalExpr context
 		return $ val |> showStringValue

@@ -36,3 +36,7 @@ parseArgs (('-':str):rest)
 				Nothing	-> putStrLn ("Command '"++name++"' does not exist. See help for list of commands") >> parseArgs rest'
 				(Just cmd) -> do	tail	<- parseArgs rest'
 							return ((cmd, args'):tail)
+
+
+repl		:: Context -> IO ()
+repl		= -- TODO pickup here

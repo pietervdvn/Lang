@@ -14,12 +14,16 @@ which will all it knows (docstring, type, laws, implementation, location)
 import StdDef
 import HumanUtils
 import qualified Languate.Pipeline as Pipeline
-import Languate.Pipeline (Context)
+import Languate.Pipeline (Context(Context))
 import Languate.Tintin
 import Languate.TAST
 
-import Data.Maybe
+import qualified Languate.Interpreter as Interpreter
+import qualified Languate.Value as Interpreter
 
+import Data.Maybe
+import Control.Arrow
+import qualified Data.Map as M
 
 version	= "0.0.1 \9650 'Black Triangle'"
 credits	= ["Made by Pieter Vander Vennet (pietervdvn)","Big thanks to Ilion Beyst for the support","Big thanks to Tlelaxu for occasional coding help"]
@@ -54,14 +58,14 @@ showShort (Command names shortHelp _ _) = (names & commas) ++ "\t " ++ shortHelp
 
 {--} {- The actual commands -} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 commands	:: [Command]
-commands	= [ help, exit, loadCmd, buildDocs, typeExprCmd, versionCmd, creditsCmd, parseTreeCmd, parseExprCmd, parsePrefExprCmd, parseTExprCmd]
+commands	= [ help, exit, loadCmd, interpret, buildDocs, typeExprCmd, loadBuild, versionCmd, creditsCmd, parseTreeCmd, parseExprCmd, parsePrefExprCmd, parseTExprCmd]
 {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 
 command		:: String -> Maybe Command
 command name	= commands & filter (\cmd -> (name `elem` names cmd)) & listToMaybe
 
 
-loadCmd		= Command ["load","reload","r","l"] "Loads the prelude and all context" "You should do this before any other command that needs actual code"
+loadCmd		= Command ["load","reload","l"] "Loads the prelude and all context" "You should do this before any other command that needs actual code"
 			loadCmd'
 
 loadCmd'	:: Context -> Maybe String -> (Context -> IO ()) -> IO()
@@ -69,10 +73,21 @@ loadCmd' _ _ cont
 		= do	ctx 	<- Pipeline.loadContext
 			cont ctx
 
+interpret	= Command ["interpret"] "Interprets given expression, tries to print with 'stringify'" "'stringify' is added in front of your expression"
+			$ continue' _interpret
 
-
+_interpret	:: Context -> Maybe String -> IO ()
+_interpret ctx Nothing
+		= putStrLn "Hey! We can't interpret if you don't give an expression!"
+_interpret ctx@(Context _ tablesOverv) (Just expr)
+		= do	tExprs	<- Pipeline.parseTExpr ctx $ "stringify "++ pars expr
+			let context	= Interpreter.Ctx tablesOverv Pipeline.prelude M.empty []
+			let results	= tExprs |> Interpreter.evalExpr context
+			results |> Interpreter.showStringValue & unlines & putStrLn
 
 {-
+
+-- TODO incorporate this one again!
 -- shows info about command
 info	:: TModule -> Name -> String
 info modul n
@@ -121,6 +136,13 @@ buildDocs' ctx _
 		= bDocs Pipeline.path ctx
 
 
+loadBuild	= Command ["lb","loadbuilddocs","r"] "Loads the code from disk, then rewrites the docs" "Will become your favorite!"
+			_loadBuild
+
+
+_loadBuild	:: Context -> Maybe String -> (Context -> IO ()) -> IO()
+_loadBuild ctx arg cont
+		= loadCmd' ctx arg (\ctx -> buildDocs' ctx arg >> cont ctx )
 
 -- compiler dev debug tools, mainly pipeline tools
 
