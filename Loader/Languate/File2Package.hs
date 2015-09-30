@@ -27,8 +27,7 @@ import Languate.Manifest.ParseManifest (parseManifest)
 -- loadpackage, but crashes when imports are not found
 loadPackage'	:: Bnf.World -> FQN -> FilePath -> IO Package
 loadPackage' bnfs fqn fp
-		= do	excPack	<- loadPackage bnfs fqn fp
-			runExceptionsIO' excPack
+		= loadPackage bnfs fqn fp >>= runExceptionsIO'
 
 loadPackage	:: Bnf.World -> FQN -> FilePath -> IO (Exceptions' String Package)
 loadPackage world fqn fp

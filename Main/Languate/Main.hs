@@ -1,110 +1,38 @@
 module Languate.Main where
 
 {--
-
-This module implements the boot of version 0.0.0 of the languate interpreter.
-
+Simple function which reads the command line arguments
 --}
 
 import StdDef
-import qualified Bnf
-import Data.Maybe
-import Languate.FQN
-import Languate.TypedLoader
-import Languate.ReadEvalPrint
-import Languate.TypedPackage
-import Languate.Tools
-import Languate.Precedence.Precedence
-
-import System.Directory
-import Prelude hiding (catch)
-import Control.Exception (catch, SomeException)
-
-import Data.List (isPrefixOf)
-import Data.Map (findWithDefault)
-
-import Languate.Pipeline
-import Data.Time.Clock
-
 import System.Environment
+import Languate.Tools
 import Control.Monad
-
-version	= "0.0.0.0.4"
-
-infoFlags	= [("version", putStrLn version),("author", putStrLn "Pieter Vander Vennet\nThanks to Ilion Beyst")]
+import Data.Char
+import Languate.Pipeline
 
 start	:: IO ()
-start	=  do 	infoPrinted	<- infoOnly
-		unless infoPrinted start'
-
-infoOnly	:: IO Bool
-infoOnly	= do 	args	<- getArgs
-			let cond word	= "--" ++ word `elem` args
-			mapM_ (\(word, action) -> when (cond word) action)
-			return $ any (cond word)
-
-start'	:: IO ()
-start'	=  do	welcome
-		putStrLn $ "Loading bnf-files from "++bnfPath
-		(pack, bnfs, precT)	<- doAllStuff
-		args	<- getArgs
-		unless ("--no-repl" `elem` args) repl
-
-repl	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> IO ()
-repl w tp precT fqn
-	=  do 	line	<- getLine
-		repl' w tp precT fqn line
-
-
-repl'	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> String -> IO ()
-repl' _ _ _ _ "--exit"	= putStrLn "Bye!"
-repl' w tp precT fqn line
-	| "--i" `isPrefixOf` line
-		|| "\EOT" == line
-			= do	printInfo tp fqn $ drop 4 line
-				repl w tp precT fqn
-	| "\f" == line	= putStrLn "\f" >> repl w tp precT fqn
-	| "--p" `isPrefixOf` line
-			= do 	print $ parseExpr w precT $ drop 4 line
-				repl w tp precT fqn
-	| "--r"	 == line
-			= start
-	| otherwise	= do	rep w tp precT fqn line
-				repl w tp precT fqn
-
--- one step
-rep	:: Bnf.World -> TPackage -> PrecedenceTable -> FQN -> String -> IO ()
-rep bnfs tpack precT fqn str
-	= do	let evaled = parseEval bnfs tpack precT fqn str
-		catch (putStrLn' $ show evaled) hndl
+start	= do	args	<- getArgs
+		commands	<- parseArgs args
+		runCmds commands (error "Please, load the context first!")
 
 
 
-hndl	:: SomeException -> IO ()
-hndl msg	= putStrLn' $ "Hi! Something went wrong with that statement!\n"++show msg
+runCmds		:: [(Command, Maybe String)] -> Context -> IO ()
+runCmds [] _	=  return ()
+runCmds ((cmd, arg):rest) state
+		= action cmd state arg (runCmds rest)
 
 
-putStrLn'	:: String -> IO ()
-putStrLn' str	=  putStr $ str++"\n> "
-printInfo	:: TPackage -> FQN -> Name -> IO ()
-printInfo tp fqn name
-		=  do	let tmod	= findWithDefault (error $ show fqn++" not found!") fqn tp
-			putStrLn' $ info tmod name
-
-
-welcome	:: IO ()
-welcome	=  do	time	<- getCurrentTime
-		putStrLn $ msg $ show time
-
-msg	:: String -> String
-msg time
-	= "\nGood morning, and welcome to the Languate Interpreter System."++
-		"\nThis automated interpreter is provided for for the security and\n"++
-		"convenience of the Languate Research personnel.\n"++
-		"The time is "++time++", current topside temperature is 91 degrees with an estimated high of 105.\n"++
-		"This interpreter is inbound from Level 3 'Source Code' to sector C 'Test Labs and Control Facilities'.\n\n"++
-	"Please keep in mind that this is but version *"++version++"* beta, and contains many bugs.\nTo keep things balanced, it does not contain many features.\n\nHow to use this?\n----------------\n\n"++
-	"This version is very limited, and will load the 'Data' project in 'workspace' ("++project++"). More precisely, it will load the 'prelude'.\n\nYou can evaluate expressions by typing them;\n --i <functionname> gives you all the information about the function;\n--p <expression> parses the expression and shows it, which shows how infix expressions are parsed.\n\nDo not expect a lot, espacially clear and descriptive error messages are rare.\n\nTake little steps.\n\nWork safe, work smart.\nNow arriving at at Sector C Test Labs. Have a very safe and productive day."
-
-up	= setCurrentDirectory ".."
-t	= up >> start
+-- Parses the command line options. One or two dashes mean: new command, no dash means argument to the previous command
+parseArgs	:: [String] -> IO [(Command, Maybe String)]
+parseArgs []	= return []
+parseArgs (('-':str):rest)
+		= do	let name	= str & dropWhile (=='-') |> toLower
+			let (args,rest')	= break (\str -> head str == '-') rest
+			-- no arguments --> Nothing, otherwise we mash them together
+			let args'		= if null args then Nothing else Just $ unwords args
+			case command name of
+				Nothing	-> putStrLn ("Command '"++name++"' does not exist. See help for list of commands") >> parseArgs rest'
+				(Just cmd) -> do	tail	<- parseArgs rest'
+							return ((cmd, args'):tail)

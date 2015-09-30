@@ -11,7 +11,7 @@ fi
 FOUND=0
 DONE=0
 
-for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/
+for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/ Interpreter/
 do
 	DONE=$(($DONE+1))
 	echo $DONE
@@ -35,8 +35,8 @@ do
 done
 
 bell 1
-cd "SemanticAnalysis"
-echo -e "bDocs\n:q" | ghci "Languate/MaintenanceAccess/TestBuild"
+# cd "SemanticAnalysis"
+# echo -e "bDocs\n:q" | ghci "Languate/MaintenanceAccess/TestBuild"
 exit
 
 cd Main

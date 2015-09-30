@@ -1,71 +1,91 @@
 module Languate.Pipeline where
 
 {--
-
-This module implements the pipeline, where everythin is loaded step by step from bnf, to package, typedpackage, example checked
-
+This module implements the actual calls to the interpreter.
 --}
 
-import Bnf
-import Languate.AST
-import Languate.TAST (typeOf, TypedExpression)
+import StdDef
+import HumanUtils
+import Exceptions
+import Languate.CheckUtils
+
+import qualified Bnf
+import Bnf.ParseTree
+
 import Languate.File2Package
 import Languate.FQN
-import Languate.TypedPackage
-import Languate.TypedLoader
-import Languate.Interpreter.EvalExpr (evalExpr)
-import Languate.Interpreter.Application (multApply)
-import Languate.CheckExamples
-import Languate.InterpreterDef
-import Languate.ReadEvalPrint
-import Languate.Precedence.Precedence
+import Languate.AST
+import Languate.Package
+import qualified Languate.Precedence.Expr2PrefExpr as Prefixer
+import qualified Languate.ParserStub as ParserInternals
 
-import Data.Maybe
-import Data.Map as Map
+import Languate.TableOverview
+import Languate.BuildTableOverview
+import Languate.Semantal
 
-import Control.Monad.Reader
-import Control.Exception (catch, SomeException)
+import Languate.TAST
 
-bnfPath	= "Parser/bnf/Languate"
-project	= "workspace/Data/src/"
-docs	= "workspace/Data/.gen/"
+import Data.Map as M
 
-fqpn		= fromJust $ toFQPN "pietervdvn:Data"
--- prelude		= fromJust $ toFqn' fqpn [] "Prelude"
-bool		= fromJust $ toFqn' fqpn ["Data"] "Bool"
+import System.IO.Unsafe
+
+-- for now, the location of the files is hardcoded
+bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"	-- location of the bnf, needed for the parser
+path		= "../workspace/Data"					-- location of the prelude/files project we work on
+prelude		= toFQN' "pietervdvn:Data:Prelude"			-- location of the prelude, as FQN
+packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
 
 
 
-doAllStuff	:: FQN -> IO (TypedPackage, World, PrecedenceTable)
-doAllStuff fqn	= do	bnfs	<- Bnf.load bnfPath
-			package	<- loadPackage' bnfs fqn project
-			let precTable	= buildPrecTable $ elems package
-			writePrecT precTable
- 			let tpack	= normalizePackage $ typeCheck precTable fqpn package
-			let evalf	= eval' tpack precTable
-			let typeOfF	= typeOf' tpack precTable
-			let exampleErrs	= checkModules evalf typeOfF package
-			catch (putStrLn exampleErrs) hndl
-			return (tpack,bnfs,precTable)
-				where 	hndl	:: SomeException -> IO ()
-					hndl msg	= putStrLn $ "Woops! Something went wrong with testing!\n"++show msg
+{-
+State needed to do all the stuff
+-}
+data Context	= Context Package TableOverview
 
 
-typeOf'		:: TPackage -> PrecedenceTable -> FQN -> Expression -> Type
-typeOf' tpack precT fqn expr
-		= let texpr	= typeExpr tpack precT fqn expr in
-		  	head $ typeOf texpr
+-- Loads (and forces!) all the files
+loadContext	:: IO Context
+loadContext	= do	package <- loadPackage' bnfs prelude path
+			tablesOverv	<- runExceptionsIO' $ buildAllTables package
+			return $ Context package tablesOverv
 
-eval'		:: TPackage -> PrecedenceTable -> FQN -> Expression -> Value
-eval' tpack precT fqn expr
-		= let texpr	= typeExpr tpack precT fqn expr in
-			runReader (evalExpr multApply texpr) (Context tpack fqn [])
 
-typeExpr	:: TPackage -> PrecedenceTable -> FQN -> Expression -> TypedExpression
-typeExpr tpack precT fqn expr
-		=  let tmod = fromMaybe (error $ "Module not found: "++show fqn) $  Map.lookup fqn tpack in
-		   	convExpr tmod $ expr2prefExpr precT expr
+{-
 
-writePrecT	:: PrecedenceTable -> IO ()
-writePrecT prcT	=  do 	writeFile (docs ++ "OperatorOverview.md") $ show prcT
-			putStrLn $ "Written operator overview to "++docs
+The pipeline of an expression is:
+
+   String
+-> ParseTree	-- parse tokens, BNF-lib
+-> AST		-- Abstract syntax tree, parser-lib
+-> AST, prefix	-- Semantal
+-> Typed Expression (TAST)	--  Semantal
+-> Value	-- interpreter
+
+All these steps are available from within the interpreter, and do need some form of state
+-}
+
+
+parseTree	:: String -> Either String ParseTree
+parseTree str
+	= do	let mpt	= Bnf.parseFull bnfs (Bnf.toFQN ["Languate"]) "expr" $ strip str
+		case mpt of
+			Nothing		-> Left $ "The expression "++show str++"' could not be parsed at all"
+			Just (Left exc)	-> Left $ "The expression "++show str++"' could not be parsed:\n"++show exc
+			Just (Right pt)	-> return pt
+
+
+parseExpr	:: String -> Either String Expression
+parseExpr str
+		=  parseTree str |> ParserInternals.pt2expr
+
+parsePrefExpr	:: Context -> String -> Either String Expression
+parsePrefExpr (Context _ tablesOverv) str
+		= parseTree str |> ParserInternals.pt2expr |> Prefixer.expr2prefExpr (precedenceTable tablesOverv)
+
+
+parseTExpr	:: Context -> String -> IO [TypedExpression]
+parseTExpr (Context package tablesOverv) str
+		= do	expr	<- either error return $ parseExpr str
+			-- crash if this fails, let's not worry about that here. Main should catch the error if needed
+			runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
+				 typeExpr package tablesOverv prelude [] M.empty expr

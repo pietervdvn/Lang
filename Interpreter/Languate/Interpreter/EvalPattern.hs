@@ -17,16 +17,16 @@ evalPattern f ctx v (TMulti pats)
 evalPattern _ _ _ TDontCare
 		= Just M.empty
 evalPattern f ctx v (TDeconstruct sign patterns)
-		= do	let err		= printStackTrace "Hello from evalPattern! How did you get this msg?" ctx
-			let texpr		= TApplication err (TCall err sign) $ TLocalCall "patternValue" err
-			let (ADT i tp mtuple)	= evalExpr' f ctx {localScope = M.singleton "patternValue" v} texpr	-- we expect a maybe of tuples
-			if i == 0 then Nothing else do
+	= do	let err		= printStackTrace "Hello from evalPattern! How did you get this msg?" ctx
+		let texpr		= TApplication err (TCall err sign) $ TLocalCall "patternValue" err
+		let (ADT i tp mtuple)	= evalExpr' f ctx {localScope = M.singleton "patternValue" v} texpr	-- we expect a maybe of tuples
+		if i == 0 then Nothing else do
 			let [tuple]	= mtuple
 			let args	= untuple tuple
 			let errMsg	= "Number of patterns and values do not match!"++indent ("\ngot: "++show args++"\npat: "++show patterns)
 			if length args /= length patterns then printStackTrace errMsg ctx else do
-			scopes	<- zipWithM (evalPattern f ctx) args patterns
-			return $ M.unions scopes
+				scopes	<- zipWithM (evalPattern f ctx) args patterns
+				return $ M.unions scopes
 evalPattern f ctx v (TEval texpr)
 	= do	let result	= evalExpr' f ctx texpr
 		if result == v then Just M.empty else Nothing
