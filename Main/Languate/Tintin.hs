@@ -27,7 +27,6 @@ bDocs path (Context package tablesOverv)
 		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
 		removeDirectoryRecursive path'
 		renderClusterTo (fix $ extend (setFilePath path' . addFooter' . addHeader) $ html $ defaultHeader css) cluster'
-		putStrLn "Documentation rendered!"
 
 
 links		:: MarkUp -> Maybe MarkUp
