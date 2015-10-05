@@ -6,6 +6,7 @@ The list category declaration.
 import Collection.Maybe
 import Data.Bool
 import Data.Char
+import Collection.Void
 import Collection.Tuple
 import Collection.Set
 

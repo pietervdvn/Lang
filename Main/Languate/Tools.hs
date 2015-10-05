@@ -60,7 +60,7 @@ showShort (Command names shortHelp _ _) = (names & commas) ++ "\t " ++ shortHelp
 
 {--} {- The actual commands -} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 commands	:: [Command]
-commands	= [ help, exit, loadCmd, interpret, buildDocs, info, typeExprCmd, loadBuild, versionCmd, creditsCmd, parseTreeCmd, parseExprCmd, parsePrefExprCmd, parseTExprCmd]
+commands	= [ help, exit, loadCmd, interpret, buildDocs, info, typeExprCmd, loadBuild, versionCmd, creditsCmd, parseTreeCmd, parseExprCmd, parsePrefExprCmd, parseTExprCmd, showValue]
 {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 
 command		:: String -> Maybe Command
@@ -150,6 +150,18 @@ _parseTExprCmd	:: Context -> Maybe String -> IO ()
 _parseTExprCmd ctx expr
 		= _argNeeded (Pipeline.parseTExpr ctx) expr >>= print
 
+
+
+showValue	= Command ["showvalue","sv"] "[advanced] Shows the internal representation of the function" "Usefull to debug"
+			(continue' _showValue)
+
+_showValue	:: Context -> Maybe String -> IO ()
+_showValue _ Nothing	= putStrLn "No expression"
+_showValue ctx@(Context _ tablesOverv) (Just expr)
+	= do	tExprs	<- Pipeline.parseTExpr ctx expr
+		let context	= Interpreter.Ctx tablesOverv Pipeline.prelude M.empty []
+		let results	= tExprs |> Interpreter.evalExpr context |> show & unlines
+		putStrLn results
 
 
 typeExprCmd	= Command ["type","t"] "Types the given expression"

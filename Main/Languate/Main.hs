@@ -69,5 +69,5 @@ parseCommand starts defaultCommand notFoundDefault str
 	= let 	(name, args)	= break (==' ') str
 		name'	= if head name `elem` starts then Just $ dropWhile (==head name) name else Nothing
 		arg	= if args == "" then Nothing else Just args in
-		if isNothing name' then defaultCommand name else
-			fromMaybe (notFoundDefault str) $ unpackMaybeTuple (name' >>= command, arg)
+		if isNothing name' then defaultCommand str else
+			fromMaybe (notFoundDefault name) $ unpackMaybeTuple (name' >>= command, arg)

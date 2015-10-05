@@ -45,7 +45,7 @@ askChar
 		if c == '\EOT' then put (":exit",5) >> return True else do
 		(str, index)	<- get
 		case c of
-			'\DEL'	-> put (take (index-1) str ++ drop index str, min 0 index-1)
+			'\DEL'	-> put (take (index-1) str ++ drop index str, max 0 index-1)
 			'\NAK'	-> put ("",0)
 			'\ESC'	-> lift (readEscSeq "") >>= handleEscSeq
 			_	-> put (take index str ++ [c] ++ drop index str, index + 1)
