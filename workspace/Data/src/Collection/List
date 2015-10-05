@@ -53,3 +53,9 @@ empty		: [a]
 
 (:)		: (b:a) -> [a] -> [a]
 		= Elem
+
+
+-- TODO stringify of a list
+stringify	: [a] -> [Char]
+Empty		= "[]"
+(Elem a tail)	= "TODO: interfaces!"
