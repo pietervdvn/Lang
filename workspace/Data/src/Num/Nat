@@ -17,6 +17,17 @@ type Nat'	= Nat
 
 instance Nat is Eq
 
+fib	: Nat -> Nat
+0	= 0
+1	= 1
+(Succ i)	= fib i + fib (i - 1)
+
+
+precedence of (+) is left, (+) > (*)
+precedence of (-) is left, (-) = (+)
+precedence of (*) is left
+precedence of (/) is left, (/) = (*)
+
 
 (+)		: Nat -> Nat -> Nat
 (Succ i) j	= Succ (i + j)

@@ -5,7 +5,6 @@ Simple function which reads the command line arguments
 --}
 
 import StdDef
-import Prompt
 import System.Environment
 import Languate.Tools
 import Control.Monad
@@ -13,6 +12,7 @@ import Data.Char
 import Data.Maybe
 import Languate.Pipeline
 import System.IO
+import System.Console.Readline
 
 import Control.Exception
 
@@ -49,8 +49,13 @@ repl' ctx	= repCommand ctx repl'
 
 repCommand		:: Context -> (Context -> IO ()) -> IO ()
 repCommand ctx cont
-	= do	ln	<- whileDo (not . null) $ prompt "\9655 " |> strip
+	= do	ln'	<- readline "\9655 "
+		let ln	= case ln' of
+				Nothing	-> ":exit"
+				(Just ln)	-> ln
+		if (ln == "") then cont ctx else do
 		let (cmd, arg)	= parseCommand [':','-'] (\str -> (interpret, Just str)) (\str -> (help, Just str)) ln
+		addHistory ln
 		catch (action cmd ctx arg cont) $ errHandle cont ctx
 
 

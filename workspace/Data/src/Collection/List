@@ -41,7 +41,7 @@ Empty		= Empty
 
 (+)		: [a] -> [a] -> [a]
 Empty ls	= ls
-(Elem a tail) ls= a : tail + ls
+(Elem a tail) ls= a : (tail + ls)
 
 prepend		: (b:a) -> [a] -> [a]
 		= Elem
