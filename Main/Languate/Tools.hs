@@ -17,9 +17,12 @@ import qualified Languate.Pipeline as Pipeline
 import Languate.Pipeline (Context(Context))
 import Languate.Tintin
 import Languate.TAST
+import qualified Languate.AST as AST
 
 import qualified Languate.Interpreter as Interpreter
 import qualified Languate.Value as Interpreter
+
+import Control.Exception
 
 import Data.Maybe
 import Control.Arrow
@@ -45,7 +48,6 @@ continue' f state a continuation
 			continuation state
 
 
-
 instance Show Command where
 	show (Command names shortHelp longHelp _)
 		= let 	title		= names & commas
@@ -58,7 +60,7 @@ showShort (Command names shortHelp _ _) = (names & commas) ++ "\t " ++ shortHelp
 
 {--} {- The actual commands -} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 commands	:: [Command]
-commands	= [ help, exit, loadCmd, interpret, buildDocs, typeExprCmd, loadBuild, versionCmd, creditsCmd, parseTreeCmd, parseExprCmd, parsePrefExprCmd, parseTExprCmd]
+commands	= [ help, exit, loadCmd, interpret, buildDocs, info, typeExprCmd, loadBuild, versionCmd, creditsCmd, parseTreeCmd, parseExprCmd, parsePrefExprCmd, parseTExprCmd]
 {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--} {--}
 
 command		:: String -> Maybe Command
@@ -83,57 +85,26 @@ _interpret ctx@(Context _ tablesOverv) (Just expr)
 		= do	tExprs	<- Pipeline.parseTExpr ctx $ "stringify "++ pars expr
 			let context	= Interpreter.Ctx tablesOverv Pipeline.prelude M.empty []
 			let results	= tExprs |> Interpreter.evalExpr context
-			results |> Interpreter.showStringValue & unlines & putStrLn
-
-{-
-
--- TODO incorporate this one again!
--- shows info about command
-info	:: TModule -> Name -> String
-info modul n
-	= let signatures =  signaturesWithName n $ functions modul in
-	  let merged		= _merge (zip signatures $ Prelude.map (info' modul) signatures) in
-	  let merged'		= "\n-- ##\t"++n++ merged in
-	  let unmerged		= info' modul $ head signatures in
-	  let notFound		= "-- No function with name "++n++" found" in
-	  let nr		= length signatures in
-	  case nr of
-		0	-> notFound
-		1	-> unmerged
-		_	-> merged'
+			results |> Interpreter.showStringValue & unlines & putStr
 
 
+info		= Command ["i","info","about","?"] "Gives info about the given function" "Lot's of info!"
+				(continue' info')
 
-_merge		::  [(Signature, String)] -> String
-_merge
-		= concatMap (\(Signature _ t, str) -> "\n\n-- ###\t" ++ show t ++ "\n" ++ str)
-
-info'	:: TModule -> Signature -> String
-info' tmod sign
-	=  let found	= isJust $ lookupSt sign $ functions tmod in
-	   let docstr'	= fromMaybe "-- No docstring found" $ lookupSt sign $ docstrings tmod in
-	   let docstr	= if '\n' `elem` docstr' then "--- "++docstr' ++ " ---" else "-- "++docstr' in
-	   let loc'	= fromMaybe (error $ "No location found. This is a bug (interpreter/Tools/info)"++show sign) $ lookupSt sign $ definedIn tmod :: FQN in
-	   let loc	= "-- Defined in\t[" ++ show loc' ++ "]" in
-	   let imp	= fromMaybe [] $ lookupSt sign $ functions tmod in
-	   let result	= loc++"\n"++docstr++"\n"++show sign++"\n"++showClauses imp in
-	   if found then result else "-- No function found with signature "++show sign
-
-
-showClauses	:: [Clause] -> String
-showClauses []	=  "-- function not representable"
-showClauses clauses
-		= intercalate "\n" $ fmap show clauses
--}
+info'		:: Context -> Maybe String -> IO ()
+info' _ Nothing	= putStrLn "What function do you want info about? Type '':info function''"
+info' ctx (Just arg)
+		= putStrLn $ Pipeline.info' ctx arg
 
 
 buildDocs	= Command ["builddocs","bdocs","docs","docgen","tintin"] ("Builds a nice document overview. You'll find your documents in " ++
 			Pipeline.path ++ "/index.html") "Your browser should even automatically refresh when you rebuild the docs! And there is some magic in the colors too, especially at night."
 			(continue' buildDocs')
 
-buildDocs'	:: Context -> Maybe String -> IO()
+buildDocs'	:: Context -> Maybe String -> IO ()
 buildDocs' ctx _
-		= bDocs Pipeline.path ctx
+		= do	bDocs Pipeline.path ctx
+			putStrLn $ "http:///"++Pipeline.path++"/index.html"
 
 
 loadBuild	= Command ["lb","loadbuilddocs","r"] "Loads the code from disk, then rewrites the docs" "Will become your favorite!"
@@ -216,6 +187,19 @@ exit		= Command ["exit","e","no-repl"] "Exit interpreter or signal not to start 
 				(\_ _ _ -> putStrLn "See you soon!")
 
 
+lazyLoad	= Command [] "Lazy load only loads the context if it's really needed" ""
+				lazyLoad'
+
+
+lazyLoad'	:: Context -> Maybe String -> (Context -> IO ()) -> IO()
+lazyLoad' ctx arg cont
+		= do	eithCtx <- try (let Context a b = ctx in return $ Context a b)	:: IO (Either SomeException Context)
+			ctx'	<- case eithCtx of
+					Left e	-> Pipeline.loadContext
+					Right c	-> return c
+			cont ctx'
+
+
 help	= Command ["h","help"] "Shows help. Type 'help command' for more info about a specific command"
 			"Use 'help *' to get a full overview"
 			(continue help')
@@ -242,5 +226,5 @@ help' (Just "*")
 		commands |> show & intercal "\n\n" & putStrLn
 help' (Just name)
  	= case command name of
-		Nothing 	-> putStrLn ("No command '"++name++"' is known.") >> help' Nothing
+		Nothing 	-> putStrLn ("No command '"++name++"' is known. Type ':help' to see all commands")
 		(Just command)	-> print command

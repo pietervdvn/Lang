@@ -6,6 +6,8 @@ This module implements the actual calls to the interpreter.
 
 import StdDef
 import HumanUtils
+import Languate.MarkUp
+import State
 import Exceptions
 import Languate.CheckUtils
 
@@ -89,3 +91,14 @@ parseTExpr (Context package tablesOverv) str
 			-- crash if this fails, let's not worry about that here. Main should catch the error if needed
 			runExceptionsIO' $ inside "interactive:" $ inside ("While typing "++show expr) $
 				 typeExpr package tablesOverv prelude [] M.empty expr
+
+
+info'	:: Context -> String -> String
+info' ctx str
+	= info ctx str & renderString
+
+-- TODO pickup
+
+info	:: Context -> String -> MarkUp
+info ctx name
+	= Titling (Base $ "Info about " ++ name) $ Base "TODO"

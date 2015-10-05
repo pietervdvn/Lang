@@ -5,16 +5,19 @@ Simple function which reads the command line arguments
 --}
 
 import StdDef
+import Prompt
 import System.Environment
 import Languate.Tools
 import Control.Monad
 import Data.Char
+import Data.Maybe
 import Languate.Pipeline
 
+import Control.Exception
+
 start	:: IO ()
-start	= do	args	<- getArgs
-		commands	<- parseArgs args
-		runCmds commands (error "Please, load the context first!")
+start	= do	commands	<- getArgs |> parseArgs
+		runCmds (commands++[(loadCmd, Nothing),(repl, Nothing)]) (error "Please, load the context first!")
 
 
 
@@ -25,18 +28,43 @@ runCmds ((cmd, arg):rest) state
 
 
 -- Parses the command line options. One or two dashes mean: new command, no dash means argument to the previous command
-parseArgs	:: [String] -> IO [(Command, Maybe String)]
-parseArgs []	= return []
-parseArgs (('-':str):rest)
-		= do	let name	= str & dropWhile (=='-') |> toLower
-			let (args,rest')	= break (\str -> head str == '-') rest
+parseArgs	:: [String] -> [(Command, Maybe String)]
+parseArgs []	= []
+parseArgs (str:rest)
+		= let	(args,rest')	= break (\str -> head str == '-') rest	-- we get the other arguments which have no '-' in front
 			-- no arguments --> Nothing, otherwise we mash them together
-			let args'		= if null args then Nothing else Just $ unwords args
-			case command name of
-				Nothing	-> putStrLn ("Command '"++name++"' does not exist. See help for list of commands") >> parseArgs rest'
-				(Just cmd) -> do	tail	<- parseArgs rest'
-							return ((cmd, args'):tail)
+			cmdText		= unwords (str:args)
+			helpFor str	= (help, Just str)
+			cmd		= parseCommand ['-'] helpFor helpFor cmdText	in
+			cmd:parseArgs rest'
+
+repl		= Command ["repl"] "REPL-loop" "" (\ctx _ _ -> repl' ctx)
+
+repl'		:: Context -> IO ()
+repl' ctx	= repCommand ctx repl'
 
 
-repl		:: Context -> IO ()
-repl		= -- TODO pickup here
+repCommand		:: Context -> (Context -> IO ()) -> IO ()
+repCommand ctx cont
+	= do	ln	<- whileDo (not . null) $ prompt "\9655 " |> strip
+		let (cmd, arg)	= parseCommand [':','-'] (\str -> (interpret, Just str)) (\str -> (help, Just str)) ln
+		catch (action cmd ctx arg cont) $ errHandle cont ctx
+
+
+
+errHandle	:: (Context -> IO ()) -> Context -> SomeException -> IO ()
+errHandle cont ctx e
+		= do	putStrLn "Something went wrong:"
+			print e
+			cont ctx
+
+handleSpecials str	= return (++str)
+
+-- Parses a command, which starts with (repetitions of) the given chars, given a default command based on the string
+parseCommand	:: [Char] -> (String -> (Command, Maybe String)) -> (String -> (Command, Maybe String)) -> String -> (Command, Maybe String)
+parseCommand starts defaultCommand notFoundDefault str
+	= let 	(name, args)	= break (==' ') str
+		name'	= if head name `elem` starts then Just $ dropWhile (==head name) name else Nothing
+		arg	= if args == "" then Nothing else Just args in
+		if isNothing name' then defaultCommand name else
+			fromMaybe (notFoundDefault str) $ unpackMaybeTuple (name' >>= command, arg)
