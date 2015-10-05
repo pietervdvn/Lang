@@ -172,17 +172,25 @@ while cond inc counter
  | cond counter	= counter
  | otherwise	= while cond inc (inc counter)
 
+-- executes the monad for each a, as long as the condition is met
 whileM		:: (Monad m, Functor m) => (a -> m Bool) -> [a] -> m [a]
 whileM _ []	=  return []
 whileM f (a:as)	=  do	cont	<- f a
 			if cont then whileM f as |> (a:) else return []
 
 
+-- executes the monad for each a in [a], as long as the condition is met
 whileM'		:: (Monad m, Functor m) => (x -> Bool) -> (a -> m x) -> [a] -> m [x]
 whileM' _ _ []	= return []
 whileM' cond f (a:as)
 		= do	cont	<- f a
 			if cond cont then whileM' cond f as |> (cont:) else return []
+
+-- executes the given monad until it's result satisfies the condition
+whileDo	:: Monad m => (a -> Bool) -> m a -> m a
+whileDo cond m
+	= do	a	<- m
+		if cond a then return a else whileDo cond m
 
 
 mapTuple	:: (a -> b, c -> d) -> (a,c) -> (b,d)
