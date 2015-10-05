@@ -94,7 +94,7 @@ info		= Command ["i","info","about","?"] "Gives info about the given function" "
 info'		:: Context -> Maybe String -> IO ()
 info' _ Nothing	= putStrLn "What function do you want info about? Type '':info function''"
 info' ctx (Just arg)
-		= putStrLn $ Pipeline.info' ctx arg
+		= Pipeline.info' ctx arg >>= putStrLn
 
 
 buildDocs	= Command ["builddocs","bdocs","docs","docgen","tintin"] ("Builds a nice document overview. You'll find your documents in " ++

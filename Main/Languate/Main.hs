@@ -12,11 +12,14 @@ import Control.Monad
 import Data.Char
 import Data.Maybe
 import Languate.Pipeline
+import System.IO
 
 import Control.Exception
 
 start	:: IO ()
-start	= do	commands	<- getArgs |> parseArgs
+start	= do	hSetBuffering stdout NoBuffering	-- needed for interactive mode
+		hSetBuffering stdin NoBuffering
+		commands	<- getArgs |> parseArgs
 		runCmds (commands++[(loadCmd, Nothing),(repl, Nothing)]) (error "Please, load the context first!")
 
 

@@ -6,10 +6,12 @@ This module implements the actual calls to the interpreter.
 
 import StdDef
 import HumanUtils
-import Languate.MarkUp
+import Languate.MarkUp as Mu
 import State
 import Exceptions
 import Languate.CheckUtils
+
+import Data.Maybe
 
 import qualified Bnf
 import Bnf.ParseTree
@@ -22,12 +24,14 @@ import qualified Languate.Precedence.Expr2PrefExpr as Prefixer
 import qualified Languate.ParserStub as ParserInternals
 
 import Languate.TableOverview
+import Languate.FunctionTable
+import Languate.TAST
 import Languate.BuildTableOverview
 import Languate.Semantal
 
 import Languate.TAST
 
-import Data.Map as M
+import qualified Data.Map as M
 
 import System.IO.Unsafe
 
@@ -93,12 +97,18 @@ parseTExpr (Context package tablesOverv) str
 				 typeExpr package tablesOverv prelude [] M.empty expr
 
 
-info'	:: Context -> String -> String
+info'	:: Context -> String -> IO String
 info' ctx str
-	= info ctx str & renderString
+	= info ctx str |> renderString
 
--- TODO pickup
-
-info	:: Context -> String -> MarkUp
+info	:: Context -> String -> IO MarkUp
 info ctx name
-	= Titling (Base $ "Info about " ++ name) $ Base "TODO"
+	= do	texprs	<- parseTExpr ctx name
+		texprs |> infoAbout ctx & Mu.Seq & return
+
+infoAbout	:: Context -> TypedExpression -> MarkUp
+infoAbout (Context _ to) texpr@(TCall (typ, constr) sign)
+	= do	let typeInf	= show typ ++ if null constr then "" else " where "++ show constr
+		let docstring	= to & docstringTable & M.lookup sign |> Base & fromMaybe (Emph (Base "No docstring found"))
+		let definedIn	= signFQN sign & show & ("Defined in "++) & Base
+		Titling (Base $ "Info about " ++ show texpr ++ " : "++ typeInf) $ Mu.Seq [Parag definedIn, Parag docstring]

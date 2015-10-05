@@ -16,7 +16,10 @@ import Control.Arrow
 
 
 prompt	:: String -> IO String
-prompt question	= runstateT (ask' question) ("", 0) |> snd |> fst
+prompt question	=
+		do	answer 	<- runstateT (clearPrompt question >> ask' question) ("", 0) |> snd |> fst
+			return answer
+
 
 
 ask'	:: String -> StateT (String, Int) IO ()
@@ -24,7 +27,6 @@ ask' question
 	= do	clearPrompt question
 		done	<- askChar
 		unless done $ ask' question
-
 
 clearPrompt	:: String -> StateT (String, Int) IO ()
 clearPrompt question
