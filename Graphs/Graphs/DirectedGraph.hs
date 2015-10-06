@@ -1,4 +1,4 @@
-module Graphs.DirectedGraph (DG,DirectedGraph, invert, addLink, nodesFrom, leafs, dropNodes, isEmpty, empty, addLinks, addNode, addNodes, makeComplete) where
+module Graphs.DirectedGraph (DG,DirectedGraph, invert, addLink, nodesFrom, leafs, dropNodes, isEmpty, empty, addLinks, fromLinks, addNode, addNodes, makeComplete) where
 
 import StdDef ((||>>),(|>))
 
@@ -30,6 +30,9 @@ addLink (from, to) graph
 addLinks	:: (Ord n, Eq n) => [(n,n)] -> DG n -> DG n
 addLinks links graph
 	= L.foldr addLink graph links
+
+fromLinks	:: (Ord n, Eq n) => [(n,n)] -> DG n
+fromLinks links	= addLinks links M.empty
 
 addNode	:: (Ord n, Eq n) => n -> DG n -> DG n
 addNode n
