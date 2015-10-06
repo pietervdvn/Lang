@@ -12,6 +12,6 @@ public import Collection.Tuple
 public import Collection.List
 public import Collection.Set
 
-public import Num.Nat
+public import Data.Nat
 public import Data.Char
 public import ControlFlow
