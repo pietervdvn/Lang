@@ -6,12 +6,14 @@ import Languate.Package
 import Languate.TableOverview
 
 import Languate.Index
+import Languate.Manifest2Doc
 
 
 generateDocs	:: String -> Package -> TableOverview -> (RenderSettings -> RenderSettings, Cluster)
 generateDocs time p to
 	= let	indexDoc	= index p to
-		cluster	= buildCluster [indexDoc] in
+		manifDoc	= manifest2doc $ manifest p
+		cluster	= buildCluster [indexDoc, manifDoc] in
 		(renderSettings (title indexDoc) time , add to cluster)
 
 renderSettings	:: String -> String -> RenderSettings -> RenderSettings
