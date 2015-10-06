@@ -52,6 +52,8 @@ empty		: [a]
 ([])		: [a]
 		= Empty
 
+precedence of (:) is right, (:) < (+)
+
 (:)		: (b:a) -> [a] -> [a]
 		= Elem
 
