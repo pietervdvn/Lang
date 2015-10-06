@@ -153,6 +153,7 @@ isEmpty' (TableStructure mus muss)
 		= null mus || null muss ||
 			((mus |> isEmpty & and) && (muss ||>> isEmpty |> and & and))
 
+
 toText	:: MarkUp -> String
 toText 	= concat . search _toText
 

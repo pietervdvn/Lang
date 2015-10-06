@@ -4,6 +4,10 @@ import StdDef
 import Normalizable
 import HumanUtils hiding (when)
 
+import Graphs.DirectedGraph
+import Graphs.SearchCycles
+
+
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
 import Languate.MarkUp.Classes
@@ -41,6 +45,9 @@ renderClusterTo	settings (Cluster docsDict)= do
 	let docs'	= fromMaybe docs (do	overviewGen	<- overviewPage settings
 						return (overviewGen docs':docs))
 	let cluster	= docs' |> (title &&& id) & M.fromList
+	let loops	= searchLoops $ Cluster cluster
+	let loopsMsg	= loops |> intercal " --> " & unlines & indent
+	if (not $ null loops) then putStrLn $ "The cluster contains loops withing embedding documents.\n"++loopsMsg else do
 	-- cluster with documents for embedding
 	let embCluster	= cluster
 				|> preprocess normalize
@@ -87,6 +94,18 @@ searchRefs (InLink _ nm)
 searchRefs (Embed nm)
 	= Just nm
 searchRefs _	= Nothing
+
+ -- Searches embed-loops
+searchLoops	:: Cluster -> [[Name]]
+searchLoops cluster
+		= let 	graph	= docsIn cluster & M.toList |> second dependsOn & unmerge & fromLinks in
+			cleanCycles graph
+
+-- Gives embed-links
+dependsOn	:: Doc -> [Name]
+dependsOn doc	= contents doc & search embeds
+			where 	embeds (Embed n)	= Just n
+				embeds _	= Nothing
 
 
 _renderInLink	:: RenderSettings -> MarkUp -> Maybe MarkUp
