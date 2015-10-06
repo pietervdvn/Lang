@@ -39,6 +39,8 @@ buildPrecTable' package
 		= do	let mods		= elems $ modules package
 			mapM_ (uncurry checkPrecStmsIn) $ M.toList $ modules package
 			let (nameMod, rels)	= mergeTwo $ map getPrecedenceInfo mods
+			let rulesFQN		= modules package & M.toList |> second getPrecedenceInfo |> swap |> (\((a,b),c) -> (a,b,c))
+							& filter (\(a,b,_) -> 0 < length a + length b)
 		  	let eqs			= eqRelations rels
 			let ltRels		= ltRelations rels
 			let allOps		= nub ((rels >>= opsIn') ++ (nameMod |> fst))
@@ -47,13 +49,15 @@ buildPrecTable' package
 			let faultyLT	= searchIllegalLT ltRels equivUnion
 			assert (null faultyLT) $ errorMsg faultyLT
 			-- graph representing ("*" should be done before "-","+")
+			warn $ "Links: " ++ show (withRepr equivUnion ltRels)
 			let lowerThen	= addLinks (withRepr equivUnion ltRels) DG.empty
 			let totalOrder'		= buildOrdering lowerThen
+			warn $ show totalOrder'
 			totalOrder <- case totalOrder' of
 					Left loops	-> halt $ "Could not build the precedence table, as there is a loop in the precedences: "++ unwords (loops |> show)
 					Right (ordering, ambigueties)	-> warnAmbigueties ambigueties >> return ordering
 			let (op2i, i2op)	= buildTable totalOrder allOps equivUnion
-		   	let table = PrecedenceTable (length totalOrder) op2i i2op (fromList nameMod)
+		   	let table = PrecedenceTable (length totalOrder) op2i i2op (fromList nameMod) rulesFQN
 			checkNoMix table
 			return table
 

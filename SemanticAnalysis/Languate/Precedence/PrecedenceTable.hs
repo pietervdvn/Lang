@@ -21,24 +21,25 @@ import Languate.AST
 import Languate.MarkUp as Mu
 
 type Operator	= Name
-data PrecedenceTable	= PrecedenceTable 
+data PrecedenceTable	= PrecedenceTable
 	{ maxI::Int
 	, op2i :: Map Operator Int
 	, i2op :: Map Int (Set Operator)
-	, op2precMod :: Map Operator PrecModifier }
+	, op2precMod :: Map Operator PrecModifier
+	, rules	:: [([(Name, PrecModifier)], [PrecRelation], FQN)] }
 	deriving (Show)
 
 instance Documentable PrecedenceTable where
 	toDocument precT
-		= (precedenceOverview, [precedencePerLevel precT, precedencePerOperator precT])
+		= (precedenceOverview, [precedencePerLevel precT, precedencePerOperator precT, rulesOverview precT])
 
 modeOf	:: Int -> PrecedenceTable -> PrecModifier
-modeOf index (PrecedenceTable _ _ i2op mods)
+modeOf index (PrecedenceTable _ _ i2op mods _)
 	= fromMaybe PrecLeft $ do	repr	<- lookup index i2op
 					lookup (S.findMin repr) mods
 
 precedenceOf	:: Expression -> PrecedenceTable -> Int
-precedenceOf expr (PrecedenceTable tot op2i _ _)
+precedenceOf expr (PrecedenceTable tot op2i _ _ _)
 		= if isOperator expr
 			then	let (Operator nm)	= expr in
 				findWithDefault tot nm op2i
@@ -53,6 +54,7 @@ precedenceOf expr (PrecedenceTable tot op2i _ _)
 
 precPerLevelTitle	= "Operators per precedence levels"
 precPerOpTitle		= "Operators with precedence levels"
+precRules		= "Defined rules"
 
 precedencePerLevel	:: PrecedenceTable -> Doc
 precedencePerLevel precTable
@@ -73,7 +75,21 @@ precedencePerOperator precTable
 
 precedenceOverview	:: Doc
 precedenceOverview	= doc "Precedence Overview" "Operators with their respective precedence" $
-				 titling "Precedence Overview" $ Mu.Seq [explanation, Embed precPerLevelTitle, Embed precPerOpTitle]
+				 titling "Precedence Overview" $ Mu.Seq [explanation, Embed precPerLevelTitle, Embed precPerOpTitle, Embed precRules]
+
+
+rulesOverview	:: PrecedenceTable -> Doc
+rulesOverview precT
+		= let	rows	= rules precT |> (\(namesMods, rels , fqn) -> [showR (namesMods, rels), code $ show fqn])	:: [[MarkUp]]	in
+			doc precRules "Gives all the known rules about precedence and the module that defines them" $ table ["Rule","Defined in"] rows
+
+showR	:: ([(Name, PrecModifier)], [PrecRelation]) -> MarkUp
+showR (namesMods, rels)
+	= let	namesMods'	= namesMods |> (\(n, mod) -> n ++ " is "++show mod) |> code
+		rels'		= rels |> show |> code in
+		(namesMods' ++ rels') |> Parag & Mu.Seq
+
+
 
 op2mu	:: Map Name PrecModifier -> (Operator, Int) -> [MarkUp]
 op2mu mods (op, i)
@@ -90,5 +106,4 @@ precOf mods op
 
 
 explanation
-	= parag "The higher the operator stands in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated\n\nTo test precedence, invoke ````--p <expression>```` in the interpreter, which converts expression to prefix notation."
-
+	= Mu.Seq [parag "The higher the operator stands in the table (the lower the number), the more range it will have. The lower it stands, the tighter the operator binds. The lower the operator stands, the earlier it will be evaluated\n\nTo test precedence, invoke ````--ppe <expression>```` in the interpreter, which converts expression to prefix notation.", Parag $ Mu.Seq [Base "To change the order, type ", code "precedence of (op) is left/right/prefix/postfix, (op) < (op)"]]

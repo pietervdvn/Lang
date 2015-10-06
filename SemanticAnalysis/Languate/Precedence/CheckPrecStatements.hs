@@ -106,7 +106,7 @@ checkNoMix table
 
 
 checkClass	:: PrecedenceTable -> Int -> Exceptions String String ()
-checkClass (PrecedenceTable maxI _ i2op modifs) i
+checkClass (PrecedenceTable maxI _ i2op modifs _) i
 		= do	haltIf (i > maxI) $ "Trying to check operator category "++show i++" on consistency, but only "++show maxI++" operator categories exists. This is a bug"
 			haltIf (i <= 0) $ "Trying to check operator category "++show i++" on consistency, but categories start numbering from 1 (and not 0). This is a bug"
 			let allOps	= S.toList $ findWithDefault S.empty i i2op
