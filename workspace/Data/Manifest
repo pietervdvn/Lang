@@ -15,7 +15,7 @@ dependencies	= {"pietervdvn:Builtins" --> 0.1 }
 language	= 0.1
 license		= GPL
 
-exposes		= {Data.Bool, Data.Int}
-
+exposes		= {Prelude}
+maintains	= {Type.Function}
 
 bugtracker	= "github.com/Lang/issues/"

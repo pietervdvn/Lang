@@ -3,7 +3,5 @@ Function
 The ''Type.Function'' module contains type synonyms and type functions to do meta stuff.
 --------
 
-import Category.Mappable
-
 -- The 'Flip' type takes a type function (''* -> * -> *'') and flips it arguments. E.g. Flip Dict v k = Dict k v
 type Flip x b a	= x a b
