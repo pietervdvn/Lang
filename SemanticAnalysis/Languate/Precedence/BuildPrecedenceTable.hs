@@ -5,6 +5,7 @@ This module implements the actual building of the precedence table
 --}
 
 import StdDef
+import HumanUtils (pars)
 import Exceptions
 import Data.Map hiding (map, foldr, null, filter)
 import qualified Data.Map as M
@@ -50,7 +51,7 @@ buildPrecTable' package
 			let totalOrder'		= buildOrdering lowerThen
 			totalOrder <- case totalOrder' of
 					Left loops	-> halt $ "Could not build the precedence table, as there is a loop in the precedences: "++ unwords (loops |> show)
-					Right ordering	-> return ordering
+					Right (ordering, ambigueties)	-> warnAmbigueties ambigueties >> return ordering
 			let (op2i, i2op)	= buildTable totalOrder allOps equivUnion
 		   	let table = PrecedenceTable (length totalOrder) op2i i2op (fromList nameMod)
 			checkNoMix table
@@ -85,6 +86,14 @@ searchIllegalLT ltRels repres
 		   let zipped	= zip ltRels canons in
 			filter (isSame . snd) zipped |> fst
 			where isSame (o1,o2)	= o1 == o2
+
+
+warnAmbigueties	:: [[Name]] -> Exceptions String String ()
+warnAmbigueties []	= return ()
+warnAmbigueties (ambigs:ambigss)
+	= do	let msg = "Some operators do not have a fixed order. "++ (ambigs |> pars & unwords) ++" do not have a precedence amongst them, assigning a random order"
+		warn msg
+		warnAmbigueties ambigss
 
 
 

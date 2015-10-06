@@ -35,28 +35,18 @@ do
 done
 
 bell 1
-# cd "SemanticAnalysis"
-# echo -e "bDocs\n:q" | ghci "Languate/MaintenanceAccess/TestBuild"
-exit
 
 cd Main
-ghc Main.hs
+ghc Main.hsijn wacht idd de evenaar overgestoken. En dan zijn we gedoopt de morgen erop. Moesten we een vis kussen en voor Neptunus komen en dan in het zwembad springen. Was wel leuk en grappig.
+
+Anders alles goed hier. Terug op zee dus eigenlijk niet veel te vertellen.
+
+Veel groeten
 EXITCODE="$?"
-echo "Exit code $EXITCODE"
 if [[ $EXITCODE -ne 0 ]]
 then
 	echo "Compiling langc (Main) failed"
 	exit
 fi
 
-version="$(./Main --version)"
-mv Main ../langc$version
-rm *.hi
-rm *.o
-rm */*.hi
-rm */*.o
-cd ..
-cd ..
-
-# Test all the laws!
-./langc$version --no-repl
+./Main --version --e
