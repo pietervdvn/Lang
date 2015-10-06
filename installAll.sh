@@ -37,6 +37,7 @@ done
 bell 1
 
 cd Main
+rm Main
 ghc Main.hs
 EXITCODE="$?"
 if [[ $EXITCODE -ne 0 ]]
