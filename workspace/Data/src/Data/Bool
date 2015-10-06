@@ -19,9 +19,9 @@ instance Bool is Eq
 
 --## Logical operations
 
-precedence of (&&) is left, (&&) = (||)
+precedence of (&&) is left, (&&) = (||), (&&) > (==)
 precedence of (||) is left, (||) = (&&)
-precedence of (!) is prefix, (!) < (&&), (!) < (*)
+precedence of (!) is prefix, (!) < (&&)
 
 -- Logical 'and'-function. Returns True if, and only if both arguments are True
   ~ annihilator for and	: b => False && b	= False

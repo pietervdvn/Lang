@@ -5,7 +5,7 @@ Implements the category of types which can be compared for equivalence, together
 
 import Data.Bool
 
-precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!), (==) > (*)
+precedence of (==) is Left, (==) = (!=), (==) < (&&), (==) > (!)
 
 ---
 The category which defines _equality_ ''=='' and _inequality_ ''!=''

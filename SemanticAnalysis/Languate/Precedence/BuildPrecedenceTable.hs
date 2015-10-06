@@ -49,13 +49,11 @@ buildPrecTable' package
 			let faultyLT	= searchIllegalLT ltRels equivUnion
 			assert (null faultyLT) $ errorMsg faultyLT
 			-- graph representing ("*" should be done before "-","+")
-			warn $ "Links: " ++ show (withRepr equivUnion ltRels)
 			let lowerThen	= addLinks (withRepr equivUnion ltRels) DG.empty
 			let totalOrder'		= buildOrdering lowerThen
-			warn $ show totalOrder'
 			totalOrder <- case totalOrder' of
 					Left loops	-> halt $ "Could not build the precedence table, as there is a loop in the precedences: "++ unwords (loops |> show)
-					Right (ordering, ambigueties)	-> warnAmbigueties ambigueties >> return ordering
+					Right (ordering, ambigueties)	-> warnAmbigueties ambigueties >> return (reverse ordering)
 			let (op2i, i2op)	= buildTable totalOrder allOps equivUnion
 		   	let table = PrecedenceTable (length totalOrder) op2i i2op (fromList nameMod) rulesFQN
 			checkNoMix table

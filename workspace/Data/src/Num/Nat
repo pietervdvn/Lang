@@ -23,9 +23,9 @@ fib	: Nat -> Nat
 (Succ i)	= fib i + fib (i - 1)
 
 
-precedence of (+) is left, (+) > (*)
+precedence of (+) is left, (+) > (*), (+) < (==), (!) > (+)
 precedence of (-) is left, (-) = (+)
-precedence of (*) is left
+precedence of (*) is left, (*) > (?), (*) < (:)
 precedence of (/) is left, (/) = (*)
 
 
