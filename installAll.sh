@@ -37,11 +37,7 @@ done
 bell 1
 
 cd Main
-ghc Main.hsijn wacht idd de evenaar overgestoken. En dan zijn we gedoopt de morgen erop. Moesten we een vis kussen en voor Neptunus komen en dan in het zwembad springen. Was wel leuk en grappig.
-
-Anders alles goed hier. Terug op zee dus eigenlijk niet veel te vertellen.
-
-Veel groeten
+ghc Main.hs
 EXITCODE="$?"
 if [[ $EXITCODE -ne 0 ]]
 then
@@ -49,4 +45,4 @@ then
 	exit
 fi
 
-./Main --version --e
+./Main -r --version --e
