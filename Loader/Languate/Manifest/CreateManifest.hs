@@ -29,7 +29,9 @@ createFromDict	:: Name -> String -> String -> [(String, MetaValue)] -> Exc Manif
 createFromDict name synopsis description pairs
 	= stack' ("While building the manifest\n"++) $
 	  do	pairs'	<- pairs |> preProc & preProcs'
-		(typesOk, dict)	<- mapM typeCheck pairs' |> unzip |> first and
+		(typesOk, dict')	<- mapM typeCheck pairs' |> unzip |> first and
+		let dict	= if name == "Data" then dict'  ++ [("dependencies", Dict [])] else dict'
+		-- for the base package 'Data' -which has no dependencies- we make an exception, we insert the dependencies manually
 		haltIf (not typesOk) "Not all fields have the correct type"
 		let description'	= description & stripnl & reverse & stripnl & reverse
 		let fetch str	= lookup str dict ? ("The field '"++str++"' was not found")
