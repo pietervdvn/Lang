@@ -11,7 +11,7 @@ fi
 FOUND=0
 DONE=0
 
-for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/ Interpreter/
+for pack in Std/ Graphs/ Consumer/ Regex/ Bnf/ Parser/ Loader/ MarkUp/ SemanticAnalysis/ Interpreter/ Tintin/
 do
 	DONE=$(($DONE+1))
 	echo $DONE
