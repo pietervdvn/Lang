@@ -15,7 +15,6 @@ import StdDef
 import HumanUtils
 import qualified Languate.Pipeline as Pipeline
 import Languate.Pipeline (Context(Context))
-import Languate.Tintin
 import Languate.TAST
 import qualified Languate.AST as AST
 
@@ -103,7 +102,7 @@ buildDocs	= Command ["builddocs","bdocs","docs","docgen","tintin"] ("Builds a ni
 
 buildDocs'	:: Context -> Maybe String -> IO ()
 buildDocs' ctx _
-		= do	bDocs Pipeline.path ctx
+		= do	Pipeline.bDocs Pipeline.path ctx
 			putStrLn $ "http:///"++Pipeline.path++"/index.html"
 
 

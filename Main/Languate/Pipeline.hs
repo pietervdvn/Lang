@@ -30,10 +30,13 @@ import Languate.BuildTableOverview
 import Languate.Semantal
 
 import Languate.TAST
+import Languate.Tintin as Tintin
 
 import qualified Data.Map as M
 
 import System.IO.Unsafe
+import Data.Time.Clock
+import System.Directory
 
 -- for now, the location of the files is hardcoded
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"	-- location of the bnf, needed for the parser
@@ -112,3 +115,15 @@ infoAbout (Context _ to) texpr@(TCall (typ, constr) sign)
 		let docstring	= to & docstringTable & M.lookup sign |> Base & fromMaybe (Emph (Base "No docstring found"))
 		let definedIn	= signFQN sign & show & ("Defined in "++) & Base
 		Titling (Base $ "Info about " ++ show texpr ++ " : "++ typeInf) $ Mu.Seq [Parag definedIn, Parag docstring]
+
+
+bDocs	:: FilePath -> Context -> IO ()
+bDocs path (Context package tablesOverv)
+	= do	dir	<- getCurrentDirectory
+		time	<- getCurrentTime |> utctDayTime |> realToFrac |> round
+		let (rendering, cluster)	= Tintin.generateDocs (show time) package tablesOverv
+		let path'	= dir ++"/" ++ path ++ "/.gen" ++ "/html"
+		let hour = 2 + time `div` (60*60)
+		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
+		removeDirectoryRecursive path'
+		renderClusterTo (fix $ extend (setFilePath path' . rendering) $ html $ defaultHeader css) cluster
