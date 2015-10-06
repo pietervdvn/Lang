@@ -13,26 +13,23 @@ import Collection.List
 -- A natural number, which might be zero
 data Nat	= Zero | Succ Nat
 
+-- A natural number, which is not zero
 type Nat'	= Nat
 
 instance Nat is Eq
 
-fib	: Nat -> Nat
-0	= 0
-1	= 1
-(Succ i)	= fib i + fib (i - 1)
 
-
-precedence of (+) is left, (+) > (*), (+) < (==), (!) > (+)
+precedence of (+) is left, (+) > (*), (+) < (==)
 precedence of (-) is left, (-) = (+)
-precedence of (*) is left, (*) > (?), (*) < (:)
+precedence of (*) is left, (*) > (?), (*) < (:), (!) < (*)
 precedence of (/) is left, (/) = (*)
 
-
+-- Natural addition
 (+)		: Nat -> Nat -> Nat
 (Succ i) j	= Succ (i + j)
 0 j		= j
 
+-- Multiplication
 (*)		: Nat -> Nat -> Nat
 (Succ i) j	= j + (i*j)
 0 j		= 0
@@ -44,25 +41,38 @@ precedence of (/) is left, (/) = (*)
 0 j		= 0
 i 0		= i
 
+-- natural division, which floors the result
+> 9 / 10 = 0
+> 15 / 3 = 5
 (/)		: Nat -> Nat' -> Nat
 i q		= if (i < q) 0 (1 + ((i-q)/q))
 
+-- Remainder after natural division, modulo
+> 15 % 10 = 5
 (%)		: Nat -> Nat' -> Nat
 i q		= if (i < q) i ((i-q) % q)
 
+-- lower then
 (<)		: Nat -> Nat -> Bool
 _ 0		= False
 0 j		= True
 (Succ i) (Succ j)= i < j
 
+-- predecessor, minus one.
 pred		: Nat' -> Nat
 (Succ i)	= i
 Zero		= Zero
 
+-- successor, plus one
 succ		: Nat -> Nat'
 		= Succ
 
+-- fibonacci. As (!) is prefix for the boolean functions, it is prefix here too
+(!)		: Nat -> Nat
+0		= 0
+1		= 1
+(Succ i)	= !i + !(i - 1)
 
-
+-- convert to string
 stringify	: Nat -> [Char]
 i		= if (i < 10) [Char (48+i)] (stringify (i/10) + stringify (i%10))
