@@ -12,7 +12,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules: Languate.Tintin
-  other-modules: Languate.Index, Languate.Manifest2Doc
+  other-modules: Languate.Index, Languate.Manifest2Doc, Languate.ModulesOverviewDoc
   -- other-extensions:
   build-depends:       base >=4.6 && <4.7, MarkUp >=0.1 && <0.2, Std >=0.1 && <0.2, Languate-Loader >= 0.1 && <0.2, Languate-SemanticAnalysis >=0.1, containers >=0.5 && <0.6
   -- hs-source-dirs:

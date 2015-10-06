@@ -8,7 +8,7 @@ import Languate.Manifest as Mani
 import Languate.FQN
 import Languate.TableOverview
 import Languate.Manifest2Doc
-
+import Languate.ModulesOverviewDoc
 
 index	:: Package -> TableOverview -> Doc
 index p to
@@ -17,4 +17,4 @@ index p to
 		version	= Mani.version manif |> show & intercal "."
 		in
  	 	doc ("Index of "++show fqpn++" "++version) ("The home of the "++Mani.name manif++" package") $
-			titling "Overview" $ Seq [Parag $ imp $ synopsis manif, parag $ Mani.description manif, Embed manifestDocTitle]
+			titling "Overview" $ Seq [Parag $ imp $ synopsis manif, parag $ Mani.description manif, Embed modulesOverviewTitle, Embed manifestDocTitle]
