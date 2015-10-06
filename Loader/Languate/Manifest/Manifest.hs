@@ -18,7 +18,7 @@ import Data.Maybe
 import Control.Arrow
 
 type Version	= [Int]
-data Manifest = Manifest {name :: Name, synopsis :: String, description :: String,
+data Manifest = Manifest {	name :: Name, synopsis :: String, description :: String,
 				version :: Version,
 				language:: Version,
 				authors :: [Name],
@@ -28,6 +28,10 @@ data Manifest = Manifest {name :: Name, synopsis :: String, description :: Strin
 				execute	:: Maybe Name,
 				rest	:: Map Name MetaValue
 				}
+
+
+fqpn		:: Manifest -> FQPN
+fqpn mani	= toFqpn' (head $ authors mani) $ name mani
 
 
 data MetaValue	= Int Int

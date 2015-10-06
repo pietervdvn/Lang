@@ -59,6 +59,8 @@ toFQPN		:: String -> Maybe FQPN
 toFQPN fqpn	=  do	let (auth,pack)	= break (==':') fqpn
 			if null pack then Nothing else toFqpn auth $ drop 1 pack
 
+toFQPN'	= fromJust . toFQPN
+
 toFQN'		:: String -> FQN
 toFQN'		=  fromJust . toFQN
 
@@ -85,6 +87,8 @@ toFqpn		:: Name -> Name -> Maybe FQPN
 toFqpn auth pck	= do	auth'	<- toAuthor auth
 			pack'	<- toPackName pck
 			return $ FQPN auth' pack'
+
+toFqpn' auth pck	= fromJust $ toFqpn auth pck
 
 -- an authors name consists of [a..zA..Z0..9 -], e.g. "Pieter Vander Vennet"
 toAuthor	:: Name -> Maybe Author
