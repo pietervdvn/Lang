@@ -5,6 +5,7 @@ This module implements the meta-info package of a manifest
 --}
 
 import StdDef
+import HumanUtils
 
 import Languate.FQN
 
@@ -23,7 +24,7 @@ data Manifest = Manifest {	name :: Name, synopsis :: String, description :: Stri
 				language:: Version,
 				authors :: [Name],
 				depends :: Map FQPN Version,
-				prelude	:: Set [Name],
+				prelude	:: Set [Name],	-- e.g.{[Data,Bool], [Collection, Maybe]}
 				exposes	:: Set [Name],
 				execute	:: Maybe Name,
 				rest	:: Map Name MetaValue
@@ -111,7 +112,7 @@ smv	:: MetaValue	-> String
 smv (Int i)	= show i
 smv (String s)	= show s
 smv (FuncName str)	= str
-smv (ModuleName fqn)	= show fqn
+smv (ModuleName fqn)	= fqn & intercal "."
 smv (License l)	= show l
 smv (Version v)	= v |> show & intercalate "."
 smv (St vals)	= "{"++ commaSepSmv vals ++"}"
