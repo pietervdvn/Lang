@@ -28,7 +28,7 @@ import Data.Maybe
 import Control.Arrow
 import qualified Data.Map as M
 
-version	= "0.0.1 \9650 'Black Triangle'"
+version	= "0.1.1 \9650 'Black Triangle'"
 credits	= ["Made by Pieter Vander Vennet (pietervdvn)","Big thanks to Ilion Beyst for the support","Big thanks to Tlelaxu for occasional coding help"]
 
 data Command	= Command {names	:: [Name]
