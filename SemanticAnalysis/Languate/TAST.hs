@@ -67,7 +67,7 @@ charTypeConstr'	= TApplication ([charType], []) charTypeConstr
 
 
 
-natFQN		= toFQN' "pietervdvn:Data:Num.Nat"
+natFQN		= toFQN' "pietervdvn:Data:Data.Nat"
 
 natType		= uncurry RNormal natTypeID
 natTypeID	= (natFQN, "Nat")
