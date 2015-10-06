@@ -37,6 +37,7 @@ t nm cont	=  tokenErr modName nm cont
 
 
 s		:: Name -> [MetaValue] -> MetaValue
+s "version" []	= Version []
 s "version" [Int i]
 		= Version [i]
 s "version" (Int i:asts)
@@ -45,8 +46,6 @@ s "version" (Int i:asts)
 s "version" (Version i:asts)
 		= let (Version is)	= s "version" asts in
 			Version (i++is)
-s "version" [Int i, Version is]
-		= Version $ i:is
 s "dictValue" [k,v]
 		= Dict [(k,v)]
 s "license" [GlobId name, String file]
