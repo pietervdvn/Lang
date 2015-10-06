@@ -45,4 +45,6 @@ then
 	exit
 fi
 
+rm *.hi *.o */*.hi */*.o
+
 ./Main -r --version --e
