@@ -42,8 +42,10 @@ addNodes ns graph
 -- Adds all nodes that occur. E.g. {a --> {b}} -> {a --> {b}, b --> {}}
 makeComplete	:: (Ord n, Eq n) => DG n -> DG n
 makeComplete graph
-	= let known	= S.toList $ S.unions $ M.elems graph in
-		addNodes known graph
+	= let 	known	= S.toList $ S.unions $ M.elems graph
+		knownNodes	= M.keys graph
+		toAdd	= known L.\\ knownNodes in
+		addNodes toAdd graph
 
 -- Nodes reachable from n with one hop
 nodesFrom	:: (Ord n, Eq n) => n -> DG n -> Set n

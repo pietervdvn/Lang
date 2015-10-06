@@ -7,6 +7,7 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 
 import Control.Applicative
+import Control.Arrow (first)
 
 
 {-
@@ -14,7 +15,7 @@ import Control.Applicative
 Given a "bigger then"-relationship, builds a absolute ordering.
 
 e.g.
-{a --> {b,c}, b --> [c], c --> {}}
+{a --> {b,c}, b --> {c}, c --> {}}
 This means that a > b, a > c, b > c.
 You will get a list [a, b, c].
 
@@ -23,6 +24,9 @@ Note that {a --> {}, b --> {}} has no specific ordering, thus a random list migh
 Some inputs are unsolvable because of loops, e.g. {a --> {b}, b --> {a}}.
 In that case, Left [a,b] is returned: a path that causes a loop.
 Loops are searched in advanced and are all returned.
+
+Ambigueties are returned. {a --> {b}, c } means we can both choose quite a lot of combinations.
+Some of the choices are returned
 
 -}
 buildOrdering	:: (Ord n, Eq n) => DG n -> Either [[n]] ([n], [[n]])
@@ -38,9 +42,12 @@ _bo graph
  | otherwise
 	= let	leaves	= leafs graph	-- all leafs are free to number
 		leafs'	= S.toList leaves
-		ambigueLeafs	= if length leafs' > 1 then leafs' else []
+		addAmbigueLeafs	= if length leafs' > 1 then (leafs':) else id
 		(ordering, ambigueties)	= _bo (dropNodes leaves graph) in
-		(leafs' ++ ordering, ambigueLeafs : ambigueties)
+		(ordering ++ leafs', addAmbigueLeafs ambigueties)
 
 testGraph	=
 	S.fromList <$> M.fromList [("a",["b","c"]),("b",["c"]), ("c",[])]
+
+testGraph'	=
+	S.fromList <$> M.fromList [("a",["b"]),("b",[]), ("c",[])]
