@@ -8,10 +8,10 @@ import Bnf hiding (toFQN)
 
 import System.IO.Unsafe
 
+help 	= "tl = testLoad; tl' = unsafePerformIO tl"
 
-tl	= loadPackage' bnfs tfqn fp -- run with current directory Lang/Loader
+tl	= loadPackage' bnfs fp -- run with current directory Lang/Loader
 tl'	= unsafePerformIO tl
-tfqn	= fromJust $ toFQN "pietervdvn:Data:Prelude" -- imports Data.Bool and Data.Functor
 fp	= "../workspace/Data/"
 
 bnfs	= unsafePerformIO $ load "../Parser/bnf/Languate.bnf"

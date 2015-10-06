@@ -71,11 +71,18 @@ toFQN fqn	=  do	let splitted	= splitOn (==':') fqn
 				let mods	= splitOn (=='.') modsStr
 				toFqn auth pack (init' mods) (last mods)
 				else Nothing
+
+
 toFqn'		:: FQPN -> [Name] -> Name -> Maybe FQN
 toFqn' fqpn mods mod
 		= do	mods'	<- mapM toModName mods
 			mod'	<- toModName mod
 			return $ FQN fqpn mods' mod'
+
+toFqn''		:: FQPN -> [Name] -> Maybe FQN
+toFqn'' _ []	= Nothing
+toFqn''	fqpn mods
+		= toFqn' fqpn (init' mods) (last mods)
 
 toFqn		:: Name -> Name -> [Name] -> Name -> Maybe FQN
 toFqn auth pack mods mod

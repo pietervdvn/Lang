@@ -80,6 +80,7 @@ typeOf	= M.fromList	[ ("version", Version [])
 			, ("execute", FuncName "")
 			, ("aliases", Dict [(String "", FuncName "")])
 			, ("language", Version [])
+			, ("maintains", St [fqnT])
 		   	  ]
 		where fqnT	= ModuleName $ error "pietervdvn is upset"
 
@@ -137,6 +138,7 @@ showMetaType (Lst (v:_))	= "["++ showMetaType v ++ "]"
 showMetaType (Dict ((k,v):_))
 		=  "{"++ showMetaType k ++ " --> "++showMetaType v ++ "}"
 showMetaType (GlobId s)	= "Identifier"
+showMetaType _		= "Invalid metavalue, e.g. empty set"
 
 
 instance Show Manifest where
