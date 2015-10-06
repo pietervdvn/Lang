@@ -5,7 +5,7 @@ This module implements the actual calls to the interpreter.
 --}
 
 import StdDef
-import HumanUtils
+import HumanUtils hiding (when)
 import Languate.MarkUp as Mu
 import State
 import Exceptions
@@ -37,6 +37,8 @@ import qualified Data.Map as M
 import System.IO.Unsafe
 import Data.Time.Clock
 import System.Directory
+
+import Control.Monad (when)
 
 -- for now, the location of the files is hardcoded
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"	-- location of the bnf, needed for the parser
@@ -121,9 +123,12 @@ bDocs	:: FilePath -> Context -> IO ()
 bDocs path (Context package tablesOverv)
 	= do	dir	<- getCurrentDirectory
 		time	<- getCurrentTime |> utctDayTime |> realToFrac |> round
-		let (rendering, cluster)	= Tintin.generateDocs (show time) package tablesOverv
+		time'	<- getCurrentTime |> show
+		let (rendering, cluster)	= Tintin.generateDocs time' package tablesOverv
 		let path'	= dir ++"/" ++ path ++ "/.gen" ++ "/html"
 		let hour = 2 + time `div` (60*60)
 		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
-		removeDirectoryRecursive path'
+		exists	<- doesDirectoryExist path'	:: IO Bool
+		when exists $ removeDirectoryRecursive path'	:: IO ()
+		createDirectory path'
 		renderClusterTo (fix $ extend (setFilePath path' . rendering) $ html $ defaultHeader css) cluster
