@@ -60,7 +60,7 @@ help	= info |> (\(a,b) -> "  "++ a ++ "\t"++b) & unlines & ("\nInterpreter help:
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
-packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
+packageIO	= loadPackage' bnfs
 prelude		= toFQN' "pietervdvn:Data:Prelude"
 
 loadedPackage	= unsafePerformIO $ packageIO path

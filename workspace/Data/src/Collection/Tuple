@@ -12,7 +12,6 @@ import Category.Eq
 The data structure representing tuples.
 
 The syntactic sugar ''(a,b,c)'' desugars to ''Tuple a (Tuple b c)''
----
 
 import Data.Bool
 
@@ -30,3 +29,4 @@ fst		: (a,b) -> a
 
 snd		: (a,b) -> b
 (Tuple _ b)	= b
+---

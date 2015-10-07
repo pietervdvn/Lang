@@ -5,17 +5,13 @@ The most basic types and functions, which each program needs.
 This package defines ''Bool'', ''Int'', basic data structures, ...
 ----
 
-author		= "Pietervdvn"
+author		= "pietervdvn"
 version		= 0.1.0
-maintainer	= "Pietervdvn"
-
-dependencies	= {"pietervdvn:Builtins" --> 0.1 }
-
+maintainer	= "pietervdvn"
 
 language	= 0.1
 license		= GPL
 
 exposes		= {Prelude}
-maintains	= {Type.Function}
 
 bugtracker	= "github.com/Lang/issues/"

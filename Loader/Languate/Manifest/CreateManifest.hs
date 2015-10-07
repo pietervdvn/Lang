@@ -40,7 +40,10 @@ createFromDict name synopsis description pairs
 		let unpv (Version v)	= v
 		version		<- fetch "version" |> unpv
 		language	<- fetch "language" |> unpv
-		authors		<- fetch "authors" |> unp
+		authors'	<- fetch "authors" |> unp
+		let authors		=  authors' ||>> toLower |> filter isAlphaNum
+		let checkNameMsg orig corrected	= "The author name '"++orig++"' has some illegal characters, it got corrected to '"++corrected++"'"
+		zip authors' authors |> (\(orig, corrected) -> assert (orig == corrected) $ checkNameMsg orig corrected) & sequence
 		depends'	<- fetch "dependencies"
 		depends		<- fetchDeps depends'
 		prelude		<- get (St []) "prelude" |> fetchModuleSet

@@ -233,7 +233,7 @@ curryNumber' tt	= _curryNumber' tt []
 _curryNumber'	:: TypeTable -> [RType] -> TypeID -> Int
 _curryNumber' tt visited tid
  | tid == anyTypeID	= 0
- | otherwise	= let	errMsg	= "No super tt for "++show tid++", weird..."
+ | otherwise	= let	errMsg	= "No super type table for "++show tid++", weird..."
 			superTT	= tt & allSupertypes & findWithDefault (error errMsg) tid  in
 			if anyType `M.member`  superTT then 0 else
 			let super	= head $ L.filter (`notElem` visited) $

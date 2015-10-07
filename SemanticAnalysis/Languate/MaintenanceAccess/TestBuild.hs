@@ -47,7 +47,7 @@ import Data.Time.LocalTime
 
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"
 path		= "../workspace/Data"
-packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
+packageIO	= loadPackage' bnfs
 
 loadedPackage	= unsafePerformIO $ packageIO path
 tablesOvervIO	= runExceptionsIO' $ buildAllTables loadedPackage
@@ -76,7 +76,7 @@ links (InLink mu nm)
 links _		= Nothing
 
 addFooter	:: IO (RenderSettings -> RenderSettings)
-addFooter	= do	let back = NonImp $ InLink (Base "Back to all pages") "All pages"
+addFooter	= do	let back = NonImp $ InLink (Base "Generated with Semantal - Back to all pages") "All pages"
 			time	<- getCurrentTime
 			print time
 			return $ addPreprocessor' (\mu -> Mu.Seq [back, mu,

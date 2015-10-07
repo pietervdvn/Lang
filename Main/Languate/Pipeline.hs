@@ -44,7 +44,7 @@ import Control.Monad (when)
 bnfs		= unsafePerformIO $ Bnf.load "../Parser/bnf/Languate"	-- location of the bnf, needed for the parser
 path		= "../workspace/Data"					-- location of the prelude/files project we work on
 prelude		= toFQN' "pietervdvn:Data:Prelude"			-- location of the prelude, as FQN
-packageIO	= loadPackage' bnfs (toFQN' "pietervdvn:Data:Prelude")
+packageIO	= loadPackage' bnfs
 
 
 
@@ -56,7 +56,7 @@ data Context	= Context Package TableOverview
 
 -- Loads (and forces!) all the files
 loadContext	:: IO Context
-loadContext	= do	package <- loadPackage' bnfs prelude path
+loadContext	= do	package <- loadPackage' bnfs path
 			tablesOverv	<- runExceptionsIO' $ buildAllTables package
 			return $ Context package tablesOverv
 
