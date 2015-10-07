@@ -47,7 +47,7 @@ renderClusterTo	settings (Cluster docsDict)= do
 	let cluster	= docs' |> (title &&& id) & M.fromList
 	let loops	= searchLoops $ Cluster cluster
 	let loopsMsg	= loops |> intercal " --> " & unlines & indent
-	if (not $ null loops) then putStrLn $ "The cluster contains loops withing embedding documents.\n"++loopsMsg else do
+	if not $ null loops then putStrLn $ "The cluster contains loops withing embedding documents.\n"++loopsMsg else do
 	-- cluster with documents for embedding
 	let embCluster	= cluster
 				|> preprocess normalize

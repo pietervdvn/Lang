@@ -49,7 +49,7 @@ loadPackage world fp
 			let srcPath		= fp ++ "/src"
 			allFiles		<- getDirectoryContentsRecursive srcPath
 			let allFiles'		= allFiles |> drop (1 + length srcPath)
-			return $ (buildWorld manifest package >>= checkObsoleteModules exposed maintained allFiles')
+			return (buildWorld manifest package >>= checkObsoleteModules exposed maintained allFiles')
 
 checkObsoleteModules	:: [FQN] -> [FQN] -> [FilePath] -> Package -> Exceptions' String Package
 checkObsoleteModules exposed maintained fps pack

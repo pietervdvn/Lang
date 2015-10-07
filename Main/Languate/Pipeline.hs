@@ -29,7 +29,6 @@ import Languate.TAST
 import Languate.BuildTableOverview
 import Languate.Semantal
 
-import Languate.TAST
 import Languate.Tintin as Tintin
 
 import qualified Data.Map as M

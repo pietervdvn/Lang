@@ -38,7 +38,7 @@ parseArgs (str:rest)
 			-- no arguments --> Nothing, otherwise we mash them together
 			cmdText		= unwords (str:args)
 			helpFor str	= (help, Just str)
-			cmd		= parseCommand ['-'] helpFor helpFor cmdText	in
+			cmd		= parseCommand "-" helpFor helpFor cmdText	in
 			cmd:parseArgs rest'
 
 repl		= Command ["repl"] "REPL-loop" "" (\ctx _ _ -> repl' ctx)
@@ -53,8 +53,8 @@ repCommand ctx cont
 		let ln	= case ln' of
 				Nothing	-> ":exit"
 				(Just ln)	-> ln
-		if (ln == "") then cont ctx else do
-		let (cmd, arg)	= parseCommand [':','-'] (\str -> (interpret, Just str)) (\str -> (help, Just str)) ln
+		if null ln then cont ctx else do
+		let (cmd, arg)	= parseCommand ":-" (\str -> (interpret, Just str)) (\str -> (help, Just str)) ln
 		addHistory ln
 		catch (action cmd ctx arg cont) $ errHandle cont ctx
 
@@ -69,7 +69,7 @@ errHandle cont ctx e
 handleSpecials str	= return (++str)
 
 -- Parses a command, which starts with (repetitions of) the given chars, given a default command based on the string
-parseCommand	:: [Char] -> (String -> (Command, Maybe String)) -> (String -> (Command, Maybe String)) -> String -> (Command, Maybe String)
+parseCommand	:: String -> (String -> (Command, Maybe String)) -> (String -> (Command, Maybe String)) -> String -> (Command, Maybe String)
 parseCommand starts defaultCommand notFoundDefault str
 	= let 	(name, args)	= break (==' ') str
 		name'	= if head name `elem` starts then Just $ dropWhile (==head name) name else Nothing
