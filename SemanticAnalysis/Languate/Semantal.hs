@@ -13,8 +13,7 @@ import Languate.AST
 import Languate.TAST
 import Languate.FQN
 import Languate.Package
-import Languate.Precedence.PrecedenceTable
-import Languate.Precedence.Expr2PrefExpr
+import Languate.PrecedenceTable
 import Languate.FunctionTable.TypeExpr
 
 import Data.Map as M

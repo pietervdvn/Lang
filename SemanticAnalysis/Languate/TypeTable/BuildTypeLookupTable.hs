@@ -1,4 +1,4 @@
-module Languate.TypeTable.BuildTypeLookupTable where
+module Languate.TypeTable.BuildTypeLookupTable (buildTLTs) where
 
 {-
 This module provides functions to
@@ -88,7 +88,7 @@ Data.List.List
 invalid:
 List.List, List : ambiguous to both idiots and data.
 
-The package is named Idiots, as EVERYONE SHOULD ALWAYS USE STANDARD LISTS FOR CONSISTENCY AND CODE REUSABILITY!
+The package is named Idiots, as everyone should always use standard lists for consistency and code reusability!
 
 -}
 buildTLT	:: Package -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))

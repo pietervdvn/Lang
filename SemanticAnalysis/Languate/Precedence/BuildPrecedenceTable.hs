@@ -1,4 +1,4 @@
-module Languate.Precedence.BuildPrecedenceTable where
+module Languate.Precedence.BuildPrecedenceTable (buildPrecTable) where
 
 {--
 This module implements the actual building of the precedence table
@@ -22,7 +22,7 @@ import Languate.Package
 
 import Languate.Precedence.Utils
 import Languate.Precedence.CheckPrecStatements
-import Languate.Precedence.PrecedenceTable
+import Languate.Precedence.PrecedenceTableDef
 
 import Graphs.UnionFind
 import Graphs.Order
@@ -32,6 +32,7 @@ import Control.Arrow
 
 import State
 
+buildPrecTable	:: Package -> Exceptions String String PrecedenceTable
 buildPrecTable	= stack' (indent' "Building Precedence table: ") . buildPrecTable'
 
 buildPrecTable' 	:: Package -> Exceptions String String PrecedenceTable
@@ -117,9 +118,6 @@ withRepr unions = map (repr *** repr)
 
 
 
-
+-- merges lists. [([1,2,3],"abc"),([4,5,6],"def")] -> ([1,2,3,4,5,6], "abcdef")
 mergeTwo	:: [([a],[b])] -> ([a],[b])
-mergeTwo []	= ([],[])
-mergeTwo ((as,bs):rest)
-		= let (as', bs')	= mergeTwo rest in
-		  	(as++as',bs++bs')
+mergeTwo arg	= ((>>= fst) &&& (>>= snd)) arg

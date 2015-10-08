@@ -11,7 +11,9 @@ import Languate.AST
 
 import Languate.Package
 import Languate.FQN
-import Languate.Precedence.PrecedenceTable
+import Languate.PrecedenceTable
+
+import Languate.TypeTable
 
 {--
 The moduletable contains all information that is local to a module
@@ -19,9 +21,10 @@ The moduletable contains all information that is local to a module
 
 data ModuleTable
 	= ModuleTable	{
-		exposed	:: ModuleContents,
-		defined	:: ModuleContents,
-		known	:: ModuleContents
+		typeLookupTable	:: TypeLookupTable,
+		exposed		:: ModuleContents,
+		defined		:: ModuleContents,
+		known		:: ModuleContents
 		} deriving (Show)
 
 
@@ -42,7 +45,7 @@ buildModuleTable	:: Package -> PrecedenceTable ->  FQN -> Module
 				-> Exc ModuleTable
 buildModuleTable p precT fqn mod
 	= do	let emptie	= ModuleContents $ FunctionTable empty empty
-		return $ ModuleTable emptie emptie emptie
+		return $ ModuleTable todo emptie emptie emptie
 
 
 

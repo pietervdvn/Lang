@@ -15,7 +15,7 @@ import Languate.TypeTable
 import Languate.BuiltIns as BuiltIn
 
 import Languate.FunctionTable
-import Languate.Precedence.PrecedenceTable
+import Languate.PrecedenceTable
 
 data SimpleFunc	= SimpleFunc {	funcName	:: Name,
 				funcTypes	:: [Type],

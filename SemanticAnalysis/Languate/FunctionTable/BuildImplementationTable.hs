@@ -11,7 +11,7 @@ import Languate.FQN
 import Languate.TableOverview
 import Languate.FunctionTable
 import Languate.TypeTable
-import Languate.Precedence.PrecedenceTable
+import Languate.PrecedenceTable
 
 import Languate.FunctionTable.TypeClause
 

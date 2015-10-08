@@ -1,4 +1,4 @@
-module Languate.Precedence.Expr2PrefExpr where
+module Languate.Precedence.Expr2PrefExpr (expr2prefExpr) where
 
 {- This module converts an AST.Expression into an AST.expression where all operator invocations are replaced by a prefix call notation, according to the precedence.
 
@@ -15,7 +15,7 @@ import StdDef
 import Normalizable
 
 import Languate.AST
-import Languate.Precedence.PrecedenceTable
+import Languate.Precedence.PrecedenceTableDef
 import Data.Maybe
 import Prelude hiding (lookup)
 import Data.Map hiding (filter, map)

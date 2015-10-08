@@ -11,7 +11,7 @@ import Languate.TAST
 import Languate.FQN
 import Languate.Package
 import Languate.TypeTable
-import Languate.Precedence.PrecedenceTable
+import Languate.PrecedenceTable
 
 import Languate.FunctionTable
 import Languate.FunctionTable.FunctionsIn
@@ -28,7 +28,7 @@ import Data.List
 
 import Control.Arrow
 
--- Builds the function tables without implementation tablek, which will still get filled by buildFunctionTable itself. The raw refers to the untyped clauses
+-- Builds the function tables without implementation table, which will still get filled by buildFunctionTable itself. The raw refers to the untyped clauses
 buildFunctionTables	:: Package -> TypeTable -> Exc (FunctionTables, Map FQN (Map Signature [Clause]))
 buildFunctionTables p tt
 	= do	-- TODO check for doubly defined functions

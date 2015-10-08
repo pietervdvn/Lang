@@ -12,7 +12,7 @@ import Data.Set (Set, fromList, member)
 import qualified Data.Set as S
 import Data.Map (Map, findWithDefault)
 import Data.List (nub, sort, intercalate)
-import Languate.Precedence.PrecedenceTable
+import Languate.Precedence.PrecedenceTableDef
 import Languate.Precedence.Utils
 
 

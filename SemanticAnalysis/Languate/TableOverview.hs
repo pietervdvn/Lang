@@ -9,7 +9,7 @@ import Languate.FQN
 import Languate.Package
 import Languate.TypeTable
 import Languate.TypeTable.TypeTable2mu
-import Languate.Precedence.PrecedenceTable
+import Languate.PrecedenceTable
 import Languate.FunctionTable
 import Languate.CheckUtils
 
