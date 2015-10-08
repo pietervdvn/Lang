@@ -4,9 +4,15 @@ import StdDef
 import Languate.MarkUp
 import Languate.Package
 import Languate.TableOverview
+import Languate.AST
 
-modulesOverviewTitle	= "Exposed modules"
+import Data.Map as M
+
+modulesOverviewTitle	= "Modules"
 
 modulesOverview	:: Package -> TableOverview -> Doc
 modulesOverview p to
-	= doc modulesOverviewTitle "Overview of exposed modules" $ Base "TODO"
+	= let mods	= p & modules & M.keys
+				|> show |> (\n -> InLink (code n) ("Modules/"++n))
+				|> (:[]) in
+		doc modulesOverviewTitle "Overview of all modules" $ table ["Module"] mods
