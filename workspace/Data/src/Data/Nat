@@ -65,7 +65,7 @@ Zero		= Zero
 
 -- successor, plus one
 succ		: Nat -> Nat'
-		= Succ
+a		= Succ a
 
 -- fibonacci. As (!) is prefix for the boolean functions, it is prefix here too
 (!)		: Nat -> Nat

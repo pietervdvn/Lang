@@ -19,8 +19,8 @@ The function table is associated with a single module and keeps track of all kno
 
 -}
 data FunctionTable	= FunctionTable
-	{ defined	:: Map Signature Coor -- signatures of locally defined functions, which might be private, and where they are defined
-	, public	:: Set Signature --all public functions
+	{ defined	:: Map Signature Coor	-- signatures of locally defined functions, which might be private, and where they are defined
+	, public	:: Set Signature	-- all public functions
 	, known		:: Map Name [Signature]	-- all functions known within local scope
 	}
 	deriving (Show)
