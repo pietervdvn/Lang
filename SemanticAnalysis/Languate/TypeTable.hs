@@ -30,13 +30,11 @@ import Data.List as L
 import Control.Arrow
 import Normalizable
 
-import Debug.Trace
-
 {-
 The type table contains all known types within a certain module.
 -}
 
-type TypeID	= (FQN, Name)
+
 
 {-Type requirements are explicit for new type declarations; in a "(freeName, reqs)" format, where each subsequent free is named "a0","a1",...
 
@@ -110,13 +108,6 @@ Set  --> [""Set a0""]
 type SpareSuperTypeTable	= Map TypeID [RType]
 type SpareSuperTypeTables	= Map TypeID SpareSuperTypeTable
 
--- basically the same as the aliastable, but with types.
-type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
-
-
-
-
-
 data TypeTable	= TypeTable	{ knownTypes	:: Set TypeID
 				, typeLookups	:: Map FQN TypeLookupTable
 				, kinds		:: KindLookupTable
@@ -131,20 +122,6 @@ data TypeTable	= TypeTable	{ knownTypes	:: Set TypeID
 
 data Binding	= Binding (Map Name RType)	-- data type, and not a type alias to allow a custom show function
 	deriving (Eq, Ord)
-
--- Finds the type within the TLT
-findTypeOrigin	:: TypeLookupTable -> ([Name], Name) -> Exc FQN
-findTypeOrigin tlt id@(path, t)
-	=  do	fqnSet	<- M.lookup id tlt ? ("The type "++spth id ++" could not be resolved. It is not declared or imported.")
-		let fqns	= S.toList fqnSet
-		assert (isSingleton fqns) $ "The type "++spth id++" is ambigous. We found it in modules "++show fqns
-		return $ head fqns
-
-
-findTypeOrigin'	:: TypeLookupTable -> ([Name],Name) -> Exc (FQN, Name)
-findTypeOrigin' tlt id@(_, nm)
-		= do	fqn	<- findTypeOrigin tlt id
-			return (fqn, nm)
 
 {-
 Constructs the vanillaType of the given ID.
@@ -162,50 +139,6 @@ vanillaType	:: TypeTable -> TypeID -> RType
 vanillaType tt
 		= vanillaType' (kinds tt)
 
-resolveType	:: TypeLookupTable -> Type -> Exc RType
-resolveType tlt (Normal path name)
-		= do	fqn	<- findTypeOrigin tlt (path, name)
-			return $ RNormal fqn name
-resolveType tlt (Free nm)
-		= return $ RFree nm
-resolveType tlt (Applied bt [])
-		= resolveType tlt bt
-resolveType tlt (Applied bt tps)
-		= do	let (tps',t)	= (init' tps, last tps)
-			t'	<- resolveType tlt t
-			tail	<- resolveType tlt (Applied bt tps')
-			return $ RApplied tail t'
-
-resolveType tlt (Curry [t])
-		= resolveType tlt t
-resolveType tlt (Curry (t:tps))
-		= do	t'	<- resolveType tlt t
-			tail	<- resolveType tlt (Curry tps)
-			return $ RCurry t' tail
-resolveType tlt (TupleType [])
-		= return voidType
-resolveType tlt (TupleType [t])
-		= resolveType tlt t
-resolveType tlt e@(TupleType (t:tps))
-		= do	rt	<- resolveType tlt t
-			tail	<- resolveType tlt (TupleType tps)
-			return $ RApplied (RApplied tupleType rt) tail
-
-resolveType _ DontCareType
-		= halt "Unresolved dont care type"
-resolveTypes tlt
-		= mapM (resolveType tlt)
-
-
-resolveTypeIn	:: TypeLookupTable -> (a,Type) -> Exc (a,RType)
-resolveTypeIn tlt (a,tp)
-	= do	rtp	<- resolveType tlt tp
-		return (a,rtp)
-
-resolveTypesIn	:: TypeLookupTable -> (a,[Type]) -> Exc (a,[RType])
-resolveTypesIn tlt (a,tps)
-	= do	rtps	<- mapM (resolveType tlt) tps
-		return (a,rtps)
 
 {-
 How much arguments takes this type?
@@ -240,19 +173,6 @@ _curryNumber' tt visited tid
 						M.keys superTT in
 			_curryNumber tt visited super
 
-_construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
-_construct tlt e tps cons
-		=  inside ("In the type expression "++show e) $ do
-			rtps	<- mapM (resolveType tlt) tps	-- mapM gives Nothing if one type is not found
-			return $ cons rtps
-
-_construct'	:: TypeLookupTable -> Type -> Type -> Type -> (RType -> RType -> RType) -> Exc RType
-_construct' tlt e t0 t1 cons
-		= inside ("In the type expression "++show e) $ do
-			t0'	<- resolveType tlt t0
-			t1'	<- resolveType tlt t1
-			return $ cons t0' t1'
-
 -- Returns all the supertypes, given per applied frees. Whenever the type is fully applied, ''Any'' is a supertype too. This supertypes is given when no other supertype exists. Used in the 2MD
 superTypesFor	::  TypeTable -> TypeID -> [([Name], RType, Map Name [RType])]
 superTypesFor tt t
@@ -266,14 +186,7 @@ superTypesFor' sttf appliedFrees
 		= let	all	= S.toList $ findWithDefault S.empty appliedFrees sttf	:: [(RType, Map Name [RType])] in
 			unmerge [(appliedFrees , all)] |>  (\(a,(b,c)) -> (a,b,c))
 
-showTLT dict	= dict & M.toList |> sitem & intercalate "; "
 
-sitem (k, possib)	= spth k ++ " --> {"++intercalate ", " (fmap shwFQN possib)  ++ "}"
-shwFQN (fqn, _)	= intercalate "." $ modulePath fqn
-spth (nms, nm)	= intercalate "." $ nms ++ [nm]
-
-showTypeID (fqn,nm)
-		= show fqn ++"."++show nm
 
 
 instance Show Binding where

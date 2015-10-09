@@ -103,6 +103,9 @@ stringType	= RApplied listType charType
 
 
 
+
+type TypeID	= (FQN, Name)
+
 {- Each type has a kind. You can think of those as the 'type of the type'
 E.g. a 'Maybe' is always in function of a second argument, e.g. 'Maybe Int' or 'Maybe String'.
 'String' and ''Functor Int'' have a kind ''a'' (no arguments), whereas ''Functor'' has a kind ''a -> b''

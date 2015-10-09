@@ -9,7 +9,7 @@ import Languate.AST
 import Languate.Package
 import Languate.ModuleTable
 import Languate.PrecedenceTable
-import Languate.TypeTable.BuildTypeLookupTable (buildTLTs)
+import Languate.Typetable.TypeLookupTable
 
 import Languate.CheckUtils
 
@@ -28,12 +28,12 @@ buildPackageTable	:: Package -> Exc PackageTable
 buildPackageTable p
 	= do	precT	<- buildPrecTable p
 		tlts	<- buildTLTs p
-		modTbls	<- modules p & toList |> _buildModuleTable p precT & sequence |> fromList
+		modTbls	<- modules p & toList |> _buildModuleTable (buildModuleTable p precT tlts) & sequence |> fromList
 		return $ PackageTable modTbls precT
 
-_buildModuleTable	:: Package -> PrecedenceTable -> (FQN, Module) -> Exc (FQN, ModuleTable)
-_buildModuleTable p precT (fqn, mod)
-	= do	modT	<- buildModuleTable p precT fqn mod
+_buildModuleTable	:: (FQN -> Module -> Exc ModuleTable) -> (FQN, Module) -> Exc (FQN, ModuleTable)
+_buildModuleTable f (fqn, mod)
+	= do	modT	<- f fqn mod
 		return (fqn, modT)
 
 

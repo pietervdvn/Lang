@@ -1,4 +1,4 @@
-module Languate.TypeTable.BuildTypeLookupTable (buildTLTs) where
+module Languate.Typetable.TypeLookupTable.BuildTypeLookupTable (buildTLTs) where
 
 {-
 This module provides functions to
@@ -8,27 +8,30 @@ This module provides functions to
 	-> For Module M, expand the aliastable
  -}
 
+import StdDef
+import qualified Exceptions as E
+
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Set hiding (map, filter)
 import Data.Map hiding (map, filter)
 import Data.Maybe
 import Data.Tuple
-import Control.Arrow (first, second)
 import Data.List
+
+import Languate.FQN
 import Languate.AST
-import StdDef
-import qualified Exceptions as E
+import Languate.TAST
+import Languate.Package as P
+import Languate.Typetable.TypeLookupTable.BuildKnownTypes
+import Languate.Typetable.TypeLookupTable.TypeLookupTableDef
+
 import Graphs.DirectedGraph
 import Graphs.ExportCalculator
 
 import Exceptions hiding (err)
 import Languate.CheckUtils
 
-import Languate.Package as P
-import Languate.FQN
-import Languate.TypeTable
-import Languate.TypeTable.BuildKnownTypes
 
 {-
 Building of a type lookup table:

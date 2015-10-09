@@ -13,7 +13,10 @@ import Languate.Package
 import Languate.FQN
 import Languate.PrecedenceTable
 
-import Languate.TypeTable
+import Languate.Typetable.TypeLookupTable
+
+import Data.Map (Map)
+import qualified Data.Map as M
 
 {--
 The moduletable contains all information that is local to a module
@@ -41,14 +44,15 @@ data FunctionTable
 
 
 
-buildModuleTable	:: Package -> PrecedenceTable ->  FQN -> Module
+buildModuleTable	:: Package -> PrecedenceTable -> Map FQN TypeLookupTable -> FQN -> Module
 				-> Exc ModuleTable
-buildModuleTable p precT fqn mod
-	= do	let emptie	= ModuleContents $ FunctionTable empty empty
-		return $ ModuleTable todo emptie emptie emptie
+buildModuleTable p precT tlts fqn mod
+	= do	tlt		<- M.lookup fqn tlts ? ("No typelookup table found for "++show fqn++".Are the fqns really the same?")
+		let emptie	= ModuleContents $ FunctionTable empty empty
+		return $ ModuleTable tlt emptie emptie emptie
 
 
 
 mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
-	=  [doc ("Moduletable for "++show fqn) "" $ Base "hi"]
+	=  [doc ("Moduletable for "++show fqn) "" $ Base "hi", tlt2doc "Modules/Typelookuptable for " fqn $ typeLookupTable mt]
