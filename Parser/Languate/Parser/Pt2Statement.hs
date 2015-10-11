@@ -9,7 +9,6 @@ import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2Law
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2DataDef
-import Languate.Parser.Pt2TypeDef
 import Languate.Parser.Pt2SubTypeDef
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Annot
@@ -35,8 +34,6 @@ convert (Func f)
 convert (Lw l)	= [LawStm l]
 convert (ADTDf def)
 		= [ADTDefStm def]
-convert (SynDf def)
-		= [SynDefStm def]
 convert (Comms comms ast)
 		= Comments comms:convert ast
 convert (Comm comms)
@@ -58,7 +55,6 @@ convert (InstanceAST inst)
 data AST	= Func Function
 		| Lw Law
 		| ADTDf ADTDef
-		| SynDf SynDef
 		| Docs [DocString (Name, Name)] AST
 		| Comms [Comment] AST
 		| Comm [Comment]
@@ -75,7 +71,6 @@ h		=  [ ("nls",		Comm 	. pt2nls)
 		   , ("function",   	Func 	. pt2func)
 		   , ("law",		Lw	. pt2law)
 		   , ("data",	    unc ADTDf 	  pt2adtdef)
-		   , ("synonym", 	SynDf 	. pt2syndef)
 		   , ("subtype", 	SubTpDf . pt2subdef)
 		   , ("cat", 	    unc ClassDf   pt2classDef)
 		   , ("annotation", 	Annot 	. pt2annot)

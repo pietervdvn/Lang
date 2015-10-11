@@ -13,8 +13,6 @@ import Collection.List
 -- A natural number, which might be zero
 data Nat	= Zero | Succ Nat
 
--- A natural number, which is not zero
-type Nat'	= Nat
 
 instance Nat is Eq
 

@@ -20,7 +20,6 @@ import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2Precedence
-import Languate.Parser.Pt2TypeDef
 import Languate.Parser.Pt2ClassDef
 import Languate.Parser.Pt2Statement
 import Languate.Parser.Pt2Languate

@@ -121,9 +121,8 @@ data ADTSum	= ADTSum Name Visible [(Maybe Name, Type)]
 {-
 > type Name = String.
 > type SortedSet (a:Ord)	= {a}
-  SynDef "SortedSet" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"]
-   no obligated docstring for this one! -}
-data SynDef	= SynDef Name [Name] Type [TypeRequirement]
+  SynDef "SortedSet" ["a"] (Applied (Normal "Set") (Free "a")) [("a"), Normal "Ord"] -}
+--data SynDef	= SynDef Name [Name] Type [TypeRequirement]
 
 {-
 Data type representing a subtype declaration, e.g.

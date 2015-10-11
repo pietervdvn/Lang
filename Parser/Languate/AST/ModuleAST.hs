@@ -34,7 +34,6 @@ data Restrict	= BlackList [Name] | WhiteList [Name]
 data Statement	= FunctionStm 	Function
 		| LawStm	Law
 		| ADTDefStm	ADTDef
-		| SynDefStm	SynDef
 		| SubDefStm	SubDef
 		| ClassDefStm	ClassDef
 		| InstanceStm 	Instance

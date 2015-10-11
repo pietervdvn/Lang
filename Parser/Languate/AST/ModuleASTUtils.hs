@@ -113,8 +113,6 @@ commentIn _	= Nothing
 declaresType	:: Name -> Statement -> Bool
 declaresType nm (ADTDefStm (ADTDef nm' _ _ _))
 		= nm == nm'
-declaresType nm (SynDefStm (SynDef nm' _ _ _))
-		= nm == nm'
 declaresType nm (SubDefStm (SubDef nm' _ _ _ _))
 		= nm == nm'
 declaresType nm (ClassDefStm cd)

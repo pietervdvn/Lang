@@ -56,13 +56,6 @@ data _Btree (a: Ord) (b:[a])
 -}
 
  -------------
- -- SYN DEF --
- -------------
-
-_typeDef	::= typeIdent freeTypes "=" type
- synonym	::= "type" typeDef
-
- -------------
  -- SUB DEF --
  -------------
 
