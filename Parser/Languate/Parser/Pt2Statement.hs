@@ -70,9 +70,9 @@ h		:: [(Name, ParseTree -> AST)]
 h		=  [ ("nls",		Comm 	. pt2nls)
 		   , ("function",   	Func 	. pt2func)
 		   , ("law",		Lw	. pt2law)
-		   , ("data",	    unc ADTDf 	  pt2adtdef)
-		   , ("subtype", 	SubTpDf . pt2subdef)
-		   , ("cat", 	    unc ClassDf   pt2classDef)
+		   , ("typeDecl",	unc ADTDf 	  pt2adtdef)
+		   , ("subtypeDecl", 	SubTpDf . pt2subdef)
+		   , ("catDecl", 	unc ClassDf   pt2classDef)
 		   , ("annotation", 	Annot 	. pt2annot)
 		   , ("precedence", 	PrecAnn . pt2precedence)
 		   , ("instance", 	InstanceAST . pt2instance)]
