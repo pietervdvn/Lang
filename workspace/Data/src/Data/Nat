@@ -11,7 +11,8 @@ import Data.Char
 import Collection.List
 
 -- A natural number, which might be zero
-data Nat	= Zero | Succ Nat
+type Nat	= {Zero} + Nat'
+type Nat'	= {Succ}
 
 
 instance Nat is Eq

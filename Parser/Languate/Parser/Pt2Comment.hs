@@ -64,8 +64,9 @@ hNl		= [("comment",pt2ast),("nlcomment", pt2ast)]
 			where pt2ast	= simpleConvert [] t s
 
 
+pt2nlcomments	:: ParseTree -> [Comment]
 pt2nlcomments	=  pt2nls
-pt2nls		:: ParseTree -> [Comment]
+pt2nls	:: ParseTree -> [Comment]
 pt2nls		=  pt2a hNls (tokenErr "Pt2Comment-nls") sNls (\(Comms strs) -> strs)
 
 
@@ -77,3 +78,4 @@ sNls "nlcomments" asts
 		= Comms $ map (\(Comment c) -> c) asts
 sNls "nls" [Nl]	= Comms []
 sNls "nls" asts = Comms $ concatMap (\(Comms strs) -> strs) asts
+sNls r asts	= seqErr "sNls" r asts

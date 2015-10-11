@@ -6,6 +6,7 @@ import Bnf
 import Languate.Parser.Utils
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2DataDefSum
+import Languate.Parser.Pt2Type
 import Languate.AST
 
 import Data.List (nub)
@@ -27,68 +28,68 @@ pt2prod	:: ParseTree -> ([ADTSum], [TypeRequirement], [DocString Name])
 pt2prod =  pt2a h t s convert . cleanAll ["nlt"]
 
 convert		:: AST -> ([ADTSum], [TypeRequirement], [DocString Name])
-convert (Sum sum reqs)
-		=  ([sum], nub reqs, [])
-convert (Sums sums reqs docs)
-		=  (sums, nub reqs, docs)
-convert ast	=  convErr modName ast
+convert (Constructor vis nm args docs)
+		= ([ADTSum nm vis (args ||>> fst)], args |> snd >>= snd, docs |> (`DocString` nm) )
+convert (Constructors asts)
+		= asts |> convert & unzip3 & (\(ass, bss, css) -> (concat ass, concat bss, concat css))
 
 
-data AST	= Sum ADTSum [TypeRequirement] -- [DocString Name]
-		| Sums [ADTSum] [TypeRequirement] [DocString Name]
-		| Comm Comment
-		| BarT
-	deriving (Show)
+data AST	= BraceOT	| BraceCT	| CommaT	| SubTypeT
+		| Constr	| Comm [String]	| PrivT		| SemiColon
+		| Ident Name	| Idents [Name]
+		| TypeV (Type,[TypeRequirement])
+		| Types [(Maybe Name, (Type, [TypeRequirement]))]
+		| Constructor { mode::Visible, nm::Name, tps::[(Maybe Name, (Type, [TypeRequirement]))], docs::[String] }
+		| Constructors [AST]
+	deriving (Show, Eq)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h		=  [("sum", uncurry Sum . pt2sum),("comment",Comm . pt2comment)]
+h		=  [("comment",Comm . (:[]) . pt2comment)
+			, ("mlcomment", Comm . (:[]) . pt2comment)
+			, ("baseType", TypeV . pt2type)
+			, ("type", TypeV . pt2type )
+			]
 
 t		:: Name -> String -> AST
-t _ "|"		=  BarT
-t nm cont	=  tokenErr modName nm cont
+t _ ","		=  CommaT
+t _ "{"		=  BraceOT
+t _ "}"		=  BraceCT
+t _ "_"		=  PrivT
+t _ ";"		=  SemiColon
+t "subTypeT" _	=  SubTypeT
+t "localIdent" nm	=  Ident nm
+t "constructName" nm	=  Ident nm
+t nm cont		=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
-s _ [Sums sums reqs docs, Comm c]
-		= Sums sums reqs $ makeDocsFor c sums docs
-s _ [Sum sum reqs, Comm c]
-		= Sums [sum] reqs $ makeDocsFor c [sum] []
-s "prod" (sum0@(Sum {}):sum1@(Sums {}):Comm c:tail)
-		= let 	sum2			= s "prod" tail
-			(sums, reqs, oldDocs)	= accSums [sum0, sum1, sum2]
-			newDocs			= makeDocsFor c sums oldDocs   in
-			Sums sums reqs (newDocs ++ oldDocs)
-s "prod" (Sum sum reqs:Comm c:tail)
-		= s "prod" (Sum sum reqs:Sums [] [] []:Comm c:tail)
-s "commentedSum" []
-		= Sums [] [] []
-s "commentedSum" (Comm c:BarT:Sum sum reqs:tail)
-		= let 	Sums sums reqs' docs' = s "commentedSum" tail
-			oldDocs		= docs'
-			newDocs		= makeDocsFor c (sum:sums) oldDocs in
-			Sums (sum:sums) (reqs ++ reqs') (newDocs ++ oldDocs)
-s _ asts@(Sum _ _:_)
-		= uncurry3 Sums $ accSums asts
-s _ [BarT, ast]	= ast
+s "prod" (BraceOT:conss)
+		= conss & filter (`notElem` [BraceCT, CommaT]) & Constructors
+s "prod" (CommaT:rest)
+		= s "constructor" rest
+s "constructor" []
+		= Constructor Public (seqErr (modName++": Constructor with no name") "constructor" ([]::[AST])) [] []
+s "constructor" (Types tps':rest)
+		= let constr = s "constructor" rest in constr {tps = tps' ++ tps constr}
+s "constructor" (Comm comm:rest)
+		= let constr = s "constructor" rest in constr {docs = comm ++ docs constr}
+s "constructor" (Ident name:rest)
+		= let constr = s "constructor" rest in constr {nm = name}
+s "constructor" (PrivT:rest)
+		= let constr = s "constructor" rest in constr {mode = Private}
+s "idents" asts	= asts |> (\(Ident nm) -> nm) & Idents
+s "named" [Idents nms,SubTypeT,TypeV tp]
+		= nms |> (\nm -> (Just nm, tp)) & Types
+s "namedSum" []	= Types []
+s "namedSum" (SemiColon:rest)
+		= s "namedSum" rest
+s "namedSum" (Types tps:rest)
+		= let Types tail	= s "namedSum" rest in
+			Types (tps ++ tail)
+s "types" []	= Types []
+s "types" (TypeV t:rest)
+		= let Types tps	= s "types" rest in
+			Types ((Nothing, t):tps)
 s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
-
-
-makeDocsFor	:: Comment -> [ADTSum] -> [DocString Name] -> [DocString Name]
-makeDocsFor c sums alreadyHave
-		= concatMap (makeDocstringIf (map about alreadyHave) c) sums
-
-makeDocstringIf	:: [Name] -> Comment -> ADTSum -> [DocString Name]
-makeDocstringIf alreadyHave c (ADTSum nm _ _)
-		= [DocString c nm | nm `notElem` alreadyHave]
-
-accSums		:: [AST] -> ([ADTSum], [TypeRequirement], [DocString Name])
-accSums []	=  ([],[],[])
-accSums (Sum adt req:tail)
-		= let (adts, reqs, docs) = accSums tail in
-			(adt:adts, req++reqs, docs)
-accSums (Sums adts reqs docs:tail)
-		= let (adts', reqs', docs') = accSums tail in
-			(adts ++ adts', reqs ++ reqs', docs')
-accSums asts	= error $ show asts

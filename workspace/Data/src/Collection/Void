@@ -11,4 +11,4 @@ Type representing _no data_.
 
 The syntactic sugar ''()'' desugars to ''Void''
 ---
-data Void	= Void
+type Void	= {Void}

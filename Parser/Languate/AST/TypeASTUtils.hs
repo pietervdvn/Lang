@@ -4,6 +4,7 @@ module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, se
 This module implements utilities for type asts
 --}
 import StdDef
+import HumanUtils (intercal)
 
 
 import Normalizable
@@ -85,8 +86,9 @@ _usedTypes (Normal [] n)
 _usedTypes _	= []
 
 instance Show ADTDef where
-	show (ADTDef name frees reqs sums)
-		= "data "++name++" "++show frees++" "++foldr (\f acc -> showTypeReq f++" "++acc) " " reqs ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
+	show (ADTDef name frees reqs sums adoptions)
+		= "type "++name++" "++show frees++" "++foldr (\f acc -> showTypeReq f++" "++acc) " " reqs ++ foldr (\s acc -> "\n\t"++show s++acc) "" sums
+			++ (adoptions |> show & intercal " + ")
 
 showTypeReq	:: TypeRequirement -> String
 showTypeReq (name, t)

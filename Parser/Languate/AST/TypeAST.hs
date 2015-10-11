@@ -93,17 +93,34 @@ type TypeRequirement	= (Name, Type)
 Represents an ADT in languate.
 ADTDef "TypeName" ["Free", "type","variable","names"] [TReqs] [sums]
 
-> data List a  = Cons a (List a) | Nil
+> type List a  = {Cons a (List a), Nil}
 becomes : ADTDef "List" [("a", Nothing)] "Comment about a list" product
-> data NaiveDict a b	= [a,b]ADT
-> data BalancedTreeDict (a in Eq) b	= ...
+> type NaiveDict (k:Ord) v	= [a,b]
 becomes
 ADTDef "Dict" ["k","v"] [("k","Ord")] product
 
-The docstring is saved within the statements
--}
-data ADTDef	= ADTDef Name [Name] [TypeRequirement] [ADTSum]
 
+Type Adoption
+-------------
+
+
+type Nat	= {Zero} + Nat'
+type Nat'	= {Succ Nat}
+
+=>
+
+Nat' : Nat
+Nat	= {Zero, Succ Nat}
+
+Succ	: Nat -> Nat'
+
+
+-}
+data ADTDef	= ADTDef Name			-- name of the type
+			[Name] [TypeRequirement] -- free types + requirements
+			[ADTSum]		-- constructors
+			[Type]			-- types which it 'adopts'. Might be recursive.
+						-- The adopted type automatically becomes the given type (if constraints are met)
 
 {-
 A single constructor is represented by a single ADTSum-object.
