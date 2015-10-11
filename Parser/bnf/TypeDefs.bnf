@@ -14,33 +14,33 @@ import Types
  -- ADT DEF --
  -------------
 
-_idents		::= localIdent+
-_optNamed	::= (idents subTypeT)? type
-_named		::= (idents subTypeT) type
--- first item is obligatedly named, to disambituate the parser; the first compromise of the language...
-_namedSum	::= named (comma optNamed)*
-
-_$constructor	::= globalIdent
+-- the constructor, e.g. 'True'
+_$constructName	::= globalIdent
 _types		::= baseType+
-_sum		::= "_"? constructor (namedSum | types)?
-
-_nlt		::= "\n\t"
-_simpleSums	::= ("\|" sum)+
--- contains the docstrings above or on the same line
-_commentedSum	::= (comment | mlcomment) nlt "\|" sum commentedSum? | simpleSums comment?
-_sums		::= (nlt commentedSum)*
-_prod		::= sum simpleSums? comment? sums
 _freeTypes	::= constrFreeType*
+-- one ore more identifiers, e.g. 'x y', for use in 'x y : Int'
+_idents		::= localIdent+
+-- a single named type, e.g. 'x y : Int' or 'name:String'
+_named		::= (idents subTypeT) type
+
+-- comment and newline administrativa
+_nlt		::= "\n\t"
+_nltComment	::= (comment nlt? | mlcomment nlt? | nlt)
+
+-- first item is obligatedly named, to disambituate the parser; the first compromise of the language...
+_namedSum	::= named (";" named)*
+
+_constructor	::= nltComment? "_"? constructName (namedSum | types)? nltComment?
+_prod		::= "\{" constructor ("," constructor)* "\}"
 {- a comment is obligated, but an error will be given by another fase then the parser
-Making a daxta type private has the only result that all it's constructors are private
+Making a type private has the only result that all it's constructors are private
 
 -- example
 data _ ABC	= AB | BC
 ==
 data ABC	= _AB | _BC
-
 -}
- data		::= "data" "_"? typeIdent freeTypes "=" prod
+ data		::= "type" "_"? typeIdent freeTypes "=" (prod | type) ("\+" type)*
 
 {-
 
@@ -51,8 +51,8 @@ data a is Ord => _BTree a
 		=
 
 data _Btree (a: Ord) (b:[a])
-		= Top
-		| Nil
+		= {Top contents:a; left:BTree a; right: BTree a,
+			Nil}
 -}
 
  -------------
@@ -85,15 +85,16 @@ _categoryStm	::= "\n+\t" (law | declaration | mlcomment | comment)
 data
 ====
 
-data Data a 	= A a | B Int
+type Data a 	= {A a , B Int}
 --or
-data Record	= Record String Int Bool
-		| Exception String LineNr
+data Record	= {Record String Int Bool, Exception String LineNr}
 -- want named fields?
 
-data Record	= A i : Int
-		| B b : Bool, i : Int, path name : Name
+data Record	= {A i : Int, B b : Bool, i : Int, path name : Name}
 
+type constraints can appear both on the right and left side, within field declarations. This might be a bit confusing.
+Field declarations are separated by semicolons.
+type Data (a:Monoid)	= {A monoid : (a:Monoid);  monoid : a}
 
 record syntax also creates functions to set and modify: (e.g. for the last one:)
 
@@ -105,10 +106,10 @@ e.g. 'record.modi (+1)' or (.modi (+1) )
 To make a single constructor private, add a _ before the constructor
 
 -- docstring for record
-data Record	= _A i : Int	-- docstring for record a
+type Record	= {_A i : Int	-- docstring for record a
 		-- alternative docstring location for b
-		| B b : Bool	-- docstring for record b
-		| C	| D	-- docstring for *both* C and D
+		, B b : Bool	-- docstring for record b
+		, C	, D}	-- docstring for *both* C and D
 (A is private, B is public)
 
 To make all the constructors private, put an underscore before the name

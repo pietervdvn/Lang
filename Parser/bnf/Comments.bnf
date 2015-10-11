@@ -2,8 +2,8 @@ Comments
 
 author		"Pieter Vander Vennet"
 date		[2014, 06, 09, 17, 56, 42]
-desc		"The syntaxis of comments. There always is a comment above each declaration, it is the docstring. The documentation tool is for later; it'll be markdown/literate"
- 
+desc		"The syntaxis of comments. The last comment above a declaration is its docstring."
+
 public import Prelude
 
 -- one or more newlines, with exactly one comment in them
