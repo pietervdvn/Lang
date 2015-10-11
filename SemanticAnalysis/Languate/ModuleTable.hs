@@ -55,4 +55,4 @@ buildModuleTable p precT tlts fqn mod
 
 mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
-	=  [doc ("Moduletable for "++show fqn) "" $ Base "hi", tlt2doc "Modules/Typelookuptable for " fqn $ typeLookupTable mt]
+	=  [doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" $ Base "hi", tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]

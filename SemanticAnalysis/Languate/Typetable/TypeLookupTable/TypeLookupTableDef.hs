@@ -103,7 +103,7 @@ tlt2doc		:: String -> FQN -> TypeLookupTable -> Doc
 tlt2doc title fqn tlt
 		= let	mappings	= tlt |> S.toList & M.toList & unmerge |> swap & merge	:: [(FQN, [([Name],Name)])]
 			mappings'	= mappings |||>>> (\(nms, nm) -> nms ++ [nm]) |||>>> intercal "." |> swap	:: [([String], FQN)]
-			row (strings, fqn)	= [strings & sort |> parag & Mu.Seq, code $ show fqn] in
-			doc (title ++ show fqn) ("What type does map on what absolute type within the module "++show fqn) $
+			row (strings, fqn)	= [strings & sort |> code |> Parag & Mu.Seq, code $ show fqn] in
+			doc (title ++ show fqn) ("What identifier does map on what type?") $
 			table ["Allowed names", "Meaning"] (mappings' |> row)
 spth (nms, nm)	= intercal "." $ nms ++ [nm]
