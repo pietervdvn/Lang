@@ -124,30 +124,6 @@ The constructors also create a new type.
 This means that constructors become types too. This however is something to think about.
 
 
-Type synonyms and subtypes
-==========================
-
-Use subtypes when there exists a datatype which does exactly what you need, but don't need all values.
-
-type Name	= String	-- real synonym, strings can be used as Name
-type Mappable a	= Functor a
-
-subtype CanonicalPath	= FilePath
-
-A subtype establishes a subset relationship. It means that every 'CanonicalPath' is a 'Filepath', but not vice-versa.
-This means that each 'CanonicalPath-object' can be used in functions with 'FilePath' as argument, but not the other way round.
-To create them, you use the constructor. This constructor has the same name as the subtype (thus 'CanonicalPath'). To keep the
-constructor hidden withing the local module, you add an underscore.
-
-
-subtype CanonicalPath	= _FilePath
-
-Note that something can be a subtype of multiple classes.
-
-subtype Int'	= Int & IntInf'
-
-This implies, if i is in Int', i is in Int AND i is in IntInf'. This means that this i can be used in both functions. It also implies a common ancestor exists. (Which always does, the Universal type)
-
 Classes
 =======
 

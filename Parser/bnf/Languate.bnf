@@ -16,6 +16,6 @@ import Manifest showing {manifest} -- Import manifest so that it is loaded
 
 {- Where it all begins -}
 
-statement	::=  function | law | data | synonym | subtype | cat | instance | precedence | annotation | nls
+statement	::=  function | law | data | subtype | cat | instance | precedence | annotation | nls
 
 module		::= globalIdent idSet? nl nlcomment (nls? import)* nls? statement* 
