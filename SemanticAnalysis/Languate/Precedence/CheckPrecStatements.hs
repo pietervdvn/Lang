@@ -66,7 +66,7 @@ checkPrecRels rels
 declaredOps	:: Statement -> [Name]
 declaredOps (FunctionStm f)
 	= signs f |> (\(n,_,_) -> n)
-declaredOps (ADTDefStm (ADTDef _ _ _ sums))
+declaredOps (ADTDefStm (ADTDef _ _ _ sums _))	-- fields might be operators too!
 	= let   maybeFields	= (sums >>= (\(ADTSum _ _ fields) -> fields)) |> fst in
 		catMaybes maybeFields
 declaredOps (ClassDefStm cd)

@@ -41,15 +41,24 @@ last'		:: a -> [a] -> a
 last' defaul []	=  defaul
 last' _ ls	=  last ls
 
+onFirst		:: Monad m => (m a, b) -> m (a, b)
+onFirst (ma, b)	= do	a	<- ma
+			return (a, b)
+
+onSecond	:: Monad m => (a, m b) -> m (a, b)
+onSecond (a, mb)= do	b	<- mb
+			return (a, b)
+
 unpackMaybeTuple
 		:: (Maybe a, b) -> Maybe (a,b)
-unpackMaybeTuple (ma,b)
-		= do	a	<- ma
-			return (a,b)
+unpackMaybeTuple = onFirst
 
 
 unpackMaybeTuples	:: [(Maybe a, b)] -> [(a,b)]
 unpackMaybeTuples	=  mapMaybe unpackMaybeTuple
+
+
+
 
 dubbles		:: Eq a => [a] -> [a]
 dubbles []	=  []

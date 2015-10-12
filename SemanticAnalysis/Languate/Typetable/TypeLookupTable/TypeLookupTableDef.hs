@@ -84,7 +84,8 @@ resolveTypesIn tlt (a,tps)
 	= do	rtps	<- mapM (resolveType tlt) tps
 		return (a,rtps)
 
--- TODO are these functions used?
+-- TODO are these functions used? DELETE ONCE REFACTOR IS COMPLETE
+{-
 _construct	:: TypeLookupTable -> Type -> [Type] -> ([RType] -> RType) -> Exc RType
 _construct tlt e tps cons
 		=  inside ("In the type expression "++show e) $ do
@@ -97,6 +98,7 @@ _construct' tlt e t0 t1 cons
 			t0'	<- resolveType tlt t0
 			t1'	<- resolveType tlt t1
 			return $ cons t0' t1'
+-}
 
 
 tlt2doc		:: String -> FQN -> TypeLookupTable -> Doc

@@ -2,6 +2,11 @@ module Languate.TypeTable where
 
 {-
 
+DEPRECATED!
+Being replaced by 'Typetable' (lowercase t)
+
+
+
 Everythin we know about every type we know of.
 
 The type table keeps track of relations between types.

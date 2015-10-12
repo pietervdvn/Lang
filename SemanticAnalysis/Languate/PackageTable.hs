@@ -26,9 +26,9 @@ data PackageTable
 
 buildPackageTable	:: Package -> Exc PackageTable
 buildPackageTable p
-	= do	precT	<- buildPrecTable p
-		tlts	<- buildTLTs p
-		modTbls	<- modules p & toList |> _buildModuleTable (buildModuleTable p precT tlts) & sequence |> fromList
+	= do	precT		<- buildPrecTable p
+		tlts		<- buildTLTs p
+		modTbls		<- modules p & toList |> _buildModuleTable (buildModuleTable p precT tlts) & sequence |> fromList
 		return $ PackageTable modTbls precT
 
 _buildModuleTable	:: (FQN -> Module -> Exc ModuleTable) -> (FQN, Module) -> Exc (FQN, ModuleTable)

@@ -23,7 +23,7 @@ import Languate.FQN
 import Languate.AST
 import Languate.TAST
 import Languate.Package as P
-import Languate.Typetable.TypeLookupTable.BuildKnownTypes
+import Languate.Typetable.ModuleTraverser
 import Languate.Typetable.TypeLookupTable.TypeLookupTableDef
 
 import Graphs.DirectedGraph
@@ -53,10 +53,11 @@ type Exports	= Map FQN (Map FQN (FQN, Name))
 buildTLTs	:: Package -> Exc (Map FQN TypeLookupTable)
 buildTLTs world
 	=  do 	let modules	= P.modules world
+		let mod fqn	= fwd "modules" fqn modules
 		let injectSet a	= S.map (\b -> (a,b))
 		let injectSetFunc f fqn	= injectSet fqn $ f fqn
 		let pubLocDecl	= injectSetFunc $ publicLocallyDeclared world
-		let locDecl	= injectSetFunc $ S.fromList . locallyDeclared world
+		let locDecl	= injectSetFunc (S.fromList . locallyDeclared' . mod)
 		let exports 	= calculateExports' world pubLocDecl (reexportType world)
 		let imports	= calculateImports' world locDecl exports
 		mapM_ (uncurry checkDoubleTypeDeclare) $ M.toList modules
@@ -98,12 +99,13 @@ buildTLT	:: Package -> Map FQN {-Module we are interested in-} (Set ((FQN, Name)
 			-> FQN {-What we have to build TLT for-}
 			-> AliasTable
 			-> TypeLookupTable
-buildTLT world imps mod at
-	= let	declared	= S.map fst $ findWithDefault S.empty mod imps
+buildTLT world imps fqn at
+	= let	mod 		= fwd "modules" fqn $ modules world
+		declared	= S.map fst $ findWithDefault S.empty fqn imps
 					:: Set (FQN, Name) {-Name, declared in -}
-		localDecl	= S.fromList $ locallyDeclared world mod
+		localDecl	= S.fromList $ locallyDeclared' mod
 					:: Set Name {- The locally declared types -}
-		locDeclDict	= S.toList $ S.map (\nm -> (([], nm), mod)) localDecl	in
+		locDeclDict	= S.toList $ S.map (\nm -> (([], nm), fqn)) localDecl	in
 		addAll locDeclDict $ S.foldl (addLookupEntry at) M.empty declared
 
 
@@ -117,7 +119,7 @@ addLookupEntry at tlt (declaredIn, name)
 publicLocallyDeclared	:: Package -> FQN -> Set Name
 publicLocallyDeclared w fqn
 		= let	mod 		= fwd "modules" fqn $ modules w
-			localDeclared	= S.fromList $ locallyDeclared w fqn
+			localDeclared	= S.fromList $ locallyDeclared' mod
 			publicTypes	= functions Public  mod >>= allTypes >>= usedTypes
 			privateTypes	= functions Private mod >>= allTypes >>= usedTypes
 			isPublic nm	= nm `elem` publicTypes || nm `notElem` privateTypes  in
@@ -159,7 +161,7 @@ Checks that no types are declared twice in the same module.
 checkDoubleTypeDeclare	:: FQN -> Module -> Check
 checkDoubleTypeDeclare fqn m
 	= do	-- what is declared + what line
-		let dec	= statements' m |> swap ||>> declaredType |> swap |> unpackMaybeTuple
+		let dec	= statements' m |> swap ||>> declaredType |||>>> fst3 |> swap |> unpackMaybeTuple
 		-- (declared type, cooridantes where declared - is only one position)
 		let dec'	= merge $ catMaybes dec	:: [(Name, [Coor])]
 		-- names which are declared twice
@@ -172,3 +174,26 @@ checkDouble _ [_]	= pass
 checkDouble t coors
 	= E.err $ "The type '"++t++"' has been declared multiple times:\n"++
 		intercalate ", " (coors |> fst |> show |> ("on line "++))
+
+-----------
+-- UTILS --
+-----------
+
+allTypes	:: (Name, [Type], [TypeRequirement]) -> [Type]
+allTypes (_,tps,treqs)
+		= tps ++ map snd treqs
+
+-- graph operator
+addAll		:: (Ord k, Ord v) => [(k,v)] -> Map k (Set v) -> Map k (Set v)
+addAll pairs dict
+		= Prelude.foldr addOne dict pairs
+-- graph operator
+addOne	:: (Ord k, Ord v) => (k,v) -> Map k (Set v) -> Map k (Set v)
+addOne (k,v) dict
+		= M.insert k (S.insert v $ findWithDefault S.empty k dict) dict
+
+err str fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn++" within "++str++" table"
+fwd str fqn	= findWithDefault (err str fqn) fqn
+
+
+locallyDeclared'	= map fst3 . locallyDeclared

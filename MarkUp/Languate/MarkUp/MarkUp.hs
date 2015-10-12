@@ -195,6 +195,16 @@ parags mus
 	= mus |> Parag & Seq
 unwords'= Seq
 
+(+++)	:: MarkUp -> MarkUp -> MarkUp
+(+++) (Seq a) (Seq b)
+	= Seq (a ++ b)
+(+++) (Seq a) b
+	= Seq (a++[b])
+(+++) a (Seq b)
+	= Seq (a:b)
+(+++) a b
+	= Seq [a,b]
+
 
 -- removes obsolete columns from the table
 cleanTable	:: MarkUp -> MarkUp

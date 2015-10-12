@@ -38,18 +38,8 @@ MAINTANCE ACCESS ONLY!
 
 This module loads and compiles the bnf's to test them.
 
-Usage:
-
--- test
-tst <function to test, e.g. pt2mod> "rule to parse against, e.g. module" "string to parse"
-
---test file does the same, but on a file, with unsafePerformIO
-> tf ... ... "file to read"
-e.g.
-> tf pt2mod "module" file
-This is tf':
-> tf'	= tf pt2mod "module", what you'll use for a normal, full module
---}
+-}
+help	= putStrLn "Usage:\ntst <function to test, e.g. pt2mod\n\n> \"rule to parse against, e.g. module\nstring to parse\"\n\ntest file does the same, but on a file, with unsafePerformIO\n> tf ... ... 'file to read'\ne.g.\n> tf pt2mod 'module' file\nThis is tf':\n> tf'\t= tf pt2mod 'module', what you'll use for a normal, full module"
 
 -- creates a parsetree. Give the rule it should parse against and the string it should parse, you'll get the parsetree
 -- pt 	:: implemented in TestBNF

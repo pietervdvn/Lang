@@ -1,8 +1,8 @@
-module Languate.ModuleTable where
+	module Languate.ModuleTable where
 
 import StdDef
 import Data.Map
-import Languate.MarkUp
+import Languate.MarkUp as Mu
 import Exceptions
 import Languate.CheckUtils
 
@@ -14,6 +14,7 @@ import Languate.FQN
 import Languate.PrecedenceTable
 
 import Languate.Typetable.TypeLookupTable
+import Languate.Typetable
 
 import Data.Map (Map)
 import qualified Data.Map as M
@@ -33,6 +34,7 @@ data ModuleTable
 
 data ModuleContents
 	= ModuleContents {
+		types		:: Typetable,
 		functions	:: FunctionTable
 		} deriving (Show)
 
@@ -44,15 +46,22 @@ data FunctionTable
 
 
 
+
 buildModuleTable	:: Package -> PrecedenceTable -> Map FQN TypeLookupTable -> FQN -> Module
 				-> Exc ModuleTable
 buildModuleTable p precT tlts fqn mod
 	= do	tlt		<- M.lookup fqn tlts ? ("No typelookup table found for "++show fqn++".Are the fqns really the same?")
-		let emptie	= ModuleContents $ FunctionTable empty empty
-		return $ ModuleTable tlt emptie emptie emptie
+		tt		<- buildTypetable mod tlt fqn
+		let emptieFT	= FunctionTable empty empty
+		let emptie	= ModuleContents (Typetable empty) emptieFT
+		return $ ModuleTable tlt (ModuleContents tt emptieFT) emptie emptie
+
 
 
 
 mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
-	=  [doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" $ Base "hi", tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]
+	=  let	neededDocs	= addDocs ([exposed mt, defined mt, known mt] |> types)
+					[tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]
+		linkedDocs	= neededDocs |> title |> inlink & Mu.List in
+		[doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" $ linkedDocs] ++ neededDocs

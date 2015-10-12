@@ -1,4 +1,4 @@
-module Languate.TypeTable.Checks.CheckType where
+module Languate.Checks.CheckType where
 
 import StdDef
 import Exceptions
@@ -6,7 +6,7 @@ import Prelude hiding (catch)
 import Languate.AST
 import Languate.TAST
 import Languate.CheckUtils
-import Languate.TypeTable
+import Languate.Typetable.TypeLookupTable
 
 import Data.List
 
@@ -23,3 +23,8 @@ validateType tlt frees t
 			return rt
 			where 		recover	t e	= do	err $ "Failed lookup of the type "++show t++".\nContinuing with checks anyway.\nThe error was:\n" ++ e
 								return $ RFree "FAILED lookup"
+
+--validates that no unknown frees are used in rt
+validateFrees		:: [Name] -> RType -> Check
+validateFrees frees rt	= do	let foundFrees 	= freesInRT rt
+				mapM_ (\a -> assert (a `elem` frees) $ "The free type variable "++show a++" was not declared") foundFrees

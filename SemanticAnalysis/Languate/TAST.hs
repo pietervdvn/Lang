@@ -13,11 +13,13 @@ It is this data-structure that all semantic analysis things use or build.
 import StdDef
 import qualified HumanUtils
 import Languate.AST
-import Data.List
 import Normalizable
 import Languate.FQN
 import Languate.MarkUp as Mu
 
+import State
+
+import Data.List as L
 import Data.Map
 import Data.Maybe
 
@@ -260,7 +262,7 @@ showRTypeReq (name, rtype)
 
 showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
-		=  nm ++":" ++ intercalate ", " (Data.List.map (st True) subs)
+		=  nm ++":" ++ intercalate ", " (fmap (st True) subs)
 
 rTypeReqs2md	:: RTypeReqs -> MarkUp
 rTypeReqs2md rqs
@@ -268,12 +270,21 @@ rTypeReqs2md rqs
 			|> code & Mu.Seq
 
 instance Normalizable ResolvedType where
-	normalize	= nt
+	normalize rt	= runstate (nt rt) (defaultFreeNames, []) & fst
 
-nt	:: ResolvedType -> ResolvedType
-nt (RApplied t0 t1)	= RApplied (nt t0) $ nt t1
-nt (RCurry t0 t1)	= RCurry (nt t0) $ nt t1
-nt t			= t
+nt	:: ResolvedType -> State ([Name],[(Name, Name)]) ResolvedType
+nt (RApplied t0 t1)	= do	t0'	<- nt t0
+				t1'	<- nt t1
+				return $ RApplied t0' t1'
+nt (RCurry t0 t1)	= do	t0'	<- nt t0
+				t1'	<- nt t1
+				return $ RCurry t0' t1'
+nt (RFree a)		= do	(available, dict)	<- get
+				case L.lookup a dict of
+					Nothing	-> do	let chosen	= head available
+							put (tail available, (a,chosen):dict)
+							return $ RFree chosen
+					(Just a') -> return $ RFree a'
 
 
 
