@@ -1,0 +1,12 @@
+TypeTesting
+-----------
+Some type-testing
+-----------
+
+
+
+type A	= {A}
+
+
+type B	= {B}
+type C	= {C} + B
