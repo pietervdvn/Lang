@@ -63,5 +63,5 @@ mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
 	=  let	neededDocs	= addDocs ([exposed mt, defined mt, known mt] |> types)
 					[tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]
-		linkedDocs	= neededDocs |> title |> inlink & Mu.List in
+		linkedDocs	= neededDocs |> title |> Embed & Mu.Seq in
 		[doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" $ linkedDocs] ++ neededDocs
