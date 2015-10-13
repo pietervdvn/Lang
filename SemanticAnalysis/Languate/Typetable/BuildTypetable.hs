@@ -35,10 +35,15 @@ buildTypetable mod tlt fqn
 buildTypeInfo	:: TypeLookupTable -> FQN -> (Name, [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
 buildTypeInfo tlt fqn (n, frees, reqs)
 		= inside ("While building type info about "++show fqn++"."++n) $
-		  do	let indices	= zip frees [0..]	:: [(Name, Int)]
+		  do	-- about the free type names
+			let indices	= zip frees [0..]	:: [(Name, Int)]
 			reqs'		<- reqs |> (\(nm, t) -> do rt<-resolveType tlt t;return (nm, rt) ) & sequence	:: Exc [(Name, RType)]
 			reqs' |> snd |> validateFrees frees & sequence
+			-- about the constraints
 			let errMsg free	= "The free type variable "++free++" was not declared"
 			constraints	<- reqs' |>  first (\free -> L.lookup free indices ? errMsg free) |> onFirst & sequence  :: Exc [(Int, RType)]
 			let constraints'= constraints & merge & M.fromList
-			return ((fqn, n), TypeInfo frees constraints')
+			-- about the supertypes
+			pass
+
+			return ((fqn, n), TypeInfo frees constraints' empty)

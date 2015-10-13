@@ -69,13 +69,14 @@ renderClusterTo	settings (Cluster docsDict)= do
 renderBar	:: (a -> IO ()) -> [(String, a)] -> IO ()
 renderBar action ls
 		= do	let l	= length ls
-			putStr $ bar 80 l "" 0
+			let width	= 79
+			putStr $ bar width l "" 0
 			ls & zip [1..]
 				|> (\(i, (msg,a)) -> do
-					putStr $ "\r" ++ bar 80 l msg i
+					putStr $ "\r" ++ bar width l msg i
 					action a)
 				& sequence_
-			putStrLn $ "\r" ++ bar 80 l (show l++" docs written") l
+			putStrLn $ "\r" ++ bar width l (show l++" docs written") l
 
 
 renderFile	:: Cluster -> RenderSettings -> Doc -> IO ()

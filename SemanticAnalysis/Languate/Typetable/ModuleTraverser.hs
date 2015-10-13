@@ -36,3 +36,12 @@ declaredType (SubDefStm (SubDef name _ frees _ reqs))
 declaredType (ClassDefStm classDef)
 		= Just (name classDef, frees classDef, classReqs classDef)
 declaredType _	= Nothing
+
+
+
+declaredSuperType	:: Statement -> Maybe ((Name, [Name]), Name, [TypeRequirement])
+declaredSuperType (ADTDefStm (ADTDef nm frees reqs _ adopts))
+	= todo
+declaredSuperType (InstanceStm (Instance typePath frees super reqs))
+	= Just $
+declaredSuperType _	= Nothing
