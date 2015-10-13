@@ -20,7 +20,7 @@ import Languate.File2Package
 import Languate.FQN
 import Languate.AST
 import Languate.Package
-import qualified Languate.Precedence.Expr2PrefExpr as Prefixer
+import qualified Languate.PrecedenceTable as Prefixer
 import qualified Languate.ParserStub as ParserInternals
 
 import Languate.TableOverview
