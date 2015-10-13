@@ -137,6 +137,8 @@ type RTypeUnion		= [RType]
 type RTypeReq		= (Name, ResolvedType)
 type RTypeReqs		= [(Name, [ResolvedType])]
 
+-- Constrainded type
+type CType		= (RType, RTypeReqs)
 -- assumed that the treqs also contain all used free variables
 type RTypeInfo		= (RTypeUnion, RTypeReqs)
 
@@ -154,6 +156,8 @@ data Signature		= Signature
 asSignature	:: (FQN, Name, RTypeUnion, RTypeReqs) -> Signature
 asSignature (fqn, n, rtps, rtpreqs)
 	= Signature fqn n rtps rtpreqs
+
+
 
 
 data TypedExpression	= TFlt Float	-- primitives
@@ -208,6 +212,8 @@ data TClause		= TClause [TPattern] TExpression
 	deriving (Show, Eq)
 type FuncBody	= TClause
 
+
+
 -------------------- Only utils, instance declaration and boring stuff below -------------------------------------
 
 
@@ -217,20 +223,10 @@ instance Show ResolvedType where
 
 st		:: Bool -> RType -> String
 st short t0@(RNormal fqn str)
-	| anyType == t0
-		= ". "
-	| voidType == t0
-		= "() "
-	| otherwise
 		=  (if short then "" else show fqn++ "." ) ++ str
 st short (RFree str)
 		=  str
 st short t0@(RApplied bt t)
-	| bt == listType
-		= "[" ++ showCommaSep short t ++ "]"
-	| bt == setType
-		= "{"++ showCommaSep short t ++"}"
-	| otherwise
 		= "("++ showCommaSep short t0 ++")"
 st short (RCurry at rt)
 		=  "(" ++ st short at ++ " -> " ++ st short rt ++")"
@@ -321,6 +317,33 @@ traverseRT f (RCurry at rt)
 		= RCurry (traverseRT f at) $ traverseRT f rt
 traverseRT f t	= f t
 
+
+traverseRTM	:: Monad m => (RType -> m RType) -> RType -> m RType
+traverseRTM f (RApplied bt t)
+		= do	bt'	<- traverseRTM f bt
+			t'	<- traverseRTM f t
+			RApplied bt' t' & return
+traverseRTM f (RCurry at rt)
+		= do	at'	<- traverseRTM f at
+			rt'	<- traverseRTM f rt
+			RCurry at' rt' & return
+traverseRTM f t	= f t
+
+
+
+onFree	:: (String -> RType) -> RType -> RType
+onFree f (RFree a)
+	= f a
+onFree _ rt
+	= rt
+
+
+onFreeM	:: Monad m => (String -> m RType) -> RType -> m RType
+onFreeM f (RFree a)
+	= f a
+onFreeM _ rt
+	= return rt
+
 foldRT	:: (RType -> a) -> ([a] -> a) -> RType -> a
 foldRT f conct (RApplied bt t)
 		= conct [foldRT f conct bt, foldRT f conct t]
@@ -369,6 +392,11 @@ uncurriedTypes [t]
 		= t
 uncurriedTypes (t:ts)
 		= RCurry t $ uncurriedTypes ts
+
+
+applyTypeArgs	:: RType -> [RType] -> RType
+applyTypeArgs t []	=  t
+applyTypeArgs t tps	= L.foldl (\curr arg -> RApplied curr arg) t tps
 
 tupledTypes	:: RType -> [RType]
 tupledTypes t@(RApplied (RApplied tupleT a) rest)
