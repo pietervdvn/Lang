@@ -41,18 +41,29 @@ last'		:: a -> [a] -> a
 last' defaul []	=  defaul
 last' _ ls	=  last ls
 
-onFirst		:: Monad m => (m a, b) -> m (a, b)
-onFirst (ma, b)	= do	a	<- ma
-			return (a, b)
+onFirst		:: Monad m => (a -> m c) -> (a, b) -> m (c, b)
+onFirst f (a, b)
+		= do	c	<- f a
+			return (c, b)
 
-onSecond	:: Monad m => (a, m b) -> m (a, b)
-onSecond (a, mb)= do	b	<- mb
-			return (a, b)
+onSecond	:: Monad m => (b -> m c) -> (a, b) -> m (a, c)
+onSecond f (a, b)
+		= do	c	<- f b
+			return (a, c)
+
+unpackFirst	:: Monad m => (m a, b) -> m (a, b)
+unpackFirst (ma, b)
+		= do	a 	<- ma
+			return (a,b)
+
+unpackSecond	:: Monad m => (a, m b) -> m (a, b)
+unpackSecond (a, mb)
+		= do	b 	<- mb
+			return (a,b)
 
 unpackMaybeTuple
 		:: (Maybe a, b) -> Maybe (a,b)
-unpackMaybeTuple = onFirst
-
+unpackMaybeTuple	= unpackFirst
 
 unpackMaybeTuples	:: [(Maybe a, b)] -> [(a,b)]
 unpackMaybeTuples	=  mapMaybe unpackMaybeTuple
@@ -139,6 +150,9 @@ stripnl s	= s
 (|||>>>)	:: (Functor f, Functor g, Functor h)	=> f (g (h a)) -> (a -> b) -> f (g (h b))
 (|||>>>) fga f
 	=  fmap (fmap (fmap f)) fga
+
+
+(|+>) a f	= a |> f & sequence
 
 uncurry3	:: (a -> b -> c -> d) -> (a,b,c) -> d
 uncurry3 f (a,b,c)
