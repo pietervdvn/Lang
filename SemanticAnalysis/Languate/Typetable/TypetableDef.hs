@@ -41,8 +41,14 @@ data TypeInfo	= TypeInfo {	frees		:: [Name], {-The names of the frees are kept m
 				} deriving (Show)
 
 
-data TypeConstraint	= SubTypeConstr RType RType	-- constraint representing that type0 should be a subtype of type1 to be a valid constraint.
-				deriving (Show)
+data TypeConstraint	= SubTypeConstr RType RType
+
+instance Show TypeConstraint where
+	show	= stc
+
+
+stc (SubTypeConstr sub super)
+	= "Constraint '"++show sub++"' is a '"++show super++"'"
 
 
 
@@ -56,10 +62,12 @@ instance Documentable Typetable where
 typeinfo2doc	:: TypeID -> TypeInfo -> Doc
 typeinfo2doc (fqn, nm) ti
 		= let 	frees'	= frees ti & (`zip` [0..]) ||>> (\i -> M.findWithDefault [] i $ constraints ti) :: [(Name, [RType])]
+			defFrees	= take (length $ frees ti) defaultFreeNames
 			frees''	= frees' |||>>> show ||>> commas ||>> when ":" |> (\(nm, reqs) -> nm ++ reqs ) |> code & Mu.Seq
 			rows	= supertypes ti ||>> (\(SubTypeConstr sub super) -> code (show sub) +++ Base " : " +++ code (show super))
-					||>> Parag |> Mu.Seq & M.toList
-					|> (\(super, constraints) -> [code (show super), constraints])	:: [[MarkUp]]
+					|> (\constrs -> Mu.Seq $ (if length constrs == 1 then id else (|> Parag)) constrs )
+					& M.toList
+					|> (\(super, constraints) -> [code $ show super, constraints])	:: [[MarkUp]]
 			supers	= table ["Supertype","Constraints"] rows
 			in
-			doc ("Modules/"++show fqn ++"/Overview of "++nm) ("All we know about "++show fqn++"."++nm) $ Titling (code nm +++ frees'') $ titling "Supertypes" supers
+			doc ("Modules/"++show fqn ++"/Overview of "++nm) ("All we know about "++show fqn++"."++nm) $ Titling (code nm +++ frees'') $ Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers
