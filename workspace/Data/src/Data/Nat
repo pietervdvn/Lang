@@ -15,17 +15,6 @@ type Nat	= {Zero} + Nat'
 -- A natural number which might not be zero
 type Nat'	= {Succ Nat}
 
-
-f	: (a0:Eq+Show) ->
-eqShow
-show
-eq
-
-
-
-f	: (a1:Eq) ->
-	= f eq
-
 instance Nat is Eq
 
 

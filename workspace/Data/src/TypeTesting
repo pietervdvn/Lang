@@ -4,9 +4,20 @@ Some type-testing
 -----------
 
 
+cat Monoid
+	(+) : monoid -> monoid -> monoid
 
-type A	= {A}
+type List a	= {Empty} + List' a
+type List' a	= {Elem head:a; elem:List a}
 
+cat Set (a:Eq)
+	> True
 
-type B	= {B}
-type C	= {C} + B
+instance List a is Monoid
+
+cat Eq
+	(==) : eq -> eq -> eq
+
+instance List (a:Eq) is Eq
+
+instance List is Set
