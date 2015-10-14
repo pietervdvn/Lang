@@ -26,7 +26,8 @@ data Typetable	= Typetable (Map TypeID TypeInfo) deriving (Show)
 
 
 
-data TypeInfo	= TypeInfo {	frees		:: [Name], {-The names of the frees are kept merely for the docstrings-}
+data TypeInfo	= TypeInfo {	kind		:: Kind,
+				frees		:: [Name], {-The names of the frees are kept merely for the docstrings-}
 				constraints	:: Map Int [RType],
 				 {- e.g. type Dict (k:Eq) v	= ...
 						means we will get {0 --> [Eq]}.
@@ -64,10 +65,12 @@ typeinfo2doc (fqn, nm) ti
 		= let 	frees'	= frees ti & (`zip` [0..]) ||>> (\i -> M.findWithDefault [] i $ constraints ti) :: [(Name, [RType])]
 			defFrees	= take (length $ frees ti) defaultFreeNames
 			frees''	= frees' |||>>> show ||>> commas ||>> when ":" |> (\(nm, reqs) -> nm ++ reqs ) |> code & Mu.Seq
+			constrs	= constraints ti & toList |> (\(i,c) -> [code $ defFrees !! i, code $ show c])
 			rows	= supertypes ti ||>> (\(SubTypeConstr sub super) -> code (show sub) +++ Base " : " +++ code (show super))
 					|> (\constrs -> Mu.Seq $ (if length constrs == 1 then id else (|> Parag)) constrs )
 					& M.toList
 					|> (\(super, constraints) -> [code $ show super, constraints])	:: [[MarkUp]]
-			supers	= table ["Supertype","Constraints"] rows
+			supers	= table ["Type param", "Constraints"] constrs +++ table ["Supertype","Constraints"] rows
 			in
-			doc ("Modules/"++show fqn ++"/Overview of "++nm) ("All we know about "++show fqn++"."++nm) $ Titling (code nm +++ frees'') $ Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers
+			doc ("Modules/"++show fqn ++"/Overview of "++nm) ("All we know about "++show fqn++"."++nm) $ Titling (code nm +++ frees'') $
+				Base "Kind: "+++ code (show $ kind ti) +++ Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers

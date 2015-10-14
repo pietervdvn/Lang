@@ -1,4 +1,4 @@
-module Languate.Typetable.ModuleTraverser (locallyDeclared, declaredType, declaredSuperType) where
+module Languate.Typetable.ModuleTraverser (locallyDeclared, declaredType, declaredSuperType, constraintAdoptions) where
 
 {-
 Multiple functions to traverse the statements, in search for type declaration stuff
@@ -68,3 +68,16 @@ declaredSuperType tlt (ClassDefStm cd)
 		let frees	=  AST.frees cd
 		supers |> (\super -> (typ, frees, (super, reqs))) & return
 declaredSuperType _ _	= return []
+
+
+{-
+
+cat A0 a:A1 a implies that A0 has the same constraints on 'a' as A1.
+This function gives exactly this relation:
+[A0 a, A1 a]
+
+-}
+constraintAdoptions	:: TypeLookupTable -> Statement -> Exc [(RType, RType)]
+constraintAdoptions tlt stm@(ClassDefStm _)
+			= declaredSuperType tlt stm ||>> (\(rt, frees, (super, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
+constraintAdoptions _ _	= return []

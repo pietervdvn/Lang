@@ -13,25 +13,35 @@ import Languate.FQN
 import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
+import Languate.Typetable.PropagateConstraints
 
 import Languate.Checks.CheckType
 
+import Data.Set as S
 import Data.Map as M
 import Data.List as L
 import Data.Maybe
+import Graphs.SearchCycles
 
 import Control.Arrow hiding ((+++))
 
 
 {- builds the 'defined' type table from the code.
 	-> Direct constraints on the free types are loaded
+
+	The known table is needed for the kinds kinds
 -}
 buildTypetable	:: Module -> TypeLookupTable -> FQN -> Exc Typetable
 buildTypetable mod tlt fqn
-		= do	let locDecl	= locallyDeclared mod 	:: [(Name, [Name], [TypeRequirement])]
+		= inside ("While building the type info in module "++show fqn) $
+		  do	let locDecl	= locallyDeclared mod 	:: [(Name, [Name], [TypeRequirement])]
 			superDecls	<- mod & statements |> declaredSuperType tlt & sequence |> concat
 						:: Exc [(RType, [Name], CType)]
-			locDecl |> buildTypeInfo tlt superDecls fqn & sequence |> M.fromList |> Typetable
+			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
+			checkSupertypeCycles (typeInfos |> supertypes)
+
+			typeInfos'	<- propagateParams tlt mod $ Typetable typeInfos
+			return typeInfos'
 
 
 -- Builds the type info about the given type in the tuple
@@ -39,6 +49,7 @@ buildTypeInfo	:: TypeLookupTable -> [(RType, [Name], CType)] -> FQN -> (Name, [N
 buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 	= inside ("While building type info about "++show fqn++"."++n) $
 	  do	let tid		= (fqn, n)
+		let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
 		-- about the free type names
 		let indices	= zip frees [0..]	:: [(Name, Int)]
 		reqs'		<- reqs |+> (\(nm, t) -> do rt<-resolveType tlt t;return (nm, rt) )	:: Exc [(Name, RType)]
@@ -54,7 +65,7 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
 		supers		<- superTypes |+> buildSTTEntry |> M.fromList
-		return (tid, TypeInfo frees constraints' supers)
+		return (tid, TypeInfo kind frees constraints' supers)
 
 
 buildSTTEntry	:: (RType, [Name], CType) -> Exc (RType, [TypeConstraint])
@@ -68,7 +79,8 @@ buildSTTEntry (sub, frees, (super, constraints))
 
 canonicalSuperDecl	:: (RType, [Name], CType) -> Exc (RType, [Name], CType)
 canonicalSuperDecl (sub, frees, (super, constraints))
-		= do	let canonFree	= zip frees defaultFreeNames
+		= do	let allFrees	= frees ++ freesInRT sub ++ freesInRT super
+			let canonFree	= zip (nub allFrees) defaultFreeNames
 			let canonType	= traverseRTM (onFreeM ((|> RFree) . fetch canonFree))
 			let frees'	= canonFree |> snd
 			sub'	<- canonType sub
@@ -77,6 +89,15 @@ canonicalSuperDecl (sub, frees, (super, constraints))
 			constraints'' 	<- constraints' |+> onFirst (fetch canonFree)	:: Exc [(Name, [RType])]
 			return (sub', frees', (super', constraints''))
 
-
 fetch indices free	= L.lookup free indices ? errMsg free
 			where errMsg free	= "The free type variable "++free++" was not declared"
+
+
+
+checkSupertypeCycles  :: Map TypeID (Map RType a) -> Check
+checkSupertypeCycles supers
+		= do	--  we build a graph of supertypes, and check for cycles
+			let graph	= supers |> M.keys ||>> getBaseTID  |> catMaybes |> S.fromList
+			let cycles	= cleanCycles graph
+			cycles |+> (\cycle -> err $ "Types form a cycle in the supertypes: "++ (cycle |> show & commas))
+			return ()
