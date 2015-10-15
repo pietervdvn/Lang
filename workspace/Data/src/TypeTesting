@@ -3,18 +3,24 @@ TypeTesting
 Some type-testing
 -----------
 
+
 cat C0
 	> True
 
-cat C1
+cat C1 a
 	> True
 
-cat A0 (a:C0)
+cat Eq
+	(==) : eq -> eq -> eq
+
+
+cat X (a:C0) (b:Eq)
 	> True
 
-cat A1 a: A0 a
+cat A2 a b c : X a a
 	> True
 
+---
 cat A2 (a:C1): A1 a
 	> True
 
@@ -23,6 +29,17 @@ cat A3 a:A2 a
 
 cat A4 a:A3 a
 	> True
+
+
+
+cat C : C0
+	> True
+
+cat X : A1 C
+	> True
+
+---
+
 
 ---
 cat Monoid
