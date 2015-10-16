@@ -11,7 +11,9 @@ It is this data-structure that all semantic analysis things use or build.
 --}
 
 import StdDef
-import qualified HumanUtils
+import HumanUtils (commas, pars)
+import Exceptions
+import Languate.CheckUtils
 import Languate.AST
 import Normalizable
 import Languate.FQN
@@ -176,8 +178,8 @@ showTE	:: TypedExpression -> String
 showTE (TFlt f)
 	= show f ++ " :Float"
 showTE (TApplication (retTps, reqs) func arg)
-	= let	funcStr	= HumanUtils.pars (show func)
-		argStr	= HumanUtils.pars (show arg)
+	= let	funcStr	= pars (show func)
+		argStr	= pars (show arg)
 		tpStr	= show retTps in
 		funcStr ++ " " ++ argStr ++ " :"++tpStr
 showTE (TCall _ sign)
@@ -266,7 +268,9 @@ rTypeReqs2md rqs
 			|> code & Mu.Seq
 
 instance Normalizable ResolvedType where
-	normalize rt	= runstate (nt rt) (defaultFreeNames, []) & fst
+	normalize rt	= normalizeRT "a" rt & fst
+
+normalizeRT names rt	= runstate (nt rt) (defaultFreeNames' names, []) |> snd
 
 nt	:: ResolvedType -> State ([Name],[(Name, Name)]) ResolvedType
 nt (RApplied t0 t1)	= do	t0'	<- nt t0
@@ -281,6 +285,7 @@ nt (RFree a)		= do	(available, dict)	<- get
 							put (tail available, (a,chosen):dict)
 							return $ RFree chosen
 					(Just a') -> return $ RFree a'
+nt t@(RNormal _ _)	= return t
 
 
 
@@ -352,6 +357,15 @@ foldRT f conct (RCurry at rt)
 foldRT f _ t	= f t
 
 
+subs	:: [(Name, RType)] -> RType -> Exc RType
+subs dict rt
+	= do	let usedFrees	= freesInRT rt & nub
+		let subsFrees	= dict |> snd >>= freesInRT
+		let overlap	= dubbles (usedFrees ++ nub subsFrees)
+		assert (L.null overlap) ("The substitution overlaps, target types contain free type variables which are in the source type too: "++commas overlap)
+		let fetch free	= L.lookup free dict & fromMaybe (RFree free)
+		traverseRT (onFree fetch) rt & return
+
 getBaseTID	:: RType -> Maybe (FQN, Name)
 getBaseTID (RNormal fqn nm)
 		= Just (fqn, nm)
@@ -415,4 +429,8 @@ canonicalBinding t
 	= appliedTypes t & zip defaultFreeNames & fromList
 
 defaultFreeNames	:: [Name]
-defaultFreeNames	= [0..] |> show |> ('a':)
+defaultFreeNames	= defaultFreeNames' "a"
+
+
+defaultFreeNames'	:: String -> [Name]
+defaultFreeNames' nm	= [0..] |> show |> (nm++)
