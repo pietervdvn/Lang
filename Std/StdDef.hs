@@ -216,6 +216,12 @@ whileDo cond m
 		if cond a then return a else whileDo cond m
 
 
+whileDo'	:: Monad m => (a -> Bool) -> (a -> m a) -> a -> m a
+whileDo' cond m start
+	= do	a	<- m start
+		if not $ cond a then return a else whileDo' cond m a
+
+
 mapTuple	:: (a -> b, c -> d) -> (a,c) -> (b,d)
 mapTuple (f, g) (a,b)
 		= (f a, g b)
