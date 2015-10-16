@@ -39,9 +39,27 @@ buildTypetable mod tlt fqn
 						:: Exc [(RType, [Name], CType)]
 			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
 			checkSupertypeCycles (typeInfos |> supertypes)
+			constrainedTT	<- propagateConstraints tlt mod (Typetable typeInfos) |> fst
+			return constrainedTT
 
-			typeInfos'	<- propagateParams tlt mod $ Typetable typeInfos
-			return typeInfos'
+
+propagateConstraints tlt mod tt
+	= (`whileChanged` tt)
+		(\tt_ -> do	-- first we propagate the implicit type requirements on cat-declarations
+				-- as long as we are changing: propagete the implicit type parameters; this might not be complete
+				(tt', changed')		<- whileChanged (propagateParams tlt mod) tt_
+				-- now the implicit requirements on requirement: X a (b:Set a) => a:Eq
+				(tt'', changed'')	<- whileChanged propagateMetaRequirements tt'
+				return (tt'', changed' || changed''))
+
+
+whileChanged	:: Monad m => (a -> m (a, Bool)) -> a -> m (a, Bool)
+whileChanged act a
+		= do	res <- whileDo' snd (\((a, onceChanged), _)	->
+				do	(a', changed)	<- act a
+					return ((a', changed || onceChanged), changed)) ((a, False), False)
+			return $ fst res
+
 
 
 -- Builds the type info about the given type in the tuple
@@ -50,14 +68,19 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 	= inside ("While building type info about "++show fqn++"."++n) $
 	  do	let tid		= (fqn, n)
 		let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
+
 		-- about the free type names
 		let indices	= zip frees [0..]	:: [(Name, Int)]
 		reqs'		<- reqs |+> (\(nm, t) -> do rt<-resolveType tlt t;return (nm, rt) )	:: Exc [(Name, RType)]
 		reqs' |> snd |+> validateFrees frees
-		-- about the constraints
 
-		constraints	<- reqs' |+>  onFirst (fetch indices)  :: Exc [(Int, RType)]
-		let constraints'= constraints & merge & M.fromList
+		-- about the constraints
+		constraints	<- reqs' |+>  onFirst (fetch indices)	:: Exc [(Int, RType)]
+		-- mapping to normalize the constraints
+		let mapping	= zip frees defaultFreeNames ||>> RFree
+		constraints'	<- constraints |+> onSecond (subs mapping) |> merge
+					|> M.fromList			:: Exc (Map Int [RType])
+
 		-- about the supertypes$
 		let isTid t	= getBaseTID t |> ((==) tid) & fromMaybe False	:: Bool
 		superTypes	<- superDecls & L.filter (isTid . fst3) |+> canonicalSuperDecl
@@ -65,7 +88,7 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
 		supers		<- superTypes |+> buildSTTEntry |> M.fromList
-		return (tid, TypeInfo kind frees constraints' supers)
+		return (tid, TypeInfo kind frees constraints' [] supers)
 
 
 buildSTTEntry	:: (RType, [Name], CType) -> Exc (RType, [TypeConstraint])
