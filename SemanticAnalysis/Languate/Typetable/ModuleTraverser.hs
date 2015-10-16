@@ -76,6 +76,8 @@ cat A0 a:A1 a implies that A0 has the same constraints on 'a' as A1.
 This function gives exactly this relation:
 [A0 a, A1 a]
 
+For CATEGORY-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
+
 -}
 constraintAdoptions	:: TypeLookupTable -> Statement -> Exc [(RType, RType)]
 constraintAdoptions tlt stm@(ClassDefStm _)
