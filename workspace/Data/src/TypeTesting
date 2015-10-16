@@ -4,67 +4,16 @@ Some type-testing
 -----------
 
 
-cat C0
-	> True
-
-cat C1 a
-	> True
-
 cat Eq
-	(==) : eq -> eq -> eq
-
-
-cat X (a:C0) (b:Eq)
 	> True
 
-cat A2 a b c : X a a
-	> True
-
----
-cat A2 (a:C1): A1 a
-	> True
-
-cat A3 a:A2 a
-	> True
-
-cat A4 a:A3 a
-	> True
-
-
-
-cat C : C0
-	> True
-
-cat X : A1 C
-	> True
-
----
-
-
----
-cat Monoid
-	(+) : monoid -> monoid -> monoid
-
-type List a	= {Empty} + List' a
-type List' a	= {Elem head:a; elem:List a}
 
 cat Set (a:Eq)
 	> True
 
-cat Set0 a: Set a
+
+cat X a0 (a1:Set a0)
 	> True
 
-instance List a is Monoid
-
-cat Eq
-	(==) : eq -> eq -> eq
-
-instance List (a:Eq) is Eq
-
-instance List is Set
-
-instance List (a:(k,v)) is Dict k v
-
-cat Dict (a:Eq) b
+cat Y a0 a1 a2	: X a1 a0
 	> True
----
