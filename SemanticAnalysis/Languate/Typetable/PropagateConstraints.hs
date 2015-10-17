@@ -157,12 +157,16 @@ typeRequirementsOn (Typetable tt) superForm
 		-- mapping
 		let form2foreign	= zip args defaultFreeNames
 						& L.filter (isRFree . fst)
-						|> first (\(RFree nm) -> nm)
-						|> second RFree	:: [(Name, RType)]
+						|> first (\(RFree nm) -> nm) :: [(Name, Name)]
+		let form2foreign'	= form2foreign |> second RFree
+		let foreign2form	= form2foreign |> swap
+		let foreign2form'	= foreign2form |> second RFree
 		-- constraint with free type variables expressed in actual values
-		constr		<- constr' |+> onSecond (|+> subs form2foreign)
+		constr		<- constr' |+> onSecond (|+> subs form2foreign')
 		let subIsA	= zip args [0..] & flip buildMapping constr	:: [(RType, [RType])]
-		recConstraints		<- (subIsA >>= snd) |+> typeRequirementsOn' (Typetable tt) |> concat	:: Exc [(RType, [RType])]
+		-- we undo the translation, for the recursive call. This means the requirements are again in a0 form
+		subIsA'		<- subIsA |+> onSecond (|+> subs foreign2form')
+		recConstraints		<- (subIsA' >>= snd ) |+> typeRequirementsOn' (Typetable tt) |> concat	:: Exc [(RType, [RType])]
 		return (subIsA++recConstraints)
 
 typeRequirementsOn'	:: Typetable -> RType -> Exc [(RType,[RType])]

@@ -55,8 +55,8 @@ propagateConstraints tlt mod tt
 
 whileChanged	:: Monad m => (a -> m (a, Bool)) -> a -> m (a, Bool)
 whileChanged act a
-		= do	res <- whileDo' snd (\((a, onceChanged), _)	->
-				do	(a', changed)	<- act a
+		= do	res <- whileDo' snd (\((a_, onceChanged), _)	->
+				do	(a', changed)	<- act a_
 					return ((a', changed || onceChanged), changed)) ((a, False), False)
 			return $ fst res
 
