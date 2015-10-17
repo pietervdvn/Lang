@@ -12,3 +12,7 @@ cat Set (a:Eq)
 
 cat X a0 a1 a2:Set a1
 	> True
+
+
+cat Y a b c d e	: X c d e
+	> True
