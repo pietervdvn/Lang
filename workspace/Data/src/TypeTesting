@@ -7,13 +7,8 @@ Some type-testing
 cat Eq
 	> True
 
-
 cat Set (a:Eq)
 	> True
 
-
-cat X a0 (a1:Set a0)
-	> True
-
-cat Y a0 a1 a2	: X a1 a0
+cat X a0 a1 a2:Set a1
 	> True

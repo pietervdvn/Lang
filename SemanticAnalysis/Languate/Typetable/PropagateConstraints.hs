@@ -23,6 +23,7 @@ import Data.Tuple
 import Control.Arrow
 import Control.Monad
 
+
 type Changed	= Bool
 
 {- Propagates constraints on the super types, e.g. instance List is Bag, the implicit requirement is that (a0:Eq)  -}
@@ -47,8 +48,30 @@ propagateMetaRequirements tt@(Typetable conts)
 propagateMetaRequirementsIn	:: Typetable -> TypeID -> TypeInfo -> Exc (TypeInfo, Changed)
 propagateMetaRequirementsIn tt tid ti
 	= inside ("While calculating implicit type requirements on "++show tid) $
-	  do	-- TODO pickup! This is buggy, something with freenames
-		return (ti, False)
+	  do	let constraintTypes	= constraints ti & M.elems & concat	:: [RType]
+		ti' 		<- foldM (propagateMetaRequirementsIn' tt tid) ti constraintTypes
+		return (ti', ti /= ti')
+
+
+propagateMetaRequirementsIn'	:: Typetable -> TypeID -> TypeInfo -> RType -> Exc TypeInfo
+propagateMetaRequirementsIn' tt@(Typetable conts) tid ti reqT
+	= do	let nrOfFrees	= ti & frees & length
+		-- {0 --> a0, 1 --> a1, ... }
+		let defaultMap	= zip [0..] defaultFreeNames & take nrOfFrees
+		reqTID		<- getBaseTID reqT ? (show reqT ++ " is not a normal type")
+		reqTi	<- M.lookup reqTID conts ? ("No typeinfo found for "++show reqTID++", weird...") :: Exc TypeInfo
+		let args	= appliedTypes reqT
+		let this2req	= zip defaultFreeNames args
+		let reqConstr	= constraints reqTi & M.toList
+					:: [(Int, [RType])]
+		-- constraint types, with frees expressed in as frees of this declaration (and not the foreign one)
+		reqConstr'	<- reqConstr |+> onSecond (|+> subs this2req)
+
+		{-  {argument --> should be} -}
+		let newConstr	= buildMapping (zip args [0..]) reqConstr'
+		let ti'		= addConstrReqs' defaultMap newConstr ti
+		return ti'
+
 
 
 
@@ -103,7 +126,6 @@ propagateParamIn tt@(Typetable dict) (actualForm', superForm') ti
 		let mapping 		= buildMapping subMapping' superMapping |> swap
 		-- normalized type, expressed in actual types or 'sub0'-type variables
 		superForm		<- subs (mapping ||>> RFree) superForm_
-
 		{--------------------------------------}
 		{- Calculate and add new requirements -}
 		{--------------------------------------}
@@ -112,49 +134,60 @@ propagateParamIn tt@(Typetable dict) (actualForm', superForm') ti
 		return (ti', ti /= ti')
 
 
-{- propagates requirement on requirements.
-	e.g. type A a (b:Set a) implies a:Eq, this function add those hidden requirements -}
+{- propagates requirement on supertypes.
+	e.g. cat A a b:Set a implies a:Eq, this function add those hidden requirements -}
 propagateImplicitRequirements	:: Typetable -> [(Int, Name)] -> RType -> TypeInfo -> Exc TypeInfo
 propagateImplicitRequirements tt mapping rt ti
-	= do	constraints	<- typeRequirementsOn' tt rt
-		return $ addConstrReqs mapping constraints ti
+	= do	requirements	<- typeRequirementsOn tt rt
+		let mapping	= zip [0..] (defaultFreeNames' "sub") & take (length $ frees ti)
+		return $ addConstrReqs' mapping requirements  ti
 
 
 
-typeRequirementsOn	:: Typetable -> TypeID -> [RType] -> Exc ([(Name, [RType])], [(RType, RType)])
-typeRequirementsOn (Typetable tt) tid args
-	= do	ti		<- M.lookup tid tt ? ("No type info about "++show tid++", weird")
-		let constr	= constraints ti & M.toList
+typeRequirementsOn	:: Typetable -> RType -> Exc [(RType, [RType])]
+typeRequirementsOn (Typetable tt) superForm
+	= do	tid		<- getBaseTID superForm ? ("The type "++show superForm++" is a bit weird. Don't apply type variables on frees please")
+		ti		<- M.lookup tid tt ? ("No type info about "++show tid++", weird")
 		let knd		= kind ti
+		let args	= appliedTypes superForm
 		assert (length args == numberOfKindArgs knd) $
 			("The type "++ show tid ++" is applied to too little (or too much) arguments.")
+		-- free type variables are expressed in foreign type
+		let constr'	= constraints ti & M.toList
+		-- mapping
+		let form2foreign	= zip args defaultFreeNames
+						& L.filter (isRFree . fst)
+						|> first (\(RFree nm) -> nm)
+						|> second RFree	:: [(Name, RType)]
+		-- constraint with free type variables expressed in actual values
+		constr		<- constr' |+> onSecond (|+> subs form2foreign)
 		let subIsA	= zip args [0..] & flip buildMapping constr	:: [(RType, [RType])]
-		let (newConstraints, superRequirements)	= subIsA & L.partition (isRFree . fst)
-		let newConstraints'	= newConstraints |> first (\(RFree nm) -> nm)			:: [(Name, [RType])]
-		let superRequirements'	= superRequirements & unmerge & L.filter (uncurry (/=)) & nub	:: [(RType, RType)]
-		recConstraints		<- (subIsA >>= snd) |+> typeRequirementsOn' (Typetable tt)	:: Exc [([(Name, [RType])], [(RType, RType)])]
-		let allConstraints	= ((newConstraints', superRequirements'):recConstraints)
-						& unzip & mapTuple (concat, concat)			:: ([(Name, [RType])], [(RType, RType)])
-		return allConstraints
+		recConstraints		<- (subIsA >>= snd) |+> typeRequirementsOn' (Typetable tt) |> concat	:: Exc [(RType, [RType])]
+		return (subIsA++recConstraints)
 
-
-typeRequirementsOn'	:: Typetable -> RType -> Exc ([(Name, [RType])], [(RType, RType)])
+typeRequirementsOn'	:: Typetable -> RType -> Exc [(RType,[RType])]
 typeRequirementsOn' _ (RFree _)
-			= return ([],[])
+			= return []
 typeRequirementsOn' _ (RNormal{})
-			= return ([],[])
+			= return []
 typeRequirementsOn' tt (RCurry t1 t2)
-			= do	(a, b)	<- typeRequirementsOn' tt t1
-				(c, d)	<- typeRequirementsOn' tt t2
-				return (a++c, b++d)
+			= do	t1Reqs	<- typeRequirementsOn' tt t1
+				t2Reqs	<- typeRequirementsOn' tt t2
+				return $ t1Reqs ++ t2Reqs
 typeRequirementsOn' tt appliedType
-			= do	tid	<- getBaseTID appliedType ? ("The type "++show appliedType++" is a bit weird. Don't apply type variables on frees please")
-				typeRequirementsOn tt tid (appliedTypes appliedType)
+			= typeRequirementsOn tt appliedType
 
 
 
+addConstrReqs'	:: [(Int, Name)] -> [(RType, [RType])] -> TypeInfo -> TypeInfo
+addConstrReqs' mapping requirements
+	= let	(constr, reqs)	= L.partition (isRFree . fst) requirements
+		constr'		= constr |> first (\(RFree nm) -> nm) in
+		addConstrReqs mapping (constr', unmerge reqs)
 
 
 
+addConstrReqs	:: [(Int, Name)] -> ([(Name, [RType])], [(RType, RType)])
+			-> TypeInfo -> TypeInfo
 addConstrReqs mapping (constraints, reqs) ti
 	= ti & addConstraintsWith mapping constraints & addRequirements reqs

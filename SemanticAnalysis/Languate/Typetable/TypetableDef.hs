@@ -53,7 +53,7 @@ data TypeInfo	= TypeInfo {	kind		:: Kind,
 addConstraints		:: [(Int, [RType])] -> TypeInfo -> TypeInfo
 addConstraints constr ti
 	= let	constr'	= constr & unmerge & merge & M.fromList in
-		ti {constraints = M.unionWith (\c c' -> nub (c++c')) constr' $ constraints ti}
+		ti {constraints = M.unionWith (\c c' -> nub (c'++c)) constr' $ constraints ti}
 
 
 addConstraintsWith	:: [(Int, Name)] -> [(Name, [RType])] -> TypeInfo -> TypeInfo
@@ -63,7 +63,7 @@ addConstraintsWith mapping constr
 
 addRequirements		:: [(RType, RType)] -> TypeInfo -> TypeInfo
 addRequirements reqs	 ti
-	= ti {requirements = nub ((reqs |> uncurry SubTypeConstr) ++ requirements ti)}
+	= ti {requirements = nub (requirements ti ++ (reqs |> uncurry SubTypeConstr))}
 
 
 buildMapping	:: Eq b => [(a, b)] -> [(b, c)] -> [(a,c)]
