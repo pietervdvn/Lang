@@ -43,6 +43,11 @@ pf p	=  do	putStr $ "  Parsing file " ++ show p
 		print $ length $ show m
 		return ()
 
+ptOfFile	:: FilePath -> IO ParseTree
+ptOfFile fp	= do	putStr $ "  Parsing file " ++ show fp
+			str	<- readFile fp
+			cachedpt "module"  str
+
 
 
 getDirectoryContents'	:: FilePath -> IO [FilePath]

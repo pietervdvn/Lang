@@ -66,16 +66,36 @@ s r (TypeT:PrivT:tail)
 s r (TypeT:Ident name:FreeTypes frees' reqs':tail)
 		=  let decl = s r (TypeT:Ident name:tail) in
 			decl {frees_ = frees', reqs = reqs decl ++ reqs'}
-s r (TypeT:Ident name:EqualT:Prod sums reqs docs:rest)
-		= let	Adopted adoptions' = s r rest
-			(adoptions, reqs') = adoptions' & unzip |> concat in
-			Data Public name [] sums (reqs++reqs') docs adoptions
+s r (TypeT:Ident name:EqualT:Prod sums rqs dcs:rest)
+		= let	decl 	= s r (TypeT:Ident name:EqualT:rest) in
+			decl{constructors = constructors decl ++ sums,
+				reqs = reqs decl ++ rqs,
+				docs = docs decl ++ dcs}
+s r (TypeT:Ident name:EqualT:rest)
+		= let	decl	= case s r rest of
+					(Adopted adops)	-> _adops2data adops
+					decl	-> decl
+			in
+			decl {nm = name}
+s r [Prod sums rqs dcs, Adopted adops]
+		= let decl = _adops2data adops in
+			decl {constructors = constructors decl ++ sums,
+				reqs	= reqs decl ++ rqs,
+				docs	= docs decl ++ dcs}
 s _ []		= Adopted []
-s r (PlusT: TypeV v:rest)
+s r (PlusT:rest)
+		= s r rest
+s r (TypeV v:rest)
 		= let Adopted tail	= s r rest in
 			Adopted (v:tail)
 s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
+
+_adops2data	:: [(Type, [TypeRequirement])] -> AST
+_adops2data adopReqs
+	= let	(adops, reqs)	= adopReqs & unzip |> concat
+		nameErr	= "Parser error in "++modName++"(No name given)" in
+		Data Public (error nameErr) [] [] reqs [] adops
 
 
 pt2freetypes	:: ParseTree -> ([Name],[TypeRequirement])
