@@ -9,8 +9,6 @@ The supertype of every single type. Each type has ''Any'' implicitly as supertyp
 The type ''.'' desugars to ''Any''.
 
 ![Supertype.jpg](../doc/res/Supertype.jpg)
-
-
 ---
 cat Any
 	> True
