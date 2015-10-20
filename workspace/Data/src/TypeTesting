@@ -10,10 +10,13 @@ cat Eq
 cat Set (a:Eq)
 	> True
 
-cat X a0 a1 a2:Set a1
+instance X a1 is Set a1
+
+cat X a1
 	> True
 
--- c should be nothing
--- d should be Eq
-cat Y a (b:Set (Set a)) c d e	: X c d e
-	> True
+type List a	= {Empty} + List' a
+type List' (a:Eq)	= {Elem a (List a)}
+type InfList a	= {Elem a (InfList a)}
+
+type String	= List Eq

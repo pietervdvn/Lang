@@ -8,5 +8,7 @@ import Data.Char
 import Data.Bool
 import Collection.Maybe
 
+type String	= [Char]
+
 stringify	: [Char] -> [Char]
 str		= "\""+str+"\""
