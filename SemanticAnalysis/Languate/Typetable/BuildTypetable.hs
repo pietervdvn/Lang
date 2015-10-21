@@ -38,9 +38,9 @@ buildTypetable mod tlt fqn
 			superDecls	<- mod & statements |> declaredSuperType tlt & sequence |> concat
 						:: Exc [(RType, [Name], CType)]
 			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
-			--checkSupertypeCycles (typeInfos |> supertypes)
-			--constrainedTT	<- propagateConstraints tlt mod (Typetable typeInfos) |> fst
-			return typeInfos
+			checkSupertypeCycles (typeInfos |> supertypes)
+			constrainedTT	<- propagateConstraints tlt mod (Typetable typeInfos) |> fst
+			return constrainedTT
 
 
 propagateConstraints tlt mod tt
@@ -81,14 +81,14 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		constraints'	<- constraints |+> onSecond (subs mapping) |> merge
 					|> M.fromList			:: Exc (Map Int [RType])
 
-		-- about the supertypes$
+		-- about the supertypes
 		let isTid t	= getBaseTID t |> ((==) tid) & fromMaybe False	:: Bool
-		--superTypes	<- superDecls & L.filter (isTid . fst3) |+> canonicalSuperDecl
+		superTypes	<- superDecls & L.filter (isTid . fst3) |+> canonicalSuperDecl
 		let duplicateSupers	= superTypes |> thd3 |> fst & dubbles
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
-		--supers		<- superTypes |+> buildSTTEntry |> M.fromList
-		return (tid, TypeInfo kind frees constraints' [] [])
+		supers		<- superTypes |+> buildSTTEntry |> M.fromList
+		return (tid, TypeInfo kind frees constraints' [] supers)
 
 
 buildSTTEntry	:: (RType, [Name], CType) -> Exc (RType, [TypeConstraint])

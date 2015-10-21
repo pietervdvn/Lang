@@ -42,7 +42,7 @@ declaredType _	= Nothing
 
 
 declaredSuperType	:: TypeLookupTable -> Statement -> Exc [(RType, [Name], CType)]
-declaredSuperType tlt (ADTDefStm (ADTDef nm frees reqs _ adopts))
+declaredSuperType tlt (ADTDefStm (ADTDef nm frees reqs sums adopts))
 	= do	-- the type being declared here is the supertype of the adopted types...
 		super	<- resolveTypePath tlt ([], nm)
 		-- ... applied on the frees of course!
@@ -50,6 +50,8 @@ declaredSuperType tlt (ADTDefStm (ADTDef nm frees reqs _ adopts))
 		adopts'	<- resolveTypes tlt adopts
 		reqs'	<- resolveReqs tlt reqs
 		adopts' |> (\typ -> (typ, frees, (super', reqs'))) & return
+		{- whenever there are no constructors (and only a single adopted type),
+			we declare a synonym; this case is handles elsewhere as to prevent supertype loops -}
 declaredSuperType tlt (InstanceStm (Instance typePath frees super reqs))
 	= do	typ	<- resolveTypePath tlt typePath
 		let typ'= applyTypeArgs typ (frees |> RFree)

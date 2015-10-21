@@ -4,19 +4,9 @@ Some type-testing
 -----------
 
 
-cat Eq
+cat Char
 	> True
 
-cat Set (a:Eq)
-	> True
 
-instance X a1 is Set a1
-
-cat X a1
-	> True
-
-type List a	= {Empty} + List' a
-type List' (a:Eq)	= {Elem a (List a)}
-type InfList a	= {Elem a (InfList a)}
-
-type String	= List Eq
+type List a	= {Empty, Elem a (List a)}
+type String	= List Char
