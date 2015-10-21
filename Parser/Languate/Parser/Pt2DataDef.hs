@@ -104,7 +104,7 @@ _adops2data	:: [(Type, [TypeRequirement])] -> AST
 _adops2data adopReqs
 	= let	(adops, reqs)	= adopReqs & unzip |> concat
 		nameErr	= "Parser error in "++modName++"(No name given)" in
-		Data Public (nameErr) [] [] reqs [] adops
+		Data Public (error nameErr) [] [] reqs [] adops
 
 
 pt2freetypes	:: ParseTree -> ([Name],[TypeRequirement])
