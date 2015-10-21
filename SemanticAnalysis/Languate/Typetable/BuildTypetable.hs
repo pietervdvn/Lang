@@ -13,9 +13,10 @@ import Languate.FQN
 import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
-import Languate.Typetable.PropagateConstraints
+import Languate.Typetable.PropagateImplicitConstraints
 
 import Languate.Checks.CheckType
+import Control.Monad
 
 import Data.Set as S
 import Data.Map as M
@@ -39,25 +40,41 @@ buildTypetable mod tlt fqn
 						:: Exc [(RType, [Name], CType)]
 			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
 			checkSupertypeCycles (typeInfos |> supertypes)
-			propagateConstraints tlt mod (Typetable typeInfos) |> fst
+			tt'	<- propagateImplicitConstraints tlt mod (Typetable typeInfos) |> fst
+			addTypeSynons tlt mod tt'
 
 
-propagateConstraints tlt mod tt
-	= (`whileChanged` tt)
-		(\tt_ -> do	-- first we propagate the implicit type requirements on cat-declarations
-				-- as long as we are changing: propagete the implicit type parameters; this might not be complete
-				(tt', changed')		<- whileChanged (propagateParams tlt mod) tt_
-				-- now the implicit requirements on requirement: X a (b:Set a) => a:Eq
-				(tt'', changed'')	<- whileChanged propagateMetaRequirements tt'
-				return (tt'', changed' || changed''))
 
 
-whileChanged	:: Monad m => (a -> m (a, Bool)) -> a -> m (a, Bool)
-whileChanged act a
-		= do	res <- whileDo' snd (\((a_, onceChanged), _)	->
-				do	(a', changed)	<- act a_
-					return ((a', changed || onceChanged), changed)) ((a, False), False)
-			return $ fst res
+{-
+Consider the statement
+type String	= List Char
+with only one type, a type synonym thus
+
+This statement implies that:
+	-> List is a String if a0 is a Char
+	-> String is a List Char
+
+This last supertype has not been added yet, as it would add a cycle that the constraint propagation could not deal with.
+
+Also note: List is a String if a0 is a Char: the condition has not been added yet. It will be done together with the 'instance-declaration'-propagation
+-}
+addTypeSynons	:: TypeLookupTable -> Module -> Typetable -> Exc Typetable
+addTypeSynons tlt mod tt
+	= do	synons	<- mod & statements |+> typeSynonyms tlt |> concat	:: Exc [(RType, [Name], RType)]
+		foldM addTypeSynon tt synons
+
+addTypeSynon	:: Typetable -> (RType, [Name], RType) -> Exc Typetable
+addTypeSynon (Typetable conts) (sub, frees, super)
+	= inside ("While adding the type synonym for "++show sub) $
+	  do	tid	<- getBaseTID sub ? ("Could not retrieve tid for "++show sub)
+		let mapping	= zip frees defaultFreeNames ||>> RFree
+		super'		<- subs mapping super
+		-- no constraints rest on this part of the synonyms; constraints are constraints of existance and already covered
+		let addSuper ti	= ti {supertypes = supertypes ti & M.insert super' []}
+		conts & update (Just . addSuper) tid & Typetable & return
+
+
 
 
 

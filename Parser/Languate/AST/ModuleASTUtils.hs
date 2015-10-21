@@ -120,6 +120,11 @@ declaresType nm (ClassDefStm cd)
 declaresType _ _
 		= False
 
+isTypeDefStm	:: Statement -> Bool
+isTypeDefStm (ADTDefStm{})
+		= True
+isTypeDefStm _	= False
+
 
 instance Normalizable Statement where
 	normalize	= ns

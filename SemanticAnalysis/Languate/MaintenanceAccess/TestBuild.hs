@@ -27,7 +27,7 @@ import System.Directory
 import Control.Monad
 
 import Languate.ModuleTable
-import Languate.Typetable.PropagateConstraints
+import Languate.Typetable.PropagateImplicitConstraints
 
 t	= packageTabl
 

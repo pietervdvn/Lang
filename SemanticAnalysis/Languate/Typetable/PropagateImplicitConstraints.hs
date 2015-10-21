@@ -1,4 +1,10 @@
-module Languate.Typetable.PropagateConstraints where
+module Languate.Typetable.PropagateImplicitConstraints where
+{- Propagates constraints on the super types, e.g. instance List is Bag, the implicit requirement is that (a0:Eq).
+
+This module defines all functions to propagate constraints on the existance of types (thus constraints imposed by inhereting other types).
+
+It does not deal with 'instance X is Y if a0 is Z'
+  -}
 
 import StdDef
 import Exceptions
@@ -26,7 +32,16 @@ import Control.Monad
 
 type Changed	= Bool
 
-{- Propagates constraints on the super types, e.g. instance List is Bag, the implicit requirement is that (a0:Eq)  -}
+propagateImplicitConstraints tlt mod tt
+	= (`whileChanged` tt)
+		(\tt_ -> do	-- first we propagate the implicit type requirements on cat-declarations
+				-- as long as we are changing: propagete the implicit type parameters; this might not be complete
+				(tt', changed')		<- whileChanged (propagateParams tlt mod) tt_
+				-- now the implicit requirements on requirement: X a (b:Set a) => a:Eq
+				(tt'', changed'')	<- whileChanged propagateMetaRequirements tt'
+				return (tt'', changed' || changed''))
+
+
 
 {-
 Propagates requirements which are known via other requirements, e.g:

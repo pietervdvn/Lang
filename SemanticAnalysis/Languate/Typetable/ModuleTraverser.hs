@@ -1,4 +1,6 @@
-module Languate.Typetable.ModuleTraverser (locallyDeclared, declaredType, declaredSuperType, constraintAdoptions) where
+module Languate.Typetable.ModuleTraverser
+	(locallyDeclared, declaredType, declaredSuperType
+	, constraintAdoptions, typeSynonyms) where
 
 {-
 Multiple functions to traverse the statements, in search for type declaration stuff
@@ -87,5 +89,17 @@ constraintAdoptions tlt stm@(ClassDefStm _)
 	= declaredSuperType tlt stm ||>> (\(rt, frees, (super, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
 constraintAdoptions tlt stm@(ADTDefStm _)
 	-- ""type X a={Constr} + Y a"": X (rt) only exists if the constraints on super are met
-	= declaredSuperType tlt stm ||>> (\(super, frees, (rt, constraints)) -> (rt, applyTypeArgs super (frees |> RFree)))
-constraintAdoptions _ _	= return [] 
+	= declaredSuperType tlt stm ||>> (\(super, frees, (rt, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
+constraintAdoptions _ _	= return []
+
+
+
+
+typeSynonyms		:: TypeLookupTable -> Statement -> Exc [(RType, [Name], RType)]
+typeSynonyms tlt (ADTDefStm (ADTDef nm frees _ [] [synonym]))
+	-- reqs are ignored, these are handled in other fases
+	= do	typ	<- resolveTypePath tlt ([],nm)
+		syn'	<- resolveType tlt synonym
+		return [(typ, frees, syn')]
+typeSynonyms _ _
+	= return []

@@ -221,6 +221,14 @@ whileDo' cond m start
 	= do	a	<- m start
 		if not $ cond a then return a else whileDo' cond m a
 
+whileChanged	:: Monad m => (a -> m (a, Bool)) -> a -> m (a, Bool)
+whileChanged act a
+		= do	res <- whileDo' snd (\((a_, onceChanged), _)	->
+				do	(a', changed)	<- act a_
+					return ((a', changed || onceChanged), changed)) ((a, False), False)
+			return $ fst res
+
+
 
 mapTuple	:: (a -> b, c -> d) -> (a,c) -> (b,d)
 mapTuple (f, g) (a,b)

@@ -11,6 +11,9 @@ cat X
 cat Eq
 	> True
 
+cat Set (a:Eq)
+	> True
+
 type List (a:X)	= {Empty, Elem a (List a)}
-type Set (a:Eq)	= {EmptySet, Elem}
 type String	= List Char
+type Set' a	= Set Char
