@@ -6,14 +6,23 @@ Some type-testing
 
 cat Char
 	> True
-cat X
-	> True
 cat Eq
 	> True
 
 cat Set (a:Eq)
 	> True
 
+cat Y
+	> True
+
+cat X (a:Y)
+	> True
+
+cat Z a b: X b
+	> True
+
 type List (a:X)	= {Empty, Elem a (List a)}
-type String	= List Char
-type Set' a	= Set Char
+type String a	= List a
+type Test a b	= {Qsdf}
+
+instance Test a b is Z a b

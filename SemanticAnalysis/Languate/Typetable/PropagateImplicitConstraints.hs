@@ -1,4 +1,4 @@
-module Languate.Typetable.PropagateImplicitConstraints where
+module Languate.Typetable.PropagateImplicitConstraints (typeRequirementsOn, propagateImplicitConstraints) where
 {- Propagates constraints on the super types, e.g. instance List is Bag, the implicit requirement is that (a0:Eq).
 
 This module defines all functions to propagate constraints on the existance of types (thus constraints imposed by inhereting other types).

@@ -14,6 +14,7 @@ import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
 import Languate.Typetable.PropagateImplicitConstraints
+import Languate.Typetable.PropagateSupertypeConstraints
 
 import Languate.Checks.CheckType
 import Control.Monad
@@ -41,7 +42,8 @@ buildTypetable mod tlt fqn
 			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
 			checkSupertypeCycles (typeInfos |> supertypes)
 			tt'	<- propagateImplicitConstraints tlt mod (Typetable typeInfos) |> fst
-			addTypeSynons tlt mod tt'
+			tt''	<- addTypeSynons tlt mod tt'
+			addSuperConstraints tlt mod tt''
 
 
 

@@ -1,6 +1,6 @@
 module Languate.Typetable.ModuleTraverser
 	(locallyDeclared, declaredType, declaredSuperType
-	, constraintAdoptions, typeSynonyms) where
+	, constraintAdoptions, typeSynonyms, pushedSupers) where
 
 {-
 Multiple functions to traverse the statements, in search for type declaration stuff
@@ -18,6 +18,7 @@ import qualified Data.Set as S
 import Data.Set hiding (map, filter)
 import Data.Map hiding (map, filter, mapMaybe)
 import Data.Maybe
+import Data.Tuple
 
 import Languate.AST as AST
 import Languate.TAST
@@ -80,7 +81,7 @@ cat A0 a:A1 a implies that A0 has the same constraints on 'a' as A1.
 This function gives exactly this relation:
 [A0 a, A1 a]
 
-For CATEGORY-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
+For CATEGORY- and TYPE-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
 
 -}
 constraintAdoptions	:: TypeLookupTable -> Statement -> Exc [(RType, RType)]
@@ -93,13 +94,34 @@ constraintAdoptions tlt stm@(ADTDefStm _)
 constraintAdoptions _ _	= return []
 
 
+{-
+Returns the supertypes which are **pushed** upon types by a type declaration, e.g.
 
+type List a = ...
+type Char = ...
+type String = List Char
 
+This last declaration 'pushes' the supertype 'String' onto 'List', but with requirements that a0 is a Char...
+
+[(subForm, superForm)]
+
+-}
+pushedSupers		:: TypeLookupTable -> Statement -> Exc [(RType, (RType,[Name]))]
+pushedSupers tlt (ADTDefStm (ADTDef nm frees _ _ adopted))
+	= do	super		<- resolveTypePath tlt ([],nm)	-- type that is pushed on ...
+		subForms	<- resolveTypes tlt adopted -- ... these fellows
+		[((super,frees), subForms)] & unmerge |> swap & return
+pushedSupers _ _
+	= return []
+
+{-
+Returns the supertypes which are **pulled** upon types by a type declaration.
+-}
 typeSynonyms		:: TypeLookupTable -> Statement -> Exc [(RType, [Name], RType)]
 typeSynonyms tlt (ADTDefStm (ADTDef nm frees _ [] [synonym]))
 	-- reqs are ignored, these are handled in other fases
 	= do	typ	<- resolveTypePath tlt ([],nm)
-		syn'	<- resolveType tlt synonym
+		syn'	<- resolveType tlt synonym -- aka super
 		return [(typ, frees, syn')]
 typeSynonyms _ _
 	= return []
