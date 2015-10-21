@@ -15,7 +15,7 @@ import Languate.PrecedenceTable
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable
 
-import Data.Map (Map)
+import Data.Map (Map, empty)
 import qualified Data.Map as M
 
 {--

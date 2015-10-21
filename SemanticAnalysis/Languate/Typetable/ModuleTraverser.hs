@@ -83,5 +83,9 @@ For CATEGORY-DECLARATIONS only, as the constraints imposed here are constraints 
 -}
 constraintAdoptions	:: TypeLookupTable -> Statement -> Exc [(RType, RType)]
 constraintAdoptions tlt stm@(ClassDefStm _)
-			= declaredSuperType tlt stm ||>> (\(rt, frees, (super, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
-constraintAdoptions _ _	= return []
+	-- ""cat X a:Y a"" : X (rt) only exists if the constraints on super are met
+	= declaredSuperType tlt stm ||>> (\(rt, frees, (super, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
+constraintAdoptions tlt stm@(ADTDefStm _)
+	-- ""type X a={Constr} + Y a"": X (rt) only exists if the constraints on super are met
+	= declaredSuperType tlt stm ||>> (\(super, frees, (rt, constraints)) -> (rt, applyTypeArgs super (frees |> RFree)))
+constraintAdoptions _ _	= return [] 

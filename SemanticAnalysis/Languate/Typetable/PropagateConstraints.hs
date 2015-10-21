@@ -81,32 +81,34 @@ cat A (a:X)
 cat B a:A a
 
 In the second cat, it is implied that B (a:Eq)
-For CATEGORY-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
-
+For CATEGORY-DECLARATIONS and TYPE-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
+type a = {...} + ADOPTS
 -}
 propagateParams	:: TypeLookupTable -> Module -> Typetable -> Exc (Typetable, Changed)
 propagateParams tlt mod tt@(Typetable dict)
 	= do	let depGraph	= dict |> supertypes |> M.keys ||>> getBaseTID |> catMaybes |> S.fromList  :: Map TypeID (Set TypeID)
 		order	<- buildOrdering depGraph & either (\e -> halt $ "Cycles in the supertypes: "++show e) (return . reverse . fst)
+
 		adoptions	<- mod & statements |+> constraintAdoptions tlt |> concat |> merge	:: Exc [(RType, [RType])]
 		let adoptions'	= adoptions |> (fst &&& id) |> first getBaseTID |> unpackMaybeTuple & catMaybes :: [(TypeID, (RType, [RType]))]
 		foldM (\(tt@(Typetable content), changed) typeToInv ->
 			do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++", weird")
-				(ti', changed')	<- propagateParamsIn tt adoptions' typeToInv ti
+				(ti', changed')	<- propagateParamConstraintsOfTID tt adoptions' typeToInv ti
 				return (Typetable $ M.insert typeToInv ti' content, changed || changed') ) (tt, False) order
 
-propagateParamsIn	:: Typetable -> [(TypeID, (RType, [RType]))] -> TypeID -> TypeInfo -> Exc (TypeInfo, Changed)
-propagateParamsIn tt supers tid ti
+-- looks for super types of 'tid' into the 'supers'-list, propagates constraints on those withint ti
+propagateParamConstraintsOfTID	:: Typetable -> [(TypeID, (RType, [RType]))] -> TypeID -> TypeInfo -> Exc (TypeInfo, Changed)
+propagateParamConstraintsOfTID tt supers tid ti
 	= inside ("While propagating the implicit type parameters for the type "++show tid) $
-	  case L.lookup tid supers of
-		Nothing		-> return (ti, False)
-		Just (actualForm, supers')
-				-> foldM (\(ti, changed) super ->
-						propagateParamIn tt (actualForm, super) ti ||>> (|| changed)) (ti, False) supers'
+	  L.lookup tid supers & maybe (return (ti, False))
+		(\(actualForm, supers')	-> foldM (\(ti, changed) super ->
+						propagateParamConstraintsIn tt (actualForm, super) ti
+						||>> (|| changed)) (ti, False) supers')
 
--- fixes a single typeInfo, by adding constraints to the type. This might be incomplete, as dependencies might not know their requirements yet
-propagateParamIn	:: Typetable -> (RType, RType) -> TypeInfo -> Exc (TypeInfo, Changed)
-propagateParamIn tt@(Typetable dict) (actualForm', superForm') ti
+
+{- fixes a single typeInfo, by adding constraints to the type (basetype of the first in the tuple). This might be incomplete, as dependencies might not know their requirements yet; this is fixed by multiple successive invocations (see buildTable) 	-}
+propagateParamConstraintsIn	:: Typetable -> (RType, RType) -> TypeInfo -> Exc (TypeInfo, Changed)
+propagateParamConstraintsIn tt@(Typetable dict) (actualForm', superForm') ti
 	= inside ("While propagating the implicit type parameters from the supertype "++show superForm') $
 	  do	{-----------------------}
 		{- normalize the frees -}
@@ -132,7 +134,13 @@ propagateParamIn tt@(Typetable dict) (actualForm', superForm') ti
 		return (ti', ti /= ti')
 
 
-{- propagates requirement on supertypes.
+
+
+
+
+
+
+{- propagates requirement on direct supertypes.
 	e.g. cat A a b:Set a implies a:Eq, this function add those hidden requirements -}
 propagateImplicitRequirements	:: Typetable -> [(Int, Name)] -> RType -> TypeInfo -> Exc TypeInfo
 propagateImplicitRequirements tt mapping rt ti
@@ -141,11 +149,12 @@ propagateImplicitRequirements tt mapping rt ti
 		return $ addConstrReqs' mapping requirements  ti
 
 
-
+{- Gets the requirements on a type, recursively, independent of what to add it to	-}
 typeRequirementsOn	:: Typetable -> RType -> Exc [(RType, [RType])]
 typeRequirementsOn (Typetable tt) superForm
-	= do	tid		<- getBaseTID superForm ? ("The type "++show superForm++" is a bit weird. Don't apply type variables on frees please")
-		ti		<- M.lookup tid tt ? ("No type info about "++show tid++", weird")
+	= inside ("While fetching the implicit type requirements on "++show superForm) $
+	  do	tid		<- getBaseTID superForm ? ("The type "++show superForm++" is a bit weird. Don't apply type variables on frees please")
+		ti		<- M.lookup tid tt ? ("No type info about "++show tid++", weird...\nTry one of these instead: "++(M.keys tt |> show & commas))
 		let knd		= kind ti
 		let args	= appliedTypes superForm
 		assert (length args == numberOfKindArgs knd)
@@ -181,6 +190,8 @@ typeRequirementsOn' tt appliedType
 
 
 
+
+-- utility; add all at once
 addConstrReqs'	:: [(Int, Name)] -> [(RType, [RType])] -> TypeInfo -> TypeInfo
 addConstrReqs' mapping requirements
 	= let	(constr, reqs)	= L.partition (isRFree . fst) requirements
