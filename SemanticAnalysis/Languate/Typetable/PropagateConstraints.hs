@@ -69,8 +69,7 @@ propagateMetaRequirementsIn' tt@(Typetable conts) tid ti reqT
 
 		{-  {argument --> should be} -}
 		let newConstr	= buildMapping (zip args [0..]) reqConstr'
-		let ti'		= addConstrReqs' defaultMap newConstr ti
-		return ti'
+		return $ addConstrReqs' defaultMap newConstr ti
 
 
 
@@ -91,11 +90,10 @@ propagateParams tlt mod tt@(Typetable dict)
 		order	<- buildOrdering depGraph & either (\e -> halt $ "Cycles in the supertypes: "++show e) (return . reverse . fst)
 		adoptions	<- mod & statements |+> constraintAdoptions tlt |> concat |> merge	:: Exc [(RType, [RType])]
 		let adoptions'	= adoptions |> (fst &&& id) |> first getBaseTID |> unpackMaybeTuple & catMaybes :: [(TypeID, (RType, [RType]))]
-		tt'		<- foldM (\(tt@(Typetable content), changed) typeToInv ->
-					do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++", weird")
-						(ti', changed')	<- propagateParamsIn tt adoptions' typeToInv ti
-						return (Typetable $ M.insert typeToInv ti' content, changed || changed') ) (tt, False) order
-		return tt'
+		foldM (\(tt@(Typetable content), changed) typeToInv ->
+			do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++", weird")
+				(ti', changed')	<- propagateParamsIn tt adoptions' typeToInv ti
+				return (Typetable $ M.insert typeToInv ti' content, changed || changed') ) (tt, False) order
 
 propagateParamsIn	:: Typetable -> [(TypeID, (RType, [RType]))] -> TypeID -> TypeInfo -> Exc (TypeInfo, Changed)
 propagateParamsIn tt supers tid ti
@@ -150,7 +148,7 @@ typeRequirementsOn (Typetable tt) superForm
 		ti		<- M.lookup tid tt ? ("No type info about "++show tid++", weird")
 		let knd		= kind ti
 		let args	= appliedTypes superForm
-		assert (length args == numberOfKindArgs knd) $
+		assert (length args == numberOfKindArgs knd)
 			("The type "++ show tid ++" is applied to too little (or too much) arguments.")
 		-- free type variables are expressed in foreign type
 		let constr'	= constraints ti & M.toList

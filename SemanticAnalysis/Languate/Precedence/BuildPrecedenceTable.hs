@@ -120,4 +120,4 @@ withRepr unions = map (repr *** repr)
 
 -- merges lists. [([1,2,3],"abc"),([4,5,6],"def")] -> ([1,2,3,4,5,6], "abcdef")
 mergeTwo	:: [([a],[b])] -> ([a],[b])
-mergeTwo arg	= ((>>= fst) &&& (>>= snd)) arg
+mergeTwo	= (>>= fst) &&& (>>= snd)

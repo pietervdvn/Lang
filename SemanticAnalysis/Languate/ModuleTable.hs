@@ -1,7 +1,6 @@
 	module Languate.ModuleTable where
 
 import StdDef
-import Data.Map
 import Languate.MarkUp as Mu
 import Exceptions
 import Languate.CheckUtils
@@ -63,5 +62,6 @@ mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
 	=  let	neededDocs	= addDocs ([exposed mt, defined mt, known mt] |> types)
 					[tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]
-		linkedDocs	= neededDocs |> title |> Embed & Mu.Seq in
-		[doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" $ linkedDocs] ++ neededDocs
+		linkedDocs	= neededDocs |> title |> Embed & Mu.Seq
+		document	= doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" linkedDocs in
+		document : neededDocs

@@ -39,8 +39,7 @@ buildTypetable mod tlt fqn
 						:: Exc [(RType, [Name], CType)]
 			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
 			checkSupertypeCycles (typeInfos |> supertypes)
-			constrainedTT	<- propagateConstraints tlt mod (Typetable typeInfos) |> fst
-			return constrainedTT
+			propagateConstraints tlt mod (Typetable typeInfos) |> fst
 
 
 propagateConstraints tlt mod tt
@@ -82,7 +81,7 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 					|> M.fromList			:: Exc (Map Int [RType])
 
 		-- about the supertypes
-		let isTid t	= getBaseTID t |> ((==) tid) & fromMaybe False	:: Bool
+		let isTid t	= getBaseTID t |> (tid ==) & fromMaybe False	:: Bool
 		superTypes	<- superDecls & L.filter (isTid . fst3) |+> canonicalSuperDecl
 		let duplicateSupers	= superTypes |> thd3 |> fst & dubbles
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++

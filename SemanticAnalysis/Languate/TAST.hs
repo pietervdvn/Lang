@@ -410,7 +410,7 @@ uncurriedTypes (t:ts)
 
 applyTypeArgs	:: RType -> [RType] -> RType
 applyTypeArgs t []	=  t
-applyTypeArgs t tps	= L.foldl (\curr arg -> RApplied curr arg) t tps
+applyTypeArgs t tps	= L.foldl RApplied t tps
 
 tupledTypes	:: RType -> [RType]
 tupledTypes t@(RApplied (RApplied tupleT a) rest)

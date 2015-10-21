@@ -75,7 +75,7 @@ buildMapping	:: Eq b => [(a, b)] -> [(b, c)] -> [(a,c)]
 buildMapping start end
 	= do	(a,b)	<- start
 		(b',c)	<- end
-		if b == b' then	[(a,c)] else []
+		[(a,c) | b == b']
 
 
 data TypeConstraint	= SubTypeConstr RType RType
@@ -105,7 +105,7 @@ typeinfo2doc	:: TypeID -> TypeInfo -> Doc
 typeinfo2doc (fqn, nm) ti
 		= let 	frees'	= frees ti & (`zip` [0..]) ||>> (\i -> M.findWithDefault [] i $ constraints ti) :: [(Name, [RType])]
 			defFrees	= take (length $ frees ti) defaultFreeNames
-			frees''	= frees' |||>>> show ||>> commas ||>> when ":" |> (\(nm, reqs) -> nm ++ reqs ) |> code & Mu.Seq
+			frees''	= frees' |||>>> show ||>> commas ||>> when ":" |> uncurry (++) |> code & Mu.Seq
 			constrs	= constraints ti & toList |> (\(i,c) -> [code $ defFrees !! i, c |> show |> code & Mu.Seq])
 			rows	= supertypes ti ||>> (\(SubTypeConstr sub super) -> code (show sub) +++ Base " : " +++ code (show super))
 					|> (\constrs -> Mu.Seq $ (if length constrs == 1 then id else (|> Parag)) constrs )
