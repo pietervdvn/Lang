@@ -54,7 +54,7 @@ _dict		::= "\{" commaSepTypes "-->" commaSepTypes "\}"
 _tuple		::= "\(" type ("," type)+ "\)"
 
 -- type without space (or withing a delimiter)
-baseType	::= (dict | set | list | tuple | simpleType) "[?*+]"?
+baseType	::= (dict | set | list | tuple | simpleType) "[?]"?
 appliedType	::= ((knownType | constrFreeType) baseType+) | baseType
 
 _curry		::= appliedType ("->" appliedType)+

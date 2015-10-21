@@ -77,11 +77,20 @@ s r (TypeT:Ident name:EqualT:rest)
 					decl	-> decl
 			in
 			decl {nm = name}
-s r [Prod sums rqs dcs, Adopted adops]
-		= let decl = _adops2data adops in
+s r (Prod sums rqs dcs:rest)
+		= let 	Adopted adops	= s r rest
+			decl = _adops2data adops in
 			decl {constructors = constructors decl ++ sums,
 				reqs	= reqs decl ++ rqs,
 				docs	= docs decl ++ dcs}
+s r (decl@(Data{}):rest)
+		= let	Adopted adopReq	= s r rest
+			(adops, rqs)	= unzip adopReq |> concat in
+			decl{adoptions = adoptions decl ++ adops,
+				reqs = reqs decl ++ rqs}
+
+s r (Adopted adops:Adopted adops':rest)
+		= s r (Adopted (adops ++ adops'):rest)
 s _ []		= Adopted []
 s r (PlusT:rest)
 		= s r rest
@@ -95,7 +104,7 @@ _adops2data	:: [(Type, [TypeRequirement])] -> AST
 _adops2data adopReqs
 	= let	(adops, reqs)	= adopReqs & unzip |> concat
 		nameErr	= "Parser error in "++modName++"(No name given)" in
-		Data Public (error nameErr) [] [] reqs [] adops
+		Data Public (nameErr) [] [] reqs [] adops
 
 
 pt2freetypes	:: ParseTree -> ([Name],[TypeRequirement])
