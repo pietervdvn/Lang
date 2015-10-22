@@ -46,8 +46,7 @@ bool		= toFQN' "pietervdvn:Data:Data.Bool"
 
 bPackT	= do	dir		<- getCurrentDirectory
 		package		<- packageIO path
-		packT		<- runExceptionsIO' $ buildPackageTable package
-		return packT
+		runExceptionsIO' $ buildPackageTable package
 
 bDocs	= do	dir		<- getCurrentDirectory
 		packT		<- bPackT

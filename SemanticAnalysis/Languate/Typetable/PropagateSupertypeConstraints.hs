@@ -51,7 +51,6 @@ addPushedUpon (Typetable conts) (subForm, (super, frees))
 		let subArgs	= appliedTypes subForm' & zip (defaultFreeNames |> RFree)
 		-- these are our constraints!
 		let subConstraints	= subArgs |> uncurry SubTypeConstr
-		warn $ show subConstraints
 		-- actual update, boilerplate
 		let superTps'	= M.update (\oldConstr -> Just $ nub $ L.filter (not . isTrivialConstraint) (oldConstr ++ subConstraints))
 					superForm' (supertypes subTi)
