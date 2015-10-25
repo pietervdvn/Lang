@@ -78,6 +78,17 @@ buildMapping start end
 		[(a,c) | b == b']
 
 
+
+-- gets the type info for the given type, as seen in the known table
+getTi'		:: Typetable -> TypeID -> Exc TypeInfo
+getTi' (Typetable conts) tid
+		= conts & M.lookup tid ? ("No type info found for "++show tid++", weird")
+
+getTi		:: Typetable -> RType -> Exc TypeInfo
+getTi tt rt	= do	tid	<- getBaseTID rt ? ("No tid found for "++show rt)
+			getTi' tt tid
+
+
 data TypeConstraint	= SubTypeConstr RType RType
 	deriving (Eq)
 

@@ -73,8 +73,7 @@ propagateMetaRequirementsIn' tt@(Typetable conts) tid ti reqT
 	= do	let nrOfFrees	= ti & frees & length
 		-- {0 --> a0, 1 --> a1, ... }
 		let defaultMap	= zip [0..] defaultFreeNames & take nrOfFrees
-		reqTID		<- getBaseTID reqT ? (show reqT ++ " is not a normal type")
-		reqTi	<- M.lookup reqTID conts ? ("No typeinfo found for "++show reqTID++", weird...") :: Exc TypeInfo
+		reqTi		<- getTi tt reqT
 		let args	= appliedTypes reqT
 		let this2req	= zip defaultFreeNames args
 		let reqConstr	= constraints reqTi & M.toList
@@ -166,14 +165,13 @@ propagateImplicitRequirements tt mapping rt ti
 
 {- Gets the requirements on a type, recursively, independent of what to add it to	-}
 typeRequirementsOn	:: Typetable -> RType -> Exc [(RType, [RType])]
-typeRequirementsOn (Typetable tt) superForm
+typeRequirementsOn tt superForm
 	= inside ("While fetching the implicit type requirements on "++show superForm) $
-	  do	tid		<- getBaseTID superForm ? ("The type "++show superForm++" is a bit weird. Don't apply type variables on frees please")
-		ti		<- M.lookup tid tt ? ("No type info about "++show tid++", weird...\nTry one of these instead: "++(M.keys tt |> show & commas))
+	  do	ti		<- getTi tt superForm
 		let knd		= kind ti
 		let args	= appliedTypes superForm
 		assert (length args == numberOfKindArgs knd)
-			("The type "++ show tid ++" is applied to too little (or too much) arguments.")
+			("The type "++ show superForm ++" is applied to too little (or too much) arguments.")
 		-- free type variables are expressed in foreign type
 		let constr'	= constraints ti & M.toList
 		-- mapping
@@ -188,7 +186,7 @@ typeRequirementsOn (Typetable tt) superForm
 		let subIsA	= zip args [0..] & flip buildMapping constr	:: [(RType, [RType])]
 		-- we undo the translation, for the recursive call. This means the requirements are again in a0 form
 		subIsA'		<- subIsA |+> onSecond (|+> subs foreign2form')
-		recConstraints		<- (subIsA' >>= snd ) |+> typeRequirementsOn' (Typetable tt) |> concat	:: Exc [(RType, [RType])]
+		recConstraints		<- (subIsA' >>= snd ) |+> typeRequirementsOn' tt |> concat	:: Exc [(RType, [RType])]
 		return (subIsA++recConstraints)
 
 typeRequirementsOn'	:: Typetable -> RType -> Exc [(RType,[RType])]
