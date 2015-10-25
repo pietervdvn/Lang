@@ -12,7 +12,7 @@ import Collection.List
 
 -- A natural number, which might be zero
 type Nat	= {Zero} + Nat'
--- A natural number which might not be zero
+-- A natural number which will not be zero
 type Nat'	= {Succ Nat}
 
 instance Nat is Eq
