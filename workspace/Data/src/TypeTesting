@@ -5,3 +5,9 @@ Some type-testing
 
 cat X
 	> True
+
+cat Y: X
+	> True
+
+cat Z: Y
+	> True

@@ -15,6 +15,7 @@ import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
 import Languate.Typetable.PropagateImplicitConstraints
 import Languate.Typetable.PropagateSupertypeConstraints
+import Languate.Typetable.PropagateSupertypes
 
 import Languate.Checks.CheckType
 import Control.Monad
@@ -36,14 +37,22 @@ import Control.Arrow hiding ((+++))
 buildTypetable	:: Module -> TypeLookupTable -> FQN -> Exc Typetable
 buildTypetable mod tlt fqn
 		= inside ("While building the type info in module "++show fqn) $
-		  do	let locDecl	= locallyDeclared mod 	:: [(Name, [Name], [TypeRequirement])]
+		  do	-- first build the locally known values
+			let locDecl	= locallyDeclared mod 	:: [(Name, [Name], [TypeRequirement])]
 			superDecls	<- mod & statements |> declaredSuperType tlt & sequence |> concat
 						:: Exc [(RType, [Name], CType)]
 			typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
+			-- now propagate existance constraints
 			checkSupertypeCycles (typeInfos |> supertypes)
-			tt'	<- propagateImplicitConstraints tlt mod (Typetable typeInfos) |> fst
-			tt''	<- addTypeSynons tlt mod tt'
-			addSuperConstraints tlt mod tt''
+			tt'		<- propagateImplicitConstraints tlt mod (Typetable typeInfos) |> fst
+			tt''		<- addTypeSynons tlt mod tt'
+			constrComplete	<- addSuperConstraints tlt mod tt''
+			-- then we calculate the 'transitive closure' of the supertype relationship
+			-- for non mathematicians: X is a Y; Y is a Z => X is a Z
+			superComplete	<- propagateSupertypes constrComplete
+			-- and as last, we pass over all type info, to check constraints (and remove them) and some cleansing
+			-- TODO
+			return superComplete
 
 
 
