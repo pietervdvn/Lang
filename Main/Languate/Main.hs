@@ -54,9 +54,9 @@ repCommand ctx cont
 				Nothing	-> ":exit"
 				(Just ln)	-> ln
 		if (ln == "") then cont ctx else do
-		let (cmd, arg)	= parseCommand [':','-'] (\str -> (interpret, Just str)) (\str -> (help, Just str)) ln
-		addHistory ln
-		catch (action cmd ctx arg cont) $ errHandle cont ctx
+			let (cmd, arg)	= parseCommand [':','-'] (\str -> (interpret, Just str)) (\str -> (help, Just str)) ln
+			addHistory ln
+			catch (action cmd ctx arg cont) $ errHandle cont ctx
 
 
 
