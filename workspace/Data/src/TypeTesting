@@ -3,11 +3,15 @@ TypeTesting
 Some type-testing
 -----------
 
-cat X
+cat X (a:Eq)
 	> True
 
-cat Y: X
+cat Y b: X b
 	> True
 
-cat Z: Y
+cat Z z0 z1: Y z1
+	> True
+
+
+cat Eq
 	> True

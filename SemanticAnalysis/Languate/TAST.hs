@@ -359,9 +359,10 @@ foldRT f _ t	= f t
 
 subs	:: [(Name, RType)] -> RType -> Exc RType
 subs dict rt
-	= do	let usedFrees	= freesInRT rt & nub
-		let subsFrees	= dict |> snd >>= freesInRT
-		let overlap	= dubbles (usedFrees ++ nub subsFrees)
+	= do	let usedFrees	= freesInRT rt & nub			-- frees in the type
+		let subsFrees	= dict |> snd >>= freesInRT		-- frees which might actually appear
+		let subsFrees'	= subsFrees L.\\ (dict |> fst)	-- frees which might actually appear and are not substituted away
+		let overlap	= dubbles (usedFrees ++ nub subsFrees')
 		assert (L.null overlap) ("The substitution overlaps, target types contain free type variables which are in the source type too: "++commas overlap)
 		let fetch free	= L.lookup free dict & fromMaybe (RFree free)
 		traverseRT (onFree fetch) rt & return

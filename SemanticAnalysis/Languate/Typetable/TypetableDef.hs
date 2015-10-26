@@ -89,8 +89,35 @@ getTi tt rt	= do	tid	<- getBaseTID rt ? ("No tid found for "++show rt)
 			getTi' tt tid
 
 
+supertypesOf'	:: Typetable -> TypeID -> Exc [(RType, [TypeConstraint])]
+supertypesOf' tt tid
+	= do	ti	<- getTi' tt tid
+		supertypes ti & M.toList & return
+
+
+-- supertypes of RT, expressed in the free types, with it's requirements
+supertypesOf	:: Typetable -> RType -> Exc [(RType, [TypeConstraint])]
+supertypesOf tt rt
+	= do	{- a0 --> type -}
+		let mapping	= appliedTypes rt & zip defaultFreeNames
+		tid		<- getBaseTID rt ? ("No type id could be found for "++show rt)
+		superTypes	<- supertypesOf' tt tid
+		superTypes'	<- superTypes |+> onFirst (subs mapping)
+		superTypes' |+> onSecond (|+> subsConstraint mapping)
+
+
+
+
 data TypeConstraint	= SubTypeConstr RType RType
 	deriving (Eq)
+
+
+subsConstraint	:: [(Name, RType)] -> TypeConstraint -> Exc TypeConstraint
+subsConstraint mapping (SubTypeConstr a b)
+	= do	a'	<- subs mapping a
+		b'	<- subs mapping b
+		return (SubTypeConstr a' b')
+
 
 
 instance Show TypeConstraint where
