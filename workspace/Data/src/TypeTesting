@@ -13,5 +13,16 @@ cat Z z0 z1: Y z1
 	> True
 
 
+cat A: Z NonEq Nat
+	> True
+
+cat NonEq
+	> True
+
 cat Eq
 	> True
+
+cat Nat
+	> True
+
+instance Nat is Eq

@@ -107,7 +107,6 @@ supertypesOf tt rt
 
 
 
-
 data TypeConstraint	= SubTypeConstr RType RType
 	deriving (Eq)
 
@@ -118,6 +117,17 @@ subsConstraint mapping (SubTypeConstr a b)
 		b'	<- subs mapping b
 		return (SubTypeConstr a' b')
 
+
+isConstraintMet' :: Typetable -> [TypeConstraint] -> TypeConstraint -> Exc Bool
+isConstraintMet' tt metConstraints constraint@(SubTypeConstr sub super)
+ | constraint `elem` metConstraints 	= return True
+ | otherwise	= do	(supers, constraints)	<- supertypesOf tt sub |> unzip ||>> concat
+			metConstrs	<- constraints |+> isConstraintMet' tt (metConstraints++[constraint]) |> and
+			return (metConstrs && (super `elem` supers))
+
+isConstraintMet	:: Typetable -> TypeConstraint -> Exc Bool
+isConstraintMet tt
+	= isConstraintMet' tt []
 
 
 instance Show TypeConstraint where

@@ -45,6 +45,5 @@ supertypesFor tt ti orig@(superform, constraints)
 	  do	supers		<- supertypesOf tt superform
 		let gotAlready	= supertypes ti & M.keys
 		let supers'	= supers & L.filter ((`notElem` gotAlready) . fst)
-		warn $ "Available supers " ++ show supers'
 		let newSupers	= supers' ||>> (constraints ++ ) ||>> nub
 		return (orig:newSupers)

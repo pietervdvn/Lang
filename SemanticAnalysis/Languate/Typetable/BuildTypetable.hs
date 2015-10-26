@@ -51,10 +51,26 @@ buildTypetable mod tlt fqn
 			-- for non mathematicians: X is a Y; Y is a Z => X is a Z
 			superComplete	<- propagateSupertypes constrComplete
 			-- and as last, we pass over all type info, to check constraints (and remove them) and some cleansing
-			-- TODO
+			checkTT superComplete
 			return superComplete
 
 
+checkTT		:: Typetable -> Check
+checkTT tt@(Typetable conts)
+		= do 	conts & M.toList |+> uncurry (checkTi tt)
+			pass
+
+
+
+checkTi		:: Typetable -> TypeID -> TypeInfo -> Check
+checkTi tt tid ti
+	= inside ("While checking the type constraints on "++show tid) $
+	  do	let reqs	= requirements ti
+		unmet		<- reqs & filterM (\constr -> isConstraintMet tt constr |> not)
+		let msg (SubTypeConstr sub super)
+				= show sub ++ " is supposed to have the supertype "++show super
+		let msgs	= unmet |> msg & unlines
+		assert (L.null unmet) ("Some constraints are not met:\n"++indent msgs)
 
 
 {-
