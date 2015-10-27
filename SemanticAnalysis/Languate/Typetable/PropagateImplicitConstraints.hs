@@ -53,8 +53,9 @@ this concerns all TYPE DECLARATIONS
 -}
 propagateMetaRequirements	:: Typetable -> Exc (Typetable, Changed)
 propagateMetaRequirements tt@(Typetable conts)
-	=  do	conts'	<- conts & M.toList |+> (\(tid, ti) -> do	ti'	<- propagateMetaRequirementsIn tt tid ti
-									return (tid, ti'))
+	=  do	conts'	<- conts & M.toList |+>
+				(\(tid, ti) -> do	ti'	<- propagateMetaRequirementsIn tt tid ti
+							return (tid, ti'))
 					:: Exc [(TypeID, (TypeInfo, Changed))]
 		let (conts'', changed)	= conts' |> (\(tid, (ti, changed)) -> ((tid, ti),changed)) & unzip |> or
 		return (Typetable $ M.fromList conts'', changed)
@@ -100,15 +101,13 @@ type a = {...} + ADOPTS
 -}
 propagateParams	:: TypeLookupTable -> Module -> Typetable -> Exc (Typetable, Changed)
 propagateParams tlt mod tt@(Typetable dict)
-	= do	let depGraph	= dict |> supertypes |> M.keys ||>> getBaseTID |> catMaybes |> S.fromList  :: Map TypeID (Set TypeID)
-		order	<- buildOrdering depGraph & either (\e -> halt $ "Cycles in the supertypes: "++show e) (return . reverse . fst)
-
+	= do	let allTypes	= dict & M.keys  :: [TypeID]
 		adoptions	<- mod & statements |+> constraintAdoptions tlt |> concat |> merge	:: Exc [(RType, [RType])]
 		let adoptions'	= adoptions |> (fst &&& id) |> first getBaseTID |> unpackMaybeTuple & catMaybes :: [(TypeID, (RType, [RType]))]
 		foldM (\(tt@(Typetable content), changed) typeToInv ->
 			do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++", weird")
 				(ti', changed')	<- propagateParamConstraintsOfTID tt adoptions' typeToInv ti
-				return (Typetable $ M.insert typeToInv ti' content, changed || changed') ) (tt, False) order
+				return (Typetable $ M.insert typeToInv ti' content, changed || changed') ) (tt, False) allTypes
 
 -- looks for super types of 'tid' into the 'supers'-list, propagates constraints on those withint ti
 propagateParamConstraintsOfTID	:: Typetable -> [(TypeID, (RType, [RType]))] -> TypeID -> TypeInfo -> Exc (TypeInfo, Changed)

@@ -6,6 +6,7 @@ import HumanUtils
 import Exceptions
 import Languate.CheckUtils
 
+import Languate.Package
 import Languate.AST hiding (frees)
 import Languate.TAST
 import Languate.FQN
@@ -29,6 +30,17 @@ import Graphs.SearchCycles
 import Control.Arrow hiding ((+++))
 
 
+{- Let' s build all the type tables.
+	We attempt to keep calculating the TTs as local as possible
+		(thus only relying on the own tt)
+	but this is not always possible.
+  Return (defined, known, exposed) for each fqn
+	-}
+buildTypetables	:: Package -> Map FQN TypeLookupTable -> Exc (Map FQN (Typetable, Typetable, Typetable))
+buildTypetables p tlts
+	= todo
+
+
 {- builds the 'defined' type table from the code.
 	-> Direct constraints on the free types are loaded
 
@@ -36,7 +48,7 @@ import Control.Arrow hiding ((+++))
 -}
 buildTypetable	:: Module -> TypeLookupTable -> FQN -> Exc Typetable
 buildTypetable mod tlt fqn
-		= inside ("While building the type info in module "++show fqn) $
+		= inside ("While building the local type info in module "++show fqn) $
 		  do	-- first build the locally known values
 			let locDecl	= locallyDeclared mod 	:: [(Name, [Name], [TypeRequirement])]
 			superDecls	<- mod & statements |> declaredSuperType tlt & sequence |> concat
@@ -45,12 +57,13 @@ buildTypetable mod tlt fqn
 			-- now propagate existance constraints
 			checkSupertypeCycles (typeInfos |> supertypes)
 			tt'		<- propagateImplicitConstraints tlt mod (Typetable typeInfos) |> fst
+			-- add type synonym supertypes, introducing cycles
 			tt''		<- addTypeSynons tlt mod tt'
 			constrComplete	<- addSuperConstraints tlt mod tt''
 			-- then we calculate the 'transitive closure' of the supertype relationship
 			-- for non mathematicians: X is a Y; Y is a Z => X is a Z
 			superComplete	<- propagateSupertypes constrComplete
-			-- and as last, we pass over all type info, to check constraints (and remove them) and some cleansing
+			-- and as last, we pass over all type info, to check constraints (and remove them)
 			checkTT superComplete
 			return superComplete
 
