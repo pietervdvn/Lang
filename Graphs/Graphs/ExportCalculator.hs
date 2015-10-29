@@ -24,7 +24,7 @@ Params:
 - export graph: inverse relation, node n is imported by given set
 - local exports: function which gives, for a node, what properties it exports. These are not passed through the secondary filter
 - filter: for a given property, does this node re-export this property?
-	current node -> (property, imported out of node) -> current node -> current node re-exports?
+	current node -> (imported out of node, property) -> current node -> current node re-exports?
 Returns:
 - What properties each node exports + via which node it got imported (this is **not** ~~the home node~~ where prop originally came from).
 -}
