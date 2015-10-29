@@ -56,12 +56,15 @@ buildTLTs world
 		let mod fqn	= fwd "modules" fqn modules
 		let injectSet a	= S.map (\b -> (a,b))
 		let injectSetFunc f fqn	= injectSet fqn $ f fqn
-		let pubLocDecl	= injectSetFunc $ publicLocallyDeclared world
-		let locDecl	= injectSetFunc (S.fromList . locallyDeclared' . mod)
+		-- locally declared types (which are public)
+		let pubLocDecl	= injectSetFunc $ publicLocallyDeclared world	:: FQN -> Set (FQN, Name)
+		-- locally declared (but might be private) types
+		let locDecl	= injectSetFunc (S.fromList . locallyDeclared' . mod)	:: FQN -> Set (FQN, Name)
+		-- exported types per fqn
 		let exports 	= calculateExports' world pubLocDecl (reexportType world)
-		let imports	= calculateImports' world locDecl exports
+		let known	= calculateImports' world locDecl exports
 		mapM_ (uncurry checkDoubleTypeDeclare) $ M.toList modules
-		return $ mapWithKey (buildTLT  world imports) $ aliasTables world
+		return $ mapWithKey (buildTLT  world known) $ aliasTables world
 
 
 calculateExports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> (FQN -> (FQN, prop) -> Bool) -> Map FQN (Set (prop, FQN))

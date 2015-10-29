@@ -44,17 +44,18 @@ data FunctionTable
 		} deriving (Show)
 
 
-
-
-buildModuleTable	:: Package -> PrecedenceTable -> Map FQN TypeLookupTable -> FQN -> Module
+assembleModTable	:: Map FQN TypeLookupTable
+				-> (Map FQN Typetable, Map FQN Typetable, Map FQN Typetable)
+				-> FQN
 				-> Exc ModuleTable
-buildModuleTable p precT tlts fqn mod
-	= do	tlt		<- M.lookup fqn tlts ? ("No typelookup table found for "++show fqn++".Are the fqns really the same?")
-		tt		<- buildTypetable mod tlt fqn
-		let emptieFT	= FunctionTable empty empty
-		let emptie	= ModuleContents (Typetable empty) emptieFT
-		return $ ModuleTable tlt (ModuleContents tt emptieFT) emptie emptie
-
+assembleModTable tlts (definedTTs, knownTTs, exposedTTs) fqn
+	= do	let fetch dict msg	= M.lookup fqn dict ? ("No "++msg++" found for "++show fqn++", weird")
+		tlt			<- fetch tlts "type lookup table"
+		definedTT		<- fetch definedTTs "defined type table"
+		knownTT			<- fetch knownTTs "known type table"
+		exposedTT		<- fetch exposedTTs "exposed type table"
+		let modCont tt		= ModuleContents tt (FunctionTable M.empty M.empty)
+		return (ModuleTable tlt (modCont exposedTT) (modCont definedTT) (modCont knownTT))
 
 
 

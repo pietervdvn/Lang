@@ -44,11 +44,12 @@ data TypeInfo	= TypeInfo {	kind		:: Kind,
 					This means that B is an A of Bool and requires that 'Bool' is an 'Eq'
 					This needs to be checked when the full type table is built
 					-}
-				supertypes	:: Map RType [TypeConstraint]
+				supertypes	:: Map RType [TypeConstraint],
 				{- Dict of supertypes. The keys represent which supertypes this type has (in a normalized form),
 					the elements are needed to check if constraints are met
 				-}
-				} deriving (Show, Eq)
+				origin		:: FQN	{-Where it is defined-}
+				} deriving (Show, Eq, Ord)
 
 addConstraints		:: [(Int, [RType])] -> TypeInfo -> TypeInfo
 addConstraints constr ti
@@ -108,7 +109,7 @@ supertypesOf tt rt
 
 
 data TypeConstraint	= SubTypeConstr RType RType
-	deriving (Eq)
+	deriving (Eq, Ord)
 
 
 subsConstraint	:: [(Name, RType)] -> TypeConstraint -> Exc TypeConstraint
@@ -164,5 +165,6 @@ typeinfo2doc (fqn, nm) ti
 			in
 			doc ("Modules/"++show fqn ++"/Overview of "++nm) ("All we know about "++show fqn++"."++nm) $ Titling (code nm +++ frees'') $
 				Base "Kind: "+++ code (show $ kind ti) +++
+				Base "Defined in: "+++ code (show $ origin ti)+++
 				titling "Requirements" (table ["Type","needs this supertype"] reqs) +++
 				Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers

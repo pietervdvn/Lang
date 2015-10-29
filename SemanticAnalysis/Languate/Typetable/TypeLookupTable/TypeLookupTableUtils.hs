@@ -24,6 +24,11 @@ import Languate.TAST as TAST
 import Languate.FQN
 
 
+knownTypes	:: TypeLookupTable -> [TypeID]
+knownTypes tlt
+	= tlt |> S.toList & M.toList & unmerge |> swap ||>> snd
+
+
 -- Finds the type within the TLT
 resolveTypeOrigin	:: TypeLookupTable -> ([Name], Name) -> Exc FQN
 resolveTypeOrigin tlt id@(path, t)
