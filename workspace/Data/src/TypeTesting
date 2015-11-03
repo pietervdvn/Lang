@@ -5,7 +5,9 @@ Some type-testing
 
 import Data.Nat
 
+
 cat X
 	> True
+
 
 instance Nat is X

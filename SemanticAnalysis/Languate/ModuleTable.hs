@@ -25,14 +25,6 @@ The moduletable contains all information that is local to a module
 data ModuleTable
 	= ModuleTable	{
 		typeLookupTable	:: TypeLookupTable,
-		exposed		:: ModuleContents,
-		defined		:: ModuleContents,
-		known		:: ModuleContents
-		} deriving (Show)
-
-
-data ModuleContents
-	= ModuleContents {
 		types		:: Typetable,
 		functions	:: FunctionTable
 		} deriving (Show)
@@ -45,23 +37,20 @@ data FunctionTable
 
 
 assembleModTable	:: Map FQN TypeLookupTable
-				-> (Map FQN Typetable, Map FQN Typetable, Map FQN Typetable)
+				-> Map FQN Typetable
 				-> FQN
 				-> Exc ModuleTable
-assembleModTable tlts (definedTTs, knownTTs, exposedTTs) fqn
+assembleModTable tlts tts fqn
 	= do	let fetch dict msg	= M.lookup fqn dict ? ("No "++msg++" found for "++show fqn++", weird")
 		tlt			<- fetch tlts "type lookup table"
-		definedTT		<- fetch definedTTs "defined type table"
-		knownTT			<- fetch knownTTs "known type table"
-		exposedTT		<- fetch exposedTTs "exposed type table"
-		let modCont tt		= ModuleContents tt (FunctionTable M.empty M.empty)
-		return (ModuleTable tlt (modCont exposedTT) (modCont definedTT) (modCont knownTT))
+		tt			<- fetch tts "type table"
+		return (ModuleTable tlt tt (FunctionTable M.empty M.empty))
 
 
 
 mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
-	=  let	neededDocs	= addDocs ([exposed mt, defined mt, known mt] |> types)
+	=  let	neededDocs	= addDocs ([types mt])
 					[tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]
 		linkedDocs	= neededDocs |> title |> Embed & Mu.Seq
 		document	= doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" linkedDocs in

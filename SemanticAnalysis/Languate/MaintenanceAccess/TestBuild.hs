@@ -60,6 +60,6 @@ bDocs	= do	dir		<- getCurrentDirectory
 
 ttIO	= bPackT |> moduleTables |> M.lookup typeTesting
 		|> fromMaybe (error "You removed the typetesting module! Remove this code in Languate/MaintenanceAccess/TestBuild of semantal")
-		|> exposed |> types
+		|> types
 
 listb	= RApplied (RNormal typeTesting "List") (RFree "b")

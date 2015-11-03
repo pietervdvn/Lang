@@ -45,6 +45,7 @@ data TypeInfo	= TypeInfo {	kind		:: Kind,
 					This needs to be checked when the full type table is built
 					-}
 				supertypes	:: Map RType [TypeConstraint],
+				supertypeOrigin	:: Map RType FQN,
 				{- Dict of supertypes. The keys represent which supertypes this type has (in a normalized form),
 					the elements are needed to check if constraints are met
 				-}
@@ -86,8 +87,11 @@ getTi' (Typetable conts) tid
 		= conts & M.lookup tid ? ("No type info found for "++show tid++", weird")
 
 getTi		:: Typetable -> RType -> Exc TypeInfo
-getTi tt rt	= do	tid	<- getBaseTID rt ? ("No tid found for "++show rt)
+getTi tt rt	= do	tid	<- getTid rt
 			getTi' tt tid
+
+getTid		:: RType -> Exc TypeID
+getTid rt	= getBaseTID rt ? ("No tid found for "++show rt)
 
 
 supertypesOf'	:: Typetable -> TypeID -> Exc [(RType, [TypeConstraint])]
