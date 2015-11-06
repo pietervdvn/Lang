@@ -15,5 +15,3 @@ public import Collection.Set
 public import Data.Nat
 public import Data.Char
 public import ControlFlow
-
-import TypeTesting
