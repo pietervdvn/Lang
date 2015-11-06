@@ -11,9 +11,11 @@ data Function	= Function	{ visibility	:: Visible
 				, signs		:: [(Name, [Type], [TypeRequirement])]
 				, clauses	:: [Clause]
 				}
+	deriving (Eq, Ord)
 
 -- (Function docString decls laws clauses)
 data Clause	= Clause [Pattern] Expression
+	deriving (Eq, Ord)
 
 
 data Pattern	= Assign Name	-- gives a name to the argument
@@ -27,7 +29,7 @@ data Pattern	= Assign Name	-- gives a name to the argument
 		| DontCare		-- underscore
 
 		| MultiDontCare		-- star
-	deriving (Eq)
+	deriving (Eq, Ord)
 
 
 

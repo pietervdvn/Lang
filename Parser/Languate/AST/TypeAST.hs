@@ -30,17 +30,20 @@ data Law	= Law 	{ lawName		:: Maybe Name
 type Comment	= String
 -- a comment just before any declaration, (thus with no newlines in between)
 data DocString a	= DocString {comment::Comment, about::a}
-	deriving Show
+	deriving (Show, Eq, Ord)
 
 data Annotation	= Annotation Name String	-- a 'normal' annotation. See docs in the BNF
+	deriving (Eq, Ord)
 data PrecedenceAnnot
 		= PrecAnnot {operator::Name, modif::PrecModifier, relations::[PrecRelation]}
+	deriving (Eq, Ord)
 
 data PrecModifier	= PrecLeft | PrecRight | PrecPrefix | PrecPostfix
-	deriving (Eq)
+	deriving (Eq, Ord)
 
 data PrecRelation	= PrecEQ Name Name
 			| PrecLT Name Name
+	deriving (Eq, Ord)
 
 
 -- ## EXPRESSIONS
@@ -121,6 +124,7 @@ data ADTDef	= ADTDef Name			-- name of the type
 			[ADTSum]		-- constructors
 			[Type]			-- types which it 'adopts'. Might be recursive.
 						-- The adopted type automatically becomes the given type (if constraints are met)
+	deriving (Eq, Ord)
 
 {-
 A single constructor is represented by a single ADTSum-object.
@@ -130,6 +134,8 @@ e.g.
 ADTSum "A" Visible (Just "docstring for A") [(Just "x", "Int"),(Nothing, "Float")]
 -}
 data ADTSum	= ADTSum Name Visible [(Maybe Name, Type)]
+	deriving (Eq, Ord)
+
 
 
 -- Synonym and subtyping --
@@ -150,6 +156,7 @@ Might have multiple supertypes
 > subtype TenSet (a in Ord)	= ...
 no obligated docstring for this one! -}
 data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement]
+	deriving (Eq, Ord)
 
 -- ## Creating classes and instances
 
@@ -165,3 +172,4 @@ data ClassDef	= ClassDef
 
 -- Instance: (["Collection"],"Set") ["a"] ---is--- "Show" [("a","Show")]
 data Instance	= Instance ([Name],Name) [Name] Type [TypeRequirement]
+	deriving (Eq, Ord)

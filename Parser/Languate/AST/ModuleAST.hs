@@ -41,4 +41,4 @@ data Statement	= FunctionStm 	Function
 		| DocStringStm [DocString (Name, Name)]	-- a docstringstatement (in the declaration from "Type"), about "function"
 		| AnnotationStm	Annotation
 		| PrecedenceStm PrecedenceAnnot
-	deriving (Show)
+	deriving (Show, Eq, Ord)
