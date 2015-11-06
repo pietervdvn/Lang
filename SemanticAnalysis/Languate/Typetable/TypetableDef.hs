@@ -21,6 +21,7 @@ import Data.Tuple
 
 
 
+type TypeSTMs	= [([Name], Statement)]
 
 data Typetable	= Typetable (Map TypeID TypeInfo) deriving (Show, Eq)
 
@@ -147,15 +148,15 @@ isTrivialConstraint	:: TypeConstraint -> Bool
 isTrivialConstraint (SubTypeConstr t0 t1)
 			= t0 == t1
 
-instance Documentable Typetable where
-	toDocument (Typetable dict)
-		= let	docs	= dict & M.toList |> uncurry typeinfo2doc in
+typetable2doc	:: FQN -> Typetable -> (Doc, [Doc])
+typetable2doc fqnView (Typetable dict)
+		= let	docs	= dict & M.toList |> uncurry (typeinfo2doc fqnView) in
 			(doc "Typetable" "" $ Base "hi", docs)
 
 
 
-typeinfo2doc	:: TypeID -> TypeInfo -> Doc
-typeinfo2doc (fqn, nm) ti
+typeinfo2doc	:: FQN -> TypeID -> TypeInfo -> Doc
+typeinfo2doc fqnView (fqnDef, nm) ti
 		= let 	frees'	= frees ti & (`zip` [0..]) ||>> (\i -> M.findWithDefault [] i $ constraints ti) :: [(Name, [RType])]
 			defFrees	= take (length $ frees ti) defaultFreeNames
 			frees''	= frees' |||>>> show ||>> commas ||>> when ":" |> uncurry (++) |> code & Mu.Seq
@@ -167,7 +168,7 @@ typeinfo2doc (fqn, nm) ti
 			supers	= table ["Type param", "Constraints"] constrs +++ table ["Supertype","Constraints"] rows
 			reqs	= requirements ti |> (\(SubTypeConstr sub super) -> [code $ show sub, code $ show super])
 			in
-			doc ("Modules/"++show fqn ++"/Overview of "++nm) ("All we know about "++show fqn++"."++nm) $ Titling (code nm +++ frees'') $
+			doc ("Modules/"++show fqnView ++"/Overview of "++nm) ("All we know about "++show fqnDef++"."++nm++" as seen within "++show fqnView) $ Titling (code nm +++ frees'') $
 				Base "Kind: "+++ code (show $ kind ti) +++
 				Base "Defined in: "+++ code (show $ origin ti)+++
 				titling "Requirements" (table ["Type","needs this supertype"] reqs) +++

@@ -31,41 +31,22 @@ import Graphs.ExportCalculator (calculateExports, calculateImports)
 
 import Control.Arrow hiding ((+++))
 
-type SupertypeRel	= (RType, [Name], CType)
-
-{- Let' s build all the type tables.
-	We attempt to keep calculating the TTs as local as possible
-		(thus only relying on the own tt)
-	but this is not always possible.
-  Return (defined, known, exposed) for each fqn
-	-}
-buildTypetables	:: Package -> Map FQN TypeLookupTable -> Exc (Map FQN Typetable)
-buildTypetables p tlts
-	= do	-- first, build the 'defined'-table for all modules
-		let buildDefTT (fqn, mod)
-			= do	tlt	<- M.lookup fqn tlts ? ("No tlt for the module "++show fqn++" found, this is a bug")
-				defined	<- buildTypetable tlt fqn mod
-				return (fqn, defined)
-		defineds	<- p & modules & M.toList |+> buildDefTT |> M.fromList	:: Exc (Map FQN (Typetable, [SupertypeRel]))
-		-- defineds' only containts he locally declared values. This means that the TI's will always be the same if we propagate them
-		-- we'll add supertype declarations out other modules later on
-		-- first, a dict {tid -> ti} for all types
-		let defineds'	= defineds & M.elems |> fst |> (\(Typetable tt) -> tt)
-				|> M.toList & concat & M.fromList :: Map TypeID TypeInfo
-
-		let missedSuperRels	= defineds |> snd & M.toList	:: [(FQN, [SupertypeRel])]
-		-- and let's get the needed types! (Thus per module what TI's are known)
-		let neededTis	= tlts |> knownTypes ||>> (id &&& id) |||>>> (`M.lookup` defineds')
-					||>> unpackSecond |> catMaybes
-					|> M.fromList
-					|> Typetable	:: Map FQN Typetable
-		-- we yet have to add those 'left-over' supertype relations
-		tts'	<- foldM fixLeftovers neededTis missedSuperRels	:: Exc (Map FQN Typetable)
-		warn $ show tts'
-		-- TODO PICKUP
-		return tts'
-
-
+buildTypetables	:: Package -> Map FQN TypeLookupTable -> Map FQN Module -> Exc (Map FQN Typetable)
+buildTypetables p tlts mods
+	= do	-- builds a dict {FQN --> type related statements}
+		let typeStms	= mapWithKey typeStatements mods |> S.fromList
+		let globalTLT	= M.unions $ M.elems tlts
+		-- we run those statements through an export calculator
+		-- this way, each module sees all the type related statements locally and builds the typetable based on that
+		let impGraph	= importGraph p
+		let expGraph	= invertDict impGraph
+		let fetch fqn	= M.findWithDefault S.empty fqn typeStms
+		-- when we would add "import M hiding (instance X is Y)" we would filter this out with this function
+		let filterSupertypes _ _	= True
+		let exports	= calculateExports impGraph expGraph fetch filterSupertypes
+		let known	= calculateImports impGraph fetch exports	:: Map FQN (Set (([Name], Statement), FQN))
+		let known'	= known |> S.toList ||>> fst |> nub
+		dictMapM (buildTypetable globalTLT) known'
 
 
 
@@ -74,33 +55,26 @@ buildTypetables p tlts
 
 	The known table is needed for the kinds kinds
 -}
-buildTypetable	:: TypeLookupTable -> FQN -> Module -> Exc (Typetable, [SupertypeRel])
-buildTypetable tlt fqn mod
+buildTypetable	:: TypeLookupTable -> FQN -> TypeSTMs -> Exc Typetable
+buildTypetable tlt fqn stms
 	= inside ("While building the local type info in module "++show fqn) $
 	  do	-- first build the locally known values
-		let locDecl	= locallyDeclared mod 	:: [(Name, [Name], [TypeRequirement])]
+		inside ("Got statements") $ warn $ (stms |> show & unlines)
+		let locDecl	= locallyDeclared stms 	:: [(([Name], Name), [Name], [TypeRequirement])]
 		-- now we get all defined supertypes (inclusing synonyms)
-		directSupers	<- mod & statements |> declaredSuperType tlt & sequence |> concat
+		directSupers	<- stms |> declaredSuperType tlt & sequence |> concat
 					:: Exc [(RType, [Name], CType)]
-		synons	<- mod & statements |+> typeSynonyms tlt |> concat
+		synons	<- stms |+> typeSynonyms tlt |> concat
 				||>> (\(rt, frees, super) -> (rt, frees, (super,[])))	:: Exc [(RType, [Name], CType)]
 		let superDecls	= directSupers ++ synons
 		{- we now build the supertype table for locally declared values.
 			It picks out of 'superDecls' the supertypes it needs;
-			this means that supertypes which are declared about a foreign type, are ignored.
 		-}
 		typeInfos'	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList
-		-- these are the supertype declarations that were ignored
-		let missed	= superDecls & L.filter (\vals -> (vals & fst3 & getBaseTID |> (`M.member` typeInfos') |> not) & fromMaybe True)
-		return (Typetable typeInfos', missed)
-
-
-completifyTypetable	:: Module -> TypeLookupTable -> FQN -> Typetable -> Exc Typetable
-completifyTypetable mod tlt fqn tt
-	= inside ("While completing the type table of "++show fqn) $
-	  do	-- now propagate existence constraints
-		tt'		<- propagateImplicitConstraints tlt mod tt |> fst
-		constrComplete	<- addSuperConstraints tlt mod tt'
+		let tt		= Typetable typeInfos'
+		-- now propagate existence constraints
+		tt'		<- propagateImplicitConstraints tlt stms tt |> fst
+		constrComplete	<- addSuperConstraints tlt stms tt'
 		-- then we calculate the 'transitive closure' of the supertype relationship
 		-- for non mathematicians: X is a Y; Y is a Z => X is a Z
 		superComplete	<- propagateSupertypes constrComplete
@@ -132,10 +106,10 @@ checkTi tt tid ti
 
 
 -- Builds the type info about the given type in the tuple
-buildTypeInfo	:: TypeLookupTable -> [(RType, [Name], CType)] -> FQN -> (Name, [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
+buildTypeInfo	:: TypeLookupTable -> [(RType, [Name], CType)] -> FQN -> (([Name], Name), [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
 buildTypeInfo tlt superDecls fqn (n, frees, reqs)
-	= inside ("While building type info about "++show fqn++"."++n) $
-	  do	let tid		= (fqn, n)
+	= inside ("While building type info about "++show n) $
+	  do	tid		<- resolveTypeID tlt n
 		let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
 
 		-- about the free type names
@@ -160,25 +134,6 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		let superOrigins	= supers |> (const fqn)
 		return (tid, TypeInfo kind frees constraints' [] supers superOrigins fqn)
 
-
--- adds the left-over supertype relations
-fixLeftovers	:: Map FQN Typetable ->  (FQN, [SupertypeRel]) -> Exc (Map FQN Typetable)
-fixLeftovers tts (fqn, superrels)
-	= do	tt	<- M.lookup fqn tts ? ("No tt found for "++show fqn)
-		tt'	<- foldM (addSupertype fqn) tt superrels
-		return (M.insert fqn tt' tts)
-
-addSupertype	:: FQN -> Typetable -> (RType, [Name], CType) -> Exc Typetable
-addSupertype fqn tt@(Typetable conts) superrel
-		= do	superrel'@(sub, _, _)	<- canonicalSuperDecl superrel
-			subTid	<- getTid sub
-			subTi	<- getTi tt sub
-			(super, constraints)	<- buildSTTEntry superrel'
-			warn  ("Added super!"++"instance "++show sub ++ " is "++show super)
-			assert (super `M.notMember` supertypes subTi) ("The type "++show sub++" already has the supertype "++show super)
-			let subTi'	= subTi {supertypes = M.insert super constraints $ supertypes subTi,
-							supertypeOrigin = M.insert super fqn $ supertypeOrigin subTi}
-			return $ Typetable $ M.insert subTid subTi' conts
 
 
 buildSTTEntry	:: (RType, [Name], CType) -> Exc (RType, [TypeConstraint])

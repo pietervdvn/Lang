@@ -23,7 +23,7 @@ import Languate.FQN
 import Languate.AST
 import Languate.TAST
 import Languate.Package as P
-import Languate.Typetable.ModuleTraverser
+import qualified Languate.Typetable.ModuleTraverser as ModuleTraverser
 import Languate.Typetable.TypeLookupTable.TypeLookupTableDef
 
 import Graphs.DirectedGraph
@@ -48,6 +48,18 @@ Building of a type lookup table:
 
 -- {FQN (1) --> {FQN (2) --> Name (3)}}: This fqn (1) exports these type(names) (3), which are originally declared on location (2). E.g. {"Prelude" --> {"Data.Bool" --> "Bool", "Num.Nat" --> "Nat", "Num.Nat" --> "Nat'", ...}, ...}
 type Exports	= Map FQN (Map FQN (FQN, Name))
+
+-- wrappers around moduletraverser, to hide the [(Origin, Statement)] complexities
+locallyDeclared	:: Module -> [(Name, [Name], [TypeRequirement])]
+locallyDeclared mod
+		= let decls	= statements mod & zip (repeat []) & ModuleTraverser.locallyDeclared :: [(([Name],Name), [Name], [TypeRequirement])]
+			in
+			decls |> (\(a,b,c) -> (snd a, b, c))
+
+
+declaredType :: Statement -> Maybe (Name, [Name], [TypeRequirement])
+declaredType stm
+		= ModuleTraverser.declaredType ([],stm) |> (\(a,b,c,d) -> (b,c,d))
 
 
 buildTLTs	:: Package -> Exc (Map FQN TypeLookupTable)

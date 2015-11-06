@@ -30,7 +30,7 @@ buildPackageTable	:: Package -> Exc PackageTable
 buildPackageTable p
 	= do	precT		<- buildPrecTable p
 		tlts		<- buildTLTs p
-		tts		<- buildTypetables p tlts
+		tts		<- buildTypetables p tlts (modules p)
 		modTbls		<- modules p & M.keys |> (id &&& id) |+> onSecond (assembleModTable tlts tts)
 					|> M.fromList
 		return $ PackageTable modTbls precT
