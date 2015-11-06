@@ -53,7 +53,8 @@ loadPackage world fp
 
 checkObsoleteModules	:: [FQN] -> [FQN] -> [FilePath] -> Package -> Exceptions' String Package
 checkObsoleteModules exposed maintained fps pack
-		= do	let loadedMods = pack & modules & M.keys |> modulePath |> intercal "/"
+		= do	-- loaded modules in file path form
+			let loadedMods = pack & modules & M.keys |> modulePath |> intercal "/"
 			let obsolete	= fps L.\\ loadedMods
 			assert (null obsolete) $ "Some packages are not used (and thus not loaded). Add them as 'maintains' in the manifest to load them too (and thus maintain them).\n"++exposedMaintained exposed maintained ++ "\nUnused files are: "++commas obsolete
 			return pack
