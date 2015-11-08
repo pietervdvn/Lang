@@ -148,28 +148,44 @@ isTrivialConstraint	:: TypeConstraint -> Bool
 isTrivialConstraint (SubTypeConstr t0 t1)
 			= t0 == t1
 
-typetable2doc	:: FQN -> Typetable -> (Doc, [Doc])
-typetable2doc fqnView (Typetable dict)
-		= let	docs	= dict & M.toList |> uncurry (typeinfo2doc fqnView) in
-			(doc "Typetable" "" $ Base "hi", docs)
+typetable2doc	:: (FQN -> String) -> FQN -> Typetable -> (Doc, [Doc])
+typetable2doc path fqnView (Typetable dict)
+		= let	docs	= dict & M.toList |> uncurry (typeinfo2doc path fqnView) in
+			(doc (path fqnView++"Typetable of "++show fqnView) ("All typeinfo that is known within the module "++show fqnView) $
+				docs |> title |> Embed & Mu.Seq, docs)
 
 
 
-typeinfo2doc	:: FQN -> TypeID -> TypeInfo -> Doc
-typeinfo2doc fqnView (fqnDef, nm) ti
+typeinfo2doc	:: (FQN -> String) -> FQN -> TypeID -> TypeInfo -> Doc
+typeinfo2doc path fqnView (fqnDef, nm) ti
 		= let 	frees'	= frees ti & (`zip` [0..]) ||>> (\i -> M.findWithDefault [] i $ constraints ti) :: [(Name, [RType])]
 			defFrees	= take (length $ frees ti) defaultFreeNames
 			frees''	= frees' |||>>> show ||>> commas ||>> when ":" |> uncurry (++) |> code & Mu.Seq
-			constrs	= constraints ti & toList |> (\(i,c) -> [code $ defFrees !! i, c |> show |> code & Mu.Seq])
 			rows	= supertypes ti ||>> (\(SubTypeConstr sub super) -> code (show sub) +++ Base " : " +++ code (show super))
 					|> (\constrs -> Mu.Seq $ (if length constrs == 1 then id else (|> Parag)) constrs )
 					& M.toList
 					|> (\(super, constraints) -> [code $ show super, constraints])	:: [[MarkUp]]
-			supers	= table ["Type param", "Constraints"] constrs +++ table ["Supertype","Constraints"] rows
+			supers	= table ["Supertype","Constraints"] rows
+			nrOfSupers	= rows & L.length
+			supers'	= if nrOfSupers > 0 then Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers
+						else parag "This type has no supertypes"
+			constrs	= constraints ti & toList |> (\(i,c) -> [code $ defFrees !! i, c |> show |> code & Mu.Seq])
+					& table ["Type param", "Constraints"]
+			nrOfConstr
+				= constraints ti & M.size
+			constrs'= if nrOfConstr > 0 then Parag (Base ("Typeconstraints on the free type variables."++
+					" This means that a specific type should be used as corresponding type argument")+++constrs) else Base ""
 			reqs	= requirements ti |> (\(SubTypeConstr sub super) -> [code $ show sub, code $ show super])
+					& table ["Type","needs this supertype"]
+			nrOfReqs
+				= requirements ti & L.length
+			reqs'	= if nrOfReqs > 0 then Parag (Base "As a type "+++code "T" +++
+					 Base "is used in a type argument "+++code "a"+++Base ("of a supertype, "++
+					"it might be that the constraint ")+++code "C"+++Base "is needed on this type "+++code "T"+++reqs)
+					else Base ""
+			reqsConstr	= if nrOfConstr + nrOfReqs > 0 then titling "Constraints and requirements" (reqs' +++ constrs') else Base ""
 			in
-			doc ("Modules/"++show fqnView ++"/Overview of "++nm) ("All we know about "++show fqnDef++"."++nm++" as seen within "++show fqnView) $ Titling (code nm +++ frees'') $
+			doc (path fqnView ++"Overview of "++nm) ("All we know about "++show fqnDef++"."++nm++" as seen within "++show fqnView) $ Titling (code nm +++ frees'') $
 				Base "Kind: "+++ code (show $ kind ti) +++
 				Base "Defined in: "+++ code (show $ origin ti)+++
-				titling "Requirements" (table ["Type","needs this supertype"] reqs) +++
-				Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers
+				reqsConstr +++ supers'

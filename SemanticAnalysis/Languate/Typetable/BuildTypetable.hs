@@ -59,7 +59,6 @@ buildTypetable	:: TypeLookupTable -> FQN -> TypeSTMs -> Exc Typetable
 buildTypetable tlt fqn stms
 	= inside ("While building the local type info in module "++show fqn) $
 	  do	-- first build the locally known values
-		inside ("Got statements") $ warn $ (stms |> show & unlines)
 		let locDecl	= locallyDeclared stms 	:: [(([Name], Name), [Name], [TypeRequirement])]
 		-- now we get all defined supertypes (inclusing synonyms)
 		directSupers	<- stms |> declaredSuperType tlt & sequence |> concat

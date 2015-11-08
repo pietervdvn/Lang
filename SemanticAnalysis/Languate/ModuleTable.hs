@@ -50,8 +50,9 @@ assembleModTable tlts tts fqn
 
 mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
-	=  let	neededDocs	= uncurry (:) (typetable2doc fqn (types mt)) ++
-					[tlt2doc ("Modules/"++ show fqn ++"/Typelookuptable for ") fqn $ typeLookupTable mt]
+	=  let	modulePath fqn	= "Module/"++show fqn++"/"
+		neededDocs	= uncurry (:) (typetable2doc modulePath fqn (types mt)) ++
+					[tlt2doc (modulePath fqn ++"Typelookuptable for ") fqn $ typeLookupTable mt]
 		linkedDocs	= neededDocs |> title |> Embed & Mu.Seq
-		document	= doc ("Modules/"++show fqn++"/Moduletable for "++show fqn) "" linkedDocs in
+		document	= doc (modulePath fqn++"Moduletable for "++show fqn) "" linkedDocs in
 		document : neededDocs
