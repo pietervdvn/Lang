@@ -18,7 +18,6 @@ import Languate.Typetable.PropagateImplicitConstraints
 import Languate.Typetable.PropagateSupertypeConstraints
 import Languate.Typetable.PropagateSupertypes
 
-import Languate.Checks.CheckType
 import Control.Monad
 
 import Data.Set as S
@@ -158,3 +157,8 @@ canonicalSuperDecl (sub, frees, (super, constraints))
 
 fetch indices free	= L.lookup free indices ? errMsg free
 			where errMsg free	= "The free type variable "++free++" was not declared"
+
+--validates that no unknown frees are used in rt
+validateFrees		:: [Name] -> RType -> Check
+validateFrees frees rt	= do	let foundFrees 	= freesInRT rt
+				mapM_ (\a -> assert (a `elem` frees) $ "The free type variable "++show a++" was not declared") foundFrees
