@@ -18,6 +18,8 @@ import Languate.Typetable.PropagateImplicitConstraints
 import Languate.Typetable.PropagateSupertypeConstraints
 import Languate.Typetable.PropagateSupertypes
 
+import Languate.Typetable.ValidateTypeStatements
+
 import Control.Monad
 
 import Data.Set as S
@@ -32,9 +34,11 @@ import Control.Arrow hiding ((+++))
 
 buildTypetables	:: Package -> Map FQN TypeLookupTable -> Map FQN Module -> Exc (Map FQN Typetable)
 buildTypetables p tlts mods
-	= do	-- builds a dict {FQN --> type related statements}
+	= do	let globalTLT	= M.unions $ M.elems tlts
+		-- first some stupid checks on all the mods
+		dictMapM (\fqn mod -> validateTypeSTMs globalTLT fqn mod) mods
+		-- builds a dict {FQN --> type related statements}
 		let typeStms	= mapWithKey typeStatements mods |> S.fromList
-		let globalTLT	= M.unions $ M.elems tlts
 		-- we run those statements through an export calculator
 		-- this way, each module sees all the type related statements locally and builds the typetable based on that
 		let impGraph	= importGraph p
@@ -76,7 +80,7 @@ buildTypetable tlt fqn stms
 		-- then we calculate the 'transitive closure' of the supertype relationship
 		-- for non mathematicians: X is a Y; Y is a Z => X is a Z
 		superComplete	<- propagateSupertypes constrComplete
-		-- and as last, we pass over all type info, to check constraints (and remove them)
+		-- and as last, we pass over all type info, to check constraints
 		checkTT superComplete
 		return superComplete
 
@@ -157,8 +161,3 @@ canonicalSuperDecl (sub, frees, (super, constraints))
 
 fetch indices free	= L.lookup free indices ? errMsg free
 			where errMsg free	= "The free type variable "++free++" was not declared"
-
---validates that no unknown frees are used in rt
-validateFrees		:: [Name] -> RType -> Check
-validateFrees frees rt	= do	let foundFrees 	= freesInRT rt
-				mapM_ (\a -> assert (a `elem` frees) $ "The free type variable "++show a++" was not declared") foundFrees
