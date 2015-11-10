@@ -14,6 +14,7 @@ import Languate.PrecedenceTable
 
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable
+import Languate.FunctionTable
 
 import Data.Map (Map, empty)
 import qualified Data.Map as M
@@ -29,12 +30,6 @@ data ModuleTable
 		functions	:: FunctionTable
 		} deriving (Show)
 
-data FunctionTable
-	= FunctionTable {
-		implementations	:: Map Signature [TClause],
-		documentation	:: Map Signature (String, [Law])
-		} deriving (Show)
-
 
 assembleModTable	:: Map FQN TypeLookupTable
 				-> Map FQN Typetable
@@ -44,7 +39,7 @@ assembleModTable tlts tts fqn
 	= do	let fetch dict msg	= M.lookup fqn dict ? ("No "++msg++" found for "++show fqn++", weird")
 		tlt			<- fetch tlts "type lookup table"
 		tt			<- fetch tts "type table"
-		return (ModuleTable tlt tt (FunctionTable M.empty M.empty))
+		return (ModuleTable tlt tt emptyFT)
 
 
 

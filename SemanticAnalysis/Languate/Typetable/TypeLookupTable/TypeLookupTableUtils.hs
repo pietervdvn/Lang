@@ -84,7 +84,7 @@ resolveType _ DontCareType
 resolveTypes tlt
 		= mapM (resolveType tlt)
 
-resolveReqs	:: TypeLookupTable -> [TypeRequirement] -> Exc RTypeReqs
+resolveReqs	:: TypeLookupTable -> [TypeRequirement] -> Exc RTypeReq
 resolveReqs tlt reqs
 		= reqs & merge |> onSecond (resolveTypes tlt) & sequence
 

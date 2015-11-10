@@ -52,12 +52,12 @@ validateDeclaration tlt (origin, declaredType, frees, treqs)
 	= inside ("In the declaration of "++((origin++[declaredType]) & intercal ".")) $
 		mapM_ (validateReq tlt frees) treqs
 
-validateCTypeFrees	:: [Name] -> (RType, RTypeReqs) -> Check
+validateCTypeFrees	:: [Name] -> (RType, RTypeReq) -> Check
 validateCTypeFrees frees (rt, reqs)
 	= do	validateFrees frees rt
 		validateReqsFrees frees reqs
 
-validateReqsFrees	:: [Name] -> [(Name, [ResolvedType])] -> Check
+validateReqsFrees	:: [Name] -> RTypeReq -> Check
 validateReqsFrees frees vals
 	= do	vals |> fst |+> (\nm -> assert (nm `elem` frees) $ "The free type variable "++show nm++" was not declared")
 		(vals >>= snd) |+> validateFrees frees

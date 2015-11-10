@@ -74,13 +74,6 @@ addRequirements reqs	 ti
 
 
 
-buildMapping	:: Eq b => [(a, b)] -> [(b, c)] -> [(a,c)]
-buildMapping start end
-	= do	(a,b)	<- start
-		(b',c)	<- end
-		[(a,c) | b == b']
-
-
 kindOf		:: Typetable -> [(Name, Kind)] -> RType -> Exc Kind
 kindOf _ ctx (RFree a)
 	= L.lookup a ctx ? ("The free type variable "++show a++" was not declared within this context")

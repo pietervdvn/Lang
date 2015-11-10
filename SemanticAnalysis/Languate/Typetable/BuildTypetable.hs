@@ -9,6 +9,8 @@ import Languate.CheckUtils
 import Languate.Package
 import Languate.AST hiding (frees)
 import Languate.TAST
+import Languate.TAST.KindUtils
+
 import Languate.FQN
 
 import Languate.Typetable.TypetableDef
@@ -132,12 +134,6 @@ buildFreeKinds tt ti
 		return $ zip defaultFreeNames kindArgs
 
 
-buildKind	:: [Kind] -> Kind
-buildKind []	= Kind
-buildKind (arg:args)
-		= let tail	= buildKind args in
-			KindCurry arg tail
-
 -- a simple kind calculator, which does not check kinds of arguments (only too much type arguments fails)
 _simpleKindOf	:: Typetable -> (Name -> Exc Kind) -> RType -> Exc Kind
 _simpleKindOf _ freeKinds (RFree free)
@@ -172,7 +168,7 @@ checkTi tt tid ti
 				= show sub ++ " is supposed to have the supertype "++show super
 		let msgs	= unmet |> msg & unlines
 		assert (L.null unmet) ("Some constraints are not met:\n"++indent msgs)
-		let freeKinds	= kind ti & kindArgs & init & zip defaultFreeNames
+		let freeKinds	= kind ti & kindArgs & zip defaultFreeNames
 		dictMapM (checkSameKind tt freeKinds ti) (constraints ti)
 		requirements ti |+> (inside "In the type existence requirements" . checkTypeConstraint tt freeKinds)
 		dictMapM (checkSupertype tt freeKinds ti) (supertypes ti)

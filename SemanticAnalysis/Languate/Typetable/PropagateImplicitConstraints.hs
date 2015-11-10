@@ -19,6 +19,8 @@ import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
 import Languate.TAST
+import Languate.TAST.KindUtils
+
 import Languate.AST hiding (frees)
 import Data.Set as S
 import Data.Map as M
