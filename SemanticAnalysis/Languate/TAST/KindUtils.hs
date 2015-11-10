@@ -31,7 +31,4 @@ kindArgs (KindCurry h t)
 
 
 buildKind	:: [Kind] -> Kind
-buildKind []	= Kind
-buildKind (arg:args)
-		= let tail	= buildKind args in
-			KindCurry arg tail
+buildKind	= foldr KindCurry Kind

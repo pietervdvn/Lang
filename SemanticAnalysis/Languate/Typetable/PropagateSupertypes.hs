@@ -21,8 +21,9 @@ type Changed	= Bool
 -- adds all supertypes, also a few steps away
 propagateSupertypes		:: Typetable -> Exc Typetable
 propagateSupertypes tt
-	= do	-- we could optimize this code with an epxort graph, but... let's do it the naive way :p
-		whileChanged propagSupertypesStep tt |> fst
+	= whileChanged propagSupertypesStep tt |> fst
+		-- we could optimize this code with an epxort graph, but... let's do it the naive way :p
+
 
 
 propagSupertypesStep	:: Typetable -> Exc (Typetable, Changed)

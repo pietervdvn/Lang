@@ -39,7 +39,7 @@ buildTypetables	:: Package -> Map FQN TypeLookupTable -> Map FQN Module -> Exc (
 buildTypetables p tlts mods
 	= do	let globalTLT	= M.unions $ M.elems tlts
 		-- first some stupid checks on all the mods
-		dictMapM (\fqn mod -> validateTypeSTMs globalTLT fqn mod) mods
+		dictMapM (validateTypeSTMs globalTLT) mods
 		-- builds a dict {FQN --> type related statements}
 		let typeStms	= mapWithKey typeStatements mods |> S.fromList
 		-- we run those statements through an export calculator
@@ -228,7 +228,7 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
 		supers		<- superTypes |+> buildSTTEntry |> M.fromList
-		let superOrigins	= supers |> (const fqn)
+		let superOrigins	= supers |> const fqn
 		return (tid, TypeInfo kind frees constraints' [] supers superOrigins fqn)
 
 

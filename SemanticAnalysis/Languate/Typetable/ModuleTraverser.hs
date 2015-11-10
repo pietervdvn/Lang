@@ -55,18 +55,18 @@ isTypeRelated _	= False
 
 
 declaredType :: ([Name], Statement) -> Maybe ([Name], Name, [Name], [TypeRequirement])
-declaredType (origin, (ADTDefStm (ADTDef name frees reqs _ _)))
+declaredType (origin, ADTDefStm (ADTDef name frees reqs _ _))
 		= Just (origin, name, frees, reqs)
-declaredType (origin, (SubDefStm (SubDef name _ frees _ reqs)))
+declaredType (origin, SubDefStm (SubDef name _ frees _ reqs))
 		= Just (origin, name, frees, reqs)
-declaredType (origin, (ClassDefStm classDef))
+declaredType (origin, ClassDefStm classDef)
 		= Just (origin, name classDef, frees classDef, classReqs classDef)
 declaredType _	= Nothing
 
 
 
 declaredSuperType	:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, [Name], CType)]
-declaredSuperType tlt (origin, (ADTDefStm (ADTDef nm frees reqs sums adopts)))
+declaredSuperType tlt (origin, ADTDefStm (ADTDef nm frees reqs sums adopts))
 	= do	-- the type being declared here is the supertype of the adopted types...
 		super	<- resolveTypePath tlt (origin, nm)
 		-- ... applied on the frees of course!
@@ -76,18 +76,18 @@ declaredSuperType tlt (origin, (ADTDefStm (ADTDef nm frees reqs sums adopts)))
 		adopts' |> (\typ -> (typ, frees, (super', reqs'))) & return
 		{- whenever there are no constructors (and only a single adopted type),
 			we declare a synonym; this case is handles elsewhere as to prevent supertype loops -}
-declaredSuperType tlt (_,(InstanceStm (Instance typePath frees super reqs)))
+declaredSuperType tlt (_,InstanceStm (Instance typePath frees super reqs))
 	= do	typ	<- resolveTypePath tlt typePath
 		let typ'= applyTypeArgs typ (frees |> RFree)
 		super'	<- resolveType tlt super
 		reqs'	<- resolveReqs tlt reqs
 		(typ', frees, (super', reqs')) & return & return
-declaredSuperType tlt (origin, (SubDefStm (SubDef name _ frees supers reqs)))
+declaredSuperType tlt (origin, SubDefStm (SubDef name _ frees supers reqs))
 	= do	typ	<- resolveTypePath tlt (origin, name)
 		supers'	<- resolveTypes tlt supers
 		reqs'	<- resolveReqs tlt reqs
 		supers' |> (\super -> (typ, frees, (super, reqs'))) & return
-declaredSuperType tlt (origin, (ClassDefStm cd))
+declaredSuperType tlt (origin, ClassDefStm cd)
 	= do	typ	<- (origin, AST.name cd) & resolveTypePath tlt
 		supers	<- subclassFrom cd & resolveTypes tlt
 		reqs	<- classReqs cd & resolveReqs tlt
@@ -106,10 +106,10 @@ For CATEGORY- and TYPE-DECLARATIONS only, as the constraints imposed here are co
 
 -}
 constraintAdoptions	:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, RType)]
-constraintAdoptions tlt stm@(_, (ClassDefStm _))
+constraintAdoptions tlt stm@(_, ClassDefStm _)
 	-- ""cat X a:Y a"" : X (rt) only exists if the constraints on super are met
 	= declaredSuperType tlt stm ||>> (\(rt, frees, (super, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
-constraintAdoptions tlt stm@(_, (ADTDefStm _))
+constraintAdoptions tlt stm@(_, ADTDefStm _)
 	-- ""type X a={Constr} + Y a"": X (rt) only exists if the constraints on super are met
 	= declaredSuperType tlt stm ||>> (\(super, frees, (rt, constraints)) -> (applyTypeArgs rt (frees |> RFree), super))
 constraintAdoptions _ _	= return []
@@ -128,7 +128,7 @@ This last declaration 'pushes' the supertype 'String' onto 'List', but with requ
 
 -}
 pushedSupers		:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, (RType,[Name]))]
-pushedSupers tlt (origin, (ADTDefStm (ADTDef nm frees _ _ adopted)))
+pushedSupers tlt (origin, ADTDefStm (ADTDef nm frees _ _ adopted))
 	= do	super		<- resolveTypePath tlt (origin,nm)	-- type that is pushed on ...
 		subForms	<- resolveTypes tlt adopted -- ... these fellows
 		[((super,frees), subForms)] & unmerge |> swap & return
@@ -139,7 +139,7 @@ pushedSupers _ _
 Returns the supertypes which are **pulled** upon types by a type declaration.
 -}
 typeSynonyms		:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, [Name], RType)]
-typeSynonyms tlt (origin, (ADTDefStm (ADTDef nm frees _ [] [synonym])))
+typeSynonyms tlt (origin, ADTDefStm (ADTDef nm frees _ [] [synonym]))
 	-- reqs are ignored, these are handled in other fases
 	= do	typ	<- resolveTypePath tlt (origin,nm)
 		syn'	<- resolveType tlt synonym -- aka super

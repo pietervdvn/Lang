@@ -65,7 +65,7 @@ validateReqsFrees frees vals
 
 validateReq	:: TypeLookupTable -> [Name] -> TypeRequirement -> Check
 validateReq tlt frees (name, typ)
-	= inside ("In the type requirement of "++show name) $
+	= inside ("In the type requirement of "++show name)
 	  (resolveType tlt typ >>= validateFrees frees)
 
 

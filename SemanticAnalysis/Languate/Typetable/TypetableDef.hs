@@ -96,7 +96,7 @@ kindOf tt ctx (RCurry t0 t1)
 assertNormalKind	:: Typetable -> [(Name, Kind)] -> (RType -> Kind -> String) -> RType -> Exc ()
 assertNormalKind tt ctx str t
 	= do	k	<- kindOf tt ctx t
-		assert (Kind == k) $ (str t k)
+		assert (Kind == k) $ str t k
 
 
 -- gets the type info for the given type, as seen in the known table
