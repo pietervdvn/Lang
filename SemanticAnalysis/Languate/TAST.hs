@@ -11,7 +11,7 @@ It is this data-structure that all semantic analysis things use or build.
 --}
 
 import StdDef
-import HumanUtils (commas, pars)
+import HumanUtils (commas, pars, intercal)
 import Exceptions
 import Languate.CheckUtils
 import Languate.AST
@@ -291,8 +291,11 @@ nt t@(RNormal _ _)	= return t
 
 instance Show Kind where
 	show Kind	= "*"
-	show (KindCurry arg0 arg1)
-			= "(" ++ show arg0 ++ " ~> " ++ show arg1 ++ ")"
+	show k		= sk k
+
+sk	:: Kind -> String
+sk Kind = "*"
+sk k	= k & kindArgs |> show & intercal " ~> " & pars
 
 
 normalKind	:: Kind -> Bool
@@ -303,6 +306,14 @@ numberOfKindArgs	:: Kind -> Int
 numberOfKindArgs Kind	= 0
 numberOfKindArgs (KindCurry _ k)
 			= 1 + numberOfKindArgs k
+
+
+kindArgs	:: Kind -> [Kind]
+kindArgs Kind	= [Kind]
+kindArgs (KindCurry h t)
+		= h:kindArgs t
+
+
 -- simple conversion, only use for type declarations. E.g. '''data Bool = ...''' in module '''Data.Bool''': '''asRType (FQN ["Data"] "Bool")(Normal "Bool") '''
 asRType	:: FQN -> Type -> RType
 asRType fqn (Normal [] nm)
