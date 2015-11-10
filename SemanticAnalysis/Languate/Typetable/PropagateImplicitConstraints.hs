@@ -71,6 +71,8 @@ propagateMetaRequirementsIn tt tid ti
 
 propagateMetaRequirementsIn'	:: Typetable -> TypeID -> TypeInfo -> RType -> Exc TypeInfo
 propagateMetaRequirementsIn' tt@(Typetable conts) tid ti reqT
+ | isRFree reqT	= return ti
+ | otherwise
 	= do	let nrOfFrees	= ti & frees & length
 		-- {0 --> a0, 1 --> a1, ... }
 		let defaultMap	= zip [0..] defaultFreeNames & take nrOfFrees
