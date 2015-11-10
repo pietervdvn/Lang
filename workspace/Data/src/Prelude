@@ -15,13 +15,3 @@ public import Collection.Set
 public import Data.Nat
 public import Data.Char
 public import ControlFlow
-
-
-cat X
-	> True
-
-
-cat Y a
-	> True
-
-instance X is Y Y
