@@ -25,6 +25,8 @@ maybeType'	= Applied (Normal ["Collection","Maybe"] "Maybe")
 -- UnResolved nat type
 natTypeUR	= Normal ["Data","Nat"] "Nat"
 
+
+
 -- Special function for constructing ADTS
 construct	:: Int -> Int -> (Type, [TypeRequirement]) -> Clause
 construct nrOfArgs i typeInfo
@@ -41,7 +43,7 @@ is		:: Int -> (Type, [TypeRequirement]) -> Clause
 is index typeInfo
 	= Clause [Assign "value"] $ Seq [BuiltIn "is" typeInfo, Nat index, Call "value"]
 
--- Construction primitves which can not be encoded as code (e.g. construct, destruct) and are language features live in the nameless package by pietervdvn
+-- Construction primitves which can not be encoded as code (e.g. construct, destruct) and are language features. These live in the nameless package by pietervdvn
 
 builtInFQN	:: FQN
 builtInFQN	= toFQN' "pietervdvn::BuiltIns"
