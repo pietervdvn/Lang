@@ -81,6 +81,30 @@ buildMapping start end
 		[(a,c) | b == b']
 
 
+kindOf		:: Typetable -> [(Name, Kind)] -> RType -> Exc Kind
+kindOf _ ctx (RFree a)
+	= L.lookup a ctx ? ("The free type variable "++show a++" was not declared within this context")
+kindOf tt _  t@(RNormal _ _)
+	= getTi tt t |> kind
+kindOf tt ctx (RApplied baseT argT)
+	= do	baseKind	<- kindOf tt ctx baseT
+		argKind		<- kindOf tt ctx argT
+		case baseKind of
+			Kind	-> halt ("The type "++show baseT++" was applied to too many arguments, namely "++show argT)
+			(KindCurry arg result)
+				-> do	assert (arg == argKind) ("The kind of "++show argT++", namely "++show argKind++" does not match the expected kind "++show arg++", imposed by "++show baseT)
+					return result
+kindOf tt ctx (RCurry t0 t1)
+	= do	let chck = assertNormalKind tt ctx (\t k -> "A type within a curry should have a kind '*', but "++show t++" has the kind "++show k)
+		chck t0
+		chck t1
+		return Kind
+
+assertNormalKind	:: Typetable -> [(Name, Kind)] -> (RType -> Kind -> String) -> RType -> Exc ()
+assertNormalKind tt ctx str t
+	= do	k	<- kindOf tt ctx t
+		assert (Kind == k) $ (str t k)
+
 
 -- gets the type info for the given type, as seen in the known table
 getTi'		:: Typetable -> TypeID -> Exc TypeInfo
