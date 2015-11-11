@@ -4,12 +4,14 @@ Testcode for generating functions
 ---------------
 
 import Any
+import Data.Bool
+import Collection.Tuple
 
-type X (a:Any)	= {X a:a; b:B, Y A}
+type X a	= {X a:a; b:B, Y A}
 
 type A	= {A}
 type B 	= {B}
 
 
-f	: A -> B
+f	: X -> B
 A	= B

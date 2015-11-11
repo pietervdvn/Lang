@@ -8,17 +8,16 @@ import Data.Bool
 import Collection.Maybe
 import Category.Eq
 
----
+----
 The data structure representing tuples.
 
 The syntactic sugar ''(a,b,c)'' desugars to ''Tuple a (Tuple b c)''
-
-import Data.Bool
-
-data Tuple a b	= Tuple a b
+---
+type Tuple a b	= {Tuple a b}
 
 instance Tuple (a:Eq) (b:Eq) is Eq
 
+---
 
 map	: (a -> b) -> (a, rest) -> (b, rest)
 f (Tuple a rest)	= Tuple (f a) rest
