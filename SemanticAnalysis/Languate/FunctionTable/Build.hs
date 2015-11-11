@@ -41,14 +41,16 @@ buildFunctionTables	:: Package
 				-> Map FQN Module
 				-> Exc (Map FQN FunctionTable)
 buildFunctionTables p tlts tts mods
- 	= dictMapM (buildFunctionTable tlts) mods
+ 	= dictMapM (buildFunctionTable tlts tts) mods
 
-buildFunctionTable	:: Map FQN TypeLookupTable -> FQN -> Module -> Exc FunctionTable
-buildFunctionTable tlts fqn mod
+buildFunctionTable	:: Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> Module -> Exc FunctionTable
+buildFunctionTable tlts tts fqn mod
 	= inside ("While building the function table for "++show fqn) $
 	  do	tlt	<- M.lookup fqn tlts ? ("No tlt for "++show fqn)
+	  	tt	<- M.lookup fqn tts ? ("No tt for "++show fqn)
 		signs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
 				||>> unpackFirst |> concat	:: Exc [((Signature, Visible), Coor)]
+		signs' |> first fst |+> checkSimpleKind tt
 		let signs	= signs' |> fst			:: [(Signature, Visible)]
 		let dubble	= signs |> fst & dubbles	:: [Signature]
 		let dubble'	= signs' |> first fst |> second fst & nub	-- throw away visibility and columns, then remove dubbles
@@ -56,3 +58,19 @@ buildFunctionTable tlts fqn mod
 					|> (\(sign, line) -> show sign ++" "++pars ("line "++show line))
 		assert (L.null dubble) ("Some functions are declared multiple times:"++indent (dubble' >>= ("\n"++)))
 		return $ FunctionTable $ M.fromList signs
+
+
+
+
+checkSimpleKind	:: Typetable ->  (Signature, Coor) -> Check
+checkSimpleKind tt (sign, (line, _))
+	= inside ("In the function declaration of "++show sign++", on line "++show line) $
+	  do	let (rtps, reqs)	= signTypes sign
+	  	let unusedFrees	= (rtps >>= freesInRT) L.\\ (reqs |> fst)
+	  	let unusedReqs	= zip unusedFrees (repeat [anyType])
+	  	reqKinds	<- kindOfReqs tt (reqs++unusedReqs)
+	  	kinds		<-rtps |+> kindOf tt reqKinds
+	  	let faulty	= zip rtps kinds & L.filter ((/=) Kind . snd)
+	  				|> (\(tp, kind) -> "Expecting "++number (numberOfKindArgs kind)++" more type arguments to "++
+	  					show tp++" :: "++show kind)
+	  	assert (L.null faulty) "Function types should have a normal kind:"
