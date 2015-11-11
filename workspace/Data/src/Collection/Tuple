@@ -27,6 +27,10 @@ f (Tuple a rest)	= Tuple (f a) rest
 fst		: (a,b) -> a
 (Tuple a _)	= a
 
-snd		: (a,b) -> b
+snd		: (a,b)	-> b
 (Tuple _ b)	= b
+
+snd		: (a,b, rest) -> b
+(Tuple _ (Tuple b _))	= b
+
 ---

@@ -10,10 +10,13 @@ import ControlFlow
 import Data.Char
 import Collection.List
 
--- A natural number, which might be zero
-type Nat	= {Zero} + Nat'
--- A natural number which will not be zero
+
+-- A natural number which can only be zero
+type Zero	= {Zero}
+-- A natural number which is not zero
 type Nat'	= {Succ Nat}
+-- A natural number, which might be zero
+type Nat	= Zero + Nat'
 
 instance Nat is Eq
 
@@ -24,7 +27,9 @@ precedence of (*) is left, (*) > (?), (*) < (:), (!) < (*)
 precedence of (/) is left, (/) = (*)
 
 -- Natural addition
-(+)		: Nat -> Nat -> Nat
+(+)		: Nat  -> Nat  -> Nat
+(+)		: Nat' -> Nat  -> Nat'
+(+)		: Nat  -> Nat' -> Nat'
 (Succ i) j	= Succ (i + j)
 0 j		= j
 
