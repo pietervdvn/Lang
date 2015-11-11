@@ -11,6 +11,7 @@ import Languate.ModuleTable
 import Languate.PrecedenceTable
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.BuildTypetable
+import Languate.FunctionTable
 
 import Languate.CheckUtils
 
@@ -28,10 +29,13 @@ data PackageTable
 
 buildPackageTable	:: Package -> Exc PackageTable
 buildPackageTable p
-	= do	precT		<- buildPrecTable p
+	= do	let mods	=  modules p
+		precT		<- buildPrecTable p
 		tlts		<- buildTLTs p
-		tts		<- buildTypetables p tlts (modules p)
-		modTbls		<- modules p & M.keys |> (id &&& id) |+> onSecond (assembleModTable tlts tts)
+		tts		<- buildTypetables p tlts mods
+		fts		<- buildFunctionTables p tlts tts mods
+		modTbls		<- modules p & M.keys |> (id &&& id)
+					|+> onSecond (assembleModTable tlts tts fts)
 					|> M.fromList
 		return $ PackageTable modTbls precT
 

@@ -6,7 +6,7 @@ import Exceptions
 import Languate.CheckUtils
 
 import Languate.TAST
-import Languate.AST
+import Languate.AST hiding (functions)
 
 import Languate.Package
 import Languate.FQN
@@ -33,20 +33,23 @@ data ModuleTable
 
 assembleModTable	:: Map FQN TypeLookupTable
 				-> Map FQN Typetable
+				-> Map FQN FunctionTable
 				-> FQN
 				-> Exc ModuleTable
-assembleModTable tlts tts fqn
+assembleModTable tlts tts fts fqn
 	= do	let fetch dict msg	= M.lookup fqn dict ? ("No "++msg++" found for "++show fqn++", weird")
 		tlt			<- fetch tlts "type lookup table"
 		tt			<- fetch tts "type table"
-		return (ModuleTable tlt tt emptyFT)
+		ft			<- fetch fts "function table"
+		return (ModuleTable tlt tt ft)
 
 
 
 mod2doc	:: (FQN,ModuleTable) -> [Doc]
 mod2doc (fqn,mt)
 	=  let	modulePath fqn	= "Module/"++show fqn++"/"
-		neededDocs	= uncurry (:) (typetable2doc modulePath fqn (types mt)) ++
+		neededDocs	= uncurry (:) (functiontable2doc modulePath fqn $ functions mt) ++
+				  uncurry (:) (typetable2doc modulePath fqn $ types mt) ++
 					[tlt2doc (modulePath fqn ++"Typelookuptable for ") fqn $ typeLookupTable mt]
 		linkedDocs	= neededDocs |> title |> Embed & Mu.Seq
 		document	= doc (modulePath fqn++"Moduletable for "++show fqn) "" linkedDocs in
