@@ -3,6 +3,7 @@ module Languate.Typetable (module M) where
 
 import Languate.Typetable.BuildTypetable as M
 import Languate.Typetable.TypetableDef as M
+import Languate.Typetable.TypeLookupTable as M
 
 {--
 

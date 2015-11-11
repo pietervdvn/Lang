@@ -25,6 +25,7 @@ import Languate.TAST
 import Languate.Package as P
 import qualified Languate.Typetable.ModuleTraverser as ModuleTraverser
 import Languate.Typetable.TypeLookupTable.TypeLookupTableDef
+import Languate.Typetable.TypeLookupTable.ModuleTraverser
 
 import Graphs.DirectedGraph
 import Graphs.ExportCalculator

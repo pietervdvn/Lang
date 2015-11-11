@@ -89,4 +89,15 @@ resolveReqs tlt reqs
 		= reqs & merge |> onSecond (resolveTypes tlt) & sequence
 
 
+resolveSignature
+		:: TypeLookupTable -> FQN -> (Name, [Type], [TypeRequirement])
+				-> Exc Signature
+resolveSignature tlt fqn (nm, tps, reqs)
+	= do	rtps	<- tps |+> resolveType tlt
+		reqs	<- resolveReqs tlt reqs
+		let ctypeUn	= (rtps, reqs)	:: CTypeUnion
+		return $ Signature fqn nm ctypeUn
+
+
+
 spth (nms, nm)	= intercal "." $ nms ++ [nm]
