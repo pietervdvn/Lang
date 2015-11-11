@@ -74,7 +74,7 @@ printErr exposed maintained notFound
 
 exposedMaintained	:: [FQN] -> [FQN] -> String
 exposedMaintained exposed maintaned
-	=	let showFQNS fqns	= if null fqns then "no packages" else fqns |> show & commas in
+	=	let showFQNS fqns	= if null fqns then "no modules" else fqns |> show & commas in
 		"The manifest exposes "++showFQNS exposed++" and maintains "++ showFQNS maintaned
 
 msg		:: [(FQN, FQN)] -> String
