@@ -58,8 +58,9 @@ buildDeconsSign fqn n reqs onlyCons defType rets
 		Signature fqn ("from"++n) ([RCurry defType (wrapper retTyp)] , reqs)
 
 
-
-
+buildFieldFunctions	:: Name -> [(Name, Type)] -> [Signature]
+-- TODO pickup!
+buildFieldFunctions	= todo
 
 
 
@@ -73,4 +74,4 @@ checkNoDubbleConsnames names
 	= do	let dubble	= dubbles names
 		let nr		= length dubble
 		assert (null dubble) ("Constructor names should be unique, " ++
-			plural nr "constructor name"++", namely "++commas (dubble |> show)++", "++isAre nr++" used multiple times")
+			plural nr "constructor name"++", namely "++commas (dubble |> show) ++", "++isAre nr++" used multiple times")

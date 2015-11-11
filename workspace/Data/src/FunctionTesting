@@ -5,8 +5,11 @@ Testcode for generating functions
 
 import Any
 
-type X (a:Any)	= {X a A, Y A}
-
+type X (a:Any)	= {X a:a; b:B, Y A}
 
 type A	= {A}
 type B 	= {B}
+
+
+f	: A -> B
+A	= B

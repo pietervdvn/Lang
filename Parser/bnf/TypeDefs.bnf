@@ -90,7 +90,7 @@ type Data a 	= {A a , B Int}
 data Record	= {Record String Int Bool, Exception String LineNr}
 -- want named fields?
 
-data Record	= {A i : Int, B b : Bool, i : Int, path name : Name}
+data Record	= {A i : Int; B b : Bool; i : Int; path name : Name}
 
 type constraints can appear both on the right and left side, within field declarations. This might be a bit confusing.
 Field declarations are separated by semicolons.
