@@ -33,8 +33,8 @@ number i	= fromMaybe (show i) $ lookup i $ zip [0..]
 			["zero", "one", "two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
 
 plural	:: Int -> String -> String
-plural i str	= if i > 1 || i == 0 then number i ++" " ++ pluralize str
-			else "one "++ str
+plural i str	= number i ++" "++ if i > 1 || i == 0 then pluralize str
+			else str
 
 -- same as intercalate, but with a empty list filter
 intercal	:: String -> [String] -> String
@@ -73,6 +73,7 @@ pluralize "match"	= "matches"
 pluralize "pattern match"
 			= "pattern matches"
 pluralize "is"		= "are"
+pluralize "has"		= "have"
 pluralize str		=  str ++ "s"
 
 isAre		:: Int -> String
