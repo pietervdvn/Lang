@@ -7,11 +7,7 @@ import Any
 import Data.Bool
 import Collection.Tuple
 
-type X a	= {X a:a; b:B, Y A}
+type X a	= {X a:a; a:B, _Y a:A}
 
 type A	= {A}
 type B 	= {B}
-
-
-f	: X -> B
-A	= B
