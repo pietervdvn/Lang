@@ -24,6 +24,7 @@ adtDefinedFunctions tlt fqn (ADTDef name frees reqs sums _)
 		let definedType	= applyTypeArgs definedTypeBase (frees |> RFree)	:: RType
 		reqs	<- resolveReqs tlt reqs
 		let uniqueCons	= length sums == 1
+		checkNoDubbleConsnames (sums |> adtSumName)
 		sums |+> sumDefFunctions tlt fqn definedType reqs uniqueCons |> concat
 
 
@@ -72,4 +73,4 @@ checkNoDubbleConsnames names
 	= do	let dubble	= dubbles names
 		let nr		= length dubble
 		assert (null dubble) ("Constructor names should be unique, " ++
-			plural nr "constructor"++isAre nr++" multiple times, namely "++commas dubble)
+			plural nr "constructor name"++", namely "++commas (dubble |> show)++", "++isAre nr++" used multiple times")

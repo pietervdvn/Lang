@@ -5,7 +5,7 @@ Testcode for generating functions
 
 import Any
 
-type X (a:Any)	= {X a A, X a A}
+type X (a:Any)	= {X a A, Y A}
 
 
 type A	= {A}
