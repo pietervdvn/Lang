@@ -129,24 +129,12 @@ buildFreeKinds tt ti
 						indent ("\n"++unlines cycles)
 		let kindOf name
 			= do	rt	<- L.lookup name constraintExamples ? ("The free type variable "++show name++" was not defined")
-				_simpleKindOf tt kindOf rt
+				simpleKindOf tt kindOf rt
  		kindArgs	<- take nrOfFrees defaultFreeNames |+> kindOf	:: Exc [Kind]
 		return $ zip defaultFreeNames kindArgs
 
 
--- a simple kind calculator, which does not check kinds of arguments (only too much type arguments fails)
-_simpleKindOf	:: Typetable -> (Name -> Exc Kind) -> RType -> Exc Kind
-_simpleKindOf _ freeKinds (RFree free)
-	= freeKinds free
-_simpleKindOf tt _ (RNormal fqn n)
-	= getTi' tt (fqn, n) |> kind
-_simpleKindOf tt freeKinds t@(RApplied base arg)
-	= do	baseKind	<- _simpleKindOf tt freeKinds base
-		case baseKind of
-			Kind	-> halt ("The type "++show base++" is applied to too many arguments")
-			(KindCurry _ kind)	-> return kind
-_simpleKindOf _ _(RCurry _ _)
-	= return Kind
+
 
 
 

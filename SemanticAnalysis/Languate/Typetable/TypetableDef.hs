@@ -15,8 +15,15 @@ import Languate.FQN
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
 
+import Graphs.DirectedGraph
+import Graphs.Order
+
+import Control.Arrow hiding ((+++))
+import Control.Monad hiding (when)
+
 import Data.Map as M
 import Data.List as L
+import Data.Set as S
 import Data.Tuple
 
 
@@ -92,6 +99,49 @@ kindOf tt ctx (RCurry t0 t1)
 		chck t0
 		chck t1
 		return Kind
+
+
+
+
+kindOfReqs	:: Typetable -> [(Name, [RType])] -> Exc [(Name, Kind)]
+kindOfReqs tt reqs
+	= inside ("While calculating the kinds on requirements") $
+	  do	let head' lst	= if length lst == 0 then anyType else head lst
+		-- we take a representative for each kind
+		let reprs	= reqs 	||>> sort	-- sort so frees are at the end -> lower chance on cycles
+					||>> head'	-- and lets take the first element (or the default Any)
+		-- we look for direct cycles
+		let cyclesDG	= reprs & L.filter (isRFree . snd) ||>> (\(RFree a) -> S.singleton a) & M.fromList
+					:: DirectedGraph Name
+		let cyclesDG'	= reprs & L.filter (not . isRFree . snd) ||>> (const S.empty) & M.fromList
+		let order	= buildOrdering (M.union cyclesDG cyclesDG')
+		let msg cycles	= "The free type variables contain cycles, what makes calculating the kind impossible. Cycles are:"
+					++ (cycles |> commas |> ("\n"++) & concat)	:: String
+		let msg' cycles	= halt (msg cycles)	:: Exc [Name]
+		ordering	<- either (halt . msg) (return . fst) order	:: Exc [Name]
+		-- now we can actually calc. the kinds of each, with a fixing function
+		let ordered	= ordering & reverse |> (id &&& id) & flip buildMapping reprs	:: [(Name, RType)]
+		-- and now we can -value by value- calculate the kinds
+		kinds	<- foldM (\known (name, rtp) -> do	kind	<- kindOf tt known rtp
+								return ((name, kind):known)) [] ordered
+		return kinds
+
+
+
+-- a simple kind calculator, which does not check kinds of arguments (only too much type arguments fails)
+simpleKindOf	:: Typetable -> (Name -> Exc Kind) -> RType -> Exc Kind
+simpleKindOf _ freeKinds (RFree free)
+	= freeKinds free
+simpleKindOf tt _ (RNormal fqn n)
+	= getTi' tt (fqn, n) |> kind
+simpleKindOf tt freeKinds t@(RApplied base arg)
+	= do	baseKind	<- simpleKindOf tt freeKinds base
+		case baseKind of
+			Kind	-> halt ("The type "++show base++" is applied to too many arguments")
+			(KindCurry _ kind)	-> return kind
+simpleKindOf _ _(RCurry _ _)
+	= return Kind
+
 
 assertNormalKind	:: Typetable -> [(Name, Kind)] -> (RType -> Kind -> String) -> RType -> Exc ()
 assertNormalKind tt ctx str t
@@ -186,7 +236,7 @@ typeinfo2doc path fqnView (fqnDef, nm) ti
 			nrOfSupers	= rows & L.length
 			supers'	= if nrOfSupers > 0 then Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers
 						else parag "This type has no supertypes"
-			constrs	= constraints ti & toList |> (\(i,c) -> [code $ defFrees !! i, c |> show |> code & Mu.Seq])
+			constrs	= constraints ti & M.toList |> (\(i,c) -> [code $ defFrees !! i, c |> show |> code & Mu.Seq])
 					& table ["Type param", "Constraints"]
 			nrOfConstr
 				= constraints ti & M.size
