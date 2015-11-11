@@ -119,11 +119,13 @@ Succ	: Nat -> Nat'
 
 
 -}
-data ADTDef	= ADTDef Name			-- name of the type
-			[Name] [TypeRequirement] -- free types + requirements
-			[ADTSum]		-- constructors
-			[Type]			-- types which it 'adopts'. Might be recursive.
-						-- The adopted type automatically becomes the given type (if constraints are met)
+data ADTDef	= ADTDef
+			{ adtName	:: Name			-- name of the type
+			, adtFrees	:: [Name]
+			, adtReqs	:: [TypeRequirement] -- free types + requirements
+			, adtSums	:: [ADTSum]		-- constructors
+			, adtAdopts	:: [Type]			-- types which it 'adopts'. Might be recursive.
+			}			-- The adopted type automatically becomes the given type (if constraints are met)
 	deriving (Eq, Ord)
 
 {-
@@ -133,7 +135,11 @@ e.g.
 > data ADT	= A x:Int Float	-- docstring for A
 ADTSum "A" Visible (Just "docstring for A") [(Just "x", "Int"),(Nothing, "Float")]
 -}
-data ADTSum	= ADTSum Name Visible [(Maybe Name, Type)]
+data ADTSum	= ADTSum
+			{ adtSumName	:: Name
+			, adtSumVisibility	:: Visible
+			, adtSumFields	:: [(Maybe Name, Type)]
+			}
 	deriving (Eq, Ord)
 
 

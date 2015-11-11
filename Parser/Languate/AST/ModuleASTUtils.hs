@@ -36,36 +36,34 @@ addStms		:: [(Statement,Coor)] -> Module -> Module
 addStms stms mod
 		= foldr (uncurry $ flip addStm) mod stms
 
+
+statements	= map fst . statements'
+
+-- Given a restricted list, is it a public function?
 isAllowed	:: Restrict -> Name -> Bool
 isAllowed (BlackList items)
 		= not . (`elem` items)
 isAllowed (WhiteList items)
 		= (`elem` items)
 
+isAllowed'	:: Restrict -> Name -> Visible
+isAllowed' restr n
+		= if (isAllowed restr n) then Public else Private
 
--- function declarations in module, which are public/private
-functions	:: Visible -> Module -> [(Name, [Type], [TypeRequirement])]
-functions mode mod
-		= let 	restrict	= exports mod
-			stms	= statements mod in
-		  _censor ((mode == Public) ==) restrict $ concatMap _unpackF stms
+isPublic	:: Visible -> Bool
+isPublic Public	= True
+isPublic _ 	= False
 
-_censor		:: (Bool -> Bool) -> Restrict -> [(Name, [Type], [TypeRequirement])]
-			-> [(Name, [Type], [TypeRequirement])]
-_censor inv restrict
-		= filter (\(nm,_,_) -> inv $ isAllowed restrict nm)
-
+toVisible	:: Bool -> Visible
+toVisible True	= Public
+toVisible False	= Private
 
 
-statements	= map fst . statements'
+isBlacklist	:: Restrict -> Bool
+isBlacklist (BlackList _)	= True
+isBlacklist _	= False
 
-
-_unpackF	:: Statement -> [(Name,[Type], [TypeRequirement])]
-_unpackF (FunctionStm f)
-		= signs f
-_unpackF (ClassDefStm cd)
-		= (\(nm,ts,tr) -> (nm,ts,tr)) <$> decls cd
-_unpackF _	= []
+isWhitelist	= not . isBlacklist
 
 
 imports''	:: Module -> [(Import, Coor)]
