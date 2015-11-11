@@ -64,10 +64,11 @@ t nm cont		=  tokenErr modName nm cont
 
 
 s		:: Name -> [AST] -> AST
-s "prod" (BraceOT:conss)
-		= conss & filter (`notElem` [BraceCT, CommaT]) & Constructors
 s "prod" (CommaT:rest)
 		= s "constructor" rest
+s "prod" (BraceOT:conss)
+		= s "prod" conss
+s "prod" conss	= conss & filter (`notElem` [BraceCT, CommaT]) & Constructors
 s "constructor" []
 		= Constructor Public (seqErr (modName++": Constructor with no name") "constructor" ([]::[AST])) [] []
 s "constructor" (Types tps':rest)
