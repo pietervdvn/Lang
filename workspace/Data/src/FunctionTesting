@@ -1,0 +1,12 @@
+FunctionTesting
+---------------
+Testcode for generating functions
+---------------
+
+import Any
+
+type X (a:Any)	= {X a A, X a A}
+
+
+type A	= {A}
+type B 	= {B}
