@@ -88,13 +88,24 @@ stringType	= RApplied listType charType
 
 
 
--------------------- TOOLS ---------------------------
-
+{-
+The type "(a,b)" is represented as ''(RApplied (RApplied Tuple a) b)''
+The type "(a,b,c)" is represented as "(a,(b,c))", thus
+	''(RApplied (RApplied Tuple a) (RApplied (RApplied Tuple b) c) )''
+-}
+-- as ((tuple as) rest)
 tupledTypes	:: RType -> [RType]
 tupledTypes t@(RApplied (RApplied tupleT a) rest)
  | tupleT == tupleType
 		= a:tupledTypes rest
- | otherwise	= [t]
+ | otherwise	= [t]	-- not a correct application of the tuple type
 tupledTypes t
  | t == voidType= []
  | otherwise	= [t]
+
+
+tupleTypes	:: [RType] -> RType
+tupleTypes []	=  voidType
+tupleTypes [t]	= t
+tupleTypes (t:ts)
+		= RApplied (RApplied tupleType t) (tupleTypes ts)

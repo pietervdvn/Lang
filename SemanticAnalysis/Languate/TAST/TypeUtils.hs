@@ -214,3 +214,12 @@ showRTypeReq nreqs
 showRTypeReq'	:: (Name, [RType]) -> String
 showRTypeReq' (nm, subs)
 		=  nm ++":" ++ intercalate ", " (fmap (st True) subs)
+
+
+
+instance Show Signature where
+	show 	= ssign
+
+ssign	:: Signature -> String
+ssign sign
+	= show (signFQN sign) ++ "." ++ signName sign ++ ": " ++ show (signTypes sign)

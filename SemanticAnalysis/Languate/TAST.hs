@@ -10,14 +10,17 @@ It is this data-structure that all semantic analysis things use or build.
 
 --}
 
-import Languate.TAST.Defaults as TAST
 import Languate.TAST.DefBuiltinTypes as TAST
-import Languate.TAST.DefExpr as TAST
 import Languate.TAST.DefType as TAST
+import Languate.TAST.DefExpr as TAST
+import Languate.TAST.DefFunction as TAST
+
 import Languate.TAST.ExprUtils as TAST
 import Languate.TAST.KindUtils as TAST
 import Languate.TAST.TypeUtils as TAST
 
+
+import Languate.TAST.Defaults as TAST
 
 {-
 
