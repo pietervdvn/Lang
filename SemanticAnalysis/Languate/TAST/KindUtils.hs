@@ -13,7 +13,7 @@ instance Show Kind where
 
 _sk	:: Kind -> String
 _sk Kind = "*"
-_sk k	= k & kindArgs |> show & intercal " ~> " & pars
+_sk k	= k & kindArgs & (++[Kind]) |> show & intercal " ~> " & pars
 
 
 isNormalKind		:: Kind -> Bool

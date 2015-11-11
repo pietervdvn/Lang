@@ -12,6 +12,8 @@ import Languate.TAST.DefType
 import Languate.TAST.Defaults
 import Normalizable
 
+import Control.Arrow
+
 import Data.List as L
 import Data.Map as M
 import Data.Maybe
@@ -140,6 +142,7 @@ freesInRT	=  nub . foldRT frees concat
 freesInReq	:: (Name, [RType]) -> [Name]
 freesInReq (nm, tps)
 		= nm:(tps >>= freesInRT) & nub
+
 
 
 -- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded (defaultFreeNames)
