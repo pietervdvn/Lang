@@ -10,9 +10,11 @@ import Languate.AST
 import Languate.TAST
 
 
+type Generated	= Bool
+
 data FunctionTable
 	= FunctionTable {
-		defined	:: Map Signature Visible
+		defined	:: Map Signature (Visible, Generated)
 		--implementations	:: Map Signature [TClause],
 		--documentation	:: Map Signature (String, [Law])
 		} deriving (Show)
