@@ -58,6 +58,10 @@ applyTypeArgs	:: RType -> [RType] -> RType
 applyTypeArgs t []	=  t
 applyTypeArgs t tps	= L.foldl RApplied t tps
 
+applyTypeArgsFree	:: RType -> [Name] -> RType
+applyTypeArgsFree t frees
+			= applyTypeArgs t (frees |> RFree)
+
 
 appliedTypes	:: RType -> [RType]
 appliedTypes (RApplied bt at)
@@ -160,6 +164,13 @@ subs dict rt
 		assert (L.null overlap) ("The substitution overlaps, target types contain free type variables which are in the source type too: "++commas overlap)
 		let fetch free	= L.lookup free dict & fromMaybe (RFree free)
 		traverseRT (onFree fetch) rt & return
+
+
+subsReq	:: [(Name, Name)] -> RTypeReq -> Exc RTypeReq
+subsReq dict reqs
+	= do	let subsName a	= fromMaybe a $ L.lookup a dict
+		let dict'	= dict ||>> RFree
+		(reqs |> first subsName) |+> onSecond (|+> subs dict')
 
 
 ------------------ NORMALIZING ---------------
