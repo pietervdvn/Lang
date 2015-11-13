@@ -106,7 +106,7 @@ kindOf tt ctx (RCurry t0 t1)
 kindOfReqs	:: Typetable -> [(Name, [RType])] -> Exc [(Name, Kind)]
 kindOfReqs tt reqs
 	= inside "While calculating the kinds on requirements" $
-	  do	let head' lst	= if null lst then anyType else head lst
+	  do	let head' lst	= if L.null lst then anyType else head lst
 		-- we take a representative for each kind
 		let reprs	= reqs 	||>> sort	-- sort so frees are at the end -> lower chance on cycles
 					||>> head'	-- and lets take the first element (or the default Any)
