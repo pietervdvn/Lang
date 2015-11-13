@@ -11,3 +11,8 @@ type X a b	= {X a:a; b:B; c:a, Y a:a}
 
 type A	= {A}
 type B 	= {B}
+
+
+
+cat Test
+	test	: test -> Bool
