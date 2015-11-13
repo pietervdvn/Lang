@@ -14,7 +14,7 @@ The syntactic sugar ''a?'' desugars to ''Maybe a''.
 This type plays an important role within the compiler, as it is used for pattern matching.
 ---
 type Maybe a	= {Nothing	-- Represents the missing value. Always keep ''Nothing'' as first one in the ADT!
-		, Just maybe:a}	-- Constructor with the actual value
+		, Just value:a}	-- Constructor with the actual value
 
 precedence of (?) is right, (?) < (!), (?) < (==)
 
