@@ -24,6 +24,12 @@ instance (Monad m) => Monad (StateT s m) where
 instance MonadTrans (StateT s) where
 	lift ma	= StateT $ \ s -> do	a	<- ma
 					return (a,s)
+instance (Monad m) => Applicative (StateT s m) where
+	pure		= return
+	(<*>) sf sa 	= do 	f	<- sf
+	            		a	<- sa
+    			        return $ f a
+
 
 instance (Monad m) => Functor (StateT s m) where
 	fmap f m	= do	a	<- m

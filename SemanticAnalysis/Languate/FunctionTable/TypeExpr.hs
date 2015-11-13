@@ -1,6 +1,6 @@
 module Languate.FunctionTable.TypeExpr where
 
-import StdDef
+import StdDef hiding (isRight)
 import Exceptions
 import Normalizable
 import HumanUtils hiding (when)

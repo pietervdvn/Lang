@@ -63,10 +63,6 @@ pred		: Nat' -> Nat
 (Succ i)	= i
 Zero		= Zero
 
--- successor, plus one
-succ		: Nat -> Nat'
-		= Succ
-
 -- fibonacci. As (!) is prefix for the boolean functions, it is prefix here too
 (!)		: Nat -> Nat
 0		= 0

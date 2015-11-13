@@ -23,6 +23,17 @@ instance Monad (ConsumerL i e) where
 					exec fn (st, Res a)	= runL (fn a) st
 
 
+instance Applicative (ConsumerL i e) where
+	pure	= return
+	(<*>) cf ca	= do	f	<- cf
+				a	<- ca
+				return $ f a
+
+instance Functor (ConsumerL i e) where
+	fmap f ca	= do	a	<- ca
+				return $ f a
+
+
 abortL			:: ConsumerL i e a
 abortL			=  ConsumerL $ const []
 

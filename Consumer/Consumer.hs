@@ -17,6 +17,7 @@ data Exception i e	= Exception (State i) Message e  -- Original stream, position
 instance Show (Exception i e) where
 	show (Exception (_, _, pos, (line, col)) msg _)	= "Exception while consuming stream at line "++show line ++ ", char "++show col++" (" ++ show pos ++ "): "++msg
 
+
 type State i		= ([i], i, Pos, Position) -- each time the second i is found, the position is incremented
 type Result i e a	= (State i, Outcome e a)
 data Consumer i e a	= Consumer ( State i ->  Result i e a )
@@ -74,6 +75,17 @@ instance Monad (Consumer i e) where
 					exec (st, Res a) fn	= run (fn a) st
 					exec (st, Exc e) _	= (st, Exc e)
 					exec (st, Nope)  _	= (st, Nope)
+
+instance Applicative (Consumer i e) where
+	pure	= return
+	(<*>) cf ca	= do	f	<- cf
+				a	<- ca
+				return $ f a
+
+instance Functor (Consumer i e) where
+	fmap f ca	= do	a	<- ca
+				return $ f a
+	
 
 _const			:: Outcome e a -> State i -> Result i e a
 _const a st		=  (st, a)

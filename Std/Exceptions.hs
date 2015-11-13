@@ -59,6 +59,12 @@ instance Monad (Exceptions w e) where
 	(>>=) (Exceptions ws es (Left e)) _
 			= Exceptions ws es (Left e)
 
+instance Applicative (Exceptions w e) where
+    pure	= return
+    (<*>) ef ea     = do    f   <- ef
+                            a   <- ea
+                            return $ f a
+
 
 instance Functor (Exceptions w e) where
 	fmap f ma 	= do	a <- ma
