@@ -11,7 +11,7 @@ import Languate.CheckUtils
 import Languate.FQN
 import Languate.AST
 import Languate.TAST
-import Languate.Typetable
+import Languate.Typetable hiding (frees)
 import Languate.FunctionTable.ConstructADTFunctions
 import Languate.FunctionTable.Def
 
@@ -19,13 +19,19 @@ import Control.Arrow
 
 
 -- fetches the function signatures that are defined within the statement
-definedFuncSign	:: Module -> TypeLookupTable -> FQN -> Statement -> Exc [(Signature, (Visible, Generated))]
+definedFuncSign	:: Module -> TypeLookupTable -> FQN -> Statement -> Exc [(Signature, (Visible, Generated, Abstract))]
 definedFuncSign m tlt fqn (FunctionStm function)
 	= do	defs	<- signs function |+> resolveSignature tlt fqn
 		visibs	<- defs |+> getVisibility m (visibility function)
-		let visibsGen	= zip visibs (repeat False)
+		let visibsGen	= visibs |> (\visib -> (visib, False, Nothing))
 		return (zip defs visibsGen)
 definedFuncSign m tlt fqn (ADTDefStm adtDef)
-	= adtDefinedFunctions tlt fqn adtDef |||>>> (id &&& const True)
+	= adtDefinedFunctions tlt fqn adtDef |||>>> (\sign -> (sign, True, Nothing))
+definedFuncSign m tlt fqn (ClassDefStm cd)
+	= do	defType	<- resolveType tlt (Normal [] $ name cd)
+		let defFree	= take (length $ frees cd) $ defaultFreeNames
+		let defType'	= applyTypeArgsFree defType defFree
+		signs	<- decls cd |+> resolveSignature tlt fqn
+		return (zip signs $ repeat (Public, False, Just defType'))
 definedFuncSign _ _ _ _
 	= return []

@@ -11,10 +11,11 @@ import Languate.TAST
 
 
 type Generated	= Bool
+type Abstract	= Maybe RType
 
 data FunctionTable
 	= FunctionTable {
-		defined	:: Map Signature (Visible, Generated)
+		defined	:: Map Signature (Visible, Generated, Abstract)
 		--implementations	:: Map Signature [TClause],
 		--documentation	:: Map Signature (String, [Law])
 		} deriving (Show)

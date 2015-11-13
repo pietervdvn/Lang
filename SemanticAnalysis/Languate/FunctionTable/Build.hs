@@ -50,9 +50,9 @@ buildFunctionTable tlts tts fqn mod
 	  do	tlt	<- M.lookup fqn tlts ? ("No tlt for "++show fqn)
 	  	tt	<- M.lookup fqn tts ? ("No tt for "++show fqn)
 		signs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
-				||>> unpackFirst |> concat	:: Exc [((Signature, (Visible, Generated)), Coor)]
+				||>> unpackFirst |> concat	:: Exc [((Signature, (Visible, Generated, Abstract)), Coor)]
 		signs' |> first fst |+> checkSimpleKind tt
-		let signs	= signs' |> fst			:: [(Signature, (Visible, Generated))]
+		let signs	= signs' |> fst			:: [(Signature, (Visible, Generated, Abstract))]
 		let dubble	= signs |> fst & dubbles	:: [Signature]
 		let dubble'	= signs' |> first fst |> second fst & nub	-- throw away visibility and columns, then remove dubbles
 					& L.filter ((`elem` dubble) . fst)
