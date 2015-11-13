@@ -30,14 +30,14 @@ nt (TupleType ts)	= TupleType $ map nt ts
 nt t			= t
 
 
-traverse	:: (Type -> Type) -> Type -> Type
-traverse f (Applied t ts)
-		= Applied (traverse f t) $ map (traverse f) ts
-traverse f (Curry ts)
-		= Curry $ map (traverse f) ts
-traverse f (TupleType ts)
-		= TupleType $ map (traverse f) ts
-traverse f t	= f t
+traverseT	:: (Type -> Type) -> Type -> Type
+traverseT f (Applied t ts)
+		= Applied (traverseT f t) $ map (traverseT f) ts
+traverseT f (Curry ts)
+		= Curry $ map (traverseT f) ts
+traverseT f (TupleType ts)
+		= TupleType $ map (traverseT f) ts
+traverseT f t	= f t
 
 trav		:: (Type -> a) -> ([a] -> a) -> Type -> a
 trav f aggr (Applied t tps)

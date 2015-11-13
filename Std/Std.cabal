@@ -10,4 +10,4 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     StateT, StdDef, State, HumanUtils, Exceptions, Normalizable
-  build-depends:       base ==4.*, mtl ==2.1.*, containers ==0.5.*, directory ==1.*
+  build-depends:       base ==4.*, mtl ==2.*, containers ==0.5.*, directory ==1.*

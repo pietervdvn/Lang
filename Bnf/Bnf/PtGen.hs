@@ -79,6 +79,20 @@ instance Monad Pr where
 	(>>=) (P ma) famb	= P (do	a <- ma
 					let (P famb') = famb a
 					famb')
+
+instance Applicative Pr where
+	(<*>) pf pa	= do	f	<- pf
+				a	<- pa
+				return $ f a
+
+instance Functor Pr where
+	pure	= return
+	fmap f pa	= do	a	<- pa
+				return $ f a
+
+
+
+
 runPr :: Pr c -> String -> Maybe (Either Exception c)
 runPr pr	= outcomeToMaybe . snd . start (unliftP pr) '\n'
 

@@ -4,7 +4,7 @@ module Languate.TypeTable.Bind.Bind where
 This module implements a simple bind, which works on Full Super Type Tables
 --}
 
-import StdDef
+import StdDef hiding (isRight)
 import StateT
 
 import Graphs.DirectedGraph
@@ -35,7 +35,7 @@ import Control.Arrow
 
 
 import Debug.Trace
-import Data.Function
+import Data.Function hiding ((&))
 
 {-
 

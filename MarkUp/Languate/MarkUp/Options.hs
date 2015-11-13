@@ -1,6 +1,6 @@
 module Languate.MarkUp.Options where
 
-import StdDef
+import StdDef hiding (sortOn)
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
 import Languate.MarkUp.HTML

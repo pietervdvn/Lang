@@ -15,4 +15,4 @@ cabal-version:       >=1.8
 library
   exposed-modules:    	Bnf, Bnf.ParseTree, Bnf.Converter
   other-modules:   	Bnf.BNF, Bnf.FQN, Bnf.PtGen, Bnf.Loader.ExportCalculator, Bnf.Loader.Convertor, Bnf.Loader.Loader, Bnf.Meta.Pt2BnfExpr, Bnf.Meta.Pt2Regex, Bnf.Meta.BnfModule, Bnf.Meta.BnfExpr, Bnf.Meta.BnfRegex, Bnf.Meta.Pt2Rule, Bnf.Meta.Pt2Import, Bnf.Meta.Parser, Bnf.Meta.Pt2Meta, Bnf.Meta.IOModule, Bnf.Meta.Pt2Module, Bnf.Meta.Pt2FQN , Bnf.Loader.Check
-  build-depends:       base ==4.*, mtl ==2.1.*, filepath ==1.3.*, containers ==0.5.*, Consumer ==0.1.*, Regex ==0.1.*, directory ==1.2.*, Std ==0.1.*
+  build-depends:       base ==4.*, mtl ==2.*, filepath ==1.*, containers ==0.5.*, Consumer ==0.1.*, Regex ==0.1.*, directory ==1.2.*, Std ==0.1.*

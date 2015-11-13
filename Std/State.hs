@@ -13,6 +13,12 @@ instance Monad (State s) where
 			help sa fastb s	=  let	(a,s1)	= runstate sa s
 					   in	runstate (fastb a) s1
 
+instance Applicative (State s) where
+	pure		= return
+	(<*>) sf sa 	= do 	f	<- sf
+	            		a	<- sa
+    			        return $ f a
+
 instance Functor (State s) where
 	fmap	= liftM
 
