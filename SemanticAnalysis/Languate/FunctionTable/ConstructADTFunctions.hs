@@ -16,6 +16,7 @@ import Languate.Typetable
 
 import Data.Maybe
 import Data.List as L
+import Data.Char (toUpper)
 
 import Control.Arrow
 
@@ -103,29 +104,120 @@ Requirements
 -}
 
 buildFieldFunctions	:: FQN -> RType -> [Name] -> RTypeReq -> [TADTSum] -> Exc [(Signature, Visible)]
--- TODO pickup!
 buildFieldFunctions fqn defType frees reqs sums
 	= do	sums |+> checkNoDubblefields
-		checkSameTypesVisibs' sums
-		return []
+		let perField	= perFieldname sums	:: [(Name,[(Name, (RType, Visible))])]
+		perField |+> checkSameTypesVisibs
+		let perField'	= perField |> second perFieldname'	:: [(Name,([Name], RType, Visible))]
+		let nrOfConss	= length sums
+		let lockedFrees	= buildLockedFrees reqs sums
+		-- closure, as this function is a bit long to invoke!
+		let buildFieldFunctionsSign'	= buildFieldFunctionsSign fqn nrOfConss defType frees lockedFrees reqs
+		fieldFuncs'	<- perField' |+> (\(fieldName, (conss, rtp, vis)) ->
+							do	signs	<- buildFieldFunctionsSign' fieldName conss rtp
+								return (zip signs (repeat vis)) )
+		let fieldFuncs	= concat fieldFuncs'
+		return fieldFuncs
 
-{- TODO checks on fields
-	- fields with the same name should have the same types and visibilities
+
+
+-- builds the signature for a given fieldname, over multiple constructors. We assume types are the same over all constructors, this has been checked previously
+{-
+arguments:
+fqn
+number of contstructors; if all constructors have the same field, we can skip the maybes
+the type that is declared by the ADTProd
+it's free type variables
+free type variables which might nog be changed, {cons name --> all frees used in this constructor}
+	type X a = {X a:a}
+	setA : (a -> b) -> X a -> X b -- ok
+	type Y a = {Y a:a b:a}
+	setA : (a -> b) -> Y a -> Y b -- not ok, what to do with field b?
+	type Z a = {Z0 a:a b:a, Z1 c:a}
+	setC : (a -> b) -> Z a -> Z b -- this one is fine!
 -}
+buildFieldFunctionsSign	:: FQN -> Int -> RType -> [Name] -> LockedFrees -> RTypeReq -> Name -> [Name] -> RType ->
+				Exc [Signature]
+buildFieldFunctionsSign fqn nrOfConstructors defType frees lockedFrees reqs fieldName conss fieldType
+	= do 	let fullType	= applyTypeArgs defType (frees |> RFree)
+		let mkSign n tp	= Signature fqn n ([tp], reqs)	:: Signature
+		-- ## field getter
+		-- wrapper: if the field occurs in all constructors, no maybe wrapping is needed
+		let wrapper	= if nrOfConstructors == length conss then id
+					else RApplied maybeType
+		let getT	= RCurry fullType (wrapper fieldType)
 
+		-- ## field modifier function
+		-- free types in this field
+		let fieldTypeFrees	= freesInRT fieldType
+		-- what frees can we freely change? (pun intended)
+		let unchangeable'	= consFrees lockedFrees & L.filter ((`elem` conss) . fst) >>= snd
+		let unchangeable	= unchangeable' ++ freesInConstraints lockedFrees	:: [Name]
+		let changeable	= fieldTypeFrees L.\\ unchangeable
+		let newFreeNames	= defaultFreeNames & L.filter (`notElem` frees) & take (length changeable)
+		let mapping	= zip changeable newFreeNames
+		let newFrees	= frees |> (\a -> fromMaybe a $ L.lookup a mapping)
+		newFieldTyp	<- subs (mapping ||>> RFree) fieldType
+		newDefTyp	<- subs (mapping ||>> RFree) defType
+		newReqs'	<- subsReq mapping reqs
+		-- of course, both the old and new constraints are still in effect!
+		let newReqs	= reqs ++ newReqs'
+		-- actual construction of the change function signatures
+		let defType'	= applyTypeArgsFree defType frees
+		let newDefType'	= applyTypeArgsFree newDefTyp newFrees
+		let modifierT	= RCurry (RCurry fieldType newFieldTyp) (RCurry defType' newDefType')
+
+		-- ## Setter
+		let setterName	= "set"++ [toUpper (head fieldName)] ++ tail fieldName
+		let setterT	= RCurry newFieldTyp (RCurry defType' newDefType')
+
+		return [mkSign fieldName getT, mkSign fieldName modifierT, mkSign setterName setterT]
+
+{- chops and dices {constructor --> (attached type, visibility)}
+ into [constructors], (attached type, visibility)
+-}
+perFieldname'	:: [(Name, (RType, Visible))] -> ([Name],RType, Visible)
+perFieldname' vals
+	= vals 	& unzip	-- ([Name],[RType, Visible])
+		|> head	& (\(conss, (rt, vis)) -> (conss, rt, vis))
+
+
+-- chops and dices TADTsums into {fieldName --> {constructor --> (attached type, visibility)}}
+perFieldname	:: [TADTSum] -> [(Name,[(Name, (RType, Visible))])]
+perFieldname sums
+	= let	raw = sums >>= (\(TADTSum name vis fields) -> zip fields (repeat (name, vis)))	:: [((Maybe Name, RType),(Name, Visible))]
+		-- fieldname, type, consname, visibility
+		namedFields	= raw |> first (unpackFirst) |> unpackFirst & catMaybes	:: [((Name, RType),(Name, Visible))]
+		-- {fieldname --> (consName, typ, vis)}
+		perField	= namedFields |> (\((field, typ), (cons,vis)) -> (field, (cons, (typ, vis))) )
+						:: [(Name,(Name, (RType, Visible)))] in
+		perField & merge
+
+
+data LockedFrees
+	= LockedFrees { freesInConstraints	:: [Name]	-- frees which are used in other constraints. Should never be changed by the fields
+			, consFrees		:: [(Name, [Name])]	-- what constructor uses what frees? Frees are NOT nubbed!
+			}
+	deriving (Show)
+
+
+buildLockedFrees	:: RTypeReq -> [TADTSum] -> LockedFrees
+buildLockedFrees rtreqs sums
+	=  let	lockedInReq	= rtreqs >>= snd >>= freesInRT
+		-- {consname --> [ [frees, in, field 1], [frees, in, field 2] ]}
+		fieldFrees	= sums 	|> (tadtSumName &&& tadtSumFields)
+					|||>>> (freesInRT . snd)
+					:: [(Name, [[Name]])]
+		-- frees are locked if, for the given constructor, the free occurs in multiple fields
+		-- each sublist is nubbed -> we concat, dubbles occur more!
+		-- [[Name]] -> [Name]
+		lockedFreesIn l	= l |> nub & concat & dubbles
+		lockedFrees	= fieldFrees ||>> lockedFreesIn
+		in
+		LockedFrees lockedInReq lockedFrees
 
 
 ----------------- CHECKS ---------------
-
-checkSameTypesVisibs'	:: [TADTSum] -> Check
-checkSameTypesVisibs' sums
-	= do	let raw = sums >>= (\(TADTSum name vis fields) -> zip fields (repeat (name, vis)))	:: [((Maybe Name, RType),(Name, Visible))]
-		-- fieldname, type, consname, visibility
-		let namedFields	= raw |> first (unpackFirst) |> unpackFirst & catMaybes	:: [((Name, RType),(Name, Visible))]
-		-- {fieldname --> (consName, typ, vis)}
-		let perField	= namedFields |> (\((field, typ), (cons,vis)) -> (field, (cons, (typ, vis))) )
-					& merge	:: [(Name,[(Name, (RType, Visible))])]
-		perField |+> checkSameTypesVisibs
 
 checkSameTypesVisibs	:: (Name,[(Name, (RType, Visible))]) -> Check
 checkSameTypesVisibs (fieldName, consTpsVis)
@@ -135,7 +227,7 @@ checkSameTypesVisibs (fieldName, consTpsVis)
 		let faulty	= zip cons tps & L.filter (flip elem diff . snd)
 		let faulty'	= faulty |> (\(cons, tp) ->"\n"++show fieldName++" in the constructor "++show cons++"\thas the type "++show tp)
 					& concat & indent
- 	  	assert (length faulty == 1) $ "Fields within different constructors should have the same type, but:"++faulty'
+ 	  	assert (length diff == 1) $ "Fields within different constructors should have the same type, but:"++faulty'
  	  	let diffVis	= nub vis
  	  	assert (length diffVis == 1) $ "Fields within different constructors should have the same visibility, but:"++
  	  			(zip cons vis |> (\(cons, vis) -> "\n"++show fieldName++" in the constructor "++show cons++" is "++show vis )
