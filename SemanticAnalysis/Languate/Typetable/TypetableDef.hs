@@ -105,15 +105,15 @@ kindOf tt ctx (RCurry t0 t1)
 
 kindOfReqs	:: Typetable -> [(Name, [RType])] -> Exc [(Name, Kind)]
 kindOfReqs tt reqs
-	= inside ("While calculating the kinds on requirements") $
-	  do	let head' lst	= if length lst == 0 then anyType else head lst
+	= inside "While calculating the kinds on requirements" $
+	  do	let head' lst	= if null lst then anyType else head lst
 		-- we take a representative for each kind
 		let reprs	= reqs 	||>> sort	-- sort so frees are at the end -> lower chance on cycles
 					||>> head'	-- and lets take the first element (or the default Any)
 		-- we look for direct cycles
 		let cyclesDG	= reprs & L.filter (isRFree . snd) ||>> (\(RFree a) -> S.singleton a) & M.fromList
 					:: DirectedGraph Name
-		let cyclesDG'	= reprs & L.filter (not . isRFree . snd) ||>> (const S.empty) & M.fromList
+		let cyclesDG'	= reprs & L.filter (not . isRFree . snd) ||>> const S.empty & M.fromList
 		let order	= buildOrdering (M.union cyclesDG cyclesDG')
 		let msg cycles	= "The free type variables contain cycles, what makes calculating the kind impossible. Cycles are:"
 					++ (cycles |> commas |> ("\n"++) & concat)	:: String
@@ -122,9 +122,8 @@ kindOfReqs tt reqs
 		-- now we can actually calc. the kinds of each, with a fixing function
 		let ordered	= ordering & reverse |> (id &&& id) & flip buildMapping reprs	:: [(Name, RType)]
 		-- and now we can -value by value- calculate the kinds
-		kinds	<- foldM (\known (name, rtp) -> do	kind	<- kindOf tt known rtp
-								return ((name, kind):known)) [] ordered
-		return kinds
+		foldM (\known (name, rtp) -> do	kind	<- kindOf tt known rtp
+						return ((name, kind):known)) [] ordered
 
 
 

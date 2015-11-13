@@ -41,8 +41,8 @@ buildFunctionTables	:: Package
 				-> Map FQN Typetable
 				-> Map FQN Module
 				-> Exc (Map FQN FunctionTable)
-buildFunctionTables p tlts tts mods
- 	= dictMapM (buildFunctionTable tlts tts) mods
+buildFunctionTables p tlts tts
+ 	= dictMapM (buildFunctionTable tlts tts)
 
 buildFunctionTable	:: Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> Module -> Exc FunctionTable
 buildFunctionTable tlts tts fqn mod

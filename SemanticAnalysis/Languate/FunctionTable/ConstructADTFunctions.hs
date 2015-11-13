@@ -187,7 +187,7 @@ perFieldname	:: [TADTSum] -> [(Name,[(Name, (RType, Visible))])]
 perFieldname sums
 	= let	raw = sums >>= (\(TADTSum name vis fields) -> zip fields (repeat (name, vis)))	:: [((Maybe Name, RType),(Name, Visible))]
 		-- fieldname, type, consname, visibility
-		namedFields	= raw |> first (unpackFirst) |> unpackFirst & catMaybes	:: [((Name, RType),(Name, Visible))]
+		namedFields	= raw |> first unpackFirst |> unpackFirst & catMaybes	:: [((Name, RType),(Name, Visible))]
 		-- {fieldname --> (consName, typ, vis)}
 		perField	= namedFields |> (\((field, typ), (cons,vis)) -> (field, (cons, (typ, vis))) )
 						:: [(Name,(Name, (RType, Visible)))] in

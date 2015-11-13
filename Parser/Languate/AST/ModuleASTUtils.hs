@@ -48,7 +48,7 @@ isAllowed (WhiteList items)
 
 isAllowed'	:: Restrict -> Name -> Visible
 isAllowed' restr n
-		= if (isAllowed restr n) then Public else Private
+		= if isAllowed restr n then Public else Private
 
 isPublic	:: Visible -> Bool
 isPublic Public	= True
