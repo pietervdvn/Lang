@@ -12,7 +12,13 @@ type X a b	= {X a:a; b:B; c:a, Y a:a}
 type A	= {A}
 type B 	= {B}
 
+cat Test0 (a:A)
+	> True
 
 
-cat Test
-	test	: test -> Bool
+cat Test a: Test0 a
+	test	: test a -> Bool
+
+
+
+subtype Y a b	= X a b
