@@ -24,10 +24,10 @@ import Control.Arrow
 
 {-
 How are the function tables built?
--- TODO: all below this line
 -> We start by looking what functions are defined, with the according types
 	- we check for double defined functions
 	- we check that functions have an appropriate, simple kind
+-- TODO: all below this line
 -> We propagate these definitions, so that each module knows what functions are visible
 -> We build the implementations of these defined functions
 	- and typecheck those
@@ -58,8 +58,16 @@ buildFunctionTable tlts tts fqn mod
 					& L.filter ((`elem` dubble) . fst)
 					|> (\(sign, line) -> show sign ++" "++pars ("line "++show line))
 		assert (L.null dubble) ("Some functions are declared multiple times:"++indent (dubble' >>= ("\n"++)))
-		return $ FunctionTable $ M.fromList signs
 
+		let metas	= signs' |> first fst |> second (buildMeta mod)
+		return $ FunctionTable (M.fromList signs) (M.fromList metas)
+
+
+
+buildMeta	:: Module -> Coor -> MetaInfo
+buildMeta mod coor
+	= let	(comms, docs, laws, annots)	= searchMeta mod coor in
+		MetaInfo coor laws comms docs annots
 
 
 
