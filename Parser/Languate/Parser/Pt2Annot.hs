@@ -1,4 +1,4 @@
-module Languate.Parser.Pt2Annot (pt2annot)where
+module Languate.Parser.Pt2Annot (pt2annot, pt2annot')where
 
 import StdDef
 import Bnf.ParseTree
@@ -18,7 +18,7 @@ modName	= "Pt2Annot"
 
 
 pt2annot	:: ParseTree -> Annotation
-pt2annot	= pt2a [("annotation", pt2annot)] (tokenErr $ "top level:"++ modName) seq' id
+pt2annot	= pt2a [("annotation", pt2annot')] (tokenErr $ "top level:"++ modName) seq' id
 
 
 seq'		:: Name -> [Annotation] -> Annotation
@@ -50,5 +50,7 @@ t _ cont	= Cont cont
 s		:: Name -> [AST] -> AST
 s _ [AtT, Ident name, ColonT, Cont cont]
 		= Annot name cont
+s _ [AtT, Ident name]
+		= Annot name ""
 s _ [ast]	= ast
 s nm asts	= seqErr modName nm asts
