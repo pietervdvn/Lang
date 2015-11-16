@@ -47,6 +47,11 @@ pt' world rule str
 					Left exception	-> error $ show exception
 			return pt
 
+ptf		:: FilePath -> IO ParseTree
+ptf fp		= do	world	<- Bnf.load "bnf/Languate"
+			str	<- readFile fp
+			pt' world "module" str
+
 cachedpt	= pt' world
 
 

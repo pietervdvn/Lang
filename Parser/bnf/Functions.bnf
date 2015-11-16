@@ -38,7 +38,7 @@ declaration	::= "_"? (localIdent | "\(" op "\)" ) subTypeT typeConj
 
 -- functions might have multiple types too
 _patterns	::= patternRoot*
-_clause		::= patterns "=" expr (nltab expr)*
+_clause		::= patterns nltab? "=" nltab? expr (nltab expr)*
  function	::= (declaration nl)+ (clause nl)+
 
 {-

@@ -134,6 +134,8 @@ se (Cast t)	= "~("++show t++")"
 se AutoCast	= "~~"
 se (Call str)	= str
 se (Operator str)= str
+se (ExpNl (Just comm))
+		= "---"++comm++"---"
 se _	= ""
 
 

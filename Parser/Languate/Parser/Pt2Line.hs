@@ -46,7 +46,11 @@ t nm cont	=  tokenErr modName nm cont
 
 s		:: Name -> [AST] -> AST
 s "patterns" asts
-		= Patterns $ map (\(Pattern p) -> p) asts 
+		= Patterns $ map (\(Pattern p) -> p) asts
+s r (pats:NlT cont:Equals:tail)
+		= s r (pats:Equals:NlT cont:tail)
+s r (NlT cont:Equals:tail)
+		= s r (Equals:NlT cont:tail)
 s _ tail@(NlT cont:_)
 		= Tail tail
 s _ (Patterns pats: Equals:tail)
@@ -66,5 +70,3 @@ getExprs (NlT cont:tail)
 getExprs (Tail tail:rtail)
 		= getExprs (tail++rtail)
 getExprs asts	= convErr "Pt2Line-getExprs" asts
-
-
