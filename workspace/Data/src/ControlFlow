@@ -4,6 +4,7 @@ Some miscallaneous, control flow functions, such as id, const, flip, if, ...
 -----------
 
 import Data.Bool
+import Category.Eq
 
 -- The identity function, returns it's argument
 > id 42		= 42

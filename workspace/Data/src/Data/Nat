@@ -18,6 +18,7 @@ type Nat'	= {Succ Nat}
 -- A natural number, which might be zero
 type Nat	= Zero + Nat'
 
+
 instance Nat is Eq
 
 

@@ -7,18 +7,8 @@ import Any
 import Data.Bool
 import Collection.Tuple
 
-type X a b	= {X a:a; b:B; c:a, Y a:a}
-
-type A	= {A}
-type B 	= {B}
-
-cat Test0 (a:A)
-	> True
-
-
-cat Test a: Test0 a
-	test	: test a -> Bool
-
-
-
-subtype Y a b	= X a b
+f	: Bool -> Bool -> Bool
+True True	-- comment 0
+	=	-- comment 1
+	True	-- comment 2
+		& True
