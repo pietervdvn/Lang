@@ -76,10 +76,27 @@ imports'	=  map fst . imports''
 docStrings	:: Module -> [((Name, Name), Comment)]
 docStrings	=  concatMap isDocstr . statements
 
+
 isDocstr	:: Statement -> [((Name, Name), Comment)]
 isDocstr (DocStringStm docs)
 		= map (about &&& comment) docs
 isDocstr _	= []
+
+
+isComment (Comments _)
+		= True
+isComment _	= False
+
+
+isLaw (LawStm _)
+		= True
+isLaw _		= False
+
+
+isAnnotation (AnnotationStm _)
+		= True
+isAnnotation _	= False
+
 
 -- Docstrings for consructors in ADTs, or for functions within categories (Typename, functionname)
 docstringFor	:: Module -> (Name,Name) -> Maybe Comment
@@ -95,6 +112,25 @@ searchCommentAbove m n 	= _sca (statements m) n Nothing
 searchCommentAbove'	:: Module -> Coor -> Maybe Comment
 searchCommentAbove' m c	= statements' m & break ((==) c . snd) & fst	-- take the statements before the coordinate
 				|> fst & reverse |> commentIn & catMaybes & listToMaybe
+
+-- searches above the given coordinate for comments, laws and annotations about this declaration. Precedence statements are not returned, but do not cause to stop searching upwards
+searchMeta	:: Module -> Coor -> ([(Comment, Coor)],[(((Name, Name), Comment), Coor)], [(Law, Coor)], [(Annotation, Coor)])
+searchMeta m c	= let 	stms	= statements' m & break ((==) c . snd) & fst	-- take the statements before the coordinate
+					& reverse & break (not . isMeta . fst) & fst	-- filter only the part that is meta about
+			comms	= (stms & filter (isComment . fst)) >>= onFirst (\(Comments comms) -> comms)
+			docs	= stms >>= onFirst isDocstr		:: [(((Name, Name), Comment), Coor)]
+			laws	= stms & filter (isLaw . fst) 		|> first (\(LawStm law) -> law)
+			annots	= stms & filter (isAnnotation . fst)	|> first (\(AnnotationStm annot) -> annot)
+			in
+			(comms, docs, laws, annots)
+
+isMeta		:: Statement -> Bool
+isMeta (LawStm _)	= True
+isMeta (Comments _)	= True
+isMeta (DocStringStm _)	= True
+isMeta (AnnotationStm _)	= True
+isMeta (PrecedenceStm _)	= True
+isMeta _	= False
 
 _sca		:: [Statement] -> (Statement -> Bool) -> Maybe Comment -> Maybe Comment
 _sca (stm:stms) f lastComment
