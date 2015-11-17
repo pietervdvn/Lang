@@ -6,7 +6,6 @@ import Bnf
 import Languate.Parser.Utils
 import Languate.Parser.Pt2Type
 import Languate.Parser.Pt2Expr
-import Languate.Parser.Pt2TypeConj
 import Languate.AST
 
 import Data.Maybe
@@ -45,8 +44,7 @@ data AST	= Tilde	| Bird	| Colon	| Equals
 
 h		:: [(Name, ParseTree -> AST)]
 h		=  [ ("expr", Expr . pt2expr)
-			, ("type", uncurry Types . first (:[]) . pt2type)
-			, ("typeConj", uncurry Types . pt2typeConj)]
+			, ("type", uncurry Types . first (:[]) . pt2type)]
 
 t		:: Name -> String -> AST
 t _ "~"		=  Tilde

@@ -35,11 +35,11 @@ public import Prelude
  $typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
  knownType	::= %((globalIdent moduleSep)* typeIdent)
  $freeType	::= localIdent & !subTypeT
- parFreeType	::= freeType subTypeT (simpleType | "\(" type "\)")
+ parFreeType	::= freeType subTypeT simpleType
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
 _$dontCare	::= "_"		-- we don't care about the type
-_simpleType	::= knownType | freeType | constrFreeType | void | dontCare | "\(" type "\)"
+_simpleType	::= constrFreeType | knownType | freeType | void | dontCare | "\(" type "\)"
 
 
 -- used for lists of tuples. ''[Int, Bool]'' = ''[(Int, Bool)]''
@@ -51,13 +51,13 @@ _dict		::= "\{" commaSepTypes "-->" commaSepTypes "\}"
 _tuple		::= "\(" type ("," type)+ "\)"
 
 -- type without space (or withing a delimiter)
-baseType	::= (dict | set | list | tuple | simpleType) "[?]"?
-appliedType	::= ((knownType | constrFreeType) baseType+) | baseType
+baseType	::= (dict | set | list | tuple | simpleType)
+appliedType	::= (simpleType baseType+) | baseType
 _typeConj	::= appliedType (typeConjT typeConj)*
 
-_curry		::= typeConj ("->" typeConj)+
+_curry		::= typeConj ("->" typeConj)*
 
-type		::= curry | typeConj
+type		::= curry
 
 
 {-

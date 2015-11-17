@@ -43,6 +43,8 @@ convert (CurryType asts)
 		=  packReqs Curry asts
 convert (Conj asts)
 		= packReqs TypeConj asts
+convert (MultiType [t])
+		= convert t
 convert	ast	=  convErr "Pt2Type" ast
 
 noReq		:: Type -> (Type,[a])
