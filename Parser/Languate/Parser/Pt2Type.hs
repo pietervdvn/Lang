@@ -136,11 +136,11 @@ s "typeConj" [Conj tps]
 s "typeConj" typs
 		= Conj typs
 
-s "curry" [Currow, typ]
+s "type" [Currow, typ]
 		= typ
-s "curry" [typ, MultiType typs]
+s "type" [typ, MultiType typs]
 		= CurryType $ typ:typs
-s "curry" typs	= MultiType typs
+s "type" typs	= MultiType typs
 s "baseType" [ast, MaybeT]
 		= AppliedType (KnownType [] "Maybe") [ast]
 s "baseType" [ast, CollectionT]

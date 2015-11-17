@@ -16,7 +16,7 @@ A ''Collection'' which preserves order and allows duplicate elements.
 The syntactic sugar ''[a]'' desugars to ''List a''
 ---
 type List a	= {Empty} + (List' a)
-type List' a	= {Elem head:a; tail:List a}
+type List' a	= {Elem a (List a)}
 
 instance List a is Set a
 
@@ -26,12 +26,12 @@ f (Elem head tail)	= Elem (f head) (map f tail)
 
 
 -- Gives the first element of the list, Nothing if this list was empty
-head		: [a] -> a?
+head		: [a] -> Maybe a
 Empty		= Nothing
 (Elem a _)	= Just a
 
 -- Drops the first element of the list, returns nothing for an empty list
-tail		: [a] -> [a]?
+tail		: [a] -> Maybe [a]
 (Elem _ tail)	= Just tail
 Empty		= Nothing
 
@@ -55,7 +55,7 @@ empty		: [a]
 
 precedence of (:) is right, (:) < (+)
 
-(:)		: (b:a) -> [a] -> [a]
+(:)		: b:a -> [a] -> [a]
 		= Elem
 
 

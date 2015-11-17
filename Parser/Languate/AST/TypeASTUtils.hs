@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav, normalize) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav, normalize, topLevelConj) where
 
 {--
 This module implements utilities for type asts

@@ -7,8 +7,12 @@ import Any
 import Data.Bool
 import Collection.Tuple
 
-f	: Bool -> Bool -> Bool
-True True	-- comment 0
-	=	-- comment 1
-	True	-- comment 2
-		& True
+type A	= {A}
+type B	= {B}
+
+cat C in A & B
+	 > True
+
+type D	= A & B
+subtype E = A
+type F	= {F} + A

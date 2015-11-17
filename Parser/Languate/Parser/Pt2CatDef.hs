@@ -1,4 +1,4 @@
-module Languate.Parser.Pt2ClassDef (pt2classDef, pt2instance) where
+module Languate.Parser.Pt2CatDef (pt2catDef, pt2instance) where
 
 import StdDef
 import Bnf.ParseTree
@@ -9,7 +9,6 @@ import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2Type
-import Languate.Parser.Pt2TypeConj
 
 import Languate.AST
 import Control.Arrow
@@ -25,15 +24,15 @@ See bnf for usage
 
 --}
 
-modName	= "Pt2ClassDef"
+modName	= "Pt2CatDef"
 
-pt2classDef	:: ParseTree -> ([DocString (Name, Name)], ClassDef)
-pt2classDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
+pt2catDef	:: ParseTree -> ([DocString (Name, Name)], ClassDef)
+pt2catDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
 
 convert		:: AST -> ([DocString (Name, Name)], ClassDef)
-convert (Clss name frees subs reqs asts)
+convert (Clss name frees supers reqs asts)
 		=  let 	(laws, declarations, docs)	= triage name asts
-			classDef	= ClassDef name frees reqs subs laws $ injectTypeReq name declarations in
+			classDef	= ClassDef name frees reqs (supers >>= topLevelConj) laws $ injectTypeReq name declarations in
 			(docs, classDef)
 convert ast	=  convErr modName ast
 
@@ -52,7 +51,7 @@ data AST	= Clss Name [Name] [Type] [TypeRequirement] [AST]
 		| Lw Law
 		| Comm Comment
 		| SubClassOf [Type] [TypeRequirement]
-		| Decl (Name, [Type], Visible, [TypeRequirement])
+		| Decl (Name, Type, Visible, [TypeRequirement])
 		| FreeT [Name] [TypeRequirement]
 		| Type Type [TypeRequirement]
 		| ClassT	| SubClassT
@@ -77,7 +76,7 @@ t "globalIdent" n
 t _ ('\n':_)	=  NlT
 t _ "cat"	=  ClassT
 t _ "category" = ClassT
-t "subTypeT" _	= SubClassT
+t "subTypeWords" _	= SubClassT
 t nm cont	=  tokenErr modName nm cont
 
 
@@ -110,7 +109,7 @@ triage _ []
 triage catName 	(Lw law:tail)
 		= first3 (law:) $ triage catName tail
 triage catName (Decl (n,t,v,reqs):tail)
-		= second3 ((n,t,reqs):) $ triage catName tail
+		= second3 ((n,topLevelConj t,reqs):) $ triage catName tail
 triage catName (Comm c:tail)
 		= let 	(lws, sign, oldDocs)	= triage catName tail
 			newDocs	= buildDocsFor catName c (map fst3 sign) oldDocs in
@@ -159,6 +158,8 @@ hi		=  [("type", uncurry TypeT . pt2type)
 ti		:: Name -> String -> ASTi
 ti _ "instance"	=  InstanceT
 ti "subTypeT" _	=  SubT
+ti "subTypeWords" _
+		= SubT
 
 ti nm cont	=  tokenErr (modName++"i") nm cont
 

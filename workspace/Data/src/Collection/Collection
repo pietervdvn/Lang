@@ -20,11 +20,11 @@ The syntactic sugar ''a*'' desugars to ''Collection a''
 ---
 cat Collection a
 	-- Gives the first element of the collection
-	head	: collection a -> (b:a)?
+	head	: collection a -> Maybe (b:a)
 	-- Gives the entire collection without the element that head gives
-	tail	: collection a -> (collection (b:a))?
+	tail	: collection a -> Maybe (collection (b:a))
 	-- Gives the first element of the collection, only if exactly one element is in the collection
-	singleton	: collection a -> (b:a)?
+	singleton	: collection a -> Maybe (b:a)
 	-- empty constructor
 	empty	: collection a
 	-- empty the given collection. In other words, start a new collection with the same internal structure
@@ -36,6 +36,6 @@ cat Collection a
 	(:)	: (a:b) -> collection b -> collection b
 
 
-instance Collection (a:Eq) is Eq
+instance Collection a:Eq is Eq
 
 precedence of (:) is Right

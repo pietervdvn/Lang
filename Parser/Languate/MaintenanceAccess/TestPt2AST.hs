@@ -6,27 +6,27 @@ import Data.Maybe
 import Bnf.ParseTree
 
 import Languate.Parser.Pt2Type
-import Languate.Parser.Pt2Expr
 import Languate.Parser.Pt2Annot
 import Languate.Parser.Pt2Comment
+import Languate.Parser.Pt2Expr
 import Languate.Parser.Pt2Law
-import Languate.Parser.Pt2Line
 import Languate.Parser.Pt2Pattern
 import Languate.Parser.Pt2Prelude
 import Languate.Parser.Pt2Import
+import Languate.Parser.Pt2Line
 import Languate.Parser.Pt2DataDefSum
 import Languate.Parser.Pt2DataDefProd
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2Declaration
 import Languate.Parser.Pt2Function
 import Languate.Parser.Pt2Precedence
-import Languate.Parser.Pt2ClassDef
+import Languate.Parser.Pt2CatDef
 import Languate.Parser.Pt2Statement
 import Languate.Parser.Pt2Languate
 import Languate.Parser.Pt2SubTypeDef
-import Languate.Parser.Pt2TypeConj
+{-
 import Languate.File2AST
-
+-}
 
 import System.IO.Unsafe
 import StdDef
@@ -48,7 +48,7 @@ help	= putStrLn "Usage:\ntst <function to test, e.g. pt2mod\n\n> \"rule to parse
 ts rule str	=  pt rule str >>= print . simplify
 tr rule str	= pt rule str >>= print
 
-tf'		= tf pt2mod "module"
+-- tf'		= tf pt2mod "module"
 
 tf		:: (ParseTree -> a) -> Name -> FilePath -> a
 tf convertor rule fp

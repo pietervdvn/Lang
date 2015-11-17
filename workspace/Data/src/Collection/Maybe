@@ -22,12 +22,12 @@ precedence of (?) is right, (?) < (!), (?) < (==)
 -- ~ id: a,x => (Just a) ? x = a
 -- > Nothing ? 1	= 1
 -- > (Just 42) ? 1	= 42
-(?)		: a? -> a -> a
+(?)		: Maybe a -> a -> a
 (Just a) _	= a
 _ 	 a	= a
 
 
-firstJust	: a? -> a? -> a?
+firstJust	: Maybe a -> Maybe a -> Maybe a
 a@(Just _) _	= a
 _ b		= b
 

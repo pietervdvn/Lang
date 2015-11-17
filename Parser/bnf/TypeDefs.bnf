@@ -59,7 +59,7 @@ data _Btree (a: Ord) (b:[a])
  -- SUB DEF --
  -------------
 
- subtypeDecl	::= "subtype" typeIdent freeTypes "=" "_"? type
+ subtypeDecl	::= "subtype" "_"? typeIdent freeTypes "=" type
 
  ------------------------
  -- CATEGORY+INSTANCE DEF --
@@ -67,12 +67,12 @@ data _Btree (a: Ord) (b:[a])
 
 -- comments are obligated, but it's not the parsers task to generate error messages
  catDecl	::= ("category"|"cat") globalIdent freeTypes subclass? categoryBody
-_subclass	::= subTypeT type
+_subclass	::= subTypeWords type
 _categoryBody	::= categoryStm*
 _categoryStm	::= "\n+\t" (law | declaration | mlcomment | comment)
 
  -- ''instance Set (a:Show) is Show'',
- instance	::= "instance" knownType constrFreeType* subTypeT type
+ instance	::= "instance" knownType constrFreeType* subTypeWords type
 
 
 

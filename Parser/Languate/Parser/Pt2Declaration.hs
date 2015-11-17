@@ -3,9 +3,9 @@ module Languate.Parser.Pt2Declaration (pt2decl) where
 import StdDef
 import Bnf.ParseTree
 import Bnf hiding (simpleConvert)
-import Languate.Parser.Pt2TypeConj
 import Languate.AST
 import Languate.Parser.Utils
+import Languate.Parser.Pt2Type
 
 
 {--
@@ -20,24 +20,24 @@ functionName	: _
 
 --}
 
-pt2decl	:: ParseTree -> (Name, [Type], Visible, [TypeRequirement])
+pt2decl	:: ParseTree -> (Name, Type, Visible, [TypeRequirement])
 pt2decl	= pt2a h t s convert
 
-convert		:: AST -> (Name, [Type], Visible, [TypeRequirement])
+convert		:: AST -> (Name, Type, Visible, [TypeRequirement])
 convert (Decl nm t v reqs)
 		= (nm, t, v, reqs)
 convert ast	= convErr "pt2Declaration" ast
 
-data AST	= Type [Type] [TypeRequirement]
+data AST	= Type Type [TypeRequirement]
 		| Ident Name
 		| Colon	| ParO	| ParC
 		| Underscore	-- private token
-		| Decl Name [Type] Visible [TypeRequirement]
+		| Decl Name Type Visible [TypeRequirement]
 	deriving (Show)
 
 
 h		:: [(Name, ParseTree -> AST)]
-h 		= [("typeConj", uncurry Type . pt2typeConj)]
+h 		= [("type", uncurry Type . pt2type)]
 
 t		:: Name -> String -> AST
 t "localIdent" id
@@ -59,6 +59,6 @@ s _ [ParO, Ident id, ParC]
 s _ [Ident nm, Colon, Type t reqs]
 		= Decl nm t Public reqs
 s _ [Ident nm, Colon]
-		= Decl nm [] Public []
+		= Decl nm DontCareType Public []
 s _ [expr]	= expr
 s nm exprs	= seqErr "Pt2Declaration" nm exprs

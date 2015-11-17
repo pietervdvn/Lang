@@ -11,5 +11,5 @@ A ''Collection'' without order and duplicates.
 
 The syntactic sugar ''{a}'' desugars to ''Set a''
 ---
-cat Set (a:Eq)
-	head	: Set a -> (b:a)
+cat Set a:Eq
+	head	: Set a -> b:a

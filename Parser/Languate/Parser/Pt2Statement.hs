@@ -10,7 +10,7 @@ import Languate.Parser.Pt2Law
 import Languate.Parser.Pt2Comment
 import Languate.Parser.Pt2DataDef
 import Languate.Parser.Pt2SubTypeDef
-import Languate.Parser.Pt2ClassDef
+import Languate.Parser.Pt2CatDef
 import Languate.Parser.Pt2Annot
 import Languate.Parser.Pt2Precedence
 import Languate.Parser.Utils
@@ -42,7 +42,7 @@ convert (Docs docstrs ast)
 		= DocStringStm docstrs:  convert ast
 convert (SubTpDf def)
 		= [SubDefStm def]
-convert (ClassDf def)
+convert (CatDf def)
 		= [ClassDefStm def]
 convert (Annot annot)
 		= [AnnotationStm annot]
@@ -59,7 +59,7 @@ data AST	= Func Function
 		| Comms [Comment] AST
 		| Comm [Comment]
 		| SubTpDf SubDef
-		| ClassDf ClassDef
+		| CatDf ClassDef
 		| Annot Annotation
 		| PrecAnn PrecedenceAnnot
 		| InstanceAST Instance
@@ -72,7 +72,7 @@ h		=  [ ("nls",		Comm 	. pt2nls)
 		   , ("law",		Lw	. pt2law)
 		   , ("typeDecl",	unc ADTDf 	pt2adtdef)
 		   , ("subtypeDecl", 	SubTpDf . 	pt2subdef)
-		   , ("catDecl", 	unc ClassDf	pt2classDef)
+		   , ("catDecl", 	unc CatDf	pt2catDef)
 		   , ("annotation", 	Annot 	. pt2annot)
 		   , ("precedence", 	PrecAnn . pt2precedence)
 		   , ("instance", 	InstanceAST . pt2instance)]

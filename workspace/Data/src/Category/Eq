@@ -15,5 +15,5 @@ cat Eq
 	> !True == False	= True
 	> True == True || False	= False
 	~ operator precedence: a,b,c,d:Bool => a == b && c == d	= (a == b) && (c == d)
-	> a,b : Bool & X => !a == b	= (!a) == b
+	> a,b : Bool => !a == b	= (!a) == b
 	(==)	: eq -> eq -> Bool

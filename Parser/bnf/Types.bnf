@@ -24,7 +24,8 @@ desc		"The syntaxis of types in Languate.
 public import Prelude
 
 
- $subTypeT	::= "in" | "is" | ":"
+ $subTypeT	::= ":"
+ $subTypeWords	::= "in" | "is"
  $typeConjT	::= "\&"
 
  -----------
@@ -34,7 +35,7 @@ public import Prelude
 
  $typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
  knownType	::= %((globalIdent moduleSep)* typeIdent)
- $freeType	::= localIdent & !subTypeT
+ $freeType	::= localIdent & !subTypeWords
  parFreeType	::= freeType subTypeT simpleType
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
@@ -55,9 +56,7 @@ baseType	::= (dict | set | list | tuple | simpleType)
 appliedType	::= (simpleType baseType+) | baseType
 _typeConj	::= appliedType (typeConjT typeConj)*
 
-_curry		::= typeConj ("->" typeConj)*
-
-type		::= curry
+type		::= typeConj ("->" typeConj)*
 
 
 {-
