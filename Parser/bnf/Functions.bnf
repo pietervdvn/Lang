@@ -14,7 +14,7 @@ import Types
    Note that these should not be case sensitive when referred to in docs;
    each law has a name which does not have to be unique -}
 _$lawname		::= "[a..zA..Z0..9 ]+"
-_lawDeclaration		::= localIdent ("," localIdent)* (subTypeT typeConj)?
+_lawDeclaration		::= localIdent ("," localIdent)* (subTypeT type)?
 _lawDeclarations	::= lawDeclaration ("," lawDeclaration)*
 
 {- "=>" can never be parsed as operator. That is why it is will be disambiguated from an expression
@@ -34,7 +34,7 @@ example declarations:
 	lookup	: (k : Ord) -> {k --> v} -> v
 -}
 
-declaration	::= "_"? (localIdent | "\(" op "\)" ) subTypeT typeConj
+declaration	::= "_"? (localIdent | "\(" op "\)" ) subTypeT type
 
 -- functions might have multiple types too
 _patterns	::= patternRoot*

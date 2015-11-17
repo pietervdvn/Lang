@@ -26,9 +26,6 @@ public import Prelude
 
  $subTypeT	::= "in" | "is" | ":"
  $typeConjT	::= "\&"
- $typeConjTC	::= "," | typeConjT
- typeConj	::= type (typeConjT type)*
- typeConjComma	::= type (typeConjTC type)*
 
  -----------
  -- TYPES --
@@ -38,11 +35,11 @@ public import Prelude
  $typeIdent	::= "[A..Z][A..Za..z0..9]*'?"
  knownType	::= %((globalIdent moduleSep)* typeIdent)
  $freeType	::= localIdent & !subTypeT
- parFreeType	::= "\(" freeType (subTypeT typeConjComma) "\)"
+ parFreeType	::= freeType subTypeT (simpleType | "\(" type "\)")
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$void		::= "\(\)"
 _$dontCare	::= "_"		-- we don't care about the type
-_simpleType	::= knownType | constrFreeType | void | dontCare | "\(" type "\)"
+_simpleType	::= knownType | freeType | constrFreeType | void | dontCare | "\(" type "\)"
 
 
 -- used for lists of tuples. ''[Int, Bool]'' = ''[(Int, Bool)]''
@@ -56,10 +53,11 @@ _tuple		::= "\(" type ("," type)+ "\)"
 -- type without space (or withing a delimiter)
 baseType	::= (dict | set | list | tuple | simpleType) "[?]"?
 appliedType	::= ((knownType | constrFreeType) baseType+) | baseType
+_typeConj	::= appliedType (typeConjT typeConj)*
 
-_curry		::= appliedType ("->" appliedType)+
+_curry		::= typeConj ("->" typeConj)+
 
-type		::= curry | appliedType
+type		::= curry | typeConj
 
 
 {-

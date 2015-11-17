@@ -79,6 +79,7 @@ data Type	= Normal [Name] Name	-- A normal type, e.g. Bool. Extra names are to d
 		-- represents a tuple type. When the types are converted to fully qualified types, the actual tuple type is used.
 		| TupleType [Type]
 		-- gets used e.g. in ''map : (a -> b) -> Mappable (_:a) -> Mappable c''
+		| TypeConj [Type]
 		| DontCareType
 	deriving (Eq, Ord)
 

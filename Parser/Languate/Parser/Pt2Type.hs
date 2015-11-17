@@ -19,9 +19,10 @@ data AST	= KnownType [Name] String
 		| Unknown
 		| ParO	| ParC
 		| Comma	| CommaSepTypes [AST]
+		| ConjT	| Conj [AST]
 		| Arrow	| MultiType [AST]
 		| MaybeT	| CollectionT	| MoreT
-		| InT	-- in - token, aka reqSep
+		| InT	-- ''in'' - token, aka reqSep
 		| Constraint [AST]
 		| Currow	-- Curry arrow
 		| DotT
@@ -40,6 +41,8 @@ convert (Tuple asts)
 		= packReqs TupleType asts
 convert (CurryType asts)
 		=  packReqs Curry asts
+convert (Conj asts)
+		= packReqs TypeConj asts
 convert	ast	=  convErr "Pt2Type" ast
 
 noReq		:: Type -> (Type,[a])
@@ -73,6 +76,7 @@ t _ "?"		= MaybeT
 t _ "*"		= CollectionT
 t _ "+"		= MoreT
 t _ "."		= DotT
+t _ "&"		= ConjT
 t nm cont	= tokenErr "Pt2Type" nm cont
 
 s		:: Name -> [AST] -> AST
@@ -91,13 +95,15 @@ s "commaSepTypes" [typ, CommaSepTypes typs]
 		= CommaSepTypes $ typ:typs
 s "commaSepTypes" typs
 		= CommaSepTypes typs
-s "typeConjComma" [Comma, typ]
+s "typeConjT" [Comma, typ]
 		= typ
-s "typeConjComma" [typ]
+s "typeConjT" [InT, typ]
 		= typ
-s "typeConjComma" [typ, CommaSepTypes typs]
+s "typeConjT" [typ]
+		= typ
+s "typeConjT" [typ, CommaSepTypes typs]
 		= CommaSepTypes $ typ:typs
-s "typeConjComma" typs
+s "typeConjT" typs
 		= CommaSepTypes typs
 
 s "list" [ParO, cont, ParC]
@@ -118,6 +124,16 @@ s "appliedType" [typ, MultiType appliedTo]
 		= AppliedType typ appliedTo
 s "appliedType" types
 		= MultiType types
+-- _typeConj	::= appliedType (typeConjT typeConj)*
+s "typeConj" [ConjT, typ]
+		= typ
+s "typeConj" [typ, Conj typs]
+		= Conj $ typ:typs
+s "typeConj" [Conj tps]
+		= Conj tps
+s "typeConj" typs
+		= Conj typs
+
 s "curry" [Currow, typ]
 		= typ
 s "curry" [typ, MultiType typs]
@@ -131,14 +147,10 @@ s "baseType" [ast, MoreT]
 		= AppliedType (KnownType [] "More") [ast]
 s "reqs" [Comma, ast]
 		= ast
-s "parFreeType" [InT, CommaSepTypes tps]
-		= Constraint tps
-s "parFreeType" (InT:constraints)
-		= Constraint $ concatConstraints  constraints
-s "parFreeType" [ParO, FreeType name _, Constraint constraints, ParC]
-		= FreeType name constraints
-s "reqs" constraints
-		= Constraint $ concatConstraints constraints
+s "parFreeType" [FreeType name _, InT, ParO, CommaSepTypes types, ParC]
+		= FreeType name types
+s "parFreeType" [FreeType name _, InT, typ]
+		= FreeType name [typ]
 s _ [ast]  	= ast
 s nm ast	= seqErr "Pt2Type" nm ast
 

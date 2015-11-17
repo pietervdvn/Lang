@@ -68,7 +68,7 @@ addClause	:: Clause -> Function -> Function
 addClause clause (Function v decls clauses)
 		= Function v decls $ clause:clauses
 
-addDecl		:: (Name,[Type], Visible, [TypeRequirement]) -> Function -> Function
+addDecl		:: (Name, Type, Visible, [TypeRequirement]) -> Function -> Function
 addDecl (n,t,v,reqs) (Function visibility decls clauses)
 		= Function (vAnd v visibility) ((n,t, reqs):decls) clauses
 			where 	vAnd	:: Visible -> Visible -> Visible

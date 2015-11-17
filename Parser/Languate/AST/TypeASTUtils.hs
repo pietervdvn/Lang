@@ -4,7 +4,7 @@ module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, se
 This module implements utilities for type asts
 --}
 import StdDef
-import HumanUtils (intercal)
+import HumanUtils (intercal, pars)
 
 
 import Normalizable
@@ -28,6 +28,8 @@ nt (Curry ts)		= Curry [nt $ head ts, nt $ Curry $ tail ts ]
 
 nt (TupleType [t])	= nt t
 nt (TupleType ts)	= TupleType $ map nt ts
+nt (TypeConj [t])	= t
+nt (TypeConj tps)	= tps |> nt & TypeConj
 nt t			= t
 
 
@@ -51,6 +53,12 @@ trav f aggr (TupleType tps)
 		= aggr $ map (trav f aggr) tps
 trav f _ t	= f t
 
+
+topLevelConj	:: Type -> [Type]
+topLevelConj (TypeConj tps)
+		= tps
+topLevelConj t	= [t]
+
 instance Show Type where
 	show t	= case normalize t of
 			(Curry tps) 	-> intercalate " -> " (map st tps)
@@ -65,6 +73,8 @@ st (Applied t tps)
 st (Curry tps)	=  "("++intercalate " -> " (map st tps)++")"
 st (TupleType tps)
 		=  "(" ++ intercalate ", " (map st tps) ++")"
+st (TypeConj tps)
+		= pars (tps |> st & intercalate " & ")
 st DontCareType	= "_"
 
 

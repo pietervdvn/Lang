@@ -8,7 +8,7 @@ import StdDef
 import Languate.AST.TypeAST
 
 data Function	= Function	{ visibility	:: Visible
-				, signs		:: [(Name, [Type], [TypeRequirement])]
+				, signs		:: [(Name, Type, [TypeRequirement])]
 				, clauses	:: [Clause]
 				}
 	deriving (Eq, Ord)
