@@ -37,6 +37,7 @@ data RType	= RNormal FQN Name
 			| RFree String
 			| RApplied RType RType
 			| RCurry RType RType
+			| RConj [RType]
 	deriving (Eq, Ord)
 
 

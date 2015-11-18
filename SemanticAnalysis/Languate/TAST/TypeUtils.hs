@@ -48,10 +48,25 @@ isApplied (RApplied _ _)
 		= True
 isApplied _	= False
 
+isConj		:: RType -> Bool
+isConj (RConj _)= True
+isConj _	= False
 
 
+isConjFree	:: RType -> Bool
+isConjFree (RConj _)
+		=  False
+isConjFree (RCurry a b)
+		= isConjFree a && isConjFree b
+isConjFree (RApplied a b)
+		= isConjFree a && isConjFree b
+isConjFree _	= True
 
 
+rtopLevelConj	:: RType -> [RType]
+rtopLevelConj (RConj tps)
+		= tps
+rtopLevelConj t	= [t]
 
 
 applyTypeArgs	:: RType -> [RType] -> RType
@@ -95,6 +110,8 @@ traverseRT f (RApplied bt t)
 		= RApplied (traverseRT f bt) $ traverseRT f t
 traverseRT f (RCurry at rt)
 		= RCurry (traverseRT f at) $ traverseRT f rt
+traverseRT f (RConj tps)
+		= RConj (tps |> traverseRT f)
 traverseRT f t	= f t
 
 -- do f on each of the leaves
@@ -107,6 +124,9 @@ traverseRTM f (RCurry at rt)
 		= do	at'	<- traverseRTM f at
 			rt'	<- traverseRTM f rt
 			RCurry at' rt' & return
+traverseRTM f (RConj tps)
+		= do	tps'	<- tps |+> traverseRTM f
+			return $ RConj tps'
 traverseRTM f t	= f t
 
 
@@ -130,6 +150,8 @@ foldRT f conct (RApplied bt t)
 		= conct [foldRT f conct bt, foldRT f conct t]
 foldRT f conct (RCurry at rt)
 		= conct [foldRT f conct at, foldRT f conct rt]
+foldRT f conct (RConj tps)
+		= tps |> f & conct
 foldRT f _ t	= f t
 
 
@@ -188,6 +210,8 @@ nt (RApplied t0 t1)	= do	t0'	<- nt t0
 nt (RCurry t0 t1)	= do	t0'	<- nt t0
 				t1'	<- nt t1
 				return $ RCurry t0' t1'
+nt (RConj [t])		= nt t
+nt (RConj tps)		= tps |+> nt |> RConj
 nt (RFree a)		= do	(available, dict)	<- get
 				case L.lookup a dict of
 					Nothing	-> do	let chosen	= head available
@@ -213,6 +237,8 @@ st short t0@(RApplied bt t)
 		= "("++ showCommaSep short t0 ++")"
 st short (RCurry at rt)
 		=  "(" ++ st short at ++ " -> " ++ st short rt ++")"
+st short (RConj tps)
+		= pars (tps |> st short & intercal " & ")
 
 showCommaSep short t0@(RApplied bt at)
 	= st short bt ++ " "++st short at
