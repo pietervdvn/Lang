@@ -1,0 +1,9 @@
+Stringable
+----------
+Home of the stringable category
+----------
+
+import Data.String
+
+cat Stringable
+	stringify: stringable -> String

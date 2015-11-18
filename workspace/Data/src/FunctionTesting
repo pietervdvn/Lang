@@ -6,13 +6,9 @@ Testcode for generating functions
 import Any
 import Data.Bool
 import Collection.Tuple
+import Category.Eq
+import Category.Stringable
 
-type A	= {A}
-type B	= {B}
+type A b:Eq	= {A}
 
-cat C in A & B
-	 > True
-
-type D	= A & B
-subtype E = A
-type F	= {F} + A
+type C a:Stringable	= A a 
