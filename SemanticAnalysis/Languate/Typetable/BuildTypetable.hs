@@ -66,12 +66,9 @@ buildTypetable tlt fqn stms
 	= inside ("While building the local type info in module "++show fqn) $
 	  do	-- first build the locally known values
 		let locDecl	= locallyDeclared stms 	:: [(([Name], Name), [Name], [TypeRequirement])]
-		-- now we get all defined supertypes (inclusing synonyms)
-		directSupers	<- stms |> declaredSuperType tlt & sequence |> concat
+		-- now we get all defined supertypes (including synonyms)
+		superDecls	<- stms |> declaredSuperType tlt & sequence |> concat
 					:: Exc [(RType, [Name], CType)]
-		synons	<- stms |+> typeSynonyms tlt |> concat
-				||>> (\(rt, frees, super) -> (rt, frees, (super,[])))	:: Exc [(RType, [Name], CType)]
-		let superDecls	= directSupers ++ synons
 		{- we now build the supertype table for locally declared values.
 			It picks out of 'superDecls' the supertypes it needs;
 		-}

@@ -23,7 +23,7 @@ _censor inv restrict
 
 _unpackF	:: Statement -> [(Name,[Type], [TypeRequirement])]
 _unpackF (FunctionStm f)
-		= signs f
+		= signs f |> (\(nm,ts,tr) -> (nm, [ts], tr))
 _unpackF (ClassDefStm cd)
 		= (\(nm,ts,tr) -> (nm,ts,tr)) <$> decls cd
 _unpackF _	= []

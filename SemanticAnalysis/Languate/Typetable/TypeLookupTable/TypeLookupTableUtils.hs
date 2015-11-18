@@ -69,6 +69,10 @@ resolveType tlt (Curry (t:tps))
 		= do	t'	<- resolveType tlt t
 			tail	<- resolveType tlt (Curry tps)
 			return $ RCurry t' tail
+resolveType tlt (TypeConj [t])
+		= resolveType tlt t
+resolveType tlt (TypeConj tps)
+		= tps |+> resolveType tlt |> RConj
 resolveType tlt (TupleType [])
 		= return voidType
 resolveType tlt (TupleType [t])
@@ -90,13 +94,19 @@ resolveReqs tlt reqs
 
 
 resolveSignature
-		:: TypeLookupTable -> FQN -> (Name, [Type], [TypeRequirement])
+		:: TypeLookupTable -> FQN -> (Name, Type, [TypeRequirement])
 				-> Exc Signature
-resolveSignature tlt fqn (nm, tps, reqs)
+resolveSignature tlt fqn (nm, tp, reqs)
+	= resolveSignature' tlt fqn (nm, topLevelConj tp, reqs)
+
+resolveSignature'	:: TypeLookupTable -> FQN -> (Name, [Type], [TypeRequirement])
+				-> Exc Signature
+resolveSignature' tlt fqn (nm, tps, reqs)
 	= do	rtps	<- tps |+> resolveType tlt
 		reqs	<- resolveReqs tlt reqs
 		let ctypeUn	= (rtps, reqs)	:: CTypeUnion
 		return $ Signature fqn nm ctypeUn
+
 
 
 

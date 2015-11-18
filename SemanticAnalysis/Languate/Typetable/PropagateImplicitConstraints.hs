@@ -17,7 +17,7 @@ import Graphs.Order
 
 import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
-import Languate.Typetable.ModuleTraverser
+import Languate.Typetable.ModuleTraverser (constraintAdoptions)
 import Languate.TAST
 import Languate.TAST.KindUtils
 
@@ -109,7 +109,7 @@ propagateParams tlt tStms tt@(Typetable dict)
 		adoptions	<- tStms |+> constraintAdoptions tlt |> concat |> merge	:: Exc [(RType, [RType])]
 		let adoptions'	= adoptions |> (fst &&& id) |> first getBaseTID |> unpackMaybeTuple & catMaybes :: [(TypeID, (RType, [RType]))]
 		foldM (\(tt@(Typetable content), changed) typeToInv ->
-			do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++", weird")
+			do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++" (tt/PropagateImplicitConstraints)")
 				(ti', changed')	<- propagateParamConstraintsOfTID tt adoptions' typeToInv ti
 				return (Typetable $ M.insert typeToInv ti' content, changed || changed') ) (tt, False) allTypes
 
@@ -169,6 +169,7 @@ propagateImplicitRequirements tt mapping rt ti
 {- Gets the requirements on a type, recursively, independent of what to add it to	-}
 typeRequirementsOn	:: Typetable -> RType -> Exc [(RType, [RType])]
 typeRequirementsOn tt superForm
+	| isConjFree superForm
 	= inside ("While fetching the implicit type requirements on "++show superForm) $
 	  do	ti		<- getTi tt superForm
 		let knd		= kind ti
@@ -191,6 +192,8 @@ typeRequirementsOn tt superForm
 		subIsA'		<- subIsA |+> onSecond (|+> subs foreign2form')
 		recConstraints		<- (subIsA' >>= snd ) |+> typeRequirementsOn' tt |> concat	:: Exc [(RType, [RType])]
 		return (subIsA++recConstraints)
+	| otherwise
+		= rtopLevelConj superForm |+> typeRequirementsOn tt |> concat
 
 typeRequirementsOn'	:: Typetable -> RType -> Exc [(RType,[RType])]
 typeRequirementsOn' _ (RFree _)

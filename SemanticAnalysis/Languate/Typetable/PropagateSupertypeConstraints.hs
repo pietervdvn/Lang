@@ -36,7 +36,7 @@ addPushedUpon	:: Typetable -> (RType, (RType,[Name])) -> Exc Typetable
 addPushedUpon (Typetable conts) (subForm, (super, frees))
 	= inside ("While adding constraints to "++show subForm++" imposed by "++show super) $
 	  do	-- let's get the TID and TI of the subform, the table we have to change
-		subTid		<- getBaseTID subForm ? ("No tid found for "++show subForm)
+		subTid		<- getBaseTID subForm ? ("No tid found for "++show subForm++" (propagateSupertypeConstraints)")
 		subTi		<- conts & M.lookup subTid ? ("No type info found for "++show subTid++", weird")
 		-- we DON'T need constraints of the super type!
 		-- playing with the free type variables
