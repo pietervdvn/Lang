@@ -17,18 +17,21 @@ import Data.Maybe
 
 isConstraintMet	:: Typetable -> TypeConstraint -> Exc Bool
 isConstraintMet tt constr
-	= _isConstraintMet tt S.empty constr
+	= isConstraintMet' tt S.empty constr
 
 
-_isConstraintMet	:: Typetable -> Set TypeConstraint -> TypeConstraint -> Exc Bool
-_isConstraintMet tt met constraint
- | constraint `S.member` met	= return True
- | otherwise	= do	extraNeeded	<- neededConstraints tt constraint
+isConstraintMet'	:: Typetable -> Set TypeConstraint -> TypeConstraint -> Exc Bool
+isConstraintMet' tt met constraint
+ | constraint `S.member` met
+ 		= return True
+ | otherwise	= do	extraNeeded	<- neededConstraints tt met constraint
  			case extraNeeded of
  				Nothing	-> return False
  				(Just moreConstraints)
- 					-> moreConstraints |+> _isConstraintMet tt (S.insert constraint met)
+ 					-> moreConstraints |+> isConstraintMet' tt (S.insert constraint met)
  							|> and
+
+
 
 {-
 Binds a type in another type.
@@ -80,9 +83,11 @@ Types must not contain:
 - curries in the first argument
 In other words, the first argument should be normal
 -}
-isSuper	:: Typetable -> RType -> RType -> Exc (Maybe TypeConstraint)
-isSuper tt t0 t1
+isSuper	:: Typetable -> Set TypeConstraint -> RType -> RType -> Exc (Maybe TypeConstraint)
+isSuper tt met t0 t1
  | t0 == t1	= return $ Just $ All []
+ | (SubTypeConstr t0 t1) `S.member` met
+ 		= return $ Just $ All []
  | otherwise	= _isSuper tt t0 t1
 
 
@@ -103,7 +108,7 @@ _isSuper tt sub super
 				else Just $ foldl1 Choose possibleSupers
  | otherwise
  	= do	warn $ "Trying to see "++show sub++" as subtype of "++show super
- 		return Nothing
+ 		return $ Nothing
 
 {-
 Given
@@ -140,16 +145,29 @@ applicableSupers ti t
 Given a type constraints, gives the constraints that are needed to meet this constraints.
 Returns nothing if this constraint can never be met in the current type table
 -}
-neededConstraints	:: Typetable -> TypeConstraint -> Exc (Maybe [TypeConstraint])
-neededConstraints tt (SubTypeConstr sub super)
-	= isSuper tt sub super ||>> (:[])
-neededConstraints tt (All constrs)
-	= do	constrs'	<- constrs |+> neededConstraints tt	:: Exc [Maybe [TypeConstraint]]
+neededConstraints	:: Typetable -> Set TypeConstraint -> TypeConstraint -> Exc (Maybe [TypeConstraint])
+neededConstraints tt met (SubTypeConstr sub super)
+	= isSuper tt met sub super ||>> (:[])
+neededConstraints tt met (All constrs)
+	= do	constrs'	<- constrs |+> neededConstraints tt met	:: Exc [Maybe [TypeConstraint]]
 		let mconstrs	= sequence constrs' |> concat	:: Maybe [TypeConstraint]
 		return mconstrs
-neededConstraints tt (Choose a b)
-	= do	a'	<- neededConstraints tt a	:: Exc (Maybe [TypeConstraint])
-		b'	<- neededConstraints tt b	:: Exc (Maybe [TypeConstraint])
+neededConstraints tt met (Choose a b)
+	= do	a'	<- neededConstraints tt met a	:: Exc (Maybe [TypeConstraint])
+		b'	<- neededConstraints tt met b	:: Exc (Maybe [TypeConstraint])
 		if isJust a' && isJust b' then
 			return $ Just $ [Choose (All $ fromJust a') (All $ fromJust b')]
 		else return $ firstJust a' b'
+
+{-Recursively build all needed constraints to meet all the wanted constraints -}
+allNeededConstraints	:: Typetable -> Set TypeConstraint -> Set TypeConstraint -> Exc (Maybe (Set TypeConstraint))
+allNeededConstraints tt met wanted
+	= do	let wanted'	= wanted S.\\ met
+		newConstr	<- wanted' & S.toList |+> neededConstraints tt met
+					|> sequence ||>> concat :: Exc (Maybe [TypeConstraint])
+		case newConstr of
+			Nothing	-> return Nothing
+			Just []	-> return $ Just met
+			Just newConstraints
+				-> do	needed	<- allNeededConstraints tt (S.union met wanted) (S.fromList newConstraints)
+					needed |> (S.\\ wanted) & return
