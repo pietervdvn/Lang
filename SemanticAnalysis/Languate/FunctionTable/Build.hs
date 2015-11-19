@@ -51,7 +51,7 @@ buildFunctionTable tlts tts fqn mod
 	  	tt	<- M.lookup fqn tts ? ("No tt for "++show fqn)
 		signs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
 				||>> unpackFirst |> concat	:: Exc [((Signature, (Visible, Generated, Abstract)), Coor)]
-		-- TODO re-enable test signs' |> first fst |+> checkSimpleKind tt
+		signs' |> first fst |+> checkSimpleKind tt
 		let signs	= signs' |> fst			:: [(Signature, (Visible, Generated, Abstract))]
 		let dubble	= signs |> fst & dubbles	:: [Signature]
 		let dubble'	= signs' |> first fst |> second fst & nub	-- throw away visibility and columns, then remove dubbles
@@ -79,8 +79,8 @@ checkSimpleKind tt (sign, (line, _))
 	  	let unusedFrees	= (rtps >>= freesInRT) L.\\ (reqs |> fst)
 	  	let unusedReqs	= zip unusedFrees (repeat [anyType])
 	  	reqKinds	<- kindOfReqs tt (reqs++unusedReqs)
-	  	kinds		<-rtps |+> kindOf tt reqKinds
+	  	kinds		<-rtps |+> (try (\ e -> err e >> return Kind) . kindOf tt reqKinds)
 	  	let faulty	= zip rtps kinds & L.filter ((/=) Kind . snd)
-	  				|> (\(tp, kind) -> "Expecting "++number (numberOfKindArgs kind)++" more type arguments to "++
-	  					show tp++" :: "++show kind)
-	  	assert (L.null faulty) "Function types should have a normal kind:"
+	  				|> (\(tp, kind) -> "Expecting "++plural (numberOfKindArgs kind) "more type argument"++" to "++
+	  					show tp++" :: "++show kind)	:: [String]
+	  	assert (L.null faulty) $ "Function types should have a normal kind:" ++indent ("\n"++unlines faulty)
