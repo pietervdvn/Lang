@@ -48,6 +48,7 @@ isApplied (RApplied _ _)
 		= True
 isApplied _	= False
 
+
 isConj		:: RType -> Bool
 isConj (RConj _)= True
 isConj _	= False
@@ -85,6 +86,12 @@ appliedTypes _
 	= []
 
 
+dissassemble	:: RType -> (RType, [RType])
+dissassemble (RApplied bt at)
+	= let (b, args)	= dissassemble bt in
+		(b, args++[at])
+dissassemble t
+	= (t, [])
 
 
 curriedTypes	:: RType -> [RType]
@@ -193,6 +200,7 @@ subsReq dict reqs
 	= do	let subsName a	= fromMaybe a $ L.lookup a dict
 		let dict'	= dict ||>> RFree
 		(reqs |> first subsName) |+> onSecond (|+> subs dict')
+
 
 
 ------------------ NORMALIZING ---------------

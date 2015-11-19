@@ -80,6 +80,12 @@ addRequirements reqs	 ti
 		-- the merge function should be stable! e.g. [1,2,3] (old) ++ [1] (new) & nub -> [1,2,3]
 		-- but [3] (new) ++ [1,2,3] (old) --> [3,1,2], which trips the (==) and marks typeinfo as changed (even if it hasn't)
 
+
+
+
+
+
+
 freeKinds	:: TypeInfo -> [(Name, Kind)]
 freeKinds ti	=  let	kinds	= kindArgs $ kind ti in
 			zip (frees ti) kinds

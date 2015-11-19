@@ -19,6 +19,7 @@ type List a	= {Empty} + (List' a)
 type List' a	= {Elem a (List a)}
 
 instance List a is Set a
+instance List a:Eq is Eq
 
 map	: (a -> b) -> List a -> List b
 _ Empty	= Empty

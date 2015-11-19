@@ -20,7 +20,7 @@ instance Show TypeConstraint where
 
 
 stc (SubTypeConstr sub super)
-	= "Constraint "++show sub++" is \n"++indent (show super)
+	= "Constraint "++show sub++" is "++indent (show super)
 stc (Choose cons1 cons2)
 	= "Either "++indent (show cons1)++"\nor     "++indent (show cons2)
 stc (All cons)
@@ -45,3 +45,10 @@ subsConstraint mapping (Choose a b)
 		return (Choose a' b')
 subsConstraint mapping (All conss)
 	= conss |+> subsConstraint mapping |> All
+
+
+subsSuper	:: [(Name, RType)] -> (RType, [TypeConstraint]) -> Exc (RType, [TypeConstraint])
+subsSuper mapping (t, constrs)
+	= do	t'	<- subs mapping t
+		constrs'	<- constrs |+> subsConstraint mapping
+		return (t', constrs')
