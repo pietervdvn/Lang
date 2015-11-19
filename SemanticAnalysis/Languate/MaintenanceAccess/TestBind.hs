@@ -13,6 +13,8 @@ import Languate.TypeConstraint
 
 import Languate.MaintenanceAccess.TestBuild
 
+import Data.Set as S
+
 
 stringFQN	= toFQN' "pietervdvn:Data:Data.String"
 charFQN		= toFQN' "pietervdvn:Data:Data.Char"
@@ -45,3 +47,9 @@ isSpr a b
 (~>)	= RCurry
 (&&&) a b
 	= RConj [a, b]
+
+cs 	= S.fromList
+
+scs a b	= cs [sc a b]
+
+sc	= SubTypeConstr
