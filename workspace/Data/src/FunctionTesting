@@ -4,7 +4,14 @@ Testcode for generating functions
 ---------------
 
 import Any
-
+import Data.Nat
 
 cat Commutative a b is a -> a -> b
 	> f: Commutative a b, a0,a1: a => f a0 a1 = f a1 a0
+
+
+f 	: Dict Nat Nat Nat
+	= [0]
+
+cat Dict k v
+	> True
