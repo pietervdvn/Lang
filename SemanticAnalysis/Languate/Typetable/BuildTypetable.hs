@@ -226,7 +226,10 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		let duplicateSupers	= superTypes |> thd3 |> fst & dubbles
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
-		supers		<- superTypes |+> buildSTTEntry |> M.fromList
+		let declaredType	= applyTypeArgsFree (RNormal (fst tid) (snd tid)) frees
+		let anySupertype	= (declaredType, frees, (anyType, []))	:: (RType, [Name], CType)
+		let superTypes'	= if L.null superTypes then [anySupertype] else superTypes
+		supers		<- superTypes' |+> buildSTTEntry |> M.fromList
 		let superOrigins	= supers |> const fqn
 		return (tid, TypeInfo kind frees constraints' [] supers superOrigins fqn)
 
