@@ -4,11 +4,7 @@ Testcode for generating functions
 ---------------
 
 import Any
-import Data.Bool
-import Collection.Tuple
-import Category.Eq
-import Category.Stringable
 
-type A b:Eq	= {A}
 
-type C a:Stringable	= A a 
+cat Commutative a b is a -> a -> b
+	> f: Commutative a b, a0,a1: a => f a0 a1 = f a1 a0

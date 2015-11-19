@@ -15,6 +15,7 @@ import Data.List as L
 
 import Languate.TAST
 import Languate.Typetable.TypetableDef
+import Languate.TypeConstraint
 
 type Changed	= Bool
 
@@ -42,9 +43,12 @@ addSupersFor tt tid ti
 -- calculates the new supertypes
 supertypesFor	:: Typetable -> TypeInfo -> (RType, [TypeConstraint]) -> Exc [(RType, [TypeConstraint])]
 supertypesFor tt ti orig@(superform, constraints)
+ | isNormal superform
 	= inside ("While getting the supertypes of "++show superform) $
 	  do	supers		<- supertypesOf tt superform
 		let gotAlready	= supertypes ti & M.keys
 		let supers'	= supers & L.filter ((`notElem` gotAlready) . fst)
 		let newSupers	= supers' ||>> (constraints ++ ) ||>> nub
 		return (orig:newSupers)
+ | otherwise
+ 	= return [orig]

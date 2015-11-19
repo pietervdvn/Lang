@@ -9,7 +9,9 @@ import Languate.CheckUtils
 import Languate.Package
 import Languate.AST hiding (frees)
 import Languate.TAST
-import Languate.TAST.KindUtils
+import Languate.TypeConstraint.Def
+import Languate.TypeConstraint.Utils
+
 
 import Languate.FQN
 
@@ -83,12 +85,18 @@ buildTypetable tlt fqn stms
 		-- then we calculate the 'transitive closure' of the supertype relationship
 		-- for non mathematicians: X is a Y; Y is a Z => X is a Z
 		superComplete	<- propagateSupertypes constrComplete
-		-- and as last, we pass over all type info, to check constraints
+		-- and as last, we pass over all type info, to check constraints on existence
 		checkTT superComplete
-		return superComplete
+		return $ cleanSupertypes superComplete
+
+cleanSupertypes	:: Typetable -> Typetable
+cleanSupertypes tt@(Typetable conts)
+	= tt -- TODO see #86
 
 
-
+cleanTi		:: Typetable -> TypeInfo -> TypeInfo
+cleanTi tt ti	=  do	let stts	= supertypes ti
+			todo
 
 buildKinds	:: Typetable -> Exc Typetable
 buildKinds tt
@@ -148,11 +156,11 @@ checkTi		:: Typetable -> TypeID -> TypeInfo -> Check
 checkTi tt tid ti
 	= inside ("While checking the type constraints on "++show tid) $
 	  do	let reqs	= requirements ti
-		unmet		<- reqs & filterM (\constr -> isConstraintMet tt constr |> not)
-		let msg (SubTypeConstr sub super)
-				= show sub ++ " is supposed to have the supertype "++show super
-		let msgs	= unmet |> msg & unlines
-		assert (L.null unmet) ("Some constraints are not met:\n"++indent msgs)
+		-- TODO re-enable, neat output
+		-- unmet		<- reqs & filterM (\constr -> isConstraintMet tt constr |> not)
+
+
+
 		let freeKinds	= kind ti & kindArgs & zip defaultFreeNames
 		dictMapM (checkSameKind tt freeKinds ti) (constraints ti)
 		requirements ti |+> (inside "In the type existence requirements" . checkTypeConstraint tt freeKinds)
@@ -174,6 +182,12 @@ checkTypeConstraint tt ctx (SubTypeConstr t0 t1)
 		let st t k	= "\n"++show t ++ " :: "++show k
 		assert (k0 == k1) ("Types in a typeconstraint should have the same kind."++
 			indent (st t0 k0 ++ st t1 k1 ))
+checkTypeConstraint tt ctx (Choose a b)
+	= do	checkTypeConstraint tt ctx a
+		checkTypeConstraint tt ctx b
+checkTypeConstraint tt ctx (All conss)
+	= do	conss |+> checkTypeConstraint tt ctx
+		pass
 
 
 checkSameKind	:: Typetable -> [(Name, Kind)] -> TypeInfo -> Int -> [RType] -> Check

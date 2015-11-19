@@ -51,7 +51,7 @@ buildFunctionTable tlts tts fqn mod
 	  	tt	<- M.lookup fqn tts ? ("No tt for "++show fqn)
 		signs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
 				||>> unpackFirst |> concat	:: Exc [((Signature, (Visible, Generated, Abstract)), Coor)]
-		signs' |> first fst |+> checkSimpleKind tt
+		-- TODO re-enable test signs' |> first fst |+> checkSimpleKind tt
 		let signs	= signs' |> fst			:: [(Signature, (Visible, Generated, Abstract))]
 		let dubble	= signs |> fst & dubbles	:: [Signature]
 		let dubble'	= signs' |> first fst |> second fst & nub	-- throw away visibility and columns, then remove dubbles
@@ -73,7 +73,8 @@ buildMeta mod coor
 
 checkSimpleKind	:: Typetable ->  (Signature, Coor) -> Check
 checkSimpleKind tt (sign, (line, _))
-	= inside ("In the function declaration of "++show sign++", on line "++show line) $
+	= inside ("While checking kinds of function types") $
+	  inside ("In the function declaration of "++show sign++", on line "++show line) $
 	  do	let (rtps, reqs)	= signTypes sign
 	  	let unusedFrees	= (rtps >>= freesInRT) L.\\ (reqs |> fst)
 	  	let unusedReqs	= zip unusedFrees (repeat [anyType])

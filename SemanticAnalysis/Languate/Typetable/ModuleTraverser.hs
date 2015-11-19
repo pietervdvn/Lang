@@ -39,7 +39,13 @@ locallyDeclared statements
 typeStatements	:: FQN -> Module -> [([Name], Statement)]
 typeStatements fqn mod
 	= let origin	= modulePath fqn in
-		mod & statements & L.filter isTypeRelated & zip (repeat origin)
+		mod & statements & L.filter isTypeRelated
+			|> rewriteTypeStm origin	-- rewrite, to prevent ambiguities, e.g. types with the same name
+			& zip (repeat origin)
+
+rewriteTypeStm	:: [Name] -> Statement -> Statement
+rewriteTypeStm origin
+	= id  -- TODO
 
 isTypeRelated	:: Statement -> Bool
 isTypeRelated (ADTDefStm{})

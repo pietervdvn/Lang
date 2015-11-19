@@ -14,6 +14,7 @@ import Languate.FQN
 
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser
+import Languate.TypeConstraint.Def
 
 import Graphs.DirectedGraph
 import Graphs.Order
@@ -79,7 +80,9 @@ addRequirements reqs	 ti
 		-- the merge function should be stable! e.g. [1,2,3] (old) ++ [1] (new) & nub -> [1,2,3]
 		-- but [3] (new) ++ [1,2,3] (old) --> [3,1,2], which trips the (==) and marks typeinfo as changed (even if it hasn't)
 
-
+freeKinds	:: TypeInfo -> [(Name, Kind)]
+freeKinds ti	=  let	kinds	= kindArgs $ kind ti in
+			zip (frees ti) kinds
 
 kindOf		:: Typetable -> [(Name, Kind)] -> RType -> Exc Kind
 kindOf _ ctx (RFree a)
@@ -178,41 +181,6 @@ supertypesOf tt rt
 		superTypes' |+> onSecond (|+> subsConstraint mapping)
 
 
-
-data TypeConstraint	= SubTypeConstr RType RType
-	deriving (Eq, Ord)
-
-
-subsConstraint	:: [(Name, RType)] -> TypeConstraint -> Exc TypeConstraint
-subsConstraint mapping (SubTypeConstr a b)
-	= do	a'	<- subs mapping a
-		b'	<- subs mapping b
-		return (SubTypeConstr a' b')
-
-
-isConstraintMet' :: Typetable -> [TypeConstraint] -> TypeConstraint -> Exc Bool
-isConstraintMet' tt metConstraints constraint@(SubTypeConstr sub super)
- | constraint `elem` metConstraints 	= return True
- | otherwise	= do	(supers, constraints)	<- supertypesOf tt sub |> unzip ||>> concat
-			metConstrs	<- constraints |+> isConstraintMet' tt (metConstraints++[constraint]) |> and
-			return (metConstrs && (super `elem` supers))
-
-isConstraintMet	:: Typetable -> TypeConstraint -> Exc Bool
-isConstraintMet tt
-	= isConstraintMet' tt []
-
-
-instance Show TypeConstraint where
-	show	= stc
-
-
-stc (SubTypeConstr sub super)
-	= "Constraint '"++show sub++"' is a '"++show super++"'"
-
-
-isTrivialConstraint	:: TypeConstraint -> Bool
-isTrivialConstraint (SubTypeConstr t0 t1)
-			= t0 == t1
 
 typetable2doc	:: (FQN -> String) -> FQN -> Typetable -> (Doc, [Doc])
 typetable2doc path fqnView (Typetable dict)

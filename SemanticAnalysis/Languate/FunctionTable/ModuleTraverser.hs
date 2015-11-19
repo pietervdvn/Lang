@@ -50,7 +50,7 @@ definedFuncSign m tlt fqn (ClassDefStm cd)
 	= do	defType	<- resolveType tlt (Normal [] $ name cd)
 		let defFree	= take (length $ frees cd) $ defaultFreeNames
 		let defType'	= applyTypeArgsFree defType defFree
-		signs	<- decls cd |+> resolveSignature tlt fqn
+		signs	<- decls cd |+> resolveSignature' tlt fqn
 		return (zip signs $ repeat (Public, False, Just defType'))
 
 definedFuncSign _ _ _ _

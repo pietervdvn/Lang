@@ -39,9 +39,13 @@ packageIO	= loadPackage' bnfs
 loadedPackage	= unsafePerformIO $ packageIO path
 packageTablIO	= runExceptionsIO' $ buildPackageTable loadedPackage
 packageTabl	= unsafePerformIO packageTablIO
-prelude		= toFQN' "pietervdvn:Data:Prelude"
-typeTesting	= toFQN' "pietervdvn:Data:TypeTesting"
-bool		= toFQN' "pietervdvn:Data:Data.Bool"
+
+
+preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
+
+
+tt	= packageTabl & moduleTables & M.findWithDefault (error "Module prelude not found") preludeFQN & types
+
 
 
 bPackT	= do	dir		<- getCurrentDirectory
@@ -56,10 +60,3 @@ bDocs	= do	dir		<- getCurrentDirectory
 		when exists $ removeDirectoryRecursive path'
 		createDirectory path'
 		renderClusterTo (fix $ extend (setFilePath path') $ html $ defaultHeader defaultCSS) cluster
-
-
-ttIO	= bPackT |> moduleTables |> M.lookup typeTesting
-		|> fromMaybe (error "You removed the typetesting module! Remove this code in Languate/MaintenanceAccess/TestBuild of semantal")
-		|> types
-
-listb	= RApplied (RNormal typeTesting "List") (RFree "b")

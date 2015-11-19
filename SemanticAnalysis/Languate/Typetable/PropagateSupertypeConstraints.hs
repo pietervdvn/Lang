@@ -15,6 +15,7 @@ import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.PropagateImplicitConstraints (typeRequirementsOn)
 import Languate.Typetable.ModuleTraverser
+import Languate.TypeConstraint
 
 
 import Data.List as L
@@ -72,7 +73,10 @@ addSuperConstraintsFor tt tid ti
 fetchConstraints	:: Typetable -> (RType, [TypeConstraint]) ->
 				Exc (RType, [TypeConstraint])
 fetchConstraints tt (rt, constraints)
+ | isNormal rt
 	= inside ("While adding the constraints for supertype "++show rt) $
 	  do	constr	<- typeRequirementsOn tt rt
 				|> unmerge ||>> uncurry SubTypeConstr
 		return (rt, L.filter (not . isTrivialConstraint) $ nub (constr++constraints))
+ | otherwise
+ 	= return (rt, constraints)

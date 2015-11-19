@@ -161,9 +161,11 @@ propagateParamConstraintsIn tt@(Typetable dict) (actualForm', superForm') ti
 	e.g. cat A a b:Set a implies a:Eq, this function add those hidden requirements -}
 propagateImplicitRequirements	:: Typetable -> [(Int, Name)] -> RType -> TypeInfo -> Exc TypeInfo
 propagateImplicitRequirements tt mapping rt ti
+ | isNormal rt
 	= do	requirements	<- typeRequirementsOn tt rt
 		let mapping	= zip [0..] (defaultFreeNames' "sub") & take (length $ frees ti)
 		return $ addConstrReqs' mapping requirements  ti
+ | otherwise	= return ti
 
 
 {- Gets the requirements on a type, recursively, independent of what to add it to	-}
