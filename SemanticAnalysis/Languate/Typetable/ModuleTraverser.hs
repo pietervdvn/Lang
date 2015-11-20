@@ -83,9 +83,11 @@ declaredSuperType tlt (origin, ADTDefStm adtDef@(ADTDef nm frees reqs sums adopt
 		let declaredType'	= applyTypeArgs declaredType (frees |> RFree)
 		adopts'	<- adopts & resolveTypes tlt
 		-- an adopted type has this type as supertype, if this adopted type is not a conjunction of types
+		-- TODO:
+		-- in case of conjuctions is the adopted type this type too if it is all the other types of the conjunction
 		let super'	= declaredType'	-- declared type = supertype of the adopts
 		let normalSupers	= adopts' & L.filter isConjFree |> (\typ -> (typ, frees, (super', reqs')))
-		-- this type is also the adopted type, if there is only one adopted type (conjunctions not counted)
+		-- this type is also the adopted type, if there is only one adopted type
 		-- and no constructors are defined
 		let allAdopts	= adopts' >>= rtopLevelConj
 		let synonymSupers	= allAdopts |> (\adoptThusSuper -> (declaredType', frees, (adoptThusSuper, reqs')) )

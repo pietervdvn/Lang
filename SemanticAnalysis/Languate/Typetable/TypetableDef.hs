@@ -81,9 +81,14 @@ addRequirements reqs	 ti
 		-- but [3] (new) ++ [1,2,3] (old) --> [3,1,2], which trips the (==) and marks typeinfo as changed (even if it hasn't)
 
 
+forTiM		:: (Functor m, Monad m) => (Typetable -> TypeID -> TypeInfo -> m TypeInfo) -> Typetable -> m Typetable
+forTiM f tt@(Typetable conts)
+	= dictMapM (f tt) conts |> Typetable
 
 
-
+forTi 		:: (Typetable -> TypeID -> TypeInfo -> TypeInfo) -> Typetable -> Typetable
+forTi f tt@(Typetable conts)
+	= mapWithKey (f tt) conts & Typetable
 
 
 freeKinds	:: TypeInfo -> [(Name, Kind)]

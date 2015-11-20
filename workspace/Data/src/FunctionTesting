@@ -11,7 +11,7 @@ cat A
 cat X a:A
 	> True
 
-cat Y a
+cat Y a:A
 	> True
 
 instance Y a is X a

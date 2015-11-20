@@ -84,19 +84,42 @@ buildTypetable tlt fqn stms
 		constrComplete	<- addSuperConstraints tlt stms kindedtt
 		-- then we calculate the 'transitive closure' of the supertype relationship
 		-- for non mathematicians: X is a Y; Y is a Z => X is a Z
-		superComplete	<- propagateSupertypes constrComplete
+		superComplete'	<- propagateSupertypes constrComplete
+		-- we still have to add the any-type as supertype to each TI
+		let superComplete = forTi addAnySupertype superComplete'
 		-- and as last, we pass over all type info, to check constraints on existence
-		checkTT superComplete
-		return $ cleanSupertypes superComplete
-
-cleanSupertypes	:: Typetable -> Typetable
-cleanSupertypes tt@(Typetable conts)
-	= tt -- TODO see #86
+		checkTT superComplete'
+		forTiM cleanTI superComplete
 
 
-cleanTi		:: Typetable -> TypeInfo -> TypeInfo
-cleanTi tt ti	=  do	let stts	= supertypes ti
-			todo
+addAnySupertype	:: Typetable -> TypeID -> TypeInfo -> TypeInfo
+addAnySupertype _ (fqn, name) ti
+ | supertypes ti & M.keys |> isNormal & and
+ 	= ti {supertypes = supertypes ti & M.insert anyType []}
+ | otherwise
+ 	= ti	-- means some super type is e.g. "a -> a", a curry. These are not subclasses of any!
+
+
+
+
+cleanTI		:: Typetable -> TypeID -> TypeInfo -> Exc TypeInfo
+cleanTI tt _ ti	= do	let stts	= supertypes ti	& M.toList :: [(RType, [TypeConstraint])]
+			let metConstraintsFrees	= constraints ti & M.toList
+							|> first (\i -> defaultFreeNames !! i)
+							|> first RFree & unmerge
+							|> (\(a, super) -> SubTypeConstr a super)
+			let metConstraints	= (metConstraintsFrees ++ requirements ti) & S.fromList	:: Set TypeConstraint
+			cleanedStts	<- stts |+> cleanSTT tt metConstraints
+						|> M.fromList	:: Exc (Map RType [TypeConstraint])
+			return $ ti{supertypes = cleanedStts}
+
+cleanSTT	:: Typetable -> Set TypeConstraint -> (RType, [TypeConstraint]) -> Exc (RType, [TypeConstraint])
+cleanSTT tt met (rt, constrs)
+	= do	statusses	<- constrs |+> isConstraintMet' tt met
+		let unmet	= zip statusses constrs & L.filter (not . fst) |> snd
+		return (rt, unmet)
+
+
 
 buildKinds	:: Typetable -> Exc Typetable
 buildKinds tt
@@ -208,7 +231,6 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 	= inside ("While building type info about "++show n) $
 	  do	tid		<- resolveTypeID tlt n
 		let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
-
 		-- about the free type names
 		let indices	= zip frees [0..]	:: [(Name, Int)]
 		reqs'		<- reqs |+> (\(nm, t) -> do rt<-resolveType tlt t;return (nm, rt) )	:: Exc [(Name, RType)]
@@ -226,17 +248,12 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 		let duplicateSupers	= superTypes |> thd3 |> fst & dubbles
 		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
-		let declaredType	= applyTypeArgsFree (RNormal (fst tid) (snd tid)) frees
-		let anySupertype	= (declaredType, frees, (anyType, []))	:: (RType, [Name], CType)
-		let superTypes'	= if L.null superTypes then [anySupertype] else superTypes
-		supers		<- superTypes' |+> buildSTTEntry |> M.fromList
+		supers		<- superTypes |+> buildSTTEntry |> M.fromList
 		let superOrigins	= supers |> const fqn
 		return (tid, TypeInfo kind frees constraints' [] supers superOrigins fqn)
 
 
 buildSTTEntry	:: (RType, [Name], CType) -> Exc (RType, [TypeConstraint])
-buildSTTEntry (sub, [], (super, []))
-		= return (super, [])
 buildSTTEntry (sub, frees, (super, constraints))
 		= do	validateFrees frees sub
 			let typeConstrs	= constraints |> first RFree & unmerge |> uncurry SubTypeConstr

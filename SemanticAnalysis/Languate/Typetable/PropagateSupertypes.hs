@@ -19,7 +19,7 @@ import Languate.TypeConstraint
 
 type Changed	= Bool
 
--- adds all supertypes, also a few steps away
+-- adds all supertypes, in a recursive way (thus fully propagate all)
 propagateSupertypes		:: Typetable -> Exc Typetable
 propagateSupertypes tt
 	= whileChanged propagSupertypesStep tt |> fst
@@ -45,7 +45,7 @@ supertypesFor	:: Typetable -> TypeInfo -> (RType, [TypeConstraint]) -> Exc [(RTy
 supertypesFor tt ti orig@(superform, constraints)
  | isNormal superform
 	= inside ("While getting the supertypes of "++show superform) $
-	  do	supers		<- supertypesOf tt superform
+	  do	supers		<- supertypesOf tt superform	-- frees already substituted by supertypesOf
 		let gotAlready	= supertypes ti & M.keys
 		let supers'	= supers & L.filter ((`notElem` gotAlready) . fst)
 		let newSupers	= supers' ||>> (constraints ++ ) ||>> nub

@@ -24,7 +24,8 @@ isConstraintMet'	:: Typetable -> Set TypeConstraint -> TypeConstraint -> Exc Boo
 isConstraintMet' tt met constraint
  | constraint `S.member` met
  		= return True
- | otherwise	= do	extraNeeded	<- neededConstraints tt met constraint
+ | otherwise	= inside ("Where constraints are met: "++show met) $
+ 		  do	extraNeeded	<- neededConstraints tt met constraint
  			case extraNeeded of
  				Nothing	-> return False
  				(Just moreConstraints)
