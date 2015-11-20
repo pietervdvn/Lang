@@ -178,12 +178,10 @@ checkTT tt@(Typetable conts)
 checkTi		:: Typetable -> TypeID -> TypeInfo -> Check
 checkTi tt tid ti
 	= inside ("While checking the type constraints on "++show tid) $
+	  inside ("This type has a supertype which imposes restrictions. Not all restrictions are met, thus this type can not exist") $
 	  do	let reqs	= requirements ti
-		-- TODO re-enable, neat output
-		-- unmet		<- reqs & filterM (\constr -> isConstraintMet tt constr |> not)
-
-
-
+		unmet		<- reqs & filterM (fmap not . isConstraintMet tt )
+		assert (L.null unmet) $ "Unmet constraints are: "++show unmet
 		let freeKinds	= kind ti & kindArgs & zip defaultFreeNames
 		dictMapM (checkSameKind tt freeKinds ti) (constraints ti)
 		requirements ti |+> (inside "In the type existence requirements" . checkTypeConstraint tt freeKinds)

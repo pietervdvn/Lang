@@ -5,13 +5,15 @@ Testcode for generating functions
 
 import Any
 
+cat Ord
+	> True
 
 cat A
 	> True
 cat X a:A
 	> True
 
-cat Y a:A
+cat Y a is X Ord
 	> True
 
-instance Y a is X a
+instance Ord is A
