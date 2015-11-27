@@ -73,7 +73,7 @@ stack	:: (w -> w', e -> e') -> Exceptions w e a -> Exceptions w' e' a
 stack (fw, fe) (Exceptions ws es eOrA)
 	= Exceptions (map fw ws) (map fe es) $ lmap fe eOrA
 
--- same as stac, but both functions are the same
+-- same as stack, but both functions are the same
 stack'	:: (we -> we') -> Exceptions we we a -> Exceptions we' we' a
 stack' f	= stack (f,f)
 
