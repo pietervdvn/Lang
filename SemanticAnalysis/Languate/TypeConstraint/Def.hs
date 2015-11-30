@@ -3,6 +3,8 @@ module Languate.TypeConstraint.Def where
 import StdDef
 import Languate.CheckUtils
 import Languate.TAST
+import Normalizable
+import Control.Arrow
 
 data TypeConstraint
 	= SubTypeConstr RType RType	-- t0 should be a subtype of t1
@@ -23,8 +25,24 @@ stc (SubTypeConstr sub super)
 	= "Constraint "++show sub++" is "++indent (show super)
 stc (Choose cons1 cons2)
 	= "Either "++indent (show cons1)++"\nor     "++indent (show cons2)
+stc (All [])
+	= "No typeconstraints! :)"
 stc (All cons)
 	= cons |> show & unlines
+
+instance Normalizable TypeConstraint where
+	normalize	= ntc
+
+ntc	:: TypeConstraint -> TypeConstraint
+ntc (All constrs)
+	= let cleaned = (constrs |> normalize) & filter (not . isTrivialConstraint) in
+		if length cleaned == 1 then head cleaned else All cleaned
+ntc (Choose a b)
+ | isTrivialConstraint a || isTrivialConstraint b
+ 	= All []
+ | otherwise
+ 	= Choose (normalize a) (normalize b)
+ntc tc	= tc
 
 
 isTrivialConstraint	:: TypeConstraint -> Bool
@@ -52,3 +70,17 @@ subsSuper mapping (t, constrs)
 	= do	t'	<- subs mapping t
 		constrs'	<- constrs |+> subsConstraint mapping
 		return (t', constrs')
+
+
+reqAsConstraint	:: RTypeReq -> [TypeConstraint]
+reqAsConstraint reqs
+	= reqs & unmerge |> first RFree |> uncurry SubTypeConstr
+
+-- traverses the constraints and returns all leaves
+allConstrs	:: TypeConstraint -> [TypeConstraint]
+allConstrs (Choose a b)
+	= allConstrs a ++ allConstrs b
+allConstrs (All constrs)
+	= constrs >>= allConstrs
+allConstrs c
+	= [c]

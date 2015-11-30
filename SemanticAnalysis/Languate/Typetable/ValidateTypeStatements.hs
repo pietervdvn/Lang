@@ -15,8 +15,9 @@ import Languate.TAST
 import Languate.FQN
 
 import Languate.Typetable.ModuleTraverser
-
 import Languate.Typetable.TypeLookupTable
+import Languate.TypeConstraint
+
 
 import Data.Maybe
 
@@ -38,11 +39,11 @@ validateTypeSTM tlt fqn (stm, (l,_))
 		pass
 
 
-validateSuperDeclaration	:: TypeLookupTable -> (RType, [Name], CType) -> Check
-validateSuperDeclaration tlt (sub, frees, super)
+validateSuperDeclaration	:: TypeLookupTable -> (RType, [Name], RType, [TypeConstraint]) -> Check
+validateSuperDeclaration tlt (sub, frees, super, constrs)
 	= inside ("In the supertype declaration of "++show sub) $
 	  do	validateFrees frees sub
-		validateCTypeFrees frees super
+		validateConstraintFrees frees super constrs
 
 
 
@@ -52,10 +53,13 @@ validateDeclaration tlt (origin, declaredType, frees, treqs)
 	= inside ("In the declaration of "++((origin++[declaredType]) & intercal ".")) $
 		mapM_ (validateReq tlt frees) treqs
 
-validateCTypeFrees	:: [Name] -> (RType, RTypeReq) -> Check
-validateCTypeFrees frees (rt, reqs)
+validateConstraintFrees	:: [Name] -> RType -> [TypeConstraint] -> Check
+validateConstraintFrees frees rt constrs
 	= do	validateFrees frees rt
-		validateReqsFrees frees reqs
+		let leaves	= constrs >>= allConstrs
+		leaves |+> (\(SubTypeConstr sub super) -> validateFrees frees sub >> validateFrees frees super)
+		pass
+
 
 validateReqsFrees	:: [Name] -> RTypeReq -> Check
 validateReqsFrees frees vals
@@ -67,6 +71,7 @@ validateReq	:: TypeLookupTable -> [Name] -> TypeRequirement -> Check
 validateReq tlt frees (name, typ)
 	= inside ("In the type requirement of "++show name)
 	  (resolveType tlt typ >>= validateFrees frees)
+
 
 
 --validates that no unknown frees are used in rt

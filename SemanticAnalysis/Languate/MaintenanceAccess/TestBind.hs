@@ -6,6 +6,7 @@ This module builds all the stuff!
 
 import StdDef
 import Exceptions
+import Languate.CheckUtils
 
 import Languate.FQN
 import Languate.TAST
@@ -40,6 +41,9 @@ a	= RFree "a"
 b	= RFree "b"
 c	= RFree "c"
 d	= RFree "d"
+
+functionTesting str
+	= RNormal testingFQN str
 
 isSpr a b
 	= isConstraintMet tt (SubTypeConstr a b) & runExceptionsIO'

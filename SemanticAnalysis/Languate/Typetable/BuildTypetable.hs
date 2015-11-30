@@ -70,7 +70,7 @@ buildTypetable tlt fqn stms
 		let locDecl	= locallyDeclared stms 	:: [(([Name], Name), [Name], [TypeRequirement])]
 		-- now we get all defined supertypes (including synonyms)
 		superDecls	<- stms |> declaredSuperType tlt & sequence |> concat
-					:: Exc [(RType, [Name], CType)]
+					:: Exc [(RType, [Name], RType, [TypeConstraint])]
 		{- we now build the supertype table for locally declared values.
 			It picks out of 'superDecls' the supertypes it needs;
 		-}
@@ -84,13 +84,13 @@ buildTypetable tlt fqn stms
 		constrComplete	<- addSuperConstraints tlt stms kindedtt
 		-- then we calculate the 'transitive closure' of the supertype relationship
 		-- for non mathematicians: X is a Y; Y is a Z => X is a Z
-		superComplete'	<- propagateSupertypes constrComplete
+		superComplete	<- propagateSupertypes constrComplete
+		-- we pass over all type info, to check constraints on existence
+		checkTT superComplete
 		-- we still have to add the any-type as supertype to each TI
-		let superComplete = forTi addAnySupertype superComplete'
-		-- and as last, we pass over all type info, to check constraints on existence
-		checkTT superComplete'
-		forTiM cleanTI superComplete
-
+		let superCompleteAny = forTi addAnySupertype superComplete
+		cleaned	<- forTiM cleanTI superCompleteAny
+		return superCompleteAny
 
 addAnySupertype	:: Typetable -> TypeID -> TypeInfo -> TypeInfo
 addAnySupertype _ (fqn, name) ti
@@ -224,7 +224,8 @@ checkSameKind  tt ctx ti i rtps
 
 
 -- Builds the type info about the given type in the tuple
-buildTypeInfo	:: TypeLookupTable -> [(RType, [Name], CType)] -> FQN -> (([Name], Name), [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
+buildTypeInfo	:: TypeLookupTable -> [(RType, [Name], RType, [TypeConstraint])] -> FQN
+				-> (([Name], Name), [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
 buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 	= inside ("While building type info about "++show n) $
 	  do	tid		<- resolveTypeID tlt n
@@ -242,33 +243,41 @@ buildTypeInfo tlt superDecls fqn (n, frees, reqs)
 					|> M.fromList			:: Exc (Map Int [RType])
 		-- about the supertypes
 		let isTid t	= getBaseTID t |> (tid ==) & fromMaybe False	:: Bool
-		superTypes	<- superDecls & L.filter (isTid . fst3) |+> canonicalSuperDecl
-		let duplicateSupers	= superTypes |> thd3 |> fst & dubbles
-		assert (L.null duplicateSupers) $ "Multiple declarations of supertypes. "++show tid++" has multiple instance declarations of "++
+		superTypes	<- superDecls & L.filter (isTid . fst4) |+> canonicalSuperDecl
+					:: Exc [(RType, [Name], RType, [TypeConstraint])]
+		let duplicateSupers	= superTypes |> (\(_,_,super,_) -> super) & dubbles
+		assert (L.null duplicateSupers) $
+			"Multiple declarations of supertypes. "++show tid++
+			" has multiple instance declarations of "++
 			commas (duplicateSupers |> show)
 		supers		<- superTypes |+> buildSTTEntry |> M.fromList
 		let superOrigins	= supers |> const fqn
 		return (tid, TypeInfo kind frees constraints' [] supers superOrigins fqn)
 
 
-buildSTTEntry	:: (RType, [Name], CType) -> Exc (RType, [TypeConstraint])
-buildSTTEntry (sub, frees, (super, constraints))
-		= do	validateFrees frees sub
-			let typeConstrs	= constraints |> first RFree & unmerge |> uncurry SubTypeConstr
-			return (super, typeConstrs)
-
-
-canonicalSuperDecl	:: (RType, [Name], CType) -> Exc (RType, [Name], CType)
-canonicalSuperDecl (sub, frees, (super, constraints))
-		= do	let allFrees	= frees ++ freesInRT sub ++ freesInRT super
+{-Converts the super type and frees into default free names-}
+canonicalSuperDecl	:: (RType, [Name], RType, [TypeConstraint]) -> Exc (RType, [Name], RType, [TypeConstraint])
+canonicalSuperDecl (sub, frees, super, constraints)
+		= do	let allFrees	= frees ++ freesInRT sub ++ freesInRT super	-- the constraints should not contain new frees
+			-- conversion mapping to default names
 			let canonFree	= zip (nub allFrees) defaultFreeNames
-			let canonType	= traverseRTM (onFreeM ((|> RFree) . fetch canonFree))
+			let mapping	= canonFree ||>> RFree
+
+			-- default frees we'll actually use
 			let frees'	= canonFree |> snd
-			sub'	<- canonType sub
-			super'	<- canonType super
-			constraints'	<- constraints |||>>> canonType ||>> sequence |+> unpackSecond
-			constraints'' 	<- constraints' |+> onFirst (fetch canonFree)	:: Exc [(Name, [RType])]
-			return (sub', frees', (super', constraints''))
+			sub'		<- subs mapping sub
+			super'		<- subs mapping super
+			constraints' 	<- constraints |+> subsConstraint mapping
+			return (sub', frees', super', constraints')
+
+
+
+
+
+buildSTTEntry	:: (RType, [Name], RType, [TypeConstraint]) -> Exc (RType, [TypeConstraint])
+buildSTTEntry (sub, frees, super, constraints)
+		= do	validateFrees frees sub
+			return (super, constraints)
 
 fetch indices free	= L.lookup free indices ? errMsg free
 			where errMsg free	= "The free type variable "++free++" was not declared"

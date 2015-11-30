@@ -89,13 +89,12 @@ isSuper tt met t0 t1
  | t0 == t1	= return $ Just $ All []
  | (SubTypeConstr t0 t1) `S.member` met
  		= return $ Just $ All []
+ | isRFree t0	= return $ Just $ SubTypeConstr t0 t1
  | otherwise	= _isSuper tt t0 t1
 
 
 _isSuper	:: Typetable -> RType -> RType -> Exc (Maybe TypeConstraint)
 _isSuper tt sub super
- | sub == super
- 	= return $ Just $ All []
  | isNormal sub
 	= do	-- let's dissassemble t0
  		let (base, args)	= dissassemble sub
@@ -104,9 +103,10 @@ _isSuper tt sub super
 		-- {a0 -> first arg, ...}
 		let mapping	= zip defaultFreeNames args
 		possibleSupers	<- applicableSupers ti super |+> subsSuper mapping
-					||>> testSuper super
-		return $ if L.null possibleSupers then Nothing
-				else Just $ foldl1 Choose possibleSupers
+		let possibleConstraints	= possibleSupers|> testSuper super
+		warn $ "In _isSuper: possible supertypes of "++show sub++" are: "++ show (zip possibleSupers possibleSupers)
+		return $ if L.null possibleConstraints then Nothing
+				else Just $ foldl1 Choose possibleConstraints
  | otherwise
  	= do	warn $ "Trying to see "++show sub++" as subtype of "++show super
  		return $ Nothing
@@ -121,7 +121,7 @@ what constraints are imposed to let A a b c be in A d e f
 -}
 testSuper	:: RType -> (RType, [TypeConstraint]) -> TypeConstraint
 testSuper wantedForm (candidate, constraints)
-	=All $ bind candidate wantedForm:constraints & L.filter (not . isTrivialConstraint)
+	= All $ bind candidate wantedForm:constraints & L.filter (not . isTrivialConstraint)
 
 
 
@@ -138,7 +138,6 @@ applicableSupers ti t
  		base		= getBaseTID t
  		in
  		allSupers & L.filter ((==) base . getBaseTID . fst)
-
 
 
 

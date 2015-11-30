@@ -35,18 +35,19 @@ propagSupertypesStep tt@(Typetable conts)
 
 
 addSupersFor	:: Typetable -> TypeID -> TypeInfo -> Exc (TypeID, TypeInfo)
-addSupersFor tt tid ti
+addSupersFor tt tid@(fqn, name) ti
 	= inside ("While calculating all the supertypes for "++show tid) $
-	  do	supertypes'	<- ti & supertypes & M.toList |+> supertypesFor tt ti |> concat	:: Exc [(RType, [TypeConstraint])]
+	  do	let self	= applyTypeArgsFree (RNormal fqn name) (frees ti)
+	  	supertypes'	<- ti & supertypes & M.toList |+> supertypesFor tt ti self |> concat	:: Exc [(RType, [TypeConstraint])]
 		return (tid, ti {supertypes = M.fromList supertypes'})
 
 -- calculates the new supertypes
-supertypesFor	:: Typetable -> TypeInfo -> (RType, [TypeConstraint]) -> Exc [(RType, [TypeConstraint])]
-supertypesFor tt ti orig@(superform, constraints)
+supertypesFor	:: Typetable -> TypeInfo -> RType -> (RType, [TypeConstraint]) -> Exc [(RType, [TypeConstraint])]
+supertypesFor tt ti self orig@(superform, constraints)
  | isNormal superform
 	= inside ("While getting the supertypes of "++show superform) $
 	  do	supers		<- supertypesOf tt superform	-- frees already substituted by supertypesOf
-		let gotAlready	= supertypes ti & M.keys
+		let gotAlready	= self : (supertypes ti & M.keys)
 		let supers'	= supers & L.filter ((`notElem` gotAlready) . fst)
 		let newSupers	= supers' ||>> (constraints ++ ) ||>> nub
 		return (orig:newSupers)

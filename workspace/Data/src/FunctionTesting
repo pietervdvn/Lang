@@ -4,16 +4,12 @@ Testcode for generating functions
 ---------------
 
 import Any
+import Collection.List
 
-cat Ord
-	> True
 
 cat A
 	> True
-cat X a:A
+cat B
 	> True
 
-cat Y a is X Ord
-	> True
-
-instance Ord is A
+type C = A & B
