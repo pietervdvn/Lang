@@ -69,6 +69,9 @@ renderMD (OrderedList mus)
                 return list
 renderMD (InLink mu url)
 		= renderMD (Link mu url)
+renderMD (Image alt url)
+	= do	let txt	= between' "![" "]" alt ++ between' "(" ")" url
+		return txt
 
 renderDoc2MD	:: Doc -> MarkDown
 renderDoc2MD dc	= runstate (renderMD $ contents dc) (MdContext 1 0) & fst

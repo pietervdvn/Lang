@@ -51,6 +51,7 @@ mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs
 	    , inlink "SubDir/Doc4"
 	        , Table [imp "Head 1", imp "Head 2"] [["Row 1","Row 1 again"] |> Base, [Base "Row 2", List [Base "Row 2 again", Base "Row 2 again"]]]
             , List [Base "Item", List [Base "More", Base "Nested", Base "Lists"], Base "Item"]
+            , titling "A kitty for Ilion" $ image "A test image" "http://meiden.blog.nl/files/2009/11/q5-225x300.jpg"
             ]
 
 

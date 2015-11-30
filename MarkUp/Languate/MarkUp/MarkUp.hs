@@ -28,6 +28,7 @@ data MarkUp
         | List [MarkUp]                 -- Unordered list
         | OrderedList [MarkUp]          -- Ordered list
 	| Embed Name			-- Embeds the document from the cluster into this markup
+	| Image String URL 		-- A link to an image (url) with alt text (string)
 	deriving (Show)
 
 type URL = String
@@ -38,6 +39,7 @@ data MarkUpStructure
 	| Two (MarkUp -> MarkUp -> MarkUp) MarkUp MarkUp
 	| Multi ([MarkUp] -> MarkUp) [MarkUp]
 	| ExtraString (MarkUp -> String -> MarkUp) MarkUp String
+	| TwoStrings (String -> String -> MarkUp) String String
 	| TableStructure [MarkUp] [[MarkUp]]
 -- A general function which extract the markdown into it's constructor + args, within the structure
 unpack	:: MarkUp -> MarkUpStructure
@@ -71,6 +73,8 @@ unpack (InLink mu url)
 	    = ExtraString InLink mu url
 unpack (Embed url)
 	    = Str Embed url
+unpack (Image mu url)
+	    = TwoStrings Image mu url
 
 -- rebuild the markup from its structure
 repack	:: (MarkUp -> MarkUp) -> MarkUpStructure -> MarkUp
@@ -82,6 +86,8 @@ repack f (Multi cons mus)
 			= mus |> f & cons
 repack f (ExtraString cons mu str)
 			= cons (f mu) str
+repack f (TwoStrings cons a b)
+			= cons a b
 repack f (TableStructure mus muss)
 			= Table (mus |> f) (muss ||>> f)
 
@@ -96,6 +102,8 @@ flatten (Two _ mu0 mu1)	= [mu0, mu1]
 flatten (Multi _ mus)	= mus
 flatten (ExtraString _ mu _)
 			= [mu]
+flatten (TwoStrings _ _ _)
+			= []
 flatten (TableStructure mus muss)
 			= mus ++ concat muss
 
@@ -194,6 +202,8 @@ commas' mus
 parags mus
 	= mus |> Parag & Seq
 unwords'= Seq
+image alt url
+	= Image alt url
 
 (+++)	:: MarkUp -> MarkUp -> MarkUp
 (+++) (Seq a) (Seq b)
