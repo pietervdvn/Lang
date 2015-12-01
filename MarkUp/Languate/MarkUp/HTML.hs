@@ -12,7 +12,9 @@ import Data.Char
 
 type HTML     = String
 
-renderHTML	:: MarkUp -> State Int HTML
+data HTMLState	= HTMLState {titleDepth :: Int, usedHeaders :: Int}
+
+renderHTML	:: MarkUp -> State HTMLState HTML
 renderHTML (Base str)
 		= (str >>= (\c -> if c == '\n' then "<br />" else [c])) & return
 renderHTML (Parag mu)
@@ -30,11 +32,11 @@ renderHTML (Code mu)
 renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
-        = do    i <- get
+        = do    i <- get' titleDepth
                 title <- renderHTML mu |> inTag' ("h"++show i) ["id=\""++escapeURL (toText mu)++"\""]
-                put $ i + 1
+                modify (\htmlstate -> htmlstate {titleDepth = i + 1})
                 text' <- renderHTML text
-                put i
+                modify (\htmlstate -> htmlstate {titleDepth = i})
                 return $ title ++ text'
 renderHTML (Link text link)
         = renderHTML text |> inTag' "a" ["href="++show link]
@@ -52,10 +54,21 @@ renderHTML (InLink mu url)
 	= renderHTML $ Link mu url
 renderHTML (Image alt url)
 	= return $ inTag' "img" ["src="++url, "alt="++alt] ""
+renderHTML (Toggle title conts)
+	= do	id	<- get' usedHeaders
+		modify (\state -> state {usedHeaders = id + 1})
+		title'	<- renderHTML title
+		let header	= "toggler"++show id
+		let inp	= inTag' "input" ["class=\"toggle-box\"", "id=\""++ header ++"\"", "type=\"checkbox\""] ""
+		let label = inTag' "label" ["for=\"" ++ header ++"\""] title'
+		conts'	<- renderHTML conts |> inTag "div"
+		return (inp ++ label ++ conts')
+
+
 
 
 renderDoc2HTML::    Doc -> HTML
-renderDoc2HTML doc   = runstate (contents doc & renderHTML) 1 & fst
+renderDoc2HTML doc   = runstate (contents doc & renderHTML) (HTMLState 1 0) & fst
 
 --------------- TOOLS ---------------
 

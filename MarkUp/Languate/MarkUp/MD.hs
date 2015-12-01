@@ -72,6 +72,8 @@ renderMD (InLink mu url)
 renderMD (Image alt url)
 	= do	let txt	= between' "![" "]" alt ++ between' "(" ")" url
 		return txt
+renderMD (Toggle title conts)
+	= renderMD (Titling title conts)
 
 renderDoc2MD	:: Doc -> MarkDown
 renderDoc2MD dc	= runstate (renderMD $ contents dc) (MdContext 1 0) & fst

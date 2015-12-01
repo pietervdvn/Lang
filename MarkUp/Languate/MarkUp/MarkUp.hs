@@ -29,7 +29,9 @@ data MarkUp
         | OrderedList [MarkUp]          -- Ordered list
 	| Embed Name			-- Embeds the document from the cluster into this markup
 	| Image String URL 		-- A link to an image (url) with alt text (string)
+	| Toggle MarkUp MarkUp		-- Extensible object, e.g. for footnotes
 	deriving (Show)
+
 
 type URL = String
 
@@ -75,6 +77,8 @@ unpack (Embed url)
 	    = Str Embed url
 unpack (Image mu url)
 	    = TwoStrings Image mu url
+unpack (Toggle title conts)
+	    = Two Toggle title conts
 
 -- rebuild the markup from its structure
 repack	:: (MarkUp -> MarkUp) -> MarkUpStructure -> MarkUp
@@ -204,6 +208,8 @@ parags mus
 unwords'= Seq
 image alt url
 	= Image alt url
+toggle string mu
+	= Toggle (Base string) mu
 
 (+++)	:: MarkUp -> MarkUp -> MarkUp
 (+++) (Seq a) (Seq b)

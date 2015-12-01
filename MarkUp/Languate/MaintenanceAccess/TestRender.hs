@@ -13,7 +13,7 @@ fp	= "/test"
 
 t = do	dir	<- getCurrentDirectory
 	let fp'	= dir ++ fp
-	let headers	= defaultHeader defaultCSS
+	let headers	= defaultHeader blackCSS
 	let html'	= fix $ extend (setFilePath (fp'++"/html")) $ html headers
 	removeDirectoryRecursive fp'
 	renderClusterTo html' cluster
@@ -29,7 +29,7 @@ preproc	= addPreprocessor' (\mu -> parags [back, mu, back])
 cluster	= buildCluster [doc1,doc2,doc3, doc4, doc5, doc6]
 
 
-mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ parags
+mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ Seq
 	    [ Base "Hallo Again!"
             , OrderedList [Base "Item", OrderedList [Base "More", Base "Nested", Base "Lists"], Base "Item"]
             , emph "Test emph"
@@ -51,7 +51,7 @@ mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs
 	    , inlink "SubDir/Doc4"
 	        , Table [imp "Head 1", imp "Head 2"] [["Row 1","Row 1 again"] |> Base, [Base "Row 2", List [Base "Row 2 again", Base "Row 2 again"]]]
             , List [Base "Item", List [Base "More", Base "Nested", Base "Lists"], Base "Item"]
-            , titling "A kitty for Ilion" $ image "A test image" "http://meiden.blog.nl/files/2009/11/q5-225x300.jpg"
+            , toggle "A kitty for Ilion" $ image "A test image" "http://meiden.blog.nl/files/2009/11/q5-225x300.jpg"
             ]
 
 
