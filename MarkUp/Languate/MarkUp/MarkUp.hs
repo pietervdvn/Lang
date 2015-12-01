@@ -30,6 +30,7 @@ data MarkUp
 	| Embed Name			-- Embeds the document from the cluster into this markup
 	| Image String URL 		-- A link to an image (url) with alt text (string)
 	| Toggle MarkUp MarkUp		-- Extensible object, e.g. for footnotes
+	| Hover MarkUp MarkUp		-- Renders the first normally and only shows the second when mouse is over the first
 	deriving (Show)
 
 
@@ -79,6 +80,8 @@ unpack (Image mu url)
 	    = TwoStrings Image mu url
 unpack (Toggle title conts)
 	    = Two Toggle title conts
+unpack (Hover shown hover)
+	    = Two Hover shown hover
 
 -- rebuild the markup from its structure
 repack	:: (MarkUp -> MarkUp) -> MarkUpStructure -> MarkUp

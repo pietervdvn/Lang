@@ -83,10 +83,11 @@ renderFile	:: Cluster -> RenderSettings -> Doc -> IO ()
 renderFile cluster@(Cluster docs) rs doc = do
 	let inLinks	= search searchRefs $ contents doc
 	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
-	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links or embeds, namely "++commas deadLinks
+	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links or embeds, namely "++commas (deadLinks |> show)
 	let target	= _makeFPproof $ fst $ renderName rs $ title doc
 	let str		= postprocessor rs doc $ render rs doc
 	writeFile' target str
+
 
  -- Returns all markups with references to different docs for error msgs
 searchRefs	:: MarkUp -> Maybe Name

@@ -18,7 +18,7 @@ renderHTML	:: MarkUp -> State HTMLState HTML
 renderHTML (Base str)
 		= (str >>= (\c -> if c == '\n' then "<br />" else [c])) & return
 renderHTML (Parag mu)
-        = mu & rewrite removePars & renderHTML |> whenTag "p" |> (++"\n")
+        = mu & rewrite removePars & renderHTML |> (++"<br />\n")
 renderHTML (Seq mus)
         = mus & mapM renderHTML |> unwords
 renderHTML (Emph mu)
@@ -53,16 +53,20 @@ renderHTML (OrderedList mus)
 renderHTML (InLink mu url)
 	= renderHTML $ Link mu url
 renderHTML (Image alt url)
-	= return $ inTag' "img" ["src="++url, "alt="++alt] ""
+	= return $ inTag' "img" ["src="++url, "alt="++show alt] ""
 renderHTML (Toggle title conts)
 	= do	id	<- get' usedHeaders
 		modify (\state -> state {usedHeaders = id + 1})
 		title'	<- renderHTML title
 		let header	= "toggler"++show id
-		let inp	= inTag' "input" ["class=\"toggle-box\"", "id=\""++ header ++"\"", "type=\"checkbox\""] ""
-		let label = inTag' "label" ["for=\"" ++ header ++"\""] title'
+		let inp	= inTag' "input" ["class=\"toggle-box\"", "id="++ show header, "type=\"checkbox\""] ""
+		let label = inTag' "label" ["for=" ++ show header] title'
 		conts'	<- renderHTML conts |> inTag "div"
 		return (inp ++ label ++ conts')
+renderHTML (Embed link)
+	= return $ inTag "a" ("Dead embed: "++link)
+renderHTML (Hover shown text)
+	= renderHTML shown
 
 
 

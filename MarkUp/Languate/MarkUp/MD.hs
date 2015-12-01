@@ -3,6 +3,7 @@ module Languate.MarkUp.MD where
 -- This module renders MD stuff
 --
 import StdDef
+import HumanUtils
 import State
 import Languate.MarkUp.MarkUp
 import Languate.MarkUp.Doc
@@ -74,6 +75,12 @@ renderMD (Image alt url)
 		return txt
 renderMD (Toggle title conts)
 	= renderMD (Titling title conts)
+renderMD (Embed title)
+	= renderMD (Link (Base $ "Dead link"++title) title)
+renderMD (Hover shown footnote)
+	= do	shown'	<- renderMD shown
+		note'	<- renderMD footnote
+		return $ shown' ++ pars (pars note')
 
 renderDoc2MD	:: Doc -> MarkDown
 renderDoc2MD dc	= runstate (renderMD $ contents dc) (MdContext 1 0) & fst
