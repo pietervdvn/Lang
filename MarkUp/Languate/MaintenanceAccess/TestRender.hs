@@ -38,7 +38,7 @@ mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs
             , incorr "wrong info"
 	    , code ">"
 	    , code "<"
-	    , Hover (Base "Hover over me") (Seq [parag "A nice kitty", image "Yet another kitty" "http://i.telegraph.co.uk/multimedia/archive/02830/cat_2830677b.jpg"])
+	    , Hover (Base "Hover over me") (Seq [parag "A nice kitty", image "Yet another kitty" "http://i.telegraph.co.uk/multimedia/archive/02830/cat_2830677b.jpg", Hover (Base "More hover!") (Base "Hi again")])
 	    , notImportant "Not important"
 	    , Incorr $ Base "Strikethrough?"
             , titling "Main item" $ Seq
