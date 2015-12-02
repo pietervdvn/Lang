@@ -18,24 +18,26 @@ data TypeConstraint
 
 
 instance Show TypeConstraint where
-	show	= stc
+	show	= stc . normalize
 
 
 stc (SubTypeConstr sub super)
 	= "Constraint "++show sub++" is "++indent (show super)
 stc (Choose cons1 cons2)
-	= "Either "++indent (show cons1)++"\nor     "++indent (show cons2)
+	= "Either"++indent ("\n"++show cons1)++"or"++indent ("\n"++show cons2)
 stc (All [])
 	= "No typeconstraints! :)"
+stc (All [tc])
+	= stc tc
 stc (All cons)
-	= cons |> show & unlines
+	= cons |> show |> (" " ++) & unlines
 
 instance Normalizable TypeConstraint where
 	normalize	= ntc
 
 ntc	:: TypeConstraint -> TypeConstraint
 ntc (All constrs)
-	= let cleaned = (constrs |> normalize) & filter (not . isTrivialConstraint) in
+	= let cleaned = ((constrs >>= flatten) |> normalize) & filter (not . isTrivialConstraint) in
 		if length cleaned == 1 then head cleaned else All cleaned
 ntc (Choose a b)
  | isTrivialConstraint a || isTrivialConstraint b
@@ -44,12 +46,18 @@ ntc (Choose a b)
  	= Choose (normalize a) (normalize b)
 ntc tc	= tc
 
+flatten	:: TypeConstraint -> [TypeConstraint]
+flatten (All tcs)	= tcs
+flatten tc		= [tc]
+
 
 isTrivialConstraint	:: TypeConstraint -> Bool
 isTrivialConstraint (SubTypeConstr t0 t1)
 			= t0 == t1
 isTrivialConstraint (All [])
 			= True
+isTrivialConstraint (Choose a b)
+			= isTrivialConstraint a || isTrivialConstraint b
 isTrivialConstraint _	= False
 
 subsConstraint	:: [(Name, RType)] -> TypeConstraint -> Exc TypeConstraint

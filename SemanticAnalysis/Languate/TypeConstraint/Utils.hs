@@ -104,7 +104,6 @@ _isSuper tt sub super
 		let mapping	= zip defaultFreeNames args
 		possibleSupers	<- applicableSupers ti super |+> subsSuper mapping
 		let possibleConstraints	= possibleSupers|> testSuper super
-		warn $ "In _isSuper: possible supertypes of "++show sub++" are: "++ show (zip possibleSupers possibleSupers)
 		return $ if L.null possibleConstraints then Nothing
 				else Just $ foldl1 Choose possibleConstraints
  | otherwise
