@@ -65,8 +65,10 @@ renderHTML (Toggle title conts)
 		return (inp ++ label ++ conts')
 renderHTML (Embed link)
 	= return $ inTag "a" ("Dead embed: "++link)
-renderHTML (Hover shown text)
-	= renderHTML shown
+renderHTML (Hover shown hovertext)
+	= do	shown'	<- renderHTML shown
+		text'	<- renderHTML hovertext |> inSpan "hover-text"
+		return $ inSpan "hover-source" (shown' ++ text')
 
 
 

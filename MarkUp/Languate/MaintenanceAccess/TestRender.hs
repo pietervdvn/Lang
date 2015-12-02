@@ -13,7 +13,7 @@ fp	= "/test"
 
 t = do	dir	<- getCurrentDirectory
 	let fp'	= dir ++ fp
-	let headers	= defaultHeader defaultCSS
+	let headers	= defaultHeader blackCSS
 	let html'	= fix $ extend (setFilePath (fp'++"/html")) $ html headers
 	removeDirectoryRecursive fp'
 	renderClusterTo html' cluster
@@ -29,7 +29,7 @@ preproc	= addPreprocessor' (\mu -> parags [back, mu, back])
 cluster	= buildCluster [doc1,doc2,doc3, doc4, doc5, doc6]
 
 
-mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ Seq
+mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ parags
 	    [ Base "Hallo Again!"
             , OrderedList [Base "Item", OrderedList [Base "More", Base "Nested", Base "Lists"], Base "Item"]
             , emph "Test emph"
@@ -38,7 +38,7 @@ mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs
             , incorr "wrong info"
 	    , code ">"
 	    , code "<"
-	    , Hover (Base "Hover over me") (Seq [Base "abc", imp "def"])
+	    , Hover (Base "Hover over me") (Seq [parag "A nice kitty", image "Yet another kitty" "http://i.telegraph.co.uk/multimedia/archive/02830/cat_2830677b.jpg"])
 	    , notImportant "Not important"
 	    , Incorr $ Base "Strikethrough?"
             , titling "Main item" $ Seq
