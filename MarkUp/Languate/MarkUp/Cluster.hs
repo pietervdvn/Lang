@@ -63,30 +63,37 @@ renderClusterTo	settings (Cluster docsDict)= do
 	-- first render and write resources, as automatic browser reloads already need those
 	resources settings	|> first (fst . resourceName settings)
 				|> uncurry writeFile' & sequence_
-	renderBar (renderFile cluster' settings) (docsIn cluster' & M.elems |> (title &&& id) )
+	missing	<- renderBar (renderFile cluster' settings) (docsIn cluster' & M.elems |> (title &&& id) )
 	putStrLn $ "Written document cluster to "++(renderName settings "" & fst)++" containing "++ show (length docs')++" docs"
+	unless (null missing) $ putStrLn $ "WARNING: some documents contain dead links or embeds:"++
+		(missing & concat & merge >>= missingMsg) & indent
 
-renderBar	:: (a -> IO ()) -> [(String, a)] -> IO ()
+missingMsg	:: (Name, [String]) -> String
+missingMsg (title, missing)
+	= let	msg	= "\nThe document "++show title++" has "++plural (length missing) "dead link" ++", namely "
+		docs	= missing |> show & commas
+		in
+		msg ++ docs
+
+renderBar	:: (a -> IO b) -> [(String, a)] -> IO [b]
 renderBar action ls
 		= do	let l	= length ls
 			let width	= 79
 			putStr $ bar width l "" 0
-			ls & zip [1..]
-				|> (\(i, (msg,a)) -> do
-					putStr $ "\r" ++ bar width l msg i
-					action a)
-				& sequence_
+			bs 	<- zip [1..] ls
+					|+> (\(i, (msg,a)) ->  putStr ("\r" ++ bar width l msg i) >> action a)
 			putStrLn $ "\r" ++ bar width l (show l++" docs written") l
+			return bs
 
 
-renderFile	:: Cluster -> RenderSettings -> Doc -> IO ()
+renderFile	:: Cluster -> RenderSettings -> Doc -> IO [(Name, String)]
 renderFile cluster@(Cluster docs) rs doc = do
 	let inLinks	= search searchRefs $ contents doc
 	let deadLinks	= inLinks & filter (`notElem` M.keys docs)
-	unless (null deadLinks) $ putStrLn $ "Warning: the document "++show (title doc)++" contains some dead internal links or embeds, namely "++commas (deadLinks |> show)
 	let target	= _makeFPproof $ fst $ renderName rs $ title doc
 	let str		= postprocessor rs doc $ render rs doc
 	writeFile' target str
+	return $ zip (repeat $ title doc) deadLinks
 
 
  -- Returns all markups with references to different docs for error msgs
