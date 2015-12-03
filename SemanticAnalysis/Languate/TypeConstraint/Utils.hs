@@ -96,7 +96,13 @@ isSuper tt met t0 t1
 _isSuper	:: Typetable -> RType -> RType -> Exc (Maybe TypeConstraint)
 _isSuper tt sub super
  | isNormal sub
-	= do	-- let's dissassemble t0
+	= do	-- check kinds first, they should both have the normal kind!
+		subKind	<- simpleKindOf tt (const $ return Kind) sub
+		superKind	<- simpleKindOf tt (const $ return Kind) super
+		if subKind /= Kind || superKind /= Kind then do
+			return Nothing
+		else do
+		-- let's dissassemble t0
  		let (base, args)	= dissassemble sub
 		ti	<- getTi tt base
 		-- we build a mapping for each free
@@ -159,14 +165,16 @@ neededConstraints tt met (Choose a b)
 		else return $ firstJust a' b'
 
 {-Recursively build all needed constraints to meet all the wanted constraints -}
-allNeededConstraints	:: Typetable -> Set TypeConstraint -> Set TypeConstraint -> Exc (Maybe (Set TypeConstraint))
+allNeededConstraints	:: Typetable -> Set TypeConstraint -> [TypeConstraint] -> Exc (Maybe (Set TypeConstraint))
 allNeededConstraints tt met wanted
-	= do	let wanted'	= wanted S.\\ met
-		newConstr	<- wanted' & S.toList |+> neededConstraints tt met
-					|> sequence ||>> concat :: Exc (Maybe [TypeConstraint])
-		case newConstr of
-			Nothing	-> return Nothing
-			Just []	-> return $ Just met
-			Just newConstraints
-				-> do	needed	<- allNeededConstraints tt (S.union met wanted) (S.fromList newConstraints)
-					needed |> (S.\\ wanted) & return
+	= _allNeededConstraints tt met S.empty wanted
+
+
+_allNeededConstraints	:: Typetable -> Set TypeConstraint -> Set TypeConstraint -> [TypeConstraint] -> Exc (Maybe (Set TypeConstraint))
+_allNeededConstraints tt met seen wanted
+	= do	newConstrs	<- wanted |+> neededConstraints tt met	:: Exc [Maybe [TypeConstraint]]
+		let newConstrs'	= newConstrs & sequence |> concat |> L.filter (`S.notMember` seen)	:: Maybe [TypeConstraint]
+		case newConstrs' of
+			Nothing 	-> return Nothing
+			(Just []) 	-> return $ Just seen
+			(Just constrs)	-> _allNeededConstraints tt met (S.fromList constrs) constrs

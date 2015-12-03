@@ -1,6 +1,7 @@
 module Languate.TypeConstraint.Def where
 
 import StdDef
+import HumanUtils
 import Languate.CheckUtils
 import Languate.TAST
 import Normalizable
@@ -24,13 +25,13 @@ instance Show TypeConstraint where
 stc (SubTypeConstr sub super)
 	= "Constraint "++show sub++" is "++indent (show super)
 stc (Choose cons1 cons2)
-	= "Either"++indent ("\n"++show cons1)++"or"++indent ("\n"++show cons2)
+	= "Either"++indent ("\n"++show cons1)++"\nor"++indent ("\n"++show cons2)
 stc (All [])
 	= "No typeconstraints! :)"
 stc (All [tc])
 	= stc tc
 stc (All cons)
-	= cons |> show |> (" " ++) & unlines
+	= cons |> show |> ("| " ++) & intercal "\n"
 
 instance Normalizable TypeConstraint where
 	normalize	= ntc
