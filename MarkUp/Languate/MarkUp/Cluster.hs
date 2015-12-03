@@ -64,9 +64,10 @@ renderClusterTo	settings (Cluster docsDict)= do
 	resources settings	|> first (fst . resourceName settings)
 				|> uncurry writeFile' & sequence_
 	missing	<- renderBar (renderFile cluster' settings) (docsIn cluster' & M.elems |> (title &&& id) )
+	let missing'	= missing & concat & merge
 	putStrLn $ "Written document cluster to "++(renderName settings "" & fst)++" containing "++ show (length docs')++" docs"
-	unless (null missing) $ putStrLn $ "WARNING: some documents contain dead links or embeds:"++
-		(missing & concat & merge >>= missingMsg) & indent
+	unless (null missing') $ putStrLn $ "WARNING: some documents contain dead links or embeds:"++
+		(missing' >>= missingMsg) & indent
 
 missingMsg	:: (Name, [String]) -> String
 missingMsg (title, missing)
