@@ -90,7 +90,7 @@ buildTypetable tlt fqn stms
 		-- we still have to add the any-type as supertype to each TI
 		let superCompleteAny = forTi addAnySupertype superComplete
 		cleaned	<- forTiM cleanTI superCompleteAny
-		return superCompleteAny
+		return cleaned
 
 addAnySupertype	:: Typetable -> TypeID -> TypeInfo -> TypeInfo
 addAnySupertype _ (fqn, name) ti
@@ -104,10 +104,12 @@ addAnySupertype _ (fqn, name) ti
 
 cleanTI		:: Typetable -> TypeID -> TypeInfo -> Exc TypeInfo
 cleanTI tt _ ti	= do	let stts	= supertypes ti	& M.toList :: [(RType, [TypeConstraint])]
+			-- existance constraints on frees
 			let metConstraintsFrees	= constraints ti & M.toList
 							|> first (\i -> defaultFreeNames !! i)
 							|> first RFree & unmerge
 							|> (\(a, super) -> SubTypeConstr a super)
+			-- constraints on frees + other requirements
 			let metConstraints	= (metConstraintsFrees ++ requirements ti) & S.fromList	:: Set TypeConstraint
 			cleanedStts	<- stts |+> cleanSTT tt metConstraints
 						|> M.fromList	:: Exc (Map RType [TypeConstraint])
@@ -117,7 +119,8 @@ cleanSTT	:: Typetable -> Set TypeConstraint -> (RType, [TypeConstraint]) -> Exc 
 cleanSTT tt met (rt, constrs)
 	= do	statusses	<- constrs |+> isConstraintMet' tt met
 		let unmet	= zip statusses constrs & L.filter (not . fst) |> snd
-		return (rt, unmet)
+		let trivial	= unmet & L.filter isTrivialConstraint
+		return (rt, unmet & L.filter (not . isTrivialConstraint))
 
 
 

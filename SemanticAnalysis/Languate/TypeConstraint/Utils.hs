@@ -22,17 +22,10 @@ isConstraintMet tt constr
 
 isConstraintMet'	:: Typetable -> Set TypeConstraint -> TypeConstraint -> Exc Bool
 isConstraintMet' tt met constraint
- | constraint `S.member` met
- 		= return True
- | otherwise	= inside ("Where constraints are met: "++show met) $
- 		  do	extraNeeded	<- neededConstraints tt met constraint
- 			case extraNeeded of
- 				Nothing	-> return False
- 				(Just moreConstraints)
- 					-> moreConstraints |+> isConstraintMet' tt (S.insert constraint met)
- 							|> and
-
-
+	= do	allCons	<- allNeededConstraints tt met [constraint]
+		case allCons of
+			(Just set)	-> return $ S.null set
+			_		-> return False
 
 {-
 Binds a type in another type.
