@@ -1,7 +1,8 @@
 module Languate.Typetable.ModuleTraverser
 	(locallyDeclared, declaredType, declaredSuperType
 	, constraintAdoptions, pushedSupers
-	, typeStatements) where
+	, typeStatements
+	, TypeSTM, TypeSTMs) where
 
 {-
 Multiple functions to traverse the statements, in search for type declaration stuff
@@ -30,23 +31,22 @@ import Languate.TypeConstraint.Def
 
 import Control.Arrow
 
-
+type TypeSTM	= (FQN, Statement)
+type TypeSTMs	= [TypeSTM]
 
 -- All locally declared types
-locallyDeclared	:: [([Name], Statement)] -> [(([Name], Name), [Name], [TypeRequirement])]
+locallyDeclared	:: TypeSTMs -> [((FQN, Name), [Name], [TypeRequirement])]
 locallyDeclared statements
 		=  statements |> declaredType & catMaybes
 			|> (\(a,b,c,d) -> ((a,b),c,d))
 
 -- filters all statements which have to do something with types
-typeStatements	:: FQN -> Module -> [([Name], Statement)]
+typeStatements	:: FQN -> Module -> TypeSTMs
 typeStatements fqn mod
-	= let origin	= modulePath fqn in
-		mod & statements & L.filter isTypeRelated
-			|> rewriteTypeStm origin	-- rewrite, to prevent ambiguities, e.g. types with the same name
-			& zip (repeat origin)
+	= mod & statements & L.filter isTypeRelated
+			& zip (repeat fqn)
 
-rewriteTypeStm	:: [Name] -> Statement -> Statement
+rewriteTypeStm	:: FQN -> Statement -> Statement
 rewriteTypeStm origin
 	= id  -- TODO
 
@@ -62,8 +62,7 @@ isTypeRelated (InstanceStm{})
 isTypeRelated _	= False
 
 
-
-declaredType :: ([Name], Statement) -> Maybe ([Name], Name, [Name], [TypeRequirement])
+declaredType :: TypeSTM -> Maybe (FQN, Name, [Name], [TypeRequirement])
 declaredType (origin, ADTDefStm (ADTDef name frees reqs _ _))
 		= Just (origin, name, frees, reqs)
 declaredType (origin, SubDefStm (SubDef name _ frees _ reqs))
@@ -76,12 +75,12 @@ declaredType _	= Nothing
 {-Gives a super type relationship
 	[(subtype, frees, supertype+reqs)]
 -}
-declaredSuperType	:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, [Name], RType, [TypeConstraint])]
+declaredSuperType	:: TypeLookupTable -> TypeSTM -> Exc [(RType, [Name], RType, [TypeConstraint])]
 declaredSuperType tlt (origin, ADTDefStm adtDef@(ADTDef nm frees reqs sums adopts))
 	= inside ("While building the supertype relation of "++show nm++" "++show frees) $
 	  do	reqs'	<- resolveReqs tlt reqs |> reqAsConstraint	:: Exc [TypeConstraint]
 		-- the type being declared here is the supertype of the adopted types...
-		declaredType	<- resolveTypePath tlt (origin, nm)
+		declaredType	<- resolveTypePath tlt (modulePath origin, nm)
 		-- ... applied on the frees of course!
 		let declaredType'	= applyTypeArgs declaredType (frees |> RFree)
 		adopts'	<- adopts & resolveTypes tlt
@@ -107,12 +106,12 @@ declaredSuperType tlt (_,InstanceStm (Instance typePath frees super reqs))
 			= supers |> (\super' -> (typ', frees, super', reqs'))
 		return declared
 declaredSuperType tlt (origin, SubDefStm (SubDef name _ frees supers reqs))
-	= do	typ	<- resolveTypePath tlt (origin, name)
+	= do	typ	<- resolveTypePath tlt (modulePath origin, name)
 		supers'	<- resolveTypes tlt (supers >>= topLevelConj)
 		reqs'	<- resolveReqs tlt reqs |> reqAsConstraint
 		supers' |> (\super -> (typ, frees, super, reqs')) & return
 declaredSuperType tlt (origin, ClassDefStm cd)
-	= do	typ	<- (origin, AST.name cd) & resolveTypePath tlt
+	= do	typ	<- (modulePath origin, AST.name cd) & resolveTypePath tlt
 		supers	<- (subclassFrom cd >>= topLevelConj) & resolveTypes tlt
 		reqs	<- classReqs cd & resolveReqs tlt |> reqAsConstraint
 		let frees	=  AST.frees cd
@@ -139,7 +138,7 @@ This function gives exactly this relation:
 For CATEGORY- and TYPE-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
 
 -}
-constraintAdoptions	:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, RType)]
+constraintAdoptions	:: TypeLookupTable -> TypeSTM -> Exc [(RType, RType)]
 constraintAdoptions tlt stm@(_, ClassDefStm _)
 	-- ""cat X a:Y a"" : X (rt) only exists if the constraints on super are met
 	= declaredSuperType tlt stm ||>> (\(rt, frees, super, constraints) -> (applyTypeArgsFree rt frees, super))
@@ -184,9 +183,9 @@ type A = B + C
 however does define that B is an A, just as C is an A
 -}
 
-pushedSupers		:: TypeLookupTable -> ([Name], Statement) -> Exc [(RType, (RType,[Name]))]
+pushedSupers		:: TypeLookupTable -> TypeSTM -> Exc [(RType, (RType,[Name]))]
 pushedSupers tlt (origin, ADTDefStm (ADTDef nm frees _ _ adopted))
-	= do	super		<- resolveTypePath tlt (origin,nm)	-- type that is pushed on ...
+	= do	super		<- resolveTypePath tlt (modulePath origin, nm)	-- type that is pushed on ...
 		subForms	<- resolveTypes tlt adopted -- ... these fellows, all the adopted types if they are not conjunctions
 						|> L.filter isConjFree
 		[((super,frees), subForms)] & unmerge |> swap & return

@@ -4,26 +4,12 @@ Testcode for generating functions
 ---------------
 
 import Any
-
+import TypeTesting
 
 cat A
 	> True
+
 cat B
 	> True
 
-type C = A & B
-
-cat D a
-	> True
-
-instance D a:A is X
-instance D a:B is Y
-
-type E = D A
-
-
-cat X
-	> True
-
-cat Y
-	> True
+instance B is A

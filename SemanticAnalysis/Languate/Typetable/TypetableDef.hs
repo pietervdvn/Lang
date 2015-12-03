@@ -29,8 +29,6 @@ import Data.Tuple
 
 
 
-type TypeSTMs	= [([Name], Statement)]
-
 data Typetable	= Typetable (Map TypeID TypeInfo) deriving (Show, Eq)
 
 

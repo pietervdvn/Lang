@@ -1,6 +1,8 @@
 module Languate.Typetable.TypeLookupTable.TypeLookupTableDef where
 
 import StdDef
+import Exceptions
+import Languate.CheckUtils
 import HumanUtils
 import Languate.MarkUp as Mu
 
@@ -18,6 +20,8 @@ import Languate.FQN
 type TypeLookupTable	= Map ([Name], Name) (Set FQN)	-- mutliple values, multiple possiblities in some cases!
 
 
+getTLT		:: Map FQN TypeLookupTable -> FQN -> Exc TypeLookupTable
+getTLT tlts fqn	= M.lookup fqn tlts ? ("No tlt found for "++show fqn++", weird")
 
 tlt2doc		:: String -> FQN -> TypeLookupTable -> Doc
 tlt2doc title fqn tlt

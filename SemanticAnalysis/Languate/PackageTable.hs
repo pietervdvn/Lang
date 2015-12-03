@@ -30,10 +30,11 @@ data PackageTable
 buildPackageTable	:: Package -> Exc PackageTable
 buildPackageTable p
 	= do	let mods	=  modules p
-		precT		<- buildPrecTable p
-		tlts		<- buildTLTs p
-		tts		<- buildTypetables p tlts mods
-		fts		<- buildFunctionTables p tlts tts mods
+		precT		<- inside "While building the precedence table"$ buildPrecTable p
+		tlts		<- inside "While building the type lookup tables" $ buildTLTs p
+		tts		<- inside "While building the type tables" $ buildTypetables p tlts mods
+		-- TODO fts		<- buildFunctionTables p tlts tts mods
+		let fts		= fmap (const emptyFT) mods	:: Map FQN FunctionTable
 		modTbls		<- modules p & M.keys |> (id &&& id)
 					|+> onSecond (assembleModTable tlts tts fts)
 					|> M.fromList

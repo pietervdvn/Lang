@@ -5,7 +5,7 @@ This module implements the definitions of the functiontable
 --}
 import StdDef
 
-import Data.Map
+import Data.Map as M
 import Data.Set
 import Languate.AST
 import Languate.TAST
@@ -28,3 +28,7 @@ data FunctionTable
 		--implementations	:: Map Signature [TClause],
 		, documentation	:: Map Signature MetaInfo -- , [Law])
 		} deriving (Show)
+
+
+emptyFT	:: FunctionTable
+emptyFT	= FunctionTable M.empty M.empty

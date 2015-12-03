@@ -20,18 +20,18 @@ import Languate.TypeConstraint
 
 
 import Data.Maybe
+import Data.Map
 
-
-validateTypeSTMs	:: TypeLookupTable -> FQN -> Module -> Check
-validateTypeSTMs tlt fqn mod
+validateTypeSTMs	:: Map FQN TypeLookupTable -> FQN -> Module -> Check
+validateTypeSTMs tlts fqn mod
 	= inside ("In the module "++show fqn)$
+	  do	tlt	<- getTLT tlts fqn
 		mod & statements' |+> validateTypeSTM tlt fqn >> pass
 
 validateTypeSTM	:: TypeLookupTable -> FQN -> (Statement, Coor) -> Check
 validateTypeSTM tlt fqn (stm, (l,_))
 	= inside ("On line "++show l) $
-	  do	let origin	= modulePath fqn
-		let stm'	= (origin, stm)
+	  do	let stm'	= (fqn, stm)
 		declaredType stm' & maybeToList
 				|+> validateDeclaration tlt
 		supers		<- declaredSuperType tlt stm'
@@ -48,9 +48,9 @@ validateSuperDeclaration tlt (sub, frees, super, constrs)
 
 
 
-validateDeclaration	:: TypeLookupTable -> ([Name], Name, [Name], [TypeRequirement]) -> Check
+validateDeclaration	:: TypeLookupTable -> (FQN, Name, [Name], [TypeRequirement]) -> Check
 validateDeclaration tlt (origin, declaredType, frees, treqs)
-	= inside ("In the declaration of "++((origin++[declaredType]) & intercal ".")) $
+	= inside ("In the declaration of "++show origin++"."++declaredType) $
 		mapM_ (validateReq tlt frees) treqs
 
 validateConstraintFrees	:: [Name] -> RType -> [TypeConstraint] -> Check

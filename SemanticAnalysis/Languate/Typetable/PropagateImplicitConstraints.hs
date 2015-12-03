@@ -17,7 +17,7 @@ import Graphs.Order
 
 import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
-import Languate.Typetable.ModuleTraverser (constraintAdoptions)
+import Languate.Typetable.ModuleTraverser (constraintAdoptions, TypeSTM, TypeSTMs)
 import Languate.TAST
 import Languate.TAST.KindUtils
 

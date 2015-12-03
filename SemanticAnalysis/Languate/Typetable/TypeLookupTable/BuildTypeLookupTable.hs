@@ -53,14 +53,14 @@ type Exports	= Map FQN (Map FQN (FQN, Name))
 -- wrappers around moduletraverser, to hide the [(Origin, Statement)] complexities
 locallyDeclared	:: Module -> [(Name, [Name], [TypeRequirement])]
 locallyDeclared mod
-		= let decls	= statements mod & zip (repeat []) & ModuleTraverser.locallyDeclared :: [(([Name],Name), [Name], [TypeRequirement])]
+		= let decls	= statements mod & zip (repeat $ error "You should not need an fqn here!") & ModuleTraverser.locallyDeclared :: [((FQN,Name), [Name], [TypeRequirement])]
 			in
 			decls |> (\(a,b,c) -> (snd a, b, c))
 
 
 declaredType :: Statement -> Maybe (Name, [Name], [TypeRequirement])
 declaredType stm
-		= ModuleTraverser.declaredType ([],stm) |> (\(a,b,c,d) -> (b,c,d))
+		= ModuleTraverser.declaredType (error "You should not need an fqn here",stm) |> (\(a,b,c,d) -> (b,c,d))
 
 
 buildTLTs	:: Package -> Exc (Map FQN TypeLookupTable)
@@ -77,7 +77,7 @@ buildTLTs world
 		let exports 	= calculateExports' world pubLocDecl (reexportType world)
 		let known	= calculateImports' world locDecl exports
 		mapM_ (uncurry checkDoubleTypeDeclare) $ M.toList modules
-		return $ mapWithKey (buildTLT  world known) $ aliasTables world
+		dictMapM (buildTLT world known) $ aliasTables world
 
 
 calculateExports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> (FQN -> (FQN, prop) -> Bool) -> Map FQN (Set (prop, FQN))
@@ -114,20 +114,18 @@ The package is named Idiots, as everyone should always use standard lists for co
 buildTLT	:: Package -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
 			-> FQN {-What we have to build TLT for-}
 			-> AliasTable
-			-> TypeLookupTable
+			-> Exc TypeLookupTable
 buildTLT world imps fqn at
-	= let	mod 		= fwd "modules" fqn $ modules world
-		declared	= S.map fst $ findWithDefault S.empty fqn imps
-					:: Set (FQN, Name) {-Name, declared in -}
-		localDecl	= S.fromList $ locallyDeclared' mod
-					:: Set Name {- The locally declared types -}
-		locDeclDict	= S.toList $ S.map (\nm -> (([], nm), fqn)) localDecl	in
-		addAll locDeclDict $ S.foldl (addLookupEntry at) M.empty declared
+	= do	let mod 		= fwd "modules" fqn $ modules world
+		let declared	= S.map fst $ findWithDefault S.empty fqn imps	:: Set (FQN, Name) {-Name, declared in -}
+		let localDecl	= S.fromList $ locallyDeclared' mod		:: Set Name {- The locally declared types -}
+		let locDeclDict	= S.toList localDecl |> (\nm -> (([], nm), S.singleton fqn))	:: [ (([Name], Name), Set FQN) ]
+		return $ insertShadowing locDeclDict $ S.foldl (addLookupEntry at) M.empty declared
 
 
 addLookupEntry	:: AliasTable -> TypeLookupTable -> (FQN, Name) -> TypeLookupTable
 addLookupEntry at tlt (declaredIn, name)
-		= addAll [((p, name), declaredIn) | p <- tails $ fwd "at" declaredIn at] tlt
+		= addAll [((p, name), declaredIn) | p <- tails $ fwd "aliastable" declaredIn at] tlt
 
 
 
@@ -208,8 +206,14 @@ addOne	:: (Ord k, Ord v) => (k,v) -> Map k (Set v) -> Map k (Set v)
 addOne (k,v) dict
 		= M.insert k (S.insert v $ findWithDefault S.empty k dict) dict
 
+insertShadowing	:: Ord k => [(k,v)] -> Map k v -> Map k v
+insertShadowing elems
+		= M.union (M.fromList elems)
+
 err str fqn 	= error $ "Building type lookup table: fqn not found: "++show fqn++" within "++str++" table"
 fwd str fqn	= findWithDefault (err str fqn) fqn
+
+
 
 
 locallyDeclared'	= map fst3 . locallyDeclared
