@@ -11,6 +11,7 @@ import Languate.CheckUtils
 
 import Languate.TAST
 import Languate.AST
+import Languate.FQN
 import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.PropagateImplicitConstraints (typeRequirementsOn)
@@ -23,13 +24,13 @@ import Data.Map as M
 import Data.List (nub)
 import Control.Monad
 
-addSuperConstraints	:: TypeLookupTable -> TypeSTMs -> Typetable -> Exc Typetable
-addSuperConstraints tlt stms tt@(Typetable conts)
+addSuperConstraints	:: Map FQN TypeLookupTable -> TypeSTMs -> Typetable -> Exc Typetable
+addSuperConstraints tlts stms tt@(Typetable conts)
 	=  do	-- instance X is Y supertype constraint propagation, the normal case
 		tt'	<- conts & M.toList |+>  uncurry (addSuperConstraintsFor tt)
 				|> M.fromList |> Typetable
 		-- pushed upon supertypes
-		pushedUpons	<- stms |+> pushedSupers tlt |> concat	:: Exc [(RType, (RType, [Name]))]
+		pushedUpons	<- stms |+> pushedSupers tlts |> concat	:: Exc [(RType, (RType, [Name]))]
 		foldM addPushedUpon tt' pushedUpons
 
 

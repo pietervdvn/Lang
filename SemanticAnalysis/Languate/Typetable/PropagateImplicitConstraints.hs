@@ -15,6 +15,8 @@ import HumanUtils
 import Graphs.SearchCycles
 import Graphs.Order
 
+import Languate.FQN
+
 import Languate.Typetable.TypetableDef
 import Languate.Typetable.TypeLookupTable
 import Languate.Typetable.ModuleTraverser (constraintAdoptions, TypeSTM, TypeSTMs)
@@ -103,10 +105,10 @@ In the second cat, it is implied that B (a:Eq)
 For CATEGORY-DECLARATIONS and TYPE-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
 type a = {...} + ADOPTS
 -}
-propagateParams	:: TypeLookupTable -> TypeSTMs -> Typetable -> Exc (Typetable, Changed)
-propagateParams tlt tStms tt@(Typetable dict)
+propagateParams	:: Map FQN TypeLookupTable -> TypeSTMs -> Typetable -> Exc (Typetable, Changed)
+propagateParams tlts tStms tt@(Typetable dict)
 	= do	let allTypes	= dict & M.keys  :: [TypeID]
-		adoptions	<- tStms |+> constraintAdoptions tlt |> concat |> merge	:: Exc [(RType, [RType])]
+		adoptions	<- tStms |+> constraintAdoptions tlts |> concat |> merge	:: Exc [(RType, [RType])]
 		let adoptions'	= adoptions |> (fst &&& id) |> first getBaseTID |> unpackMaybeTuple & catMaybes :: [(TypeID, (RType, [RType]))]
 		foldM (\(tt@(Typetable content), changed) typeToInv ->
 			do	ti	<- M.lookup typeToInv content ? ("No type info found for "++show typeToInv++" (tt/PropagateImplicitConstraints)")

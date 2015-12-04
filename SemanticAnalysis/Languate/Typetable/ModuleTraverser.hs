@@ -75,12 +75,19 @@ declaredType _	= Nothing
 {-Gives a super type relationship
 	[(subtype, frees, supertype+reqs)]
 -}
-declaredSuperType	:: TypeLookupTable -> TypeSTM -> Exc [(RType, [Name], RType, [TypeConstraint])]
-declaredSuperType tlt (origin, ADTDefStm adtDef@(ADTDef nm frees reqs sums adopts))
+
+
+declaredSuperType	:: Map FQN TypeLookupTable -> TypeSTM -> Exc [(RType, [Name], RType, [TypeConstraint])]
+declaredSuperType tlts (fqn, stm)
+	= do	tlt	<- getTLT tlts fqn
+		_declaredSuperType tlt stm
+
+_declaredSuperType	:: TypeLookupTable -> Statement -> Exc [(RType, [Name], RType, [TypeConstraint])]
+_declaredSuperType tlt (ADTDefStm adtDef@(ADTDef nm frees reqs sums adopts))
 	= inside ("While building the supertype relation of "++show nm++" "++show frees) $
 	  do	reqs'	<- resolveReqs tlt reqs |> reqAsConstraint	:: Exc [TypeConstraint]
 		-- the type being declared here is the supertype of the adopted types...
-		declaredType	<- resolveTypePath tlt (modulePath origin, nm)
+		declaredType	<- resolveTypePath tlt ([], nm)
 		-- ... applied on the frees of course!
 		let declaredType'	= applyTypeArgs declaredType (frees |> RFree)
 		adopts'	<- adopts & resolveTypes tlt
@@ -97,7 +104,7 @@ declaredSuperType tlt (origin, ADTDefStm adtDef@(ADTDef nm frees reqs sums adopt
 		let synonymSupers'	= if isSynonym adtDef then synonymSupers++conjSupers else []
 		return (normalSupers ++ synonymSupers')
 
-declaredSuperType tlt (_,InstanceStm (Instance typePath frees super reqs))
+_declaredSuperType tlt (InstanceStm (Instance typePath frees super reqs))
 	= do	typ	<- resolveTypePath tlt typePath
 		let typ'= applyTypeArgs typ (frees |> RFree)
 		supers	<- super & topLevelConj & resolveTypes tlt
@@ -105,18 +112,18 @@ declaredSuperType tlt (_,InstanceStm (Instance typePath frees super reqs))
 		let declared
 			= supers |> (\super' -> (typ', frees, super', reqs'))
 		return declared
-declaredSuperType tlt (origin, SubDefStm (SubDef name _ frees supers reqs))
-	= do	typ	<- resolveTypePath tlt (modulePath origin, name)
+_declaredSuperType tlt (SubDefStm (SubDef name _ frees supers reqs))
+	= do	typ	<- resolveTypePath tlt ([], name)
 		supers'	<- resolveTypes tlt (supers >>= topLevelConj)
 		reqs'	<- resolveReqs tlt reqs |> reqAsConstraint
 		supers' |> (\super -> (typ, frees, super, reqs')) & return
-declaredSuperType tlt (origin, ClassDefStm cd)
-	= do	typ	<- (modulePath origin, AST.name cd) & resolveTypePath tlt
+_declaredSuperType tlt (ClassDefStm cd)
+	= do	typ	<- ([], AST.name cd) & resolveTypePath tlt
 		supers	<- (subclassFrom cd >>= topLevelConj) & resolveTypes tlt
 		reqs	<- classReqs cd & resolveReqs tlt |> reqAsConstraint
 		let frees	=  AST.frees cd
 		supers |> (\super -> (typ, frees, super, reqs)) & return
-declaredSuperType _ _	= return []
+_declaredSuperType _ _	= return []
 
 
 
@@ -138,16 +145,17 @@ This function gives exactly this relation:
 For CATEGORY- and TYPE-DECLARATIONS only, as the constraints imposed here are constraints to exist, not to have a certain supertype
 
 -}
-constraintAdoptions	:: TypeLookupTable -> TypeSTM -> Exc [(RType, RType)]
-constraintAdoptions tlt stm@(_, ClassDefStm _)
+constraintAdoptions	:: Map FQN TypeLookupTable -> TypeSTM -> Exc [(RType, RType)]
+constraintAdoptions tlts stm@(_, ClassDefStm _)
 	-- ""cat X a:Y a"" : X (rt) only exists if the constraints on super are met
-	= declaredSuperType tlt stm ||>> (\(rt, frees, super, constraints) -> (applyTypeArgsFree rt frees, super))
-constraintAdoptions tlt stm@(_, ADTDefStm adtDef@(ADTDef _ _ _ _ adopts))
+	= declaredSuperType tlts stm ||>> (\(rt, frees, super, constraints) -> (applyTypeArgsFree rt frees, super))
+constraintAdoptions tlts stm@(origin, ADTDefStm adtDef@(ADTDef _ _ _ _ adopts))
 	-- ""type X a = Y a"" is a synonym, therefor only exists if constraints on super are met
 	-- ""type X a={Constr} + Y a"": can exists, but then it ain't a Y is constraints are not met
  | isSynonym adtDef
-	= do	adopts'	<- (adopts >>= topLevelConj) & resolveTypes tlt
-		superRel	<-  declaredSuperType tlt stm ||>> (\(super, frees, rt, constraints) -> (rt, super))
+	= do	tlt		<- getTLT tlts origin
+		adopts'		<- (adopts >>= topLevelConj) & resolveTypes tlt
+		superRel	<-  declaredSuperType tlts stm ||>> (\(super, frees, rt, constraints) -> (rt, super))
 		-- adopted types never get any new constraints
 		-- we filter out values where the subtype comes from an adopted type
 		superRel & L.filter ( (`notElem` adopts') . fst) & return
@@ -183,9 +191,10 @@ type A = B + C
 however does define that B is an A, just as C is an A
 -}
 
-pushedSupers		:: TypeLookupTable -> TypeSTM -> Exc [(RType, (RType,[Name]))]
-pushedSupers tlt (origin, ADTDefStm (ADTDef nm frees _ _ adopted))
-	= do	super		<- resolveTypePath tlt (modulePath origin, nm)	-- type that is pushed on ...
+pushedSupers		:: Map FQN TypeLookupTable -> TypeSTM -> Exc [(RType, (RType,[Name]))]
+pushedSupers tlts (origin, ADTDefStm (ADTDef nm frees _ _ adopted))
+	= do	tlt		<- getTLT tlts origin
+		super		<- resolveTypePath tlt ([], nm)	-- type that is pushed on ...
 		subForms	<- resolveTypes tlt adopted -- ... these fellows, all the adopted types if they are not conjunctions
 						|> L.filter isConjFree
 		[((super,frees), subForms)] & unmerge |> swap & return

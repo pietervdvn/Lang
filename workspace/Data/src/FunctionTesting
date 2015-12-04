@@ -4,12 +4,7 @@ Testcode for generating functions
 ---------------
 
 import Any
-import TypeTesting
+import TypeTestingA
+import TypeTestingB
 
-cat A
-	> True
-
-cat B
-	> True
-
-instance B is A
+instance X is Y

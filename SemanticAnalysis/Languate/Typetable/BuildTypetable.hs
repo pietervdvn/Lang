@@ -39,8 +39,7 @@ import Control.Arrow hiding ((+++))
 
 buildTypetables	:: Package -> Map FQN TypeLookupTable -> Map FQN Module -> Exc (Map FQN Typetable)
 buildTypetables p tlts mods
-	= do	let globalTLT	= M.unions $ M.elems tlts
-		-- first some stupid checks on all the mods
+	= do	-- first some stupid checks on all the mods
 		inside "While doing the pre-checks" $ dictMapM (validateTypeSTMs tlts) mods
 		-- builds a dict {FQN --> type related statements}
 		let typeStms	= mapWithKey typeStatements mods |> S.fromList
@@ -54,7 +53,7 @@ buildTypetables p tlts mods
 		let exports	= calculateExports impGraph expGraph fetch filterSupertypes
 		let known	= calculateImports impGraph fetch exports	:: Map FQN (Set (TypeSTM, FQN))
 		let known'	= known |> S.toList ||>> fst |> nub
-		dictMapM (buildTypetable globalTLT) known'
+		dictMapM (buildTypetable tlts) known'
 
 
 
@@ -63,25 +62,25 @@ buildTypetables p tlts mods
 
 	The known table is needed for the kinds kinds
 -}
-buildTypetable	:: TypeLookupTable -> FQN -> TypeSTMs -> Exc Typetable
-buildTypetable tlt fqn stms
+buildTypetable	:: Map FQN TypeLookupTable -> FQN -> TypeSTMs -> Exc Typetable
+buildTypetable tlts fqn stms
 	= inside ("While building the local type info in module "++show fqn) $
 	  do	-- first build the locally known values
 		let locDecl	= locallyDeclared stms 	:: [((FQN, Name), [Name], [TypeRequirement])]
 		-- now we get all defined supertypes (including synonyms)
-		superDecls	<- stms |> declaredSuperType tlt & sequence |> concat
+		superDecls	<- stms |> declaredSuperType tlts & sequence |> concat
 					:: Exc [(RType, [Name], RType, [TypeConstraint])]
 		{- we now build the supertype table for locally declared values.
 			It picks out of 'superDecls' the supertypes it needs;
 		-}
-		typeInfos	<- locDecl |+> buildTypeInfo tlt superDecls fqn |> M.fromList |> Typetable
+		typeInfos	<- locDecl |+> buildTypeInfo tlts superDecls fqn |> M.fromList |> Typetable
 		-- now propagate existence constraints
-		tt		<- propagateImplicitConstraints tlt stms typeInfos |> fst
+		tt		<- propagateImplicitConstraints tlts stms typeInfos |> fst
 		-- we calculate the kinds of the types. The basic kinds are already there, but special cases are not handled yet
 		-- e.g. StateT :: * -> (* -> *) -> * -> *
 		-- this is done using the kinds of the constraints
 		kindedtt	<- buildKinds tt
-		constrComplete	<- addSuperConstraints tlt stms kindedtt
+		constrComplete	<- addSuperConstraints tlts stms kindedtt
 		-- then we calculate the 'transitive closure' of the supertype relationship
 		-- for non mathematicians: X is a Y; Y is a Z => X is a Z
 		superComplete	<- propagateSupertypes constrComplete
@@ -226,16 +225,24 @@ checkSameKind  tt ctx ti i rtps
 
 
 
--- Builds the type info about the given type in the tuple. The fqn is the module for which we build the typetable, the second is where it was defined
-buildTypeInfo	:: TypeLookupTable -> [(RType, [Name], RType, [TypeConstraint])] -> FQN
-				-> ((FQN, Name), [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
-buildTypeInfo tlt superDecls fqn ((definedIn, name), frees, reqs)
-	= inside ("While building type info about "++show definedIn++"."++show name) $
-	  do	tid		<- resolveTypeID tlt (modulePath definedIn, name)-- TODO resolveTypeID tlt n
-		let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
+{- Builds the type info about the given type in the tuple.
+ The fqn is the module for which we build the typetable, the second is where it was defined
+ tlts -> all type lookup tables
+ superDecls: full super type relation, thus all that are known within this module (also about other types)
+ FQN: fqn of the module we are building the supertype table for
+ Base info of the type for which we build the type info
+
+ -}
+buildTypeInfo	:: Map FQN TypeLookupTable -> [(RType, [Name], RType, [TypeConstraint])] -> FQN
+				-> (TypeID, [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
+buildTypeInfo tlts superDecls fqn (tid@(definedWithin, _), frees, reqs)
+	= inside ("While building type info about "++show tid) $
+	  do	let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
 		-- about the free type names
 		let indices	= zip frees [0..]	:: [(Name, Int)]
-		reqs'		<- reqs |+> (\(nm, t) -> do rt<-resolveType tlt t;return (nm, rt) )	:: Exc [(Name, RType)]
+		-- we have to resolve the requirements against the tlt of the origin
+		tlt	<- getTLT tlts definedWithin
+		reqs'		<- reqs |+> onSecond (resolveType tlt)	:: Exc [(Name, RType)]
 		reqs' |> snd |+> validateFrees frees
 
 		-- about the constraints
@@ -245,8 +252,8 @@ buildTypeInfo tlt superDecls fqn ((definedIn, name), frees, reqs)
 		constraints'	<- constraints |+> onSecond (subs mapping) |> merge
 					|> M.fromList			:: Exc (Map Int [RType])
 		-- about the supertypes
-		let isTid t	= getBaseTID t |> (tid ==) & fromMaybe False	:: Bool
-		superTypes	<- superDecls & L.filter (isTid . fst4) |+> canonicalSuperDecl
+		let isRightTid t	= getBaseTID t |> (tid ==) & fromMaybe False	:: Bool
+		superTypes	<- superDecls & L.filter (isRightTid . fst4) |+> canonicalSuperDecl
 					:: Exc [(RType, [Name], RType, [TypeConstraint])]
 		let duplicateSupers	= superTypes |> (\(_,_,super,_) -> super) & dubbles
 		assert (L.null duplicateSupers) $

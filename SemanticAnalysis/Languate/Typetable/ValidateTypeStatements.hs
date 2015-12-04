@@ -10,6 +10,8 @@ import HumanUtils
 import Exceptions
 import Languate.CheckUtils
 
+import Languate.FQN
+
 import Languate.AST
 import Languate.TAST
 import Languate.FQN
@@ -26,15 +28,16 @@ validateTypeSTMs	:: Map FQN TypeLookupTable -> FQN -> Module -> Check
 validateTypeSTMs tlts fqn mod
 	= inside ("In the module "++show fqn)$
 	  do	tlt	<- getTLT tlts fqn
-		mod & statements' |+> validateTypeSTM tlt fqn >> pass
+		mod & statements' |+> validateTypeSTM tlts fqn >> pass
 
-validateTypeSTM	:: TypeLookupTable -> FQN -> (Statement, Coor) -> Check
-validateTypeSTM tlt fqn (stm, (l,_))
+validateTypeSTM	:: Map FQN TypeLookupTable -> FQN -> (Statement, Coor) -> Check
+validateTypeSTM tlts fqn (stm, (l,_))
 	= inside ("On line "++show l) $
 	  do	let stm'	= (fqn, stm)
+	  	tlt		<- getTLT tlts fqn
 		declaredType stm' & maybeToList
 				|+> validateDeclaration tlt
-		supers		<- declaredSuperType tlt stm'
+		supers		<- declaredSuperType tlts stm'
 		supers |+> validateSuperDeclaration tlt
 		pass
 
