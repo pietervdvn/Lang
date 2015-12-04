@@ -1,0 +1,14 @@
+TypeTesting
+-----------
+Blabla
+-----------
+
+import Any
+
+cat A
+	> True
+
+cat Y
+	> True
+
+instance Y is A
