@@ -45,19 +45,22 @@ loadPackage world fp
 			maintained		<- manifest & rest & M.lookup "maintains" & fromMaybe (St [])
 							& (\(St mods) -> mods) |> (\(ModuleName names) -> names) & convNames2FQNS
 			(package, missing)	<- _loadPackage world (exposed++maintained) $ fp ++ "/src/"
-			unless (null missing) $ printErr exposed maintained missing
 			let srcPath		= fp ++ "/src"
 			allFiles		<- getDirectoryContentsRecursive srcPath
 			let allFiles'		= allFiles |> drop (1 + length srcPath)
-			return (buildWorld manifest package >>= checkObsoleteModules exposed maintained allFiles')
+			return (do	pack	<- buildWorld manifest package
+					checkCorrectNames (package |> fst)
+					haltIf (not $ null missing) $ notAllFoundErrMsg exposed maintained missing
+					checkObsoleteModules exposed maintained allFiles' pack
+					return pack)
 
-checkObsoleteModules	:: [FQN] -> [FQN] -> [FilePath] -> Package -> Exceptions' String Package
+checkObsoleteModules	:: [FQN] -> [FQN] -> [FilePath] -> Package -> Exceptions' String ()
 checkObsoleteModules exposed maintained fps pack
 		= do	-- loaded modules in file path form
 			let loadedMods = pack & modules & M.keys |> modulePath |> intercal "/"
 			let obsolete	= fps L.\\ loadedMods
 			assert (null obsolete) $ "Some modules are not used (and thus not loaded). Add them as 'maintains' in the manifest to load them too (and thus maintain them).\n"++exposedMaintained exposed maintained ++ "\nUnused modules are: "++commas obsolete
-			return pack
+
 
 _filterInvalid :: (Maybe FQN, [Name]) -> IO [FQN]
 _filterInvalid (Nothing, mods)
@@ -65,11 +68,18 @@ _filterInvalid (Nothing, mods)
 _filterInvalid (Just fqn, _)
 		= return [fqn]
 
-printErr	:: [FQN] -> [FQN] -> [(FQN,FQN)] -> IO ()
-printErr exposed maintained notFound
-		= do	putStrLn $ msg notFound
-			putStrLn $ exposedMaintained exposed maintained
-			error "Not all imported modules were found."
+notAllFoundErrMsg	:: [FQN] -> [FQN] -> [(FQN,FQN)] -> String
+notAllFoundErrMsg exposed maintained notFound
+		= msg notFound ++ "\n" ++ exposedMaintained exposed maintained
+
+-- The fqns are calculated based on their paths. The name within the module might be different
+checkCorrectNames	:: Map FQN Module -> Exceptions String String ()
+checkCorrectNames mods
+	= let msg fqn got	=  "The module "++show fqn++" is named incorrectly, it's name within the module is "++show got in
+	  do	(mods |> moduleName) & dictMapM (\fqn@(FQN _ _ expected) got ->
+			assert (deModName expected == got) $ msg fqn got)
+		pass
+
 
 
 exposedMaintained	:: [FQN] -> [FQN] -> String
@@ -116,6 +126,7 @@ loadNext	=  do	request	<- pop
 			cached	<- get' $ member (snd request) . loaded
 			unless cached $ uncurry loadF request
 
+-- Actual loading of a file
 loadF		:: FQN -> FQN -> StateT Context IO ()
 loadF requestor fqn
 		=  do	fpr	<- get' root
@@ -128,6 +139,7 @@ loadF requestor fqn
 					cache	<- get' loaded
 					imports	<- addImports fqn modul
 					modify $ setLoaded $ insert fqn (modul,imports)  cache
+
 
 -- adds all the imports to the toLoad-list. Returns the FQN's which are needed
 addImports	:: FQN -> Module -> StateT Context IO (Set (FQN,Import))
