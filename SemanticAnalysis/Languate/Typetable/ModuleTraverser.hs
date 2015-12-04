@@ -46,10 +46,6 @@ typeStatements fqn mod
 	= mod & statements & L.filter isTypeRelated
 			& zip (repeat fqn)
 
-rewriteTypeStm	:: FQN -> Statement -> Statement
-rewriteTypeStm origin
-	= id  -- TODO
-
 isTypeRelated	:: Statement -> Bool
 isTypeRelated (ADTDefStm{})
 		= True
