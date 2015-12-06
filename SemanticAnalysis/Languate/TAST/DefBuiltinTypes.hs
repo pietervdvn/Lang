@@ -17,11 +17,11 @@ anyTypeID	= (toFQN' "pietervdvn:Data:Any", "Any")
 boolType	= uncurry RNormal boolTypeID
 boolTypeID	= (toFQN' "pietervdvn:Data:Data.Bool", "Bool")
 
-voidType	= uncurry RNormal voidTypeID
-voidTypeID	= (voidTypeFQN,"Void")
-voidTypeFQN	= toFQN' "pietervdvn:Data:Collection.Void"
-voidTypeCons	:: TExpression
-voidTypeCons	= TCall ([voidType], []) $ Signature voidTypeFQN "Void" ([voidType], [])
+unitType	= uncurry RNormal unitTypeID
+unitTypeID	= (unitTypeFQN,"Unit")
+unitTypeFQN	= toFQN' "pietervdvn:Data:Collection.Unit"
+unitTypeCons	:: TExpression
+unitTypeCons	= TCall ([unitType], []) $ Signature unitTypeFQN "Unit" ([unitType], [])
 
 -- The representation of a tuple
 tupleType	= uncurry RNormal tupleTypeID
@@ -100,12 +100,12 @@ tupledTypes t@(RApplied (RApplied tupleT a) rest)
 		= a:tupledTypes rest
  | otherwise	= [t]	-- not a correct application of the tuple type
 tupledTypes t
- | t == voidType= []
+ | t == unitType= []
  | otherwise	= [t]
 
 
 tupleTypes	:: [RType] -> RType
-tupleTypes []	=  voidType
+tupleTypes []	=  unitType
 tupleTypes [t]	= t
 tupleTypes (t:ts)
 		= RApplied (RApplied tupleType t) (tupleTypes ts)

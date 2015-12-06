@@ -60,7 +60,7 @@ t "globalIdent" s
 		= Ident s
 t "typeIdent" s	= Ident s
 t "freeType" s	= FreeType s []
-t "void"  _	= KnownType [] "Void"
+t "unit"  _	= KnownType [] "Unit"
 t "dontCare" _	= Unknown
 t "subTypeT" _	= InT
 t "typeConjTC" _

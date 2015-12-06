@@ -1,0 +1,14 @@
+Unit
+----
+Implementation of ''Unit'', a type with a single representative
+----
+
+import Data.Bool
+import Collection.Maybe
+
+---
+Type representing _no extra data_.
+
+The syntactic sugar ''()'' desugars to ''Unit''
+---
+type Unit	= {Unit}

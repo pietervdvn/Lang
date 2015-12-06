@@ -74,7 +74,7 @@ resolveType tlt (TypeConj [t])
 resolveType tlt (TypeConj tps)
 		= tps |+> resolveType tlt |> RConj
 resolveType tlt (TupleType [])
-		= return voidType
+		= return unitType
 resolveType tlt (TupleType [t])
 		= resolveType tlt t
 resolveType tlt e@(TupleType (t:tps))

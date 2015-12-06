@@ -9,7 +9,7 @@ This module gives the category declaration of each collection.
 
 import Category.Eq
 import Collection.Maybe
-import Collection.Void
+import Collection.Unit
 import Data.Bool
 ---
 A ''Collection'' is a data structure which contains zero or more elements.

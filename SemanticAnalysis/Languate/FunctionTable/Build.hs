@@ -28,6 +28,7 @@ How are the function tables built?
 	- we check for double defined functions
 	- we check that functions have an appropriate, simple kind
 -- TODO: all below this line
+-- TODO: PICKUP!
 -> We propagate these definitions, so that each module knows what functions are visible
 -> We build the implementations of these defined functions
 	- and typecheck those

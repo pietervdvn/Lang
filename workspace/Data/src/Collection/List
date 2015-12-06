@@ -5,7 +5,7 @@ The list category declaration.
 
 import Data.Bool
 import Data.Char
-import Collection.Void
+import Collection.Unit
 import Collection.Maybe
 import Collection.Tuple
 import Collection.Set

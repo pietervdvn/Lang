@@ -1,10 +1,9 @@
 FunctionTesting
 ---------------
-Testcode for generating functions
+Module to test functions!
 ---------------
 
 import Any
-import TypeTestingA
-import TypeTestingB
+import Collection.Unit
 
-instance X is Y
+type A	= {A}

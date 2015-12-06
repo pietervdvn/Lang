@@ -38,7 +38,7 @@ public import Prelude
  $freeType	::= localIdent & !subTypeWords
  parFreeType	::= freeType subTypeT simpleType
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
-_$void		::= "\(\)"
+_$unit		::= "\(\)"
 _$dontCare	::= "_"		-- we don't care about the type
 _simpleType	::= constrFreeType | knownType | freeType | void | dontCare | "\(" type "\)"
 
