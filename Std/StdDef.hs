@@ -133,9 +133,13 @@ rstrip	= reverse . lstrip . reverse
 
 strip	= lstrip . rstrip
 
-stripnl('\n':str)	= stripnl str
-stripnl s	= s
+stripnll('\n':str)	= stripnll str
+stripnll s	= s
 
+
+stripnlr s	= reverse $ stripnll $ reverse s
+
+stripnl 	= stripnll . stripnlr
 
 (&)	:: a -> (a -> b) -> b
 (&) a f	= f a
