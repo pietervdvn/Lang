@@ -11,7 +11,7 @@ desc		"The syntaxis of types in Languate.
 		{Int, String}	-- A set of int,string tuples
 		{Int --> String}	-- A dict (hashmap) from int to string
 		[Int]		-- list of int
-		()		-- void type
+		()		-- unit type
 		(a -> b) -> c	-- a function which takes a function
 		{a,b -> c}	=== { a, (b -> c) }
 		Int?		=== Maybe Int
@@ -40,7 +40,7 @@ public import Prelude
  constrFreeType	::= parFreeType | freeType	-- contstrained free type
 _$unit		::= "\(\)"
 _$dontCare	::= "_"		-- we don't care about the type
-_simpleType	::= constrFreeType | knownType | freeType | void | dontCare | "\(" type "\)"
+_simpleType	::= constrFreeType | knownType | freeType | unit | dontCare | "\(" type "\)"
 
 
 -- used for lists of tuples. ''[Int, Bool]'' = ''[(Int, Bool)]''
