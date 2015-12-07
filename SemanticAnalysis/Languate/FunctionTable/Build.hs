@@ -16,6 +16,8 @@ import Languate.FunctionTable.Def
 import Languate.FunctionTable.Utils
 import Languate.FunctionTable.ModuleTraverser
 
+import qualified Graphs.ExportCalculator as EC
+
 import Data.Set as S
 import Data.Map as M
 import Data.List as L
@@ -28,28 +30,49 @@ How are the function tables built?
 	- we check for double defined functions
 	- we check that functions have an appropriate, simple kind
 -- TODO: all below this line
--- TODO: PICKUP!
 -> We propagate these definitions, so that each module knows what functions are visible
 -> We build the implementations of these defined functions
 	- and typecheck those
-Mo
 
 -}
 
+type Signaturetable	= Map FQN (Visible, Generated, Abstract)
 
 buildFunctionTables	:: Package
 				-> Map FQN TypeLookupTable
 				-> Map FQN Typetable
 				-> Map FQN Module
 				-> Exc (Map FQN FunctionTable)
-buildFunctionTables p tlts tts
- 	= dictMapM (buildFunctionTable tlts tts)
+buildFunctionTables p tlts tts modules
+ 	= do	-- the basetables only contain declared function signatures
+ 		basetables	<- dictMapM (buildLocalFunctionTable tlts tts) modules
+		let contains	=  basetables |> definedFuncs |> M.keys |> S.fromList	:: Map FQN (Set Signature)
+		let fetch fqn	=  M.findWithDefault (error $ "No fqn - building FT"++show fqn) fqn contains
+		let propagate fqnSelf (importingFQN, sign)
+				= False	-- TODO all is treated as private import now
+		let exported	= EC.calculateExports (importGraph p) (invertDict $ importGraph p)
+					fetch propagate	:: Map FQN (Set (Signature, FQN))
+		let imported	= EC.calculateImports (importGraph p) fetch exported	:: Map FQN (Set (Signature, FQN))
+		let impTables	= M.mapWithKey (setImported imported) basetables
+		return impTables
 
-buildFunctionTable	:: Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> Module -> Exc FunctionTable
-buildFunctionTable tlts tts fqn mod
+
+setImported	:: Map FQN (Set (Signature, FQN)) -> FQN -> FunctionTable -> FunctionTable
+setImported importss fqn ft
+	= let	imports	= findWithDefault (error $ "No fqn - building FT set imp"++show fqn) fqn importss
+				& S.toList	:: [(Signature, FQN)]
+		imports'= imports & merge |> (signName . fst &&& id)
+				& merge	& M.fromList |> S.fromList	:: Map Name (Set (Signature, [FQN]))
+		in
+		ft {visibleFuncs = imports'}
+
+
+buildLocalFunctionTable	:: Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> Module -> Exc FunctionTable
+buildLocalFunctionTable tlts tts fqn mod
 	= inside ("While building the function table for "++show fqn) $
 	  do	tlt	<- M.lookup fqn tlts ? ("No tlt for "++show fqn)
 	  	tt	<- M.lookup fqn tts ? ("No tt for "++show fqn)
+
 		signs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
 				||>> unpackFirst |> concat	:: Exc [((Signature, (Visible, Generated, Abstract)), Coor)]
 		signs' |> first fst |+> checkSimpleKind tt
@@ -61,14 +84,17 @@ buildFunctionTable tlts tts fqn mod
 		assert (L.null dubble) ("Some functions are declared multiple times:"++indent (dubble' >>= ("\n"++)))
 
 		let metas	= signs' |> first fst |> second (buildMeta mod)
-		return $ FunctionTable (M.fromList signs) (M.fromList metas)
+		let err		= error $ "At this point you should not need the visible function tables"
+		return $ FunctionTable (M.fromList (signs' |> fst)) err (M.fromList metas)
 
 
 
 buildMeta	:: Module -> Coor -> MetaInfo
 buildMeta mod coor
-	= let	(comms, docs, laws, annots)	= searchMeta mod coor in
-		MetaInfo coor laws comms docs annots
+	= let	(comms, docs, laws, annots)	= searchMeta mod coor
+		comms'	= comms |> first (strip . stripnl)
+		docs'	= docs |> first (second (strip . stripnl)) in
+		MetaInfo coor laws comms' docs' annots
 
 
 

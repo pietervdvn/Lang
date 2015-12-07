@@ -29,7 +29,8 @@ definedFuncSign m tlt fqn (FunctionStm function)
 		return (zip defs visibsGen)
 
 definedFuncSign m tlt fqn (ADTDefStm adtDef)
-	= adtDefinedFunctions tlt fqn adtDef |||>>> (\sign -> (sign, True, Nothing))
+	= do	let definedType	= RNormal fqn (adtName adtDef)	:: RType
+		adtDefinedFunctions tlt fqn adtDef |||>>> (\sign -> (sign, True, Just definedType))
 
 definedFuncSign m tlt fqn (SubDefStm (SubDef nm vis frees tps reqs))
 	= do	defType		<- resolveType tlt (Normal [] nm)
