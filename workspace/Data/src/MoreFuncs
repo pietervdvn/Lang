@@ -1,0 +1,12 @@
+MoreFuncs
+---------
+More functions to test by
+---------
+
+import Any
+
+pubM	: Any
+	= Unit
+
+pubHidden	: Any
+	= Unit

@@ -1,0 +1,16 @@
+Funcs
+-----
+Some funcs to test propagation
+-----
+
+import Any
+public import MoreFuncs showing {pubM}
+
+_priv	: Any
+	= Unit
+
+pub	: Any
+	= Unit
+
+pub1	: Any
+	= Unit
