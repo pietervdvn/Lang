@@ -9,3 +9,7 @@ import Funcs hiding {pub}
 
 f	: Any
 	= 5
+
+type A	= {A}
+f	: (a:A)
+	= A
