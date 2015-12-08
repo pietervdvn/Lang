@@ -132,6 +132,11 @@ isMeta (AnnotationStm _)	= True
 isMeta (PrecedenceStm _)	= True
 isMeta _	= False
 
+isFunctionStm	:: Statement -> Bool
+isFunctionStm (FunctionStm _)
+		= True
+isFunctionStm _	= False
+
 _sca		:: [Statement] -> (Statement -> Bool) -> Maybe Comment -> Maybe Comment
 _sca (stm:stms) f lastComment
 		= if f stm then lastComment
