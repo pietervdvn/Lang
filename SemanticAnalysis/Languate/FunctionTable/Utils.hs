@@ -38,6 +38,16 @@ functiontable2doc path fqn ft
 		impDoc	= doc (path fqn ++ "Visible function signatures of "++show fqn) "What functions are visible in this module?"
 				importT
 
+	  -- about the implementations of locally declared functions
+	  	implRow (sign, imp)
+	  		= [code $ signName sign
+	  		  , signTypes sign & fst |> show |> code & parags
+	  		  , signTypes sign & snd & show & code
+	  		  , imp |> show |> code & parags
+	  		  ]
+	  	implT	= table ["Function name","Types","Type constraints","Implementations"] (ft & implementations & M.toList |> implRow)
+	  	implDoc	= doc (path fqn ++ "Implementions of functions in "++show fqn) "Internal table showing the actual implementations" implT
+
 	  -- about the docstrings
 		docstrRow (sign, meta)
 			= [code $ signName sign
@@ -53,7 +63,7 @@ functiontable2doc path fqn ft
 		docDoc	= doc (path fqn ++"Meta info about functions of "++show fqn) "Docstrings and such" docstrs
 
 	  -- Putting it all together
-		docs	= [declaredDoc, impDoc, docDoc]
+		docs	= [declaredDoc, impDoc, implDoc, docDoc]
 		in
 		(doc (path fqn ++"Functiontable of "++show fqn) ("Function overview for "++show fqn) (docs |> title |> Embed & Mu.Seq),
 			docs)

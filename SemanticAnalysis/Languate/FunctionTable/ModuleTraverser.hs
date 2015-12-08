@@ -23,7 +23,7 @@ import Control.Arrow
 -- fetches the function signatures that are defined within the statement
 definedFuncSign	:: Module -> TypeLookupTable -> FQN -> Statement -> Exc [(Signature, (Visible, Generated, Abstract))]
 definedFuncSign m tlt fqn (FunctionStm function)
-	= do	defs	<- signs function |+> resolveSignature tlt fqn
+	= do	defs	<- signs function |+> resolveSignature tlt fqn	:: Exc [Signature]
 		visibs	<- defs |+> getVisibility m (visibility function)
 		let visibsGen	= visibs |> (\visib -> (visib, False, Nothing))
 		return (zip defs visibsGen)

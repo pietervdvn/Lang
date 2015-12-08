@@ -15,6 +15,7 @@ import Languate.Typetable
 import Languate.FunctionTable.Def
 import Languate.FunctionTable.Utils
 import Languate.FunctionTable.ModuleTraverser
+import Languate.FunctionTable.BuildImplementationTables
 
 import qualified Graphs.ExportCalculator as EC
 
@@ -30,8 +31,8 @@ How are the function tables built?
 -> We start by looking what functions are defined, with the according types
 	- we check for double defined functions
 	- we check that functions have an appropriate, simple kind
--- TODO: all below this line
 -> We propagate these definitions, so that each module knows what functions are visible
+-- TODO: all below this line
 -> We build the implementations of these defined functions
 	- and typecheck those
 
@@ -50,13 +51,14 @@ buildFunctionTables p tlts tts modules
 		let contains	=  basetables |> definedFuncs |> M.filter (isPublic . fst3)
 					|> M.keys |> S.fromList	:: Map FQN (Set Signature)
 		let fetch fqn	=  M.findWithDefault (error $ "No fqn - building FT"++show fqn) fqn contains
-		let propagate'	= propagate (importGraph' p)
-		let exported	= EC.calculateExports (importGraph p) (invertDict $ importGraph p)
+		let propagate'	=  propagate (importGraph' p)
+		let exported	=  EC.calculateExports (importGraph p) (invertDict $ importGraph p)
 					fetch propagate' :: Map FQN (Set (Signature, FQN))
-		let isImported'	= isImported (importGraph' p)
-		let imported	= EC.calculateImports (importGraph p) fetch isImported' exported	:: Map FQN (Set (Signature, [FQN]))
-		let impTables	= M.mapWithKey (setImported imported) basetables
-		return impTables
+		let isImported'	=  isImported (importGraph' p)
+		let imported	=  EC.calculateImports (importGraph p) fetch isImported' exported	:: Map FQN (Set (Signature, [FQN]))
+		let imprtTables	=  M.mapWithKey (setImported imported) basetables
+		implementTables	<- dictMapM (buildImplementations p tlts) imprtTables
+		return implementTables
 
 -- Asks wether the signature can be RE-exported further. This is only the case for public imports
 propagate	:: Map FQN (Map FQN Import) -> FQN -> (FQN, Signature) -> Bool
@@ -109,8 +111,8 @@ buildLocalFunctionTable tlts tts fqn mod
 		assert (L.null dubble) ("Some functions are declared multiple times:"++indent (dubble' >>= ("\n"++)))
 
 		let metas	= signs' |> first fst |> second (buildMeta mod)
-		let err		= error $ "At this point you should not need the visible function tables"
-		return $ FunctionTable (M.fromList (signs' |> fst)) err (M.fromList metas)
+		let err	msg	= error $ "At this point you should not need the "++msg++" tables"
+		return $ FunctionTable (M.fromList (signs' |> fst)) (err "visible function") (err "implementation") (M.fromList metas)
 
 
 
