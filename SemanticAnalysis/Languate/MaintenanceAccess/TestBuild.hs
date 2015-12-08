@@ -22,6 +22,7 @@ import Languate.Package
 import Languate.PackageTable
 import Data.Maybe
 
+import Data.Time.Clock
 import System.IO.Unsafe
 import System.Directory
 import Control.Monad
@@ -59,4 +60,9 @@ bDocs	= do	dir		<- getCurrentDirectory
 		exists		<- doesDirectoryExist path'
 		when exists $ removeDirectoryRecursive path'
 		createDirectory path'
-		renderClusterTo (fix $ extend (setFilePath path') $ html $ defaultHeader defaultCSS) cluster
+		time	<- getCurrentTime |> utctDayTime |> realToFrac |> round
+		time'	<- getCurrentTime |> show
+		let hour = 2 + time `div` (60*60)
+		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
+
+		renderClusterTo (fix $ extend (setFilePath path') $ html $ defaultHeader css) cluster

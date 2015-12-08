@@ -41,7 +41,9 @@ adtDefinedFunctions tlt fqn (ADTDef name frees reqs sums _)
 sumDefFunctions	:: TypeLookupTable -> FQN -> RType -> RTypeReq -> UniqueConstructor -> ADTSum
 			-> Exc [(Signature, Visible)]
 sumDefFunctions tlt fqn defType reqs onlyCons (ADTSum name vis fields)
-	= do	args	<- fields |> snd |+> resolveType tlt	-- types of the arguments
+	= inside ("In the constructor "++name) $
+	  do	args	<- fields |> snd |+> resolveType tlt	-- types of the arguments
+		checkFieldsAreNamed fields
 		let constr	= [buildConstructorSign fqn name reqs args defType]
 		let isContstr	= if onlyCons then [] else [buildIsConstrSign fqn name reqs defType]
 		let decons	= [buildDeconsSign fqn name reqs onlyCons defType args]
@@ -120,6 +122,10 @@ buildFieldFunctions fqn defType frees reqs sums
 		return fieldFuncs
 
 
+checkFieldsAreNamed	:: [(Maybe Name, Type)] -> Check
+checkFieldsAreNamed fields
+	= do	let unnamed = fields & L.filter (isJust . fst) & length
+		warnIf (unnamed > 4) $ "You have quite some fields in your constructor. Wouldn't you name those, boy?"
 
 -- builds the signature for a given fieldname, over multiple constructors. We assume types are the same over all constructors, this has been checked previously
 {-

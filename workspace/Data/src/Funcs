@@ -6,6 +6,7 @@ Some funcs to test propagation
 import Any
 public import MoreFuncs showing {pubM}
 
+
 _priv	: Any
 	= Unit
 

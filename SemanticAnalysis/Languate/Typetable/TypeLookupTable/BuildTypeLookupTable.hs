@@ -84,8 +84,8 @@ calculateExports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> (FQN
 calculateExports' w	= let ig	= P.importGraph w in
  				calculateExports ig (invert ig)
 
-calculateImports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> Map FQN (Set (prop, FQN)) -> Map FQN (Set (prop, FQN))
-calculateImports' w	= calculateImports (P.importGraph w)
+calculateImports'	:: (Ord prop, Eq prop) => Package -> (FQN -> Set prop) -> Map FQN (Set (prop, FQN)) -> Map FQN (Set (prop, [FQN]))
+calculateImports' w local	= calculateImports (P.importGraph w) local (const2 True {-TODO actual filter imported types?-})
 
 
 {- builds a TLT for a certain module.
@@ -111,7 +111,7 @@ List.List, List : ambiguous to both idiots and data.
 The package is named Idiots, as everyone should always use standard lists for consistency and code reusability!
 
 -}
-buildTLT	:: Package -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, FQN{-Imported via. Can be self-}))
+buildTLT	:: Package -> Map FQN {-Module we are interested in-} (Set ((FQN, Name) {-Type declaration + origin-}, [FQN]{-Imported via. Can be self-}))
 			-> FQN {-What we have to build TLT for-}
 			-> AliasTable
 			-> Exc TypeLookupTable

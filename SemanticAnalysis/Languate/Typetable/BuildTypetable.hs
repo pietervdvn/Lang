@@ -48,10 +48,11 @@ buildTypetables p tlts mods
 		let impGraph	= importGraph p
 		let expGraph	= invertDict impGraph
 		let fetch fqn	= M.findWithDefault S.empty fqn typeStms
-		-- when we would add "import M hiding (instance X is Y)" we would filter this out with this function
+		-- TODO when we would add "import M hiding (instance X is Y)" we would filter this out with this function
 		let filterSupertypes _ _	= True
 		let exports	= calculateExports impGraph expGraph fetch filterSupertypes
-		let known	= calculateImports impGraph fetch exports	:: Map FQN (Set (TypeSTM, FQN))
+		{-TODO actual filter out function? to replace const2-}
+		let known	= calculateImports impGraph fetch (const2 True) exports	:: Map FQN (Set (TypeSTM, [FQN]))
 		let known'	= known |> S.toList ||>> fst |> nub
 		dictMapM (buildTypetable tlts) known'
 

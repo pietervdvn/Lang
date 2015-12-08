@@ -39,7 +39,7 @@ calculateExports importGraph exportGraph exps impFilt
 calculateImports	:: (Eq prop, Ord n, Ord prop) =>
 				Map n (Set n) ->
 				(n -> Set prop) ->
-				(n -> prop -> Bool) ->
+				(n -> (n, prop) -> Bool) ->
 				Map n (Set (prop,n)) ->
 				Map n (Set (prop, [n]))
 calculateImports importGraph local importFilter exports
@@ -48,7 +48,7 @@ calculateImports importGraph local importFilter exports
 
 calculateImportsFor	:: (Eq prop, Ord n, Ord prop) =>
 				(n -> Set prop) ->
-				(n -> prop -> Bool) ->
+				(n -> (n,prop) -> Bool) ->
 				Map n (Set prop) ->
 				n -> Set n ->
 				Set (prop, [n])
@@ -56,7 +56,7 @@ calculateImportsFor local importFilter exports node importsFrom
 			= let	imported	= S.toList importsFrom 	-- imported namespaces
 							|> (id &&& (\n -> n `lookup'` exports & S.toList))	-- get what they export
 							& unmerge	-- :: [(n, prop)]
-				filtered	= imported & filter (uncurry importFilter)	-- filter import stuff
+				filtered	= imported & filter (importFilter node)	-- filter import stuff
 							|> swap & merge & S.fromList
 				localDecls	= local node & S.map (id &&& const [node]) in
 				S.union localDecls filtered

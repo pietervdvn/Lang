@@ -21,6 +21,7 @@ import qualified Graphs.ExportCalculator as EC
 import Data.Set as S
 import Data.Map as M
 import Data.List as L
+import Data.Maybe
 
 import Control.Arrow
 
@@ -46,22 +47,46 @@ buildFunctionTables	:: Package
 buildFunctionTables p tlts tts modules
  	= do	-- the basetables only contain declared function signatures
  		basetables	<- dictMapM (buildLocalFunctionTable tlts tts) modules
-		let contains	=  basetables |> definedFuncs |> M.keys |> S.fromList	:: Map FQN (Set Signature)
+		let contains	=  basetables |> definedFuncs |> M.filter (isPublic . fst3)
+					|> M.keys |> S.fromList	:: Map FQN (Set Signature)
 		let fetch fqn	=  M.findWithDefault (error $ "No fqn - building FT"++show fqn) fqn contains
-		let propagate fqnSelf (importingFQN, sign)
-				= False	-- TODO all is treated as private import now
+		let propagate'	= propagate (importGraph' p)
 		let exported	= EC.calculateExports (importGraph p) (invertDict $ importGraph p)
-					fetch propagate	:: Map FQN (Set (Signature, FQN))
-		let imported	= EC.calculateImports (importGraph p) fetch exported	:: Map FQN (Set (Signature, FQN))
+					fetch propagate' :: Map FQN (Set (Signature, FQN))
+		let isImported'	= isImported (importGraph' p)
+		let imported	= EC.calculateImports (importGraph p) fetch isImported' exported	:: Map FQN (Set (Signature, [FQN]))
 		let impTables	= M.mapWithKey (setImported imported) basetables
 		return impTables
 
+-- Asks wether the signature can be RE-exported further. This is only the case for public imports
+propagate	:: Map FQN (Map FQN Import) -> FQN -> (FQN, Signature) -> Bool
+propagate importStmss self dt@(impFrom, sign)
+ = let	publicImport	=  do 	(Import visibility _ _ _ _)	<- _getImpStm importStmss self impFrom
+				return $ isPublic visibility
+	publicImport'	= fromMaybe False publicImport
+	in
+	publicImport' && isImported importStmss self dt
 
-setImported	:: Map FQN (Set (Signature, FQN)) -> FQN -> FunctionTable -> FunctionTable
+
+
+
+isImported	:: Map FQN (Map FQN Import) -> FQN -> (FQN, Signature) -> Bool
+isImported importStmss self (impFrom, sign)
+	= fromMaybe False $
+		do 	(Import _ _ _ _ restrict)	<- _getImpStm importStmss self impFrom
+			return $ isAllowed restrict (signName sign)
+
+
+_getImpStm	:: Map FQN (Map FQN Import) -> FQN -> FQN -> Maybe Import
+_getImpStm importss self impFrom
+	= do	importStms	<- M.lookup self importss
+		M.lookup impFrom importStms
+
+setImported	:: Map FQN (Set (Signature, [FQN])) -> FQN -> FunctionTable -> FunctionTable
 setImported importss fqn ft
 	= let	imports	= findWithDefault (error $ "No fqn - building FT set imp"++show fqn) fqn importss
-				& S.toList	:: [(Signature, FQN)]
-		imports'= imports & merge |> (signName . fst &&& id)
+				& S.toList	:: [(Signature, [FQN])]
+		imports'= imports & merge |> (signName . fst &&& second concat)
 				& merge	& M.fromList |> S.fromList	:: Map Name (Set (Signature, [FQN]))
 		in
 		ft {visibleFuncs = imports'}
