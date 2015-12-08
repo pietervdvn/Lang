@@ -4,6 +4,8 @@ Module to test functions!
 ---------------
 
 import Any
-import Collection.Unit
+import Funcs hiding {pub}
 
-type A	= {A}
+
+f	: Any
+	= 5
