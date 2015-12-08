@@ -3,7 +3,7 @@ module Graphs.ExportCalculator where
 {--
 This module implements calculateExports and calculateImports
 --}
-import StdDef ((|>), (||>>))
+import StdDef
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Prelude hiding (lookup)
@@ -33,18 +33,33 @@ calculateExports importGraph exportGraph exps impFilt
 			= exported $ snd $ runstate _ce $ ExpS importGraph exportGraph exps impFilt M.empty (S.fromList $ M.keys importGraph)
 
 {- calculateImports gives all things which are visible within n (thus local -private- props and imported props)
-
+	Imported props are passed another time through a filter, which says if it is effectively imported.
+	The filter, (node from which imported) -> (property) -> allowed in local scope
 -}
-calculateImports	:: (Eq prop, Ord n, Ord prop) => Map n (Set n) -> (n -> Set prop) -> Map n (Set (prop,n)) -> Map n (Set (prop,n))
-calculateImports importGraph local exports
-			= let	local' n	= S.map (\p -> (p,n)) $ local n	in
-				mapWithKey (\n impsFrom -> calculateImportsFor impsFrom local' exports n) importGraph
+calculateImports	:: (Eq prop, Ord n, Ord prop) =>
+				Map n (Set n) ->
+				(n -> Set prop) ->
+				(n -> prop -> Bool) ->
+				Map n (Set (prop,n)) ->
+				Map n (Set (prop, [n]))
+calculateImports importGraph local importFilter exports
+			= let 	exports'	= exports |> (S.map fst) in
+				mapWithKey (\n imps -> calculateImportsFor local importFilter exports' n imps) importGraph
 
-calculateImportsFor	:: (Eq prop, Ord n, Ord prop) => Set n -> (n -> Set prop) -> Map n (Set prop) -> n -> Set prop
-calculateImportsFor importsFrom local exports n
-			=  let	imported	= S.toList importsFrom |> (`lookup'` exports)
-				localDecls	= local n in
-				union localDecls $ unions imported
+calculateImportsFor	:: (Eq prop, Ord n, Ord prop) =>
+				(n -> Set prop) ->
+				(n -> prop -> Bool) ->
+				Map n (Set prop) ->
+				n -> Set n ->
+				Set (prop, [n])
+calculateImportsFor local importFilter exports node importsFrom
+			= let	imported	= S.toList importsFrom 	-- imported namespaces
+							|> (id &&& (\n -> n `lookup'` exports & S.toList))	-- get what they export
+							& unmerge	-- :: [(n, prop)]
+				filtered	= imported & filter (uncurry importFilter)	-- filter import stuff
+							|> swap & merge & S.fromList
+				localDecls	= local node & S.map (id &&& const [node]) in
+				S.union localDecls filtered
 
 
 
