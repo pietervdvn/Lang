@@ -133,9 +133,9 @@ instance Show Expression where
 	show	= se . normalize
 
 se		:: Expression -> String
-se (Nat i)	= show i
-se (Flt flt)	= show flt
-se (Chr c)	= show c
+se (Nat i)	= "Nat" ++ show i
+se (Flt flt)	= "Flt" ++ show flt
+se (Chr c)	= "Chr" ++ show c
 se (Seq expr)	= "("++unwords (map show expr) ++ ")"
 se (Tuple exprs)= "("++intercalate ", " (map show exprs) ++ ")"
 se (BuiltIn str typeInfo)
