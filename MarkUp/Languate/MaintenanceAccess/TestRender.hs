@@ -14,7 +14,8 @@ fp	= "/test"
 
 t = do	dir	<- getCurrentDirectory
 	let fp'	= dir ++ fp
-	let headers	= defaultHeader blackCSS
+	css	<- loadCSS whiteCSSLocation defaultCSSCons
+	let headers	= defaultHeader css
 	let html'	= fix $ extend (setFilePath (fp'++"/html")) $ html headers
 	removeDirectoryRecursive fp'
 	renderClusterTo html' cluster

@@ -1,0 +1,428 @@
+@font-face {
+  font-family: octicons-anchor;
+  src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+
+body {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  color: #999;
+  background: #000000;
+  overflow: hidden;
+  font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+div {
+word-wrap: normal;
+}
+
+body a {
+  background: transparent;
+}
+
+body .notImp {
+   color: #999999
+}
+
+body .incorr{
+   text-decoration: line-through;
+}
+
+body a:active,
+body a:hover {
+  outline: 0;
+}
+
+body strong {
+  font-weight: bold;
+}
+
+body .emph {
+  font-style: italic;
+}
+
+body h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+body img {
+  border: 0;
+}
+
+body code {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+body td,
+body th {
+  padding: 0;
+}
+
+body * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body input {
+  font: 13px/1.4 Helvetica, arial, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+body a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+body a:hover,
+body a:focus,
+body a:active {
+  text-decoration: underline;
+}
+
+body hr {
+  height: 0;
+  margin: 15px 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+body hr:before {
+  display: table;
+  content: "";
+}
+
+body hr:after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+
+body blockquote {
+  margin: 0;
+}
+
+body ul,
+body ol {
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+body ol ol,
+body ul ol {
+  list-style-type: lower-roman;
+}
+
+body ul ul ol,
+body ul ol ol,
+body ol ul ol,
+body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+body code {
+  font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  color:#009900
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+
+
+
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6 {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 16px;
+  line-height: 1.4;
+  font-weight: bold;
+}
+
+body .anchor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: none;
+}
+
+body .anchor:focus {
+  outline: none;
+  display: block;
+}
+
+body h1:hover .anchor,
+body h2:hover .anchor,
+body h3:hover .anchor,
+body h4:hover .anchor,
+body h5:hover .anchor,
+body h6:hover .anchor {
+  display: block;
+  line-height: 1;
+  text-decoration: none;
+  margin-top: 5px;
+  color: #999;
+}
+
+
+
+body h1:hover .anchor {
+   margin-top: 5px;
+   margin-left: -30px;
+   font-size: 26px;
+}
+
+body h2:hover .anchor {
+   margin-left: -24px;
+   font-size: 22px;
+}
+
+body h3:hover .anchor {
+   margin-left: -20px;
+   margin-top: 7px;
+   font-size: 18px;
+
+}
+
+body h4:hover .anchor {
+   margin-left: -16px;
+   padding-top: 2px;
+   font-size: 14px;
+}
+
+body h5:hover .anchor {
+  margin-left: -13px;
+  font-size: 11px;
+}
+
+body h6:hover .anchor {
+   margin-left: -12px;
+   font-size: 10px;
+
+}
+
+body h1 {
+  font-size: 30px;
+  padding-bottom: 0.3em;
+  font-size: 2.25em;
+  line-height: 1.2;
+  border-bottom: 2px solid #eee;
+}
+
+body h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.75em;
+  line-height: 1.225;
+  border-bottom: 1.5px solid #eee;
+}
+
+body h3 {
+  font-size: 1.5em;
+  line-height: 1.43;
+  border-bottom: 0.5px solid #777;
+}
+
+body h4 {
+  font-size: 1.25em;
+}
+
+body h5 {
+  font-size: 1em;
+}
+
+body h6 {
+  font-size: 1em;
+  color: #777;
+}
+
+body p,
+body blockquote,
+body ul,
+body ol,
+body table,
+body pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+body hr {
+  height: 4px;
+  padding: 0;
+  margin: 16px 0;
+  background-color: #e7e7e7;
+  border: 0 none;
+}
+
+body ul,
+body ol {
+  padding-left: 2em;
+}
+
+body ul ul,
+body ul ol,
+body ol ol,
+body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+body li>p {
+  margin-top: 16px;
+}
+
+body blockquote {
+  padding: 0 15px;
+  color: #777;
+  border-left: 4px solid #ddd;
+}
+
+body blockquote>:first-child {
+  margin-top: 0;
+}
+
+body blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  word-break: normal;
+  word-break: keep-all;
+}
+
+body table th {
+  font-weight: bold;
+}
+
+body table th,
+body table td {
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+}
+
+body table tr {
+  background-color: #000;
+  border-top: 1px solid #ccc;
+}
+
+body table tr:nth-child(2n) {
+  background-color: #101010;
+}
+
+body img {
+  max-width: 100%;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body code {
+  padding: 0;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(0,0,0,0.4);
+  border-radius: 3px;
+}
+
+body code:before,
+body code:after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
+}
+
+body h1 code:before {
+  letter-spacing: -1em;
+  content: "\00a0";
+}
+
+body h1 code:after{
+   letter-spacing: 0em;
+   content: "\00a0";
+}
+.toggle-box {
+  display:none;
+}
+
+.toggle-box + label + div {
+  display: none;
+  margin-bottom: 5px;
+}
+
+.toggle-box:checked + label + div {
+  display: block;
+  padding-left: 5px;
+  padding-top: 10px;
+  border-left: solid #009900;
+
+}
+
+.toggle-box + label{
+  background-color: #000000;
+  color: #009900;
+  padding: 5px;
+  border-left: solid #009900;
+}
+
+.toggle-box + label:before {
+  content: "     \25B6  ";
+}
+
+.toggle-box:checked + label:before {
+  content: "\25BC  ";
+}
+
+.hover-source{
+  position: relative;
+  text-decoration:underline dashed;
+  text-decoration-color: #992299;
+
+}
+
+.hover-source:hover{
+  background-color: #000000;
+  color: #992299;
+}
+
+.hover-source:hover .hover-text{
+  display:inline;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: #009900;
+  color: #000000;
+  position: absolute;
+  top: -40px;
+  left: 0;
+  z-index:+1;
+
+}
+
+.hover-source .hover-text{
+  display:none;
+}
