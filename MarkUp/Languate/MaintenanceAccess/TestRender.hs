@@ -6,6 +6,7 @@ import Languate.MarkUp
 import Languate.MarkUp.Css
 
 import Data.Map
+import Data.List as L
 
 import System.Directory
 
@@ -26,7 +27,7 @@ preproc	:: RenderSettings -> RenderSettings
 preproc	= addPreprocessor' (\mu -> parags [back, mu, back])
 
 
-cluster	= buildCluster [doc1,doc2,doc3, doc4, doc5, doc6]
+cluster	= buildCluster [doc1,doc2,doc3, doc4, doc5, doc6, docT]
 
 
 mu = Titling (Seq [Base "Example file ", emph "with ", imp "all", code " structs"]) $ parags
@@ -65,6 +66,8 @@ doc1	= Doc "Doc1" "This is the first document" (fromList [("key", "value")]) mu
 doc2	= Doc "Doc 2" "This is the second document" empty mu0
 doc3	= Doc "Doc3" "The third document" empty $ Seq [Base "Contents of doc3", table ["a","b","c"] [ [ Base "x", Base "y", parags [Base "z", Base "w"]] ] ]
 doc4	= Doc "SubDir/Doc4" "The fourth doc" empty $ Base "Hi"
+docT	= Doc "Titlings" "Titling tests" empty $
+		L.foldr (\i acc -> titling ("Level "++show i) acc) (Base "Base") [1..6]
 
 doc5	= Doc "SubDir/More sub/Doc5" "The fifth doc" empty $ Base "Hi"
 doc6	= Doc "SubDir2/Doc6" "Doc 6" empty $ Base "XKCD"

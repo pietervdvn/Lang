@@ -33,7 +33,11 @@ renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
         = do    i <- get' titleDepth
-                title <- renderHTML mu |> inTag' ("h"++show i) ["id=\""++escapeURL (toText mu)++"\""]
+        	let titleID	= toText mu & space2dash & escapeURL
+                let titleLink	= inTag' "a" ["href=\"#"++titleID++"\"", "class=\"anchor\""] "&#x1f517;&nbsp;"
+                title <- renderHTML mu |> (titleLink ++ ) |> inTag' ("h"++show i) ["id=\""++titleID++"\""]
+                -- the title link is the small icon to link to this subtitle
+                -- <a id="user-content-consumer" class="anchor" href="#consumer" aria-hidden="true"><span class="octicon octicon-link"></span></a>
                 modify (\htmlstate -> htmlstate {titleDepth = i + 1})
                 text' <- renderHTML text
                 modify (\htmlstate -> htmlstate {titleDepth = i})
@@ -119,6 +123,13 @@ escapeChar c
 			= "&#x" ++ asHex (ord c) ++  ";"
 	| c == '\n'	= "<br />"
 	| otherwise	= [c]
+
+space2dash	:: String -> String
+space2dash []	= []
+space2dash (' ':str)
+		= '-':space2dash str
+space2dash (s:str)
+		= s:space2dash str
 
 escapeURL	:: String -> URL
 escapeURL str	= str >>= escapeURLChar
