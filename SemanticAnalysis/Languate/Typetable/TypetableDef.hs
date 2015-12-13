@@ -52,10 +52,12 @@ data TypeInfo	= TypeInfo {	kind		:: Kind,
 					This needs to be checked when the full type table is built
 					-}
 				supertypes	:: Map RType [TypeConstraint],
-				supertypeOrigin	:: Map RType FQN,
 				{- Dict of supertypes. The keys represent which supertypes this type has (in a normalized form),
 					the elements are needed to check if constraints are met
 				-}
+				supertypeOrigin	:: Map RType FQN,
+				{-Constructor names with tags. These constructors might come from other types-}
+				constructors	:: Map Name Int,
 				origin		:: FQN	{-Where it is defined-}
 				} deriving (Show, Eq, Ord)
 
@@ -208,6 +210,9 @@ typeinfo2doc path fqnView (fqnDef, nm) ti
 					|> (\constrs -> Mu.Seq $ (if length constrs == 1 then id else (|> Parag)) constrs )
 					& M.toList
 					|> (\(super, constraints) -> [code $ show super, constraints])	:: [[MarkUp]]
+
+			conss	= table ["Constructor","Tag"] (constructors ti & M.toList |> (\(nm, tag) -> [code nm, Base $ show tag]))
+			conss'	= if (not $ M.null $ constructors ti) then titling "Constructors" conss else Mu.Seq []
 			supers	= table ["Supertype","Constraints"] rows
 			nrOfSupers	= rows & L.length
 			supers'	= if nrOfSupers > 0 then Titling (Base "Supertypes of "+++code nm+++ (defFrees |> code & Mu.Seq) ) supers
@@ -231,4 +236,4 @@ typeinfo2doc path fqnView (fqnDef, nm) ti
 			doc (path fqnView ++"Overview of "++nm) ("All we know about "++show fqnDef++"."++nm++" as seen within "++show fqnView) $ Titling (code nm +++ frees'') $
 				Base "Kind: "+++ code (show $ kind ti) +++
 				Base "Defined in: "+++ code (show $ origin ti)+++
-				reqsConstr +++ supers'
+				conss' +++ reqsConstr +++ supers'

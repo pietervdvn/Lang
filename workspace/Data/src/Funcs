@@ -8,7 +8,7 @@ public import MoreFuncs showing {pubM}
 
 
 _priv	: Any
-	= Unit
+	= 5
 
 pub	: Any
 	= Unit

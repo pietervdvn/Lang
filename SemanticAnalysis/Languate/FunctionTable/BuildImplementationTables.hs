@@ -5,6 +5,7 @@ This module builds the implementations and sticks them into the FT
 --}
 
 import StdDef
+import Normalizable
 import Exceptions
 import Languate.CheckUtils
 
@@ -14,6 +15,7 @@ import Languate.FQN
 import Languate.Package
 import Languate.Typetable.TypeLookupTable
 import Languate.FunctionTable.Def
+import Languate.Typing.TypeExpression
 
 import Data.Map as M
 import Data.Set as S
@@ -36,4 +38,16 @@ buildImplementation tlt fqn function
 	= do	-- the function might have multiple declared types (e.g. (+) : Nat' -> Nat' -> Nat' and (+) : Nat -> Nat -> Nat)
 		-- we get all possible signatures here
 		rSigns	<- signs function |+> resolveSignature tlt fqn
-		return (zip rSigns $ repeat [])
+		let cls	= clauses function
+		rSigns |+> typeClauses cls
+
+typeClauses	:: [Clause] -> Signature -> Exc (Signature, [TClause])
+typeClauses clauses sign
+		= do	tclauses	<- clauses |+> typeClause sign
+			return (sign, tclauses)
+
+typeClause	:: Signature -> Clause -> Exc TClause
+typeClause sign (Clause pats expr)
+		= do	--tpats	<- typePatterns pats
+			texpr	<- typeExpr $ normalize expr
+			return $ TClause [] texpr

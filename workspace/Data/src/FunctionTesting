@@ -10,6 +10,9 @@ import Funcs hiding {pub}
 f	: Any
 	= 5
 
-type A	= {A}
+type A	= {A, B, C}
+type X  = {X, Y, Z}
+type W	= A + X
+type Z  = {G} + A
 f	: (a:A)
 	= A

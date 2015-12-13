@@ -20,7 +20,7 @@ import Languate.Typetable.ModuleTraverser
 import Languate.Typetable.TypeLookupTable
 import Languate.TypeConstraint
 
-
+import Data.List as L
 import Data.Maybe
 import Data.Map
 
@@ -51,9 +51,10 @@ validateSuperDeclaration tlt (sub, frees, super, constrs)
 
 
 
-validateDeclaration	:: TypeLookupTable -> (FQN, Name, [Name], [TypeRequirement]) -> Check
-validateDeclaration tlt (origin, declaredType, frees, treqs)
+validateDeclaration	:: TypeLookupTable -> (FQN, Name, [Name], [TypeRequirement], [Name]) -> Check
+validateDeclaration tlt (origin, declaredType, frees, treqs, cons)
 	= inside ("In the declaration of "++show origin++"."++declaredType) $
+	  do	assert (L.null $ dubbles cons) $ "Constructor names should be unique, you used "++(dubbles cons |> show & commas)++ " multiple times"
 		mapM_ (validateReq tlt frees) treqs
 
 validateConstraintFrees	:: [Name] -> RType -> [TypeConstraint] -> Check

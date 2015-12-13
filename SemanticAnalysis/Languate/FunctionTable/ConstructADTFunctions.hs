@@ -54,7 +54,9 @@ buildConstructorSign	:: FQN -> Name -> RTypeReq
 				-> [RType] -> RType
 				-> Signature
 buildConstructorSign fqn n reqs args defType
-	= Signature fqn n ([uncurriedTypes (args++[defType])],reqs)
+	= let   sign	= Signature fqn n ([uncurriedTypes (args++[defType])],reqs)
+
+		in (sign)
 
 
 buildIsConstrSign	:: FQN -> Name -> RTypeReq -> RType -> Signature

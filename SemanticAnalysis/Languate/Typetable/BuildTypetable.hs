@@ -66,7 +66,7 @@ buildTypetable	:: Map FQN TypeLookupTable -> FQN -> TypeSTMs -> Exc Typetable
 buildTypetable tlts fqn stms
 	= inside ("While building the local type info in module "++show fqn) $
 	  do	-- first build the locally known values
-		let locDecl	= locallyDeclared stms 	:: [((FQN, Name), [Name], [TypeRequirement])]
+		let locDecl	= locallyDeclared stms 	:: [((FQN, Name), [Name], [TypeRequirement], [Name])]
 		-- now we get all defined supertypes (including synonyms)
 		superDecls	<- stms |> declaredSuperType tlts & sequence |> concat
 					:: Exc [(RType, [Name], RType, [TypeConstraint])]
@@ -234,8 +234,8 @@ checkSameKind  tt ctx ti i rtps
 
  -}
 buildTypeInfo	:: Map FQN TypeLookupTable -> [(RType, [Name], RType, [TypeConstraint])] -> FQN
-				-> (TypeID, [Name], [(Name, Type)]) -> Exc (TypeID, TypeInfo)
-buildTypeInfo tlts superDecls fqn (tid@(definedWithin, _), frees, reqs)
+				-> (TypeID, [Name], [(Name, Type)], [Name]) -> Exc (TypeID, TypeInfo)
+buildTypeInfo tlts superDecls fqn (tid@(definedWithin, _), frees, reqs, constructors)
 	= inside ("While building type info about "++show tid) $
 	  do	let kind	= L.foldl (\kind free -> KindCurry Kind kind) Kind frees
 		-- about the free type names
@@ -262,7 +262,8 @@ buildTypeInfo tlts superDecls fqn (tid@(definedWithin, _), frees, reqs)
 			commas (duplicateSupers |> show)
 		supers		<- superTypes |+> buildSTTEntry |> M.fromList
 		let superOrigins	= supers |> const fqn
-		return (tid, TypeInfo kind frees constraints' [] supers superOrigins fqn)
+		let constrs	= zip constructors [0..] & M.fromList
+		return (tid, TypeInfo kind frees constraints' [] supers superOrigins constrs fqn)
 
 
 {-Converts the super type and frees into default free names-}

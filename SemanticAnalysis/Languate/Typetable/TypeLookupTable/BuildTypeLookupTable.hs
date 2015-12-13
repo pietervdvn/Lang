@@ -53,14 +53,14 @@ type Exports	= Map FQN (Map FQN (FQN, Name))
 -- wrappers around moduletraverser, to hide the [(Origin, Statement)] complexities
 locallyDeclared	:: Module -> [(Name, [Name], [TypeRequirement])]
 locallyDeclared mod
-		= let decls	= statements mod & zip (repeat $ error "You should not need an fqn here!") & ModuleTraverser.locallyDeclared :: [((FQN,Name), [Name], [TypeRequirement])]
+		= let decls	= statements mod & zip (repeat $ error "You should not need an fqn here!") & ModuleTraverser.locallyDeclared :: [((FQN,Name), [Name], [TypeRequirement], [Name])]
 			in
-			decls |> (\(a,b,c) -> (snd a, b, c))
+			decls |> (\(a,b,c,_) -> (snd a, b, c))
 
 
 declaredType :: Statement -> Maybe (Name, [Name], [TypeRequirement])
 declaredType stm
-		= ModuleTraverser.declaredType (error "You should not need an fqn here",stm) |> (\(a,b,c,d) -> (b,c,d))
+		= ModuleTraverser.declaredType (error "You should not need an fqn here",stm) |> (\(a,b,c,d,_) -> (b,c,d))
 
 
 buildTLTs	:: Package -> Exc (Map FQN TypeLookupTable)

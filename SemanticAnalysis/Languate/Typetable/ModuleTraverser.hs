@@ -35,10 +35,10 @@ type TypeSTM	= (FQN, Statement)
 type TypeSTMs	= [TypeSTM]
 
 -- All locally declared types
-locallyDeclared	:: TypeSTMs -> [((FQN, Name), [Name], [TypeRequirement])]
+locallyDeclared	:: TypeSTMs -> [((FQN, Name), [Name], [TypeRequirement], [Name])]
 locallyDeclared statements
 		=  statements |> declaredType & catMaybes
-			|> (\(a,b,c,d) -> ((a,b),c,d))
+			|> (\(a,b,c,d,e) -> ((a,b),c,d,e))
 
 -- filters all statements which have to do something with types
 typeStatements	:: FQN -> Module -> TypeSTMs
@@ -57,16 +57,19 @@ isTypeRelated (InstanceStm{})
 		= True
 isTypeRelated _	= False
 
-
-declaredType :: TypeSTM -> Maybe (FQN, Name, [Name], [TypeRequirement])
-declaredType (origin, ADTDefStm (ADTDef name frees reqs _ _))
-		= Just (origin, name, frees, reqs)
+-- defined in, name, frees, reqs, constructors
+declaredType :: TypeSTM -> Maybe (FQN, Name, [Name], [TypeRequirement],[Name])
+declaredType (origin, ADTDefStm (ADTDef name frees reqs sums _))
+		= let constructors	= sums |> adtSumName in
+			Just (origin, name, frees, reqs, constructors)
 declaredType (origin, SubDefStm (SubDef name _ frees _ reqs))
-		= Just (origin, name, frees, reqs)
+		= Just (origin, name, frees, reqs, noConstructors)
 declaredType (origin, ClassDefStm classDef)
-		= Just (origin, name classDef, frees classDef, classReqs classDef)
+		= Just (origin, name classDef, frees classDef, classReqs classDef, noConstructors)
 declaredType _	= Nothing
 
+
+noConstructors	= []
 
 {-Gives a super type relationship
 	[(subtype, frees, supertype+reqs)]

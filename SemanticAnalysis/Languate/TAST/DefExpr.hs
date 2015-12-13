@@ -18,4 +18,5 @@ data TExpression
 	-- we save the type independently as not to change the signature - we need it to look up the implementation
 	| TCall CTypeUnion Signature
 	| TLocalCall Name CTypeUnion
+	| Tag Int	-- The tag is used in combination of builtin functions to construct and deconstruct values
 	deriving (Eq)
