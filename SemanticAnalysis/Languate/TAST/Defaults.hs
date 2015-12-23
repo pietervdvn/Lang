@@ -6,7 +6,6 @@ This module implements functions with some defaults, as defaultFreeNames etc...
 
 
 import StdDef
-import Languate.TAST.DefType
 
 import Data.Map
 

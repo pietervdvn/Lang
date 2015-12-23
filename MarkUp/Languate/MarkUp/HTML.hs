@@ -33,7 +33,7 @@ renderHTML (Incorr mu)
         = mu & renderHTML       |> inSpan "incorr"
 renderHTML (Titling mu text)
         = do    i <- get' titleDepth
-        	let titleID	= toText mu & space2dash & escapeURL
+        	let titleID	= toText mu & space2dash & reverse & break (=='/') & fst & reverse & escapeURL
                 let titleLink	= inTag' "a" ["href=\"#"++titleID++"\"", "class=\"anchor\""] "&#x1f517;&nbsp;"
                 title <- renderHTML mu |> (titleLink ++ ) |> inTag' ("h"++show i) ["id=\""++titleID++"\""]
                 -- the title link is the small icon to link to this subtitle

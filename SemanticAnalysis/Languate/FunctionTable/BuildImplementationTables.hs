@@ -22,14 +22,15 @@ import Data.Set as S
 import Data.List as L
 
 -- Builds the implementations for the given module (FQN), which already has the visible functions in it's function table (given)
-buildImplementations	:: Package -> Map FQN TypeLookupTable -> FQN -> FunctionTable -> Exc FunctionTable
-buildImplementations pack tlts fqn ft
+buildImplementations	:: Package -> Map FQN TypeLookupTable -> FQN -> (FunctionTable, Map Signature [Clause]) -> Exc FunctionTable
+buildImplementations pack tlts fqn (ft, untClauses)
 	= inside ("While building the implementations of the functions defined in "++show fqn) $
 	  do	mod	<- M.lookup fqn (modules pack) ? ("No module found")
 		tlt	<- M.lookup fqn tlts ? ("No tlt found")
 		let funcs = statements mod & L.filter isFunctionStm |> (\(FunctionStm f) -> f)	:: [Function]
-		imps 	<- funcs |+> buildImplementation tlt fqn |> concat
-		return (ft {implementations = M.fromList imps})
+		imps 	<- funcs |+> buildImplementation tlt fqn |> concat |> M.fromList
+		imps'	<- dictMapM  typeClauses' untClauses
+		return (ft {implementations = M.unions [imps, imps', implementations ft]})
 
 
 
@@ -43,8 +44,13 @@ buildImplementation tlt fqn function
 
 typeClauses	:: [Clause] -> Signature -> Exc (Signature, [TClause])
 typeClauses clauses sign
-		= do	tclauses	<- clauses |+> typeClause sign
+		= do	tclauses	<- typeClauses' sign clauses
 			return (sign, tclauses)
+
+
+typeClauses'	:: Signature -> [Clause] -> Exc [TClause]
+typeClauses' sign clauses
+		= clauses |+> typeClause sign
 
 typeClause	:: Signature -> Clause -> Exc TClause
 typeClause sign (Clause pats expr)

@@ -1,7 +1,7 @@
 module Languate.FunctionTable.Build where
 
 
-import StdDef
+import StdDef hiding (isLeft)
 import HumanUtils
 import Exceptions
 import Languate.CheckUtils
@@ -23,6 +23,7 @@ import Data.Set as S
 import Data.Map as M
 import Data.List as L
 import Data.Maybe
+import Data.Either
 
 import Control.Arrow
 
@@ -47,16 +48,19 @@ buildFunctionTables	:: Package
 				-> Exc (Map FQN FunctionTable)
 buildFunctionTables p tlts tts modules
  	= do	-- the basetables only contain declared function signatures
- 		basetables	<- dictMapM (buildLocalFunctionTable tlts tts) modules
+ 		basetables'	<- dictMapM (buildLocalFunctionTable tlts tts) modules
+ 					:: Exc (Map FQN (FunctionTable, Map Signature [Clause]))
+ 		let basetables	= basetables' |> fst
+ 		let untTables	= basetables' |> snd
 		let contains	=  basetables |> definedFuncs |> M.filter (isPublic . fst3)
-					|> M.keys |> S.fromList	:: Map FQN (Set Signature)
+					|> M.keys |> S.fromList	:: Map FQN (Set Signature)	-- set containing all local signatures
 		let fetch fqn	=  M.findWithDefault (error $ "No fqn - building FT"++show fqn) fqn contains
 		let propagate'	=  propagate (importGraph' p)
 		let exported	=  EC.calculateExports (importGraph p) (invertDict $ importGraph p)
 					fetch propagate' :: Map FQN (Set (Signature, FQN))
 		let isImported'	=  isImported (importGraph' p)
 		let imported	=  EC.calculateImports (importGraph p) fetch isImported' exported	:: Map FQN (Set (Signature, [FQN]))
-		let imprtTables	=  M.mapWithKey (setImported imported) basetables
+		let imprtTables	=  M.mapWithKey (\fqn -> first (setImported imported fqn)) basetables'	:: Map FQN (FunctionTable, Map Signature [Clause])
 		implementTables	<- dictMapM (buildImplementations p tlts) imprtTables
 		return implementTables
 
@@ -94,25 +98,45 @@ setImported importss fqn ft
 		ft {visibleFuncs = imports'}
 
 
-buildLocalFunctionTable	:: Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> Module -> Exc FunctionTable
+buildLocalFunctionTable	:: Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> Module -> Exc (FunctionTable, Map Signature [Clause])
 buildLocalFunctionTable tlts tts fqn mod
 	= inside ("While building the function table for "++show fqn) $
 	  do	tlt	<- M.lookup fqn tlts ? ("No tlt for "++show fqn)
 	  	tt	<- M.lookup fqn tts ? ("No tt for "++show fqn)
 
-		signs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
-				||>> unpackFirst |> concat	:: Exc [((Signature, (Visible, Generated, Abstract)), Coor)]
-		signs' |> first fst |+> checkSimpleKind tt
-		let signs	= signs' |> fst			:: [(Signature, (Visible, Generated, Abstract))]
-		let dubble	= signs |> fst & dubbles	:: [Signature]
-		let dubble'	= signs' |> first fst |> second fst & nub	-- throw away visibility and columns, then remove dubbles
-					& L.filter ((`elem` dubble) . fst)
-					|> (\(sign, line) -> show sign ++" "++pars ("line "++show line))
-		assert (L.null dubble) ("Some functions are declared multiple times:"++indent (dubble' >>= ("\n"++)))
+		-- All the function stuff! Signatures, coors, implementations, ...
+		funcs'	<- mod & statements' |+> onFirst (definedFuncSign mod tlt fqn)
+				|> (>>= unpackFirst) :: Exc [(FunctionInfo, Coor)]
 
-		let metas	= signs' |> first fst |> second (buildMeta mod)
-		let err	msg	= error $ "At this point you should not need the "++msg++" tables"
-		return $ FunctionTable (M.fromList (signs' |> fst)) (err "visible function") (err "implementation") (M.fromList metas)
+		-- Without those coors
+		let funcs	= funcs' |> fst			:: [FunctionInfo]
+
+		-- some checks
+		checkNoDubble funcs'
+		funcs' |> first fiSign |+> checkSimpleKind tt
+
+		-- # The actual function table
+		-- ## what is declared?
+		let definedF	= funcs |> (fiSign &&& (\fi -> (fiVis fi, fiGen fi, fiAbs fi))) & M.fromList
+		-- ## visible functions
+		let visibleFunc	= error $ "At this point you should not need the visible function tables"
+		-- ## implementations
+		let clauses	= funcs |> (fiSign &&& fiClauses)
+					|> unpackSecond & catMaybes	-- remove nothings
+		-- already types clauses, generated funcs thus
+		let imps	= clauses |> unpackSecond & rights
+					& M.fromList	:: Map Signature [TClause]
+		-- untyped clauses, still to typechecked
+		let untImps	= clauses & L.filter (isLeft . snd)
+					|> second (\(Left a) -> a)
+					& M.fromList	:: Map Signature [Clause]
+
+		-- ## docs and such
+		let metas	= funcs' |> first fiSign |> second (buildMeta mod) & M.fromList
+
+
+		let ft          = FunctionTable definedF visibleFunc imps metas
+		return (ft, untImps)
 
 
 
@@ -123,7 +147,15 @@ buildMeta mod coor
 		docs'	= docs |> first (second (strip . stripnl)) in
 		MetaInfo coor laws comms' docs' annots
 
-
+-- Checks no dubble signatures exist
+checkNoDubble   :: [(FunctionInfo, Coor)] -> Check
+checkNoDubble funcs
+	= do	let signs       = funcs |> first fiSign :: [(Signature, Coor)]
+	        let dubble	= signs |> fst & dubbles	:: [Signature]
+		let dubble'	= signs |> second fst & nub	-- throw away visibility and columns, then remove dubbles
+					& L.filter ((`elem` dubble) . fst)
+					|> (\(sign, line) -> show sign ++" "++pars ("line "++show line))
+		assert (L.null dubble) ("Some functions are declared multiple times:"++indent (dubble' >>= ("\n"++)))
 
 checkSimpleKind	:: Typetable ->  (Signature, Coor) -> Check
 checkSimpleKind tt (sign, (line, _))

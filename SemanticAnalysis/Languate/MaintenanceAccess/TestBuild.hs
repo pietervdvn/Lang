@@ -63,6 +63,6 @@ bDocs	= do	dir		<- getCurrentDirectory
 		time	<- getCurrentTime |> utctDayTime |> realToFrac |> round
 		time'	<- getCurrentTime |> show
 		let hour = 2 + time `div` (60*60)
-		let css	= if hour `elem` ([0..8] ++ [21..24]) then blackCSS else defaultCSS
-
+		let cssLocation	= if hour `elem` ([0..8] ++ [21..24]) then blackCSSLocation else whiteCSSLocation
+		css	<- loadCSS ("../MarkUp/"++cssLocation) defaultCSSCons
 		renderClusterTo (fix $ extend (setFilePath path') $ html $ defaultHeader css) cluster

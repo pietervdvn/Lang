@@ -107,6 +107,18 @@ uncurriedTypes [t]
 uncurriedTypes (t:ts)
 		= RCurry t $ uncurriedTypes ts
 
+{- removes an argument type from the curry chain
+	Returns original type if no curry is detected
+-}
+dropCurry	:: RType -> RType
+dropCurry (RCurry arg rt)
+		= rt
+dropCurry t	= t
+
+dropCurry'	:: CTypeUnion -> CTypeUnion
+dropCurry' (tps, reqs)
+		= (tps |> dropCurry, reqs)
+
 
 
 ---------------------- FOLDING ----------------

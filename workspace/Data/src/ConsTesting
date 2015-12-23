@@ -1,0 +1,12 @@
+ConsTesting
+-----------
+Testing of constructors and stuff
+-----------
+
+import Any
+import Data.Bool
+
+type A = {A, X}
+type B = {B, Y}
+
+type C = A + B

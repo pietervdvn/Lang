@@ -7,6 +7,16 @@ import Languate.TAST.DefType
 import Languate.TAST.TypeUtils
 
 
+{-Smashes the argument into the function, without actually checking the types.
+Only use for pregenerated functions
+-}
+simpleApply	:: TExpression -> TExpression -> TExpression
+simpleApply func arg
+	= let	(tps, reqs)	= typeOf func
+		tp'	= (tps |> dropCurry, reqs)
+		in
+		TApplication tp' func arg
+
 instance Show TExpression where
 	show 	= showTE
 
@@ -21,6 +31,8 @@ showTE (TCall _ sign)
 	= signName sign
 showTE (TLocalCall nm _)
 	= show nm
+showTE (Tag t)
+	= "§"++show t
 
 
 typeOf		:: TExpression -> CTypeUnion

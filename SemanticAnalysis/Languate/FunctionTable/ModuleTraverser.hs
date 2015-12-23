@@ -19,18 +19,28 @@ import Data.List
 
 import Control.Arrow
 
+data FunctionInfo	= FI { fiSign	:: Signature,
+				fiVis	:: Visible,
+				fiGen	:: Generated,
+				fiAbs	:: Abstract,
+				fiClauses	:: Maybe (Either [Clause] [TClause])
+				}
+	deriving (Show)
+ -- (Signature, (Visible, Generated, Abstract)) -- , Either [Clause] [TClause]))
 
 -- fetches the function signatures that are defined within the statement
-definedFuncSign	:: Module -> TypeLookupTable -> FQN -> Statement -> Exc [(Signature, (Visible, Generated, Abstract))]
+definedFuncSign	:: Module -> TypeLookupTable -> FQN -> Statement -> Exc [FunctionInfo]
 definedFuncSign m tlt fqn (FunctionStm function)
 	= do	defs	<- signs function |+> resolveSignature tlt fqn	:: Exc [Signature]
-		visibs	<- defs |+> getVisibility m (visibility function)
-		let visibsGen	= visibs |> (\visib -> (visib, False, Nothing))
-		return (zip defs visibsGen)
+		visibs  <- defs |+> getVisibility m (visibility function)
+		zip defs visibs |> (\(sign, vis) -> FI sign vis False Nothing (Just $ Left $ clauses function) ) & return
 
 definedFuncSign m tlt fqn (ADTDefStm adtDef)
 	= do	let definedType	= RNormal fqn (adtName adtDef)	:: RType
-		adtDefinedFunctions tlt fqn adtDef |||>>> (\sign -> (sign, True, Just definedType))
+		fi	        <- adtDefinedFunctions tlt fqn adtDef	:: Exc [(Signature, Visible, Either [Clause] [TClause])]
+		let wrapped	= fi |> (\(sign, vis, clauses) -> FI sign vis True (Just definedType) (Just clauses))	:: [FunctionInfo]
+		wrapped |> show & unlines & warn	-- TODO remove
+		return wrapped
 
 definedFuncSign m tlt fqn (SubDefStm (SubDef nm vis frees tps reqs))
 	= do	defType		<- resolveType tlt (Normal [] nm)
@@ -45,14 +55,17 @@ definedFuncSign m tlt fqn (SubDefStm (SubDef nm vis frees tps reqs))
 		let extraReq	= if singleType then [] else [(free, rtps)]
 		let funcT	= RCurry startT defType'
 		let funcReqs	= rreqs ++ extraReq
-		return [(Signature fqn ("as"++nm) ([funcT], funcReqs), (Private, True, Nothing))]
+		let sign	= Signature fqn ("as"++nm) ([funcT], funcReqs)
+		return [FI sign Private True Nothing Nothing] -- TODO add implementation of "asSubType"
 
 definedFuncSign m tlt fqn (ClassDefStm cd)
 	= do	defType	<- resolveType tlt (Normal [] $ name cd)
 		let defFree	= take (length $ frees cd) $ defaultFreeNames
 		let defType'	= applyTypeArgsFree defType defFree
 		signs	<- decls cd |+> resolveSignature' tlt fqn
-		return (zip signs $ repeat (Public, False, Just defType'))
+		repeat (Public, False, Just defType') & zip signs
+			|> (\(sign, (fiVis, fiGen, fiAbs)) -> FI sign fiVis fiGen fiAbs Nothing)
+			& return
 
 definedFuncSign _ _ _ _
 	= return []

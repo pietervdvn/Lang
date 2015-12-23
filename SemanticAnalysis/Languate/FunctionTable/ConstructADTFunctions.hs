@@ -24,52 +24,78 @@ type UniqueConstructor	= Bool
 
 
 adtDefinedFunctions	:: TypeLookupTable -> FQN -> ADTDef
-				-> Exc [(Signature, Visible)]
-adtDefinedFunctions tlt fqn (ADTDef name frees reqs sums _)
+				-> Exc [(Signature, Visible, Either [Clause] [TClause])]
+adtDefinedFunctions tlt fqn (ADTDef name frees reqs sums adopted)
 	= inside ("In generating the function signatures defined by "++show name) $
 	  do	let definedTypeBase	= RNormal fqn name	:: RType
 		let definedType	= applyTypeArgs definedTypeBase (frees |> RFree)	:: RType
 		reqs	<- resolveReqs tlt reqs
-		let uniqueCons	= length sums == 1
+		let uniqueCons	= length sums + length adopted == 1
 		checkNoDubbleConsnames (sums |> adtSumName)
-		consDecons	<- sums |+> sumDefFunctions tlt fqn definedType reqs uniqueCons |> concat
-		sums'		<- sums |+> tsum tlt
-		fieldFuncs	<- buildFieldFunctions fqn definedTypeBase frees reqs sums'
-		return (consDecons++fieldFuncs)
+		rSums		<- sums |+> resolveSum tlt	-- TODO Add adopted types to constructors
+		consDecons	<- zip rSums [0..] |+> sumDefFunctions tlt fqn definedType reqs uniqueCons |> concat
+		fieldFuncs	<- buildFieldFunctions fqn definedTypeBase frees reqs rSums
+		(consDecons++fieldFuncs) & return
 
 
-sumDefFunctions	:: TypeLookupTable -> FQN -> RType -> RTypeReq -> UniqueConstructor -> ADTSum
-			-> Exc [(Signature, Visible)]
-sumDefFunctions tlt fqn defType reqs onlyCons (ADTSum name vis fields)
+sumDefFunctions	:: TypeLookupTable -> FQN -> RType -> RTypeReq -> UniqueConstructor -> (TADTSum, Int)
+			-> Exc [(Signature, Visible, Either [Clause] [TClause])]
+sumDefFunctions tlt fqn defType reqs onlyCons (TADTSum name vis fields, tag)
 	= inside ("In the constructor "++name) $
-	  do	args	<- fields |> snd |+> resolveType tlt	-- types of the arguments
+	  do	let args	= fields |> snd	-- types of the arguments
 		checkFieldsAreNamed fields
-		let constr	= [buildConstructorSign fqn name reqs args defType]
-		let isContstr	= if onlyCons then [] else [buildIsConstrSign fqn name reqs defType]
-		let decons	= [buildDeconsSign fqn name reqs onlyCons defType args]
-		let funcs	= constr ++ isContstr ++ decons
-		zip funcs (repeat vis) & return
+		let constr	= [buildConstructorSign fqn name reqs args defType tag] |> second Right
+		let isContstr'	= if onlyCons then [] else [buildIsConstrSign fqn name reqs defType (length fields)]
+		let isContstr	= isContstr' |> second Left
+		let decons	= [buildDeconsSign fqn name reqs onlyCons tag defType args] |> second Right
+		let funcs	= constr ++ isContstr ++ decons	:: [(Signature, Either [Clause] [TClause])]
+		let funcs'	= funcs |> (\(sign, clauses) -> (sign, vis, clauses))	:: [(Signature, Visible, Either [Clause] [TClause])]
+		funcs' & return
+
 
 buildConstructorSign	:: FQN -> Name -> RTypeReq
-				-> [RType] -> RType
-				-> Signature
-buildConstructorSign fqn n reqs args defType
+				-> [RType] -> RType -> Int
+				-> (Signature, [TClause])
+buildConstructorSign fqn n reqs args defType tag
 	= let   sign	= Signature fqn n ([uncurriedTypes (args++[defType])],reqs)
+		vars	= args |> (\a -> ([a],[])) & zip defaultFreeNames
+		pats	= vars |> fst |> TAssign
+		baseExpr= TApplication (signTypes sign)
+				(TCall (signTypes sign) (sign {signName= "#construct"}))
+				(Tag tag)
+		expr	= vars |> uncurry TLocalCall & foldl simpleApply baseExpr
+		in (sign, [TClause pats expr])
 
-		in (sign)
 
 
-buildIsConstrSign	:: FQN -> Name -> RTypeReq -> RType -> Signature
-buildIsConstrSign fqn n reqs defType
-	= Signature fqn ("is"++n) ([RCurry defType boolType],reqs)
 
-buildDeconsSign		:: FQN -> Name -> RTypeReq -> UniqueConstructor -> RType -> [RType] -> Signature
-buildDeconsSign fqn n reqs onlyCons defType rets
-	= let	retTyp	= tupleTypes rets
-		-- if we have a unique constructor, we don't need to wrap it in a maybe
-		wrapper	= if onlyCons then id else RApplied maybeType
+buildIsConstrSign	:: FQN -> Name -> RTypeReq -> RType -> Int -> (Signature, [Clause])
+buildIsConstrSign fqn n reqs defType nArgs
+	= let	sign	= Signature fqn ("is"++n) ([RCurry defType boolType],reqs)
+		matchClause	= Clause [Deconstruct n (replicate nArgs DontCare)] (Call "True")
+		failClause	= Clause [DontCare] (Call "False")
 		in
-		Signature fqn ("from"++n) ([RCurry defType (wrapper retTyp)] , reqs)
+		(sign, [matchClause, failClause])
+
+buildDeconsSign		:: FQN -> Name -> RTypeReq -> UniqueConstructor -> Int -> RType -> [RType] -> (Signature, [TClause])
+buildDeconsSign fqn n reqs onlyCons tag defType args
+	= let	retTyp		= tupleTypes args   -- args are the arguments to the constructor, here the return types in a tuple
+		-- if we have a unique constructor, we don't need to wrap it in a maybe
+		wrapper		= if onlyCons then id else RApplied maybeType
+		retTyp' 	= wrapper retTyp
+		sign		= Signature fqn ("from"++n) ([RCurry defType (wrapper retTyp)] , reqs)
+		failClause	= TClause [TDontCare] $ maybeTypeNothing retTyp'   -- only exists if multiple constructors
+
+		deconsSign  	= sign {signName = "#deconstruct"}
+		tagCheck    	= TEval $ Tag tag
+		vars        	= args |> (\a -> ([a], [])) & zip defaultFreeNames
+		pats		= vars |> fst |> TAssign
+		tupleResult	= buildTuple args (vars |> uncurry TLocalCall)
+       		successClause   = TClause [TDeconstruct deconsSign (tagCheck : pats)]
+       					tupleResult
+       		clauses		= if onlyCons then [successClause] else [successClause, failClause]
+		in
+		(sign, clauses)
 
 data TADTSum  = TADTSum
 		{ tadtSumName		:: Name
@@ -78,8 +104,8 @@ data TADTSum  = TADTSum
              	}
 
 
-tsum	:: TypeLookupTable -> ADTSum -> Exc TADTSum
-tsum tlt (ADTSum n vis fields)
+resolveSum	:: TypeLookupTable -> ADTSum -> Exc TADTSum
+resolveSum tlt (ADTSum n vis fields)
 	= do	fields'	<- fields |+> onSecond (resolveType tlt)
 		return $ TADTSum n vis fields'
 
@@ -107,7 +133,7 @@ Requirements
 
 -}
 
-buildFieldFunctions	:: FQN -> RType -> [Name] -> RTypeReq -> [TADTSum] -> Exc [(Signature, Visible)]
+buildFieldFunctions	:: FQN -> RType -> [Name] -> RTypeReq -> [TADTSum] -> Exc [(Signature, Visible, Either [Clause] [TClause])]
 buildFieldFunctions fqn defType frees reqs sums
 	= do	sums |+> checkNoDubblefields
 		let perField	= perFieldname sums	:: [(Name,[(Name, (RType, Visible))])]
@@ -119,14 +145,14 @@ buildFieldFunctions fqn defType frees reqs sums
 		let buildFieldFunctionsSign'	= buildFieldFunctionsSign fqn nrOfConss defType frees lockedFrees reqs
 		fieldFuncs'	<- perField' |+> (\(fieldName, (conss, rtp, vis)) ->
 							do	signs	<- buildFieldFunctionsSign' fieldName conss rtp
-								return (zip signs (repeat vis)) )
+								return (signs |> (\sign -> (sign, vis, Right [{-TODO actual implementations-}]))) )
 		let fieldFuncs	= concat fieldFuncs'
 		return fieldFuncs
 
 
-checkFieldsAreNamed	:: [(Maybe Name, Type)] -> Check
+checkFieldsAreNamed	:: [(Maybe Name, RType)] -> Check
 checkFieldsAreNamed fields
-	= do	let unnamed = fields & L.filter (isJust . fst) & length
+	= do	let unnamed = fields & L.filter (isNothing . fst) & length
 		warnIf (unnamed > 4) $ "You have quite some fields in your constructor. Wouldn't you name those, boy?"
 
 -- builds the signature for a given fieldname, over multiple constructors. We assume types are the same over all constructors, this has been checked previously
