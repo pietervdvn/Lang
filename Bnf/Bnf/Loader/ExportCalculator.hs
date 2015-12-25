@@ -40,7 +40,7 @@ calcExports modules
 calcImports		:: IOModule -> Map FQN Exports -> Map Name FQN
 calcImports (IOM fqn _ imports _) ctx
 		=  let all 	= map (`importOne'` ctx) imports in
-			M.fromList $ nub $ concat all 
+			M.fromList $ nub $ concat all
 
 importOne'	:: IOImport -> Map FQN Exports -> [(Name, FQN)]
 importOne' imp
@@ -65,26 +65,26 @@ createContext modules
 
 prepContext	:: IOModule -> [IOModule] -> (FQN, (IOModule, [FQN]))
 prepContext iom allModules
-		= let fqn	= getFqn iom in 
+		= let fqn	= getFqn iom in
 			(fqn, (iom, map getFqn $ modulesImporting fqn allModules))
 
--- Names of modules which should be checked, 
+-- Names of modules which should be checked,
 -- a map of fqn --> it's module , what other modules it is used in , locally defined rules
 -- the new state of exported stuff + what modules might be changed
 -- We assume local rules already are added to the starting state, so we propagate all these now
 calculateExports	:: Set FQN -> Map FQN (IOModule, [FQN]) -> State (Map FQN Exports) [FQN]
-calculateExports todo context
-	| S.null todo	= return []
+calculateExports worklist context
+	| S.null worklist	= return []
 	| otherwise
-		= do	-- we export all the stuff that we should export. If the "we export"-set has changed, all modules which import this module should be notified and added (again) to the todo-list
-			let fqn		= S.findMin todo
+		= do	-- we export all the stuff that we should export. If the "we export"-set has changed, all modules which import this module should be notified and added (again) to the worklist
+			let fqn		= S.findMin worklist
 			let (iom, importedBy)= fromJust $ M.lookup fqn context
 			currentExports	<- fmap (fromJust . M.lookup fqn) get
 			exportContext	<- get
 			let (changed, exports')	= runstate (addExports iom exportContext) currentExports
-			let todo' = (if changed then S.union $ S.fromList importedBy else id) $ S.delete fqn todo
-			when changed $ modify (M.insert fqn exports')	
-			calculateExports todo' context		
+			let worklist' = (if changed then S.union $ S.fromList importedBy else id) $ S.delete fqn worklist
+			when changed $ modify (M.insert fqn exports')
+			calculateExports worklist' context
 
 addExports	:: IOModule -> Map FQN Exports -> State Exports Bool
 addExports iom context
