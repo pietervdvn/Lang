@@ -16,7 +16,7 @@ A ''Collection'' which preserves order and allows duplicate elements.
 The syntactic sugar ''[a]'' desugars to ''List a''
 ---
 type List a	= {Empty} + (List' a)
-type List' a	= {Elem a (List a)}
+type List' a	= {Elem head':a;  tail':(List a)}
 
 instance List a is Set a
 instance List a:Eq is Eq
@@ -36,10 +36,6 @@ tail		: [a] -> Maybe [a]
 (Elem _ tail)	= Just tail
 Empty		= Nothing
 
--- Drops the first element of the list. Returns an empty list if no tail exists
-tail'		: [a] -> [a]
-(Elem _ tail)	= tail
-Empty		= Empty
 
 (+)		: [a] -> [a] -> [a]
 Empty ls	= ls

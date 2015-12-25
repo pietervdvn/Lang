@@ -39,7 +39,6 @@ definedFuncSign m tlt fqn (ADTDefStm adtDef)
 	= do	let definedType	= RNormal fqn (adtName adtDef)	:: RType
 		fi	        <- adtDefinedFunctions tlt fqn adtDef	:: Exc [(Signature, Visible, Either [Clause] [TClause])]
 		let wrapped	= fi |> (\(sign, vis, clauses) -> FI sign vis True (Just definedType) (Just clauses))	:: [FunctionInfo]
-		wrapped |> show & unlines & warn	-- TODO remove
 		return wrapped
 
 definedFuncSign m tlt fqn (SubDefStm (SubDef nm vis frees tps reqs))
