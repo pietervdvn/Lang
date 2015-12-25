@@ -106,9 +106,9 @@ rework n	=  do	-- The nodes which n imports
 				else get' exportGraph |> nodesFrom n	-- Some new properties are reexported. We have to rework these nodes later
 
 pop	:: Ord n => St n prop (Maybe n)
-pop	=  do	todo	<- get' worklist
-		if S.null todo then return Nothing
-			else do	let n	= S.findMin todo
+pop	=  do	toCheck	<- get' worklist
+		if S.null toCheck then return Nothing
+			else do	let n	= S.findMin toCheck
 				modify $ modWorkList $ S.delete n
 				return $ Just n
 
@@ -117,8 +117,8 @@ push n	=  modify $ modWorkList (S.insert n)
 
 -- False: we're done!
 stillWork	:: St n prop Bool
-stillWork	=  do	todo	<- get' worklist
-			return $ not $ S.null todo
+stillWork	=  do	toCheck	<- get' worklist
+			return $ not $ S.null toCheck
 
 setWorkList	:: Set n -> ExpS n prop -> ExpS n prop
 setWorkList wl (ExpS importGraph expGraph exps reExpFilter exported _)
