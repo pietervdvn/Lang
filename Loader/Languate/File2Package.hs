@@ -148,8 +148,8 @@ addImports fqn mdul
 			cache	<- get' loaded
 			let fqns 	= map (import2fqn fqnp) $ imports' mdul
 			let fqns'	= zip (repeat fqn) $ filter (`notMember` cache) $ fmap fst fqns
-			todolist	<- get' toLoad
-			modify (setToLoad $ fqns' ++ todolist)
+			worklist	<- get' toLoad
+			modify (setToLoad $ fqns' ++ worklist)
 			return $ S.fromList fqns
 
 
