@@ -16,7 +16,7 @@ import Data.Tuple
 {--
 
 
-This module implements the loader. 
+This module implements the loader.
 
 The loader exists of one main loop, which loads files that haven't been loaded yet (and are needed).
 The loader is started by asking it to load a FQN from a certain path.
@@ -46,12 +46,12 @@ load fqn pwd
 loadWithImports	:: [(FQN, FilePath)] -> FilePath -> Map FilePath IOModule -> IO (Map FilePath IOModule)
 loadWithImports	[] _ loaded
 		= return loaded
-loadWithImports	((fqn, lastActiveDir):todoList) workingDir currentlyLoaded
+loadWithImports	((fqn, lastActiveDir):worklist) workingDir currentlyLoaded
 		=  do	path	<- search fqn workingDir (init $ dropFileName lastActiveDir)
-			if path `member` currentlyLoaded then loadWithImports todoList workingDir currentlyLoaded
+			if path `member` currentlyLoaded then loadWithImports worklist workingDir currentlyLoaded
 			 else do	modul	<- loadFrom fqn path
 					let needed	= zip (map getFQN $ getImports modul) (repeat path)
-					loadWithImports (needed++todoList) workingDir $ insert path modul currentlyLoaded
+					loadWithImports (needed++worklist) workingDir $ insert path modul currentlyLoaded
 
 {- Searches the existing path where the FQN could be found. Crashes if no suitable path available-}
 search	:: FQN -> FilePath -> FilePath -> IO FilePath
@@ -68,9 +68,9 @@ search	fqn pwd cld
 		 else when (1 /= length existing) $
 			putStrLn $ "Warning: multiple "++ show fqn ++" found: "++ show existing ++ "\nThe deepest one is used: "++last existing
 		return $ last existing
-		
+
 {- Loads a module from the given location, crashes if errors are found within this bnf file -}
-loadFrom	:: FQN -> FilePath -> IO IOModule 
+loadFrom	:: FQN -> FilePath -> IO IOModule
 loadFrom fqn path
 		= do 	putStrLn $ "Loading "++path
 			str	<- readFile path
