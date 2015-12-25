@@ -21,7 +21,7 @@ import Data.Map
 A local scope keeps track of what variable has what type.
 It is build based on the pattern matching of the function, while typing the patterns.
 -}
-type LocalScope	= Map Name RType
+type LocalScope	= Map Name [RType]	-- Variable a is **all** of the given types. Requirements might apply, but will be known in context
 data TPattern	= TAssign Name
 		| TDeconstruct Signature [TPattern]
 		| TMulti [TPattern]

@@ -42,10 +42,10 @@ packageTablIO	= runExceptionsIO' $ buildPackageTable loadedPackage
 packageTabl	= unsafePerformIO packageTablIO
 
 
-preludeFQN	= toFQN' "pietervdvn:Data:FunctionTesting"
+preludeFQN	= toFQN' "pietervdvn:Data:Prelude"
 
 
-tt	= packageTabl & moduleTables & M.findWithDefault (error "Module prelude not found") preludeFQN & types
+tt	= packageTabl & moduleTables & M.findWithDefault (error $ "Module "++show preludeFQN++" not found") preludeFQN & types
 
 
 

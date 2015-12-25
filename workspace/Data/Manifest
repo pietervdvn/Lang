@@ -12,6 +12,6 @@ maintainer	= "pietervdvn"
 language	= 0.1
 license		= GPL
 
-exposes		= {ConsTesting}
+exposes		= {Prelude}
 
 bugtracker	= "github.com/Lang/issues/"

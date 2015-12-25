@@ -34,7 +34,7 @@ How are the function tables built?
 	- we check that functions have an appropriate, simple kind
 -> We propagate these definitions, so that each module knows what functions are visible
 -- TODO: all below this line
--> We build the implementations of these defined functions
+-> We build the implementations (thus resolving calls) of these defined functions
 	- and typecheck those
 
 -}
@@ -132,6 +132,7 @@ buildLocalFunctionTable tlts tts fqn mod
 					& M.fromList	:: Map Signature [Clause]
 
 		-- ## docs and such
+		-- TODO generate docs for auto generated functions!
 		let metas	= funcs' |> first fiSign |> second (buildMeta mod) & M.fromList
 
 
