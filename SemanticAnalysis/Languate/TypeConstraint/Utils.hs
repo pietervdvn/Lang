@@ -13,6 +13,12 @@ import Data.Set as S
 import Data.Map as M
 
 import Data.Maybe
+import Control.Arrow
+
+
+asConstraints	:: RTypeReq -> Set TypeConstraint
+asConstraints reqs
+	= reqs |> first RFree & unmerge |> uncurry SubTypeConstr & S.fromList
 
 
 isConstraintMet	:: Typetable -> TypeConstraint -> Exc Bool
@@ -82,7 +88,8 @@ isSuper tt met t0 t1
  | t0 == t1	= return $ Just $ All []
  | (SubTypeConstr t0 t1) `S.member` met
  		= return $ Just $ All []
- | isRFree t0	= return $ Just $ SubTypeConstr t0 t1
+ | isRFree t0 || isRFree t1
+ 		= return $ Just $ SubTypeConstr t0 t1
  | otherwise	= _isSuper tt t0 t1
 
 
