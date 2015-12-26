@@ -61,7 +61,7 @@ buildFunctionTables p tlts tts modules
 		let isImported'	=  isImported (importGraph' p)
 		let imported	=  EC.calculateImports (importGraph p) fetch isImported' exported	:: Map FQN (Set (Signature, [FQN]))
 		let imprtTables	=  M.mapWithKey (\fqn -> first (setImported imported fqn)) basetables'	:: Map FQN (FunctionTable, Map Signature [Clause])
-		implementTables	<- dictMapM (buildImplementations p tlts) imprtTables
+		implementTables	<- dictMapM (buildImplementations p tlts tts) imprtTables
 		return implementTables
 
 -- Asks wether the signature can be RE-exported further. This is only the case for public imports

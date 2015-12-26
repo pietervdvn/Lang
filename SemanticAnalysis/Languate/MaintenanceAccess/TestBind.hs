@@ -59,4 +59,4 @@ scs a b	= cs [sc a b]
 sc	= SubTypeConstr
 
 -- return faulty either case "a is b"
-tc	= runExceptionsIO' $ allNeededConstraints tt S.empty [SubTypeConstr (list a) (set b)]
+tc	= runExceptionsIO' $ allNeededConstraints tt S.empty [SubTypeConstr (bool) (list a)]
