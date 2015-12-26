@@ -43,12 +43,12 @@ sChar "numericChar" [Quote, Nat i, Quote]
 sChar _ [a]	= a
 
 tChar		:: Name -> String -> AST
-tChar "normalChar" ('\'':c:'\'':[])	
+tChar "normalChar" ['\'', c, '\'']
 		= Ch c
-tChar "escapedChar" ('\'':'\\':c:'\'':[])
+tChar "escapedChar" ['\'', '\\', c, '\'']
 		= Ch $ fromJust $ lookup c escaped
 tChar "numericChar" _
-		= Quote 
+		= Quote
 
 escaped	= [('n','\n'),('t','\t'),('r','\r'),('\\','\\'),('\'','\'')]
 

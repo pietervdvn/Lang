@@ -116,7 +116,7 @@ searchCommentAbove' m c	= statements' m & break ((==) c . snd) & fst	-- take the
 -- searches above the given coordinate for comments, laws and annotations about this declaration. Precedence statements are not returned, but do not cause to stop searching upwards
 searchMeta	:: Module -> Coor -> ([(Comment, Coor)],[(((Name, Name), Comment), Coor)], [(Law, Coor)], [(Annotation, Coor)])
 searchMeta m c	= let 	stms	= statements' m & break ((==) c . snd) & fst	-- take the statements before the coordinate
-					& reverse & break (not . isMeta . fst) & fst	-- filter only the part that is meta about
+					& reverse & span (isMeta . fst) & fst	-- filter only the part that is meta about
 			comms	= (stms & filter (isComment . fst)) >>= onFirst (\(Comments comms) -> comms)
 			docs	= stms >>= onFirst isDocstr		:: [(((Name, Name), Comment), Coor)]
 			laws	= stms & filter (isLaw . fst) 		|> first (\(LawStm law) -> law)
