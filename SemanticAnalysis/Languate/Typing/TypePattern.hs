@@ -13,6 +13,8 @@ import Languate.Typetable
 import Languate.AST
 import Languate.TAST
 
+import Languate.Typing.TypeExpression
+
 import Data.Set as S
 import Data.Map as M
 import Data.List as L
@@ -20,50 +22,65 @@ import Data.Char
 
 import Data.Maybe
 import Control.Arrow
-
+import Control.Monad
 
 {-
+tables: info about the context
+reqs: requirements on the types
+localscope: scope created by left patterns (e.g. 'a b $(==a+b)')
 Argument types; each argument might be an intersection of mutliple things
-Patterns
-(typed patterns, local scope, curried variables (start with _a))
+Actual patterns
+-> (typed patterns, local scope (including previous scope), curried variables (start with _a))
 
 -}
-typePatterns	:: (FunctionTable, Typetable) -> RTypeReq -> [[RType]] -> [Pattern] -> Exc ([TPattern], LocalScope, [Name])
-typePatterns tables reqs args pats
+typePatterns	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [[RType]] -> [Pattern] -> Exc ([TPattern], LocalScope, [Name])
+typePatterns tables reqs ls args pats
 		= inside ("In the typing of the pattern "++ (pats |> show & unwords & pars)++ " with expected types "++(args |> show & commas)) $
 			do	pats'		<- demultidontcare (length args) pats
-				(tPats, scopes)	<- zip args pats' |+> uncurry (typePattern tables reqs) |> unzip
-				scopes'		<- safeUnions scopes
-				return (tPats, scopes', [])
+				let curried	= take ((length args) - (length pats')) defaultFreeNames |> ("_"++)
+				let pats''	= pats' ++ (curried |> Assign)
+				let typePat (acc, scope) (pat, arg)
+						= do	(pat', scope')	<- typePattern tables reqs scope pat arg
+							return (acc++[pat'], scope')	:: Exc ([TPattern], LocalScope)
+				(tPats, newScope)	<- zip args pats'' & foldM typePat ([], ls)
+				return (tPats, newScope, curried)
 
-typePattern	:: (FunctionTable, Typetable) -> RTypeReq -> [RType] -> Pattern -> Exc (TPattern, LocalScope)
-typePattern _ _ _ DontCare
-	= return (TDontCare, M.empty)
-typePattern _ _ rts (Assign n)
-	= return (TAssign n, M.singleton n rts)
-typePattern tables reqs rts (Multi pats)
-	= do	(tpats, scopes)	<- pats |+> typePattern tables reqs rts |> unzip
-		scopes'		<- safeUnions scopes
-		return (TMulti tpats, scopes')
-typePattern tables@(ft, tt) rqs rts (Deconstruct n' pats)
+-- old scope is returned too
+typePattern	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [RType] -> Pattern -> Exc (TPattern, LocalScope)
+typePattern _ _ ls _ DontCare
+	= return (TDontCare, ls)
+typePattern _ _ ls rts (Assign n)
+	= do	ls'	<- safeUnion ls $ M.singleton n rts
+		return (TAssign n, ls')
+typePattern tables reqs ls rts (Multi pats)
+	= do	let typePat (acc, scope) pat	= do	(pat', scope')	<- typePattern tables reqs scope rts pat
+							return (acc++[pat'], scope')
+		(tpats, scope)	<- foldM typePat ([], ls) pats
+		return (TMulti tpats, scope)
+typePattern tables@(ft, tt) rqs ls rts (Deconstruct n' pats)
 	-- we search all function with given name and type (A -> b) or (A -> Maybe b) (where b might be a tuple)
 	= do	let n	= if isUpper $ head n' then "from"++n' else n'
 		_funcs	<- visibleFuncs ft & M.lookup n ? ("No function with the name "++n++" found")
 		let funcs	= S.toList _funcs
 		funcs'	<- funcs |> (fst &&& id)|+> onSecond (onFirst (deconstructorArgs tt rts)) |> L.filter (isJust . fst . snd)
 				:: Exc [(Signature, (Maybe [[RType]], [FQN]))]
-		assert (not $ L.null funcs') $ "No suitable deconstructor function found for "++show n++indent ("\n"++
+		haltIf (L.null funcs') $ "No suitable deconstructor function found for "++show n++indent ("\n"++
 			(funcs |> fst |> show |> ("Tried "++) |> (++" but it didn't have a suitable type") & unlines))
 		assert (length funcs' == 1) $ "Multiple deconstructor functions found for "++show n++indent ("\n"++
 			funcs' |> (\(sign, (_, impFrom)) -> show sign ++  "(imported from "++ (impFrom |> show & commas) ++")") & unlines
 			)
-		let (sign, argTps)	= head funcs' & second fst |> fromJust
-		(tpats, scope, curries)	<- typePatterns tables rqs argTps pats
+		let (sign, argTps)	= head funcs' & second fst |> fromJust	-- we assume only one function is found, thus the head
+		(tpats, scope, curries)	<- typePatterns tables rqs ls argTps pats
 		assert (L.null curries) $ ("The destructor "++show n++" is not applied to enough arguments.")
-		return (TDeconstruct sign tpats, scope)	-- TODO
-
-typePattern _ _ rt p
-	= {- halt $ "TODO: pattern "++show p++ " with expected type "++show rt -} return (TDontCare, M.empty) --}
+		return (TDeconstruct sign tpats, scope)
+typePattern tables rqs ls rts (Eval expr)
+	= do	texpr	<- typeExpr tables rqs ls expr
+		-- TODO
+		return (TDontCare, ls)
+typePattern _ _ ls rt p
+	= do	warn $ "TODO: unsupported pattern "++show p++ " with expected type "++show rt
+		-- TODO
+		return (TDontCare, ls) --}
 
 
 
@@ -81,18 +98,15 @@ deconstructorArgs tt originTypes sign
 
 		-- at this point, we only have to take a look at the output type(s)
 		-- Are we dealing with a Maybe? If yes, then all return types should bind on "Maybe a"
-		constrs	<- rtTypes |> SubTypeConstr (RApplied maybeType $ RFree "_decons") |> (:[])
+		constrs	<- rtTypes |> bind (RApplied maybeType $ RFree "_decons") |> (:[])
 				|+> allNeededConstraints tt reqs'
 				|||>>> S.toList	:: Exc [Maybe [TypeConstraint]]
 					-- Returns the typeunion of what is in the maybe if this binding succeeded
-		-- TODO this looks broken
 		let maybeArgs'	= unpackMaybeArgFromConstraints constrs	:: Maybe [RType]
-		let tupleArgs = fromMaybe rtTypes maybeArgs'
-
+		let tupleArgs	= fromMaybe rtTypes maybeArgs'
 		-- TODO FIXME use actual binding! Use actual unions!
 		let args	= head tupleArgs & tupledTypes
-		warn $ show args
-		return $ Just [args]
+		return $ Just (args |> (:[]))
 
 
 unpackMaybeArgFromConstraints	:: [Maybe [TypeConstraint]] -> Maybe [RType]

@@ -60,6 +60,10 @@ typeClauses tables sign clauses
 
 typeClause	:: (FunctionTable, Typetable) -> RTypeReq -> [[RType]] -> [RType] -> Clause -> Exc TClause
 typeClause tables reqs args rt (Clause pats expr)
-		= do	(tpats, lscope, curries)	<- typePatterns tables reqs args pats
-			texpr	<- typeExpr $ normalize expr
-			return $ TClause tpats texpr
+		= do	let usedFrees	= (rt ++ concat args) >>= freesInRT
+			let usedFrees'	= usedFrees & L.filter (`L.notElem` (reqs |> fst))
+			let fullReqs	= Reqs $ (reqs ++ (zip usedFrees $ repeat []))
+			(tpats, lscope, curries)	<- typePatterns tables fullReqs M.empty args pats
+			texprs	<- typeExpr tables fullReqs lscope $ normalize expr
+			assert (length texprs == 1) $ "Multiple implementations are possible"++indent ("\n"++(texprs |> show & unlines))
+			return $ TClause tpats $ head texprs

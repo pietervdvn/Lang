@@ -121,7 +121,7 @@ natFQN		= toFQN' "pietervdvn:Data:Data.Nat"
 natType		= uncurry RNormal natTypeID
 natTypeID	= (natFQN, "Nat")
 
-zeroType	= uncurry RNormal natTypeID
+zeroType	= uncurry RNormal zeroTypeID
 zeroTypeID	= (natFQN, "Zero")
 
 natType'	= uncurry RNormal natTypeID'
@@ -129,7 +129,7 @@ natTypeID'	= (natFQN, "Nat'")
 
 -- Zero Constructor for the natural type
 natTypeZero	:: TExpression
-natTypeZero	= TCall ([zeroType],[]) $ Signature natFQN "Zero" ([natType], [])
+natTypeZero	= TCall ([zeroType],[]) $ Signature natFQN "Zero" ([zeroType], [])
 
 natTypeSucc	:: TExpression
 natTypeSucc	= TCall ([ RCurry natType natType'],[]) $

@@ -42,6 +42,10 @@ data RType	= RNormal FQN Name
 
 
 type RTypeReq		= [(Name, [RType])]
+
+-- type requirements where all free varialbes that are used, are listed. This is to prevent free type collision
+newtype FullRTypeReq	= Reqs {unp :: RTypeReq}
+
 -- a type with constraints
 type CType		= (RType, RTypeReq)
 {- A type of a function with multiple 'tags', e.g. (+) : Nat -> Nat -> Nat & Comm Nat Nat

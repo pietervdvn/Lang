@@ -188,7 +188,12 @@ freesInReq	:: (Name, [RType]) -> [Name]
 freesInReq (nm, tps)
 		= nm:(tps >>= freesInRT) & nub
 
-
+buildSafeSubs	:: FullRTypeReq -> [(Name, Name)]
+buildSafeSubs (Reqs ls)
+	= let	used	= ls |> fst
+		new	= defaultFreeNames & L.filter (`notElem` used) & take (length used)
+		in
+		zip used new
 
 -- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded (defaultFreeNames)
 canonicalBinding	:: RType -> Map Name RType
@@ -214,6 +219,11 @@ subsReq dict reqs
 		(reqs |> first subsName) |+> onSecond (|+> subs dict')
 
 
+subsUnion	:: [(Name, Name)] -> CTypeUnion -> Exc CTypeUnion
+subsUnion sub (rtps, reqs)
+	= do	rtps'	<- rtps |+> subs (sub ||>> RFree)
+		reqs'	<- subsReq sub reqs
+		return (rtps', reqs')
 
 ------------------ NORMALIZING ---------------
 
