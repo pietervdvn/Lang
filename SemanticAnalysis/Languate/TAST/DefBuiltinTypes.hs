@@ -26,7 +26,7 @@ unitType	= uncurry RNormal unitTypeID
 unitTypeID	= (unitTypeFQN,"Unit")
 unitTypeFQN	= toFQN' "pietervdvn:Data:Collection.Unit"
 unitTypeCons	:: TExpression
-unitTypeCons	= TCall unitType $ Signature unitTypeFQN "Unit" ([unitType],[])
+unitTypeCons	= TCall unitType $ Signature unitTypeFQN "Unit" (unitType,[])
 
 
 
@@ -45,14 +45,14 @@ tupleTypeFQN	= toFQN' "pietervdvn:Data:Collection.Tuple"
 tupleTypeConsSign'	:: RType -> RType -> Signature
 tupleTypeConsSign' a b
 		= let 	tp = RCurry a (RCurry b (tupleType' a b)) in
-		     Signature tupleTypeFQN "Tuple" ([tp], [])
+		     Signature tupleTypeFQN "Tuple" (tp, [])
 tupleTypeConsSign
 		= tupleTypeConsSign' (RFree $ defaultFreeNames !! 0) (RFree $ defaultFreeNames !! 1)
 
 tupleTypeCons	:: RType -> RType -> TExpression
 tupleTypeCons a b
 		= let 	sign	= tupleTypeConsSign' a b in
-			TCall (signTypes sign) tupleTypeConsSign
+			TCall (fst $ signType sign) tupleTypeConsSign
 
 
 buildTuple	:: [RType] -> [TExpression] -> TExpression
@@ -63,8 +63,8 @@ buildTuple ftps@(t:tps) (e:exps)
 		= let 	tail	= buildTuple tps exps	-- Tuple b (Tuble c)
 			resultT	= tupleTypes ftps in
 			-- (a, (b, c)) = Tuple a (b,c) = TApp (TApp cons a) (b,c)
-			TApplication ([resultT], [])
-				(TApplication ([RCurry t $ resultT], [])
+			TApplication resultT
+				(TApplication (RCurry t $ resultT)
 					(tupleTypeCons t resultT)
 					e)
 				tail
@@ -110,9 +110,9 @@ setTypeID	= (toFQN' "pietervdvn:Data:Collection.Set","Set")
 charType	= uncurry RNormal charTypeID
 charTypeID	= (charTypeFQN, "Char")
 charTypeFQN		= toFQN' "pietervdvn:Data:Data.Char"
-charTypeConstr	= TCall ([ RCurry natType charType],[]) $
-		     Signature charTypeFQN "Char" ([RCurry natType charType], [])
-charTypeConstr'	= TApplication ([charType], []) charTypeConstr
+charTypeConstr	= TCall (RCurry natType charType) $
+		     Signature charTypeFQN "Char" (RCurry natType charType,[])
+charTypeConstr'	= TApplication charType charTypeConstr
 
 
 
@@ -129,14 +129,14 @@ natTypeID'	= (natFQN, "Nat'")
 
 -- Zero Constructor for the natural type
 natTypeZero	:: TExpression
-natTypeZero	= TCall ([zeroType],[]) $ Signature natFQN "Zero" ([zeroType], [])
+natTypeZero	= TCall zeroType $ Signature natFQN "Zero" (zeroType, [])
 
 natTypeSucc	:: TExpression
-natTypeSucc	= TCall ([ RCurry natType natType'],[]) $
-			Signature natFQN "Succ" ([RCurry natType natType], [])
+natTypeSucc	= TCall (RCurry natType natType') $
+			Signature natFQN "Succ" (RCurry natType natType, [])
 
 natTypeSucc'	:: TExpression -> TExpression
-natTypeSucc'	= TApplication ([natType'], []) natTypeSucc
+natTypeSucc'	= TApplication natType' natTypeSucc
 
 intType		= uncurry RNormal intTypeID
 intTypeID	= (natFQN, "Int")
@@ -148,21 +148,24 @@ intTypeID'	= (natFQN, "Int'")
 floatType	= uncurry RNormal floatTypeID
 floatTypeID	= (toFQN' "pietervdvn:Data:Num.Float", "Float")
 
+maybeType	:: RType
 maybeType	= uncurry RNormal maybeTypeID
-maybeType' rt   = ([RApplied maybeType rt], [])
+
+maybeType'	:: RType -> CType
+maybeType' rt   = (RApplied maybeType rt, [])
 maybeTypeID	= (maybeTypeFQN, "Maybe")
 maybeTypeFQN	= toFQN' "pietervdvn:Data:Collection.Maybe"
 
 maybeTypeNothing rt
-		= TCall (maybeType' rt) $
+		= TCall (fst $ maybeType' rt) $
 			Signature maybeTypeFQN "Nothing" (maybeType' $ RFree $ head defaultFreeNames)
 maybeTypeJust rt
-        = TCall (maybeType' rt & first (|> RCurry rt)) $
+        = TCall (RCurry rt (maybeType' rt & fst)) $
             Signature maybeTypeFQN "Just" (maybeType' $ RFree $ head defaultFreeNames)
 
 maybeTypeJust'  :: RType -> TExpression -> TExpression
 maybeTypeJust' rt exp
-        = TApplication (maybeType' rt)
+        = TApplication (fst $ maybeType' rt)
                (maybeTypeJust rt) exp
 
 

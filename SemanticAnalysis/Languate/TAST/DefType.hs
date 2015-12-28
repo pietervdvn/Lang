@@ -48,11 +48,6 @@ newtype FullRTypeReq	= Reqs {unp :: RTypeReq}
 
 -- a type with constraints
 type CType		= (RType, RTypeReq)
-{- A type of a function with multiple 'tags', e.g. (+) : Nat -> Nat -> Nat & Comm Nat Nat
-	([Nat -> Nat -> Nat, Comm Nat Nat], [{-no reqs-}])
-	-}
-type CTypeUnion		= ([RType], RTypeReq)
-
 
 
 {- a signature for a single implementation.
@@ -61,10 +56,10 @@ All types (union + reqs) live withing the same context, thus a free type var is 
 data Signature		= Signature
 				{ signFQN	:: FQN	-- where the function is defined
 				, signName	:: Name	-- its name
-				, signTypes	:: CTypeUnion	-- all the types it obeys
+				, signType	:: CType	-- all the types it obeys
 				}
 	deriving (Eq, Ord)
 
-asSignature	:: (FQN, Name, CTypeUnion) -> Signature
+asSignature	:: (FQN, Name, CType) -> Signature
 asSignature (fqn, n, union)
 	= Signature fqn n union

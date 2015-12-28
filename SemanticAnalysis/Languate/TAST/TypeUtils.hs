@@ -115,9 +115,9 @@ dropCurry (RCurry arg rt)
 		= rt
 dropCurry t	= t
 
-dropCurry'	:: CTypeUnion -> CTypeUnion
-dropCurry' (tps, reqs)
-		= (tps |> dropCurry, reqs)
+dropCurry'	:: CType -> CType
+dropCurry' (tp, reqs)
+		= (tp & dropCurry, reqs)
 
 
 
@@ -219,11 +219,11 @@ subsReq dict reqs
 		(reqs |> first subsName) |+> onSecond (|+> subs dict')
 
 
-subsUnion	:: [(Name, Name)] -> CTypeUnion -> Exc CTypeUnion
-subsUnion sub (rtps, reqs)
-	= do	rtps'	<- rtps |+> subs (sub ||>> RFree)
+subsCType	:: [(Name, Name)] -> CType-> Exc CType
+subsCType sub (rTyp, reqs)
+	= do	rTyp'	<- rTyp & subs (sub ||>> RFree)
 		reqs'	<- subsReq sub reqs
-		return (rtps', reqs')
+		return (rTyp', reqs')
 
 ------------------ NORMALIZING ---------------
 
@@ -292,4 +292,4 @@ instance Show Signature where
 
 ssign	:: Signature -> String
 ssign sign
-	= show (signFQN sign) ++ "." ++ signName sign ++ ": " ++ show (signTypes sign)
+	= show (signFQN sign) ++ "." ++ signName sign ++ ": " ++ show (signType sign)
