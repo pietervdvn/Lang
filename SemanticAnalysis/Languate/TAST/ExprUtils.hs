@@ -12,20 +12,17 @@ Only use for pregenerated functions
 -}
 simpleApply	:: TExpression -> TExpression -> TExpression
 simpleApply func arg
-	= let	(tps, reqs)	= typeOf func
-		tp'	= (tps |> dropCurry, reqs)
-		in
-		TApplication tp' func arg
+	= TApplication (typeOf func & dropCurry) func arg
 
 instance Show TExpression where
 	show 	= showTE
 
 -- Typed Expression to string
 showTE	:: TExpression -> String
-showTE (TApplication (retTps, reqs) func arg)
+showTE (TApplication tp func arg)
 	= let	funcStr	= pars (show func)
 		argStr	= pars (show arg)
-		tpStr	= show retTps in
+		tpStr	= show tp in
 		funcStr ++ " " ++ argStr ++ " :"++tpStr
 showTE (TCall _ sign)
 	= signName sign
@@ -35,10 +32,10 @@ showTE (Tag t)
 	= "§"++show t
 
 
-typeOf		:: TExpression -> CTypeUnion
-typeOf (TCall typeInfo _)
-		= typeInfo
-typeOf (TApplication typeInfo _ _)
-		= typeInfo
-typeOf (TLocalCall _ t)
+typeOf		:: TExpression -> RType
+typeOf (TCall t _)
+		= t
+typeOf (TApplication t _ _)
+		= t
+typeOf (TLocalCall t _)
 		= t

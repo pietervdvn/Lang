@@ -33,8 +33,8 @@ typeExpr t r ls (Nat i)
 		rec |> natTypeSucc' & return
 typeExpr (ft, _) reqs ls (Call str)
  | str `M.member` ls
- 	= do	let (Just typeUnion)	= M.lookup str ls
- 		returns $ TLocalCall str (typeUnion, unp reqs)
+ 	= do	let (Just rtype)	= M.lookup str ls
+ 		returns $ TLocalCall str ([rtype], unp reqs)
  | otherwise
  	= do	let visib	= visibleFuncs ft
 		let available	= M.findWithDefault S.empty str visib
@@ -46,11 +46,13 @@ typeExpr (ft, _) reqs ls (Call str)
 			let signs	= available & S.toList |> fst
 			types	<- (zip signs signs |> first signTypes) |+> (onFirst $ subsUnion subAway)	:: Exc [(CTypeUnion, Signature)]
 			return (types |> uncurry TCall)
-
-
+typeExpr (ft, tt) reqs ls (Seq [exprs])
+	= todo
+typeExpr _ _ _ (Operator str)
+	= halt $ "BUG: the expression is not passed through the proper rewrites to remove operators and bring it in prefix form"
 
 typeExpr _ _ _ expr
-	=  do	err $ "TODO: Expr " ++ show expr
+	=  do	warn $ "TODO: Expr " ++ show expr
 		-- TODO
 		returns $ TLocalCall ("") ([],[])
 

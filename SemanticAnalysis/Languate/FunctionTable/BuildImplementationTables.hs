@@ -67,3 +67,15 @@ typeClause tables reqs args rt (Clause pats expr)
 			texprs	<- typeExpr tables fullReqs lscope $ normalize expr
 			assert (length texprs == 1) $ "Multiple implementations are possible"++indent ("\n"++(texprs |> show & unlines))
 			return $ TClause tpats $ head texprs
+
+rewriteClauseExprs	:: PrecedenceTable -> Clause -> Clause
+rewriteClauseExprs precT (Clause pats expr)
+	= let	expr'	= rewriteExpression precT expr
+		pats'	= pats |> rewritePatternExprs (rewriteExpression precT)
+		in
+		Clause pats' expr'
+
+-- removes useless comments and rewrites the expression into it's prefix form
+rewriteExpression	:: PrecedenceTable -> Expression -> Exc Expression
+rewriteExpression precT expr
+	= expr & removeExpNl & expr2prefExpr precT

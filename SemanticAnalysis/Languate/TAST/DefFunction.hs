@@ -21,12 +21,13 @@ import Data.Map
 A local scope keeps track of what variable has what type.
 It is build based on the pattern matching of the function, while typing the patterns.
 -}
-type LocalScope	= Map Name [RType]	-- Variable a is **all** of the given types. Requirements might apply, but will be known in context
+type LocalScope	= Map Name RType	-- Variable a is of the given type. Requirements might apply (and contain intersections), but will be known in context
 data TPattern	= TAssign Name
 		| TDeconstruct Signature [TPattern]
 		| TMulti [TPattern]
 		| TDontCare
 		| TEval TExpression	-- The value should be the same as the result of this expression
+		| TFail			-- Always fails. Usefull for dead clauses, see 'type pattern'
 	deriving (Show, Eq)
 
 data TClause		= TClause [TPattern] TExpression

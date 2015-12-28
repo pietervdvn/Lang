@@ -28,12 +28,12 @@ import Control.Monad
 tables: info about the context
 reqs: requirements on the types
 localscope: scope created by left patterns (e.g. 'a b $(==a+b)')
-Argument types; each argument might be an intersection of mutliple things
+Argument types. Each argument might be an intersection of mutliple things; this is saved within the
 Actual patterns
 -> (typed patterns, local scope (including previous scope), curried variables (start with _a))
 
 -}
-typePatterns	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [[RType]] -> [Pattern] -> Exc ([TPattern], LocalScope, [Name])
+typePatterns	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [RType] -> [Pattern] -> Exc ([TPattern], LocalScope, [Name])
 typePatterns tables reqs ls args pats
 		= inside ("In the typing of the pattern "++ (pats |> show & unwords & pars)++ " with expected types "++(args |> show & commas)) $
 			do	pats'		<- demultidontcare (length args) pats
@@ -45,24 +45,27 @@ typePatterns tables reqs ls args pats
 				(tPats, newScope)	<- zip args pats'' & foldM typePat ([], ls)
 				return (tPats, newScope, curried)
 
--- old scope is returned too
-typePattern	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [RType] -> Pattern -> Exc (TPattern, LocalScope)
+{- old scope is embedded within the new, returned scope
+	Patterns may never match, then a big fat N
+	The expected type might be an intersection. This can should expressed in the type requirements
+-}
+typePattern	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> RType -> Pattern -> Exc (TPattern, LocalScope)
 typePattern _ _ ls _ DontCare
 	= return (TDontCare, ls)
-typePattern _ _ ls rts (Assign n)
-	= do	ls'	<- safeUnion ls $ M.singleton n rts
+typePattern _ _ ls inTyp (Assign n)
+	= do	ls'	<- safeUnion ls $ M.singleton n inTyp
 		return (TAssign n, ls')
-typePattern tables reqs ls rts (Multi pats)
-	= do	let typePat (acc, scope) pat	= do	(pat', scope')	<- typePattern tables reqs scope rts pat
+typePattern tables reqs ls inTyp (Multi pats)
+	= do	let typePat (acc, scope) pat	= do	(pat', scope')	<- typePattern tables reqs scope inTyp pat
 							return (acc++[pat'], scope')
 		(tpats, scope)	<- foldM typePat ([], ls) pats
 		return (TMulti tpats, scope)
-typePattern tables@(ft, tt) rqs ls rts (Deconstruct n' pats)
+typePattern tables@(ft, tt) rqs ls inTyp (Deconstruct n' pats)
 	-- we search all function with given name and type (A -> b) or (A -> Maybe b) (where b might be a tuple)
 	= do	let n	= if isUpper $ head n' then "from"++n' else n'
 		_funcs	<- visibleFuncs ft & M.lookup n ? ("No function with the name "++n++" found")
 		let funcs	= S.toList _funcs
-		funcs'	<- funcs |> (fst &&& id)|+> onSecond (onFirst (deconstructorArgs tt rts)) |> L.filter (isJust . fst . snd)
+		funcs'	<- funcs |> (fst &&& id)|+> onSecond (onFirst (deconstructorArgs tt inTyp)) |> L.filter (isJust . fst . snd)
 				:: Exc [(Signature, (Maybe [[RType]], [FQN]))]
 		haltIf (L.null funcs') $ "No suitable deconstructor function found for "++show n++indent ("\n"++
 			(funcs |> fst |> show |> ("Tried "++) |> (++" but it didn't have a suitable type") & unlines))
@@ -74,8 +77,43 @@ typePattern tables@(ft, tt) rqs ls rts (Deconstruct n' pats)
 		assert (L.null curries) $ ("The destructor "++show n++" is not applied to enough arguments.")
 		return (TDeconstruct sign tpats, scope)
 typePattern tables rqs ls rts (Eval expr)
-	= do	texpr	<- typeExpr tables rqs ls expr
-		-- TODO
+	= do	texprs	<- typeExpr tables rqs ls expr
+		if L.null texprs then do
+			err $ "Could not type the 'same-as' pattern "++show expr
+			return (TFail, ls)
+		else do
+		{- typeExpr returns multiple, possible expressions. We only keep the one of which the type matches this type
+		   The expression should return a single value, which can be compared to the incoming type, in other words,
+			f	: X -> Y
+			$e	= Y
+
+			e	:: T
+
+		  Thus: T `subtypeOf` X
+		  	e.g.
+		  	f	: Nat -> ...
+		  	$Zero	= ...
+		  or	T `superTypeOf` X
+		  	e.g.
+		  	areSame	: Int -> Nat -> True
+		  	i $i	= True
+		  	_ _	= False
+
+		  So you could say some types shuold be in common. Even this is not true, as multiple implementations might be shared over multiple signatures
+		  e.g.
+		  (+)	: Nat' -> Nat' -> Nat'
+		  (+)	: Nat -> Nat -> Nat
+		  Zero Zero	= Zero
+		  (Succ i) ...	= Succ ...
+
+		  The first clause will never match for the type signature "Nat' -> Nat' -> Nat'".
+		  In this case, the clause is dead (for this typing - it might be usefull for other types).
+		  We return a 'TFail'; the totality checker will pick it up and warn for clauses that are never used
+		-}
+		let tps	= texprs |> (id &&& typeOf)
+		-- TODO:
+		-- we also check that the type that gets in, has Eq as super type (as we want to compare it)
+		err $ show texprs	-- TODO remove err
 		return (TDontCare, ls)
 typePattern _ _ ls rt p
 	= do	warn $ "TODO: unsupported pattern "++show p++ " with expected type "++show rt
@@ -84,27 +122,39 @@ typePattern _ _ ls rt p
 
 
 
+-- Returns wether or not the type of this expression can be used. Expected is an intersection of the expected value to end in the pattern
+isValidEvalType		:: (FunctionTable, Typetable) -> CTypeUnion -> [RType] -> Exc Bool
+isValidEvalType (ft, tt) (rets, reqs) expected
+	= do	let reqs'	= asConstraints reqs
+		-- first we check wether the return type is a subtype of the expected type, e.g. (Zero `elem` Nat) by binding
+		-- bind will assume the left is a subtype. We have a match if
+		rets	<- rets |> bind |+> allNeededConstraintsFor tt reqs'
+
+		return False -- TODO pickup
+
+
+
 -- it is a decons type if we take a single argument, and return a normal value, a tuple, or a maybe of a normal value/tuple
-deconstructorArgs	:: Typetable -> [RType] -> Signature -> Exc (Maybe [[RType]])
-deconstructorArgs tt originTypes sign
+deconstructorArgs	:: Typetable -> RType -> Signature -> Exc (Maybe [[RType]])
+deconstructorArgs tt originType sign
 	= do	(argTypess, rtTypes, reqs)	<- unpackArgs $ signTypes sign	:: Exc ([[RType]], [RType], RTypeReq)
 		if (length argTypess) /= 1 then return Nothing else do
 		let argTypes	= head argTypess
 		let reqs'	= asConstraints reqs
 		-- the originType will be passed into the function (as argType)
 		-- The originType might be *bigger* then the argTypes. If it's a non matching value, the pattern match will simply fail and move on
-		-- it however is problematic when not a single match can be made
+		-- It might even happen that the in type is totality incompatible. This can happen with implementation sharing. We simply return a fail then
 		-- TODO think thoroughly about it!
 
 		-- at this point, we only have to take a look at the output type(s)
 		-- Are we dealing with a Maybe? If yes, then all return types should bind on "Maybe a"
-		constrs	<- rtTypes |> bind (RApplied maybeType $ RFree "_decons") |> (:[])
-				|+> allNeededConstraints tt reqs'
+		constrs	<- rtTypes |> bind (RApplied maybeType $ RFree "_decons")
+				|+> allNeededConstraintsFor tt reqs'
 				|||>>> S.toList	:: Exc [Maybe [TypeConstraint]]
 					-- Returns the typeunion of what is in the maybe if this binding succeeded
 		let maybeArgs'	= unpackMaybeArgFromConstraints constrs	:: Maybe [RType]
 		let tupleArgs	= fromMaybe rtTypes maybeArgs'
-		-- TODO FIXME use actual binding! Use actual unions!
+		-- TODO FIXME use actual binding! Use actual intersections on the type!
 		let args	= head tupleArgs & tupledTypes
 		return $ Just (args |> (:[]))
 
@@ -120,10 +170,13 @@ unpackMaybeArgFromConstraints constraints
 			validConstr _	= Nothing
 
 
-
+{- we get a signature of a function, which is applied on a single argument, namely inTyp.
+	We thus bind this argument type onto the
+	-}
 unpackArgs	:: CTypeUnion -> Exc ([[RType]], [RType], RTypeReq)
 unpackArgs (tps, reqs)
-	= do	let curried	= tps |> curriedTypes	-- [ [arg0 -> arg1 -> rt ], [arg0' -> arg1' -> rt'], ... ]
+	= do	-- TODO fix
+		let curried	= tps |> curriedTypes	-- [ [arg0 -> arg1 -> rt ], [arg0' -> arg1' -> rt'], ... ]
 		-- TODO fix for cases as "Commutative a b" = "a -> a -> b"
 		assert (curried |> length & allSame) $ "Contradictory number of argument in the different number of types:" ++ indent  ("\n" ++ tps |> show & unlines)
 		let argsRetTypes	= transpose curried	-- [ [arg0, arg0', arg0''], [arg1, arg1',...], [rt, rt', ...] ]

@@ -1,4 +1,4 @@
-module Languate.TypeConstraint.Utils where
+module Languate.TypeConstraint.Utils (asConstraints, isConstraintMet, isConstraintMet', allNeededConstraints, allNeededConstraintsFor, bind) where
 
 import StdDef
 import Exceptions
@@ -15,7 +15,7 @@ import Data.Map as M
 import Data.Maybe
 import Control.Arrow
 
-
+-- small helper function
 asConstraints	:: RTypeReq -> Set TypeConstraint
 asConstraints reqs
 	= reqs |> first RFree & unmerge |> uncurry SubTypeConstr & S.fromList
@@ -164,10 +164,15 @@ neededConstraints tt met (Choose a b)
 			return $ Just $ [Choose (All $ fromJust a') (All $ fromJust b')]
 		else return $ firstJust a' b'
 
-{-Recursively build all needed constraints to meet all the wanted constraints -}
+{-Recursively build all needed constraints to meet all the wanted constraints, given the list of wanted type constraints -}
 allNeededConstraints	:: Typetable -> Set TypeConstraint -> [TypeConstraint] -> Exc (Maybe (Set TypeConstraint))
 allNeededConstraints tt met wanted
 	= _allNeededConstraints tt met S.empty wanted
+
+{-Same as allNeededConstraints, but wraps the argument into a list-}
+allNeededConstraintsFor	:: Typetable -> Set TypeConstraint -> TypeConstraint -> Exc (Maybe (Set TypeConstraint))
+allNeededConstraintsFor tt met wanted
+	= allNeededConstraints tt met [wanted]
 
 
 _allNeededConstraints	:: Typetable -> Set TypeConstraint -> Set TypeConstraint -> [TypeConstraint] -> Exc (Maybe (Set TypeConstraint))

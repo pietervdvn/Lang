@@ -26,7 +26,7 @@ unitType	= uncurry RNormal unitTypeID
 unitTypeID	= (unitTypeFQN,"Unit")
 unitTypeFQN	= toFQN' "pietervdvn:Data:Collection.Unit"
 unitTypeCons	:: TExpression
-unitTypeCons	= TCall ([unitType], []) $ Signature unitTypeFQN "Unit" ([unitType], [])
+unitTypeCons	= TCall unitType $ Signature unitTypeFQN "Unit" ([unitType],[])
 
 
 
