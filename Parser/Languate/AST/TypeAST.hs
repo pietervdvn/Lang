@@ -168,13 +168,13 @@ data SubDef	= SubDef Name Visible [Name] [Type] [TypeRequirement]
 -- ## Creating classes and instances
 
 -- Name: name of the new class; second Name: name of it in the functions; [(Name,Type)]: declarations
-data ClassDef	= ClassDef
+data CatDef	= CatDef
 			{ name		:: Name
 			, frees		:: [Name]
 			, classReqs	:: [TypeRequirement]
 			, subclassFrom	:: [Type]
 			, classlaws	:: [Law]
-			, decls		:: [(Name,[Type], [TypeRequirement])] }
+			, decls		:: [(Name, Type, [TypeRequirement])] }
 	deriving (Ord, Eq)
 
 -- Instance: (["Collection"],"Set") ["a"] ---is--- "Show" [("a","Show")]

@@ -26,19 +26,19 @@ See bnf for usage
 
 modName	= "Pt2CatDef"
 
-pt2catDef	:: ParseTree -> ([DocString (Name, Name)], ClassDef)
+pt2catDef	:: ParseTree -> ([DocString (Name, Name)], CatDef)
 pt2catDef	=  pt2a h t s convert . cleanAll ["nltab","nl"]
 
-convert		:: AST -> ([DocString (Name, Name)], ClassDef)
+convert		:: AST -> ([DocString (Name, Name)], CatDef)
 convert (Clss name frees supers reqs asts)
 		=  let 	(laws, declarations, docs)	= triage name asts
-			classDef	= ClassDef name frees reqs (supers >>= topLevelConj) laws $ injectTypeReq name declarations in
+			classDef	= CatDef name frees reqs (supers >>= topLevelConj) laws $ injectTypeReq name declarations in
 			(docs, classDef)
 convert ast	=  convErr modName ast
 
 
 -- injects the syntactic sugar that 'cat Abc\n\t abc -> abc' means '(abc:Abc)'
-injectTypeReq	:: Name -> [(Name, [Type], [TypeRequirement])] -> [(Name, [Type], [TypeRequirement])]
+injectTypeReq	:: Name -> [(Name, Type, [TypeRequirement])] -> [(Name, Type, [TypeRequirement])]
 injectTypeReq (n:nm) decls
 		= let	typeReq	= nub   [ (toLower n : nm, Normal [] $ n:nm)
 					, (map toLower (n:nm), Normal [] $ n:nm)]	in
@@ -50,11 +50,11 @@ data AST	= Clss Name [Name] [Type] [TypeRequirement] [AST]
 		| Ident Name
 		| Lw Law
 		| Comm Comment
-		| SubClassOf [Type] [TypeRequirement]
+		| SubCatOf [Type] [TypeRequirement]
 		| Decl (Name, Type, Visible, [TypeRequirement])
 		| FreeT [Name] [TypeRequirement]
 		| Type Type [TypeRequirement]
-		| ClassT	| SubClassT
+		| CatT	| SubCatT
 		| CommaT
 		| NlT
 	deriving (Show)
@@ -74,9 +74,9 @@ t "typeIdent" n
 t "globalIdent" n
 		=  Ident n
 t _ ('\n':_)	=  NlT
-t _ "cat"	=  ClassT
-t _ "category" = ClassT
-t "subTypeWords" _	= SubClassT
+t _ "cat"	=  CatT
+t _ "category" = CatT
+t "subTypeWords" _	= SubCatT
 t nm cont	=  tokenErr modName nm cont
 
 
@@ -85,31 +85,31 @@ s "categoryStm" [NlT, ast]
 		= ast
 s "categoryBody" asts
 		= Body asts
-s "subclass" (SubClassT:Type t reqs:tail)
-		= let SubClassOf ts reqs'	= s "subclass" tail in
-			SubClassOf (t:ts) (reqs++reqs')
+s "subclass" (SubCatT:Type t reqs:tail)
+		= let SubCatOf ts reqs'	= s "subclass" tail in
+			SubCatOf (t:ts) (reqs++reqs')
 s "subclass" [CommaT, Type t reqs]
-		= SubClassOf [t] reqs
-s "subclass" []	= SubClassOf [] []
+		= SubCatOf [t] reqs
+s "subclass" []	= SubCatOf [] []
 s _ [ast]	= ast
-s _ [ClassT, Ident name, FreeT freeNames reqs, SubClassOf subs reqs', Body asts]
+s _ [CatT, Ident name, FreeT freeNames reqs, SubCatOf subs reqs', Body asts]
 		= Clss name freeNames subs (reqs++reqs') asts
-s _ [ClassT, Ident name, FreeT names reqs,  Body asts]
+s _ [CatT, Ident name, FreeT names reqs,  Body asts]
 		= Clss name names [] reqs asts
-s _ [ClassT, Ident name, SubClassOf subs reqs, Body asts]
+s _ [CatT, Ident name, SubCatOf subs reqs, Body asts]
 		= Clss name [] subs reqs asts
-s _ [ClassT, Ident name, Body asts]
+s _ [CatT, Ident name, Body asts]
 		= Clss name [] [] [] asts
 s nm asts	= seqErr modName nm asts
 
 
-triage		:: Name -> [AST] -> ([Law], [(Name, [Type], [TypeRequirement])], [DocString (Name, Name)])
+triage		:: Name -> [AST] -> ([Law], [(Name, Type, [TypeRequirement])], [DocString (Name, Name)])
 triage _ []
 		= ([], [], [])
 triage catName 	(Lw law:tail)
 		= first3 (law:) $ triage catName tail
 triage catName (Decl (n,t,v,reqs):tail)
-		= second3 ((n,topLevelConj t,reqs):) $ triage catName tail
+		= second3 ((n, t,reqs):) $ triage catName tail
 triage catName (Comm c:tail)
 		= let 	(lws, sign, oldDocs)	= triage catName tail
 			newDocs	= buildDocsFor catName c (map fst3 sign) oldDocs in

@@ -43,7 +43,7 @@ convert (Docs docstrs ast)
 convert (SubTpDf def)
 		= [SubDefStm def]
 convert (CatDf def)
-		= [ClassDefStm def]
+		= [CatDefStm def]
 convert (Annot annot)
 		= [AnnotationStm annot]
 convert (PrecAnn prec)
@@ -59,7 +59,7 @@ data AST	= Func Function
 		| Comms [Comment] AST
 		| Comm [Comment]
 		| SubTpDf SubDef
-		| CatDf ClassDef
+		| CatDf CatDef
 		| Annot Annotation
 		| PrecAnn PrecedenceAnnot
 		| InstanceAST Instance

@@ -1,4 +1,4 @@
-module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav, normalize, topLevelConj) where
+module Languate.AST.TypeASTUtils (traverse, showTypeReq, isOperator, isExpNl, setVisibility, usedTypes, freesIn, trav, normalize, topLevelConj, removeExpNl) where
 
 {--
 This module implements utilities for type asts
@@ -198,9 +198,9 @@ instance Show PrecRelation where
 	show (PrecLT o1 o2)	= "(" ++ o1 ++ ") < (" ++ o2 ++ ")"
 
 
-instance Show ClassDef where
-	show (ClassDef n frees reqs subC laws signs)
-		= "class "++n ++" "++ show frees ++" in "++show subC++" "++ concatMap showTypeReq reqs ++ show laws++show signs
+instance Show CatDef where
+	show (CatDef n frees reqs subC laws signs)
+		= "cat "++n ++" "++ show frees ++" in "++show subC++" "++ concatMap showTypeReq reqs ++ show laws++show signs
 
 instance Show SubDef where
 	show (SubDef n priv frees t reqs)

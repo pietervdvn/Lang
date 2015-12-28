@@ -154,7 +154,7 @@ declaresType nm (ADTDefStm (ADTDef nm' _ _ _ _))
 		= nm == nm'
 declaresType nm (SubDefStm (SubDef nm' _ _ _ _))
 		= nm == nm'
-declaresType nm (ClassDefStm cd)
+declaresType nm (CatDefStm cd)
 		= nm == name cd
 declaresType _ _
 		= False

@@ -35,7 +35,7 @@ data Statement	= FunctionStm 	Function
 		| LawStm	Law
 		| ADTDefStm	ADTDef
 		| SubDefStm	SubDef
-		| ClassDefStm	ClassDef
+		| CatDefStm	CatDef
 		| InstanceStm 	Instance
 		| Comments [Comment]
 		| DocStringStm [DocString (Name, Name)]	-- a docstringstatement (in the declaration from "Type"), about "function"
