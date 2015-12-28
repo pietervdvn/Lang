@@ -116,9 +116,16 @@ isExpNl			:: Expression -> Bool
 isExpNl (ExpNl _)	= True
 isExpNl _		= False
 
+
+removeExpNl		:: Expression -> Expression
+removeExpNl (ExpNl _)	= Seq []
+removeExpNl (Seq exprs)	= exprs |> removeExpNl & Seq
+removeExpNl (Tuple exprs)
+			= exprs |> removeExpNl & Tuple
+removeExpNl expr	= expr
+
 instance Normalizable Expression where
 	normalize	= ne
-
 
 ne		:: Expression -> Expression
 ne (Seq [e])	= ne e
@@ -136,7 +143,7 @@ se		:: Expression -> String
 se (Nat i)	= "Nat" ++ show i
 se (Flt flt)	= "Flt" ++ show flt
 se (Chr c)	= "Chr" ++ show c
-se (Seq expr)	= "("++unwords (map show expr) ++ ")"
+se (Seq exprs)	= "("++unwords (map show exprs) ++ ")"
 se (Tuple exprs)= "("++intercalate ", " (map show exprs) ++ ")"
 se (BuiltIn str typeInfo)
 		= '#':str++" "++show typeInfo

@@ -1,4 +1,4 @@
-module Languate.AST.FunctionASTUtils (show, isNl, remNl, addClause, addDecl) where
+module Languate.AST.FunctionASTUtils (show, isNl, remNl, addClause, addDecl, rewritePatternExprs) where
 
 {--
 
@@ -44,6 +44,19 @@ sp (Eval expr)	= '$':show expr
 sp DontCare	= "_"
 sp MultiDontCare
 		= "*"
+
+
+rewritePatternExprs	:: (Expression -> Expression) -> Pattern -> Pattern
+rewritePatternExprs f (Let nm expr)
+	= Let nm $ f expr
+rewritePatternExprs f (Eval expr)
+	= Eval $ f expr
+rewritePatternExprs f (Deconstruct name pats)
+	= Deconstruct name (pats |> rewritePatternExprs f)
+rewritePatternExprs f (Multi pats)
+	= pats |> rewritePatternExprs f & Multi
+rewritePatternExprs _ pat
+	= pat
 
 instance Normalizable Pattern where
 	normalize	= np
