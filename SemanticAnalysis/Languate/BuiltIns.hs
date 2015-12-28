@@ -26,6 +26,7 @@ maybeType'	= Applied (Normal ["Collection","Maybe"] "Maybe")
 natTypeUR	= Normal ["Data","Nat"] "Nat"
 
 
+{- TODO remove these if they turn out not to be used!
 
 -- Special function for constructing ADTS
 construct	:: Int -> Int -> (Type, [TypeRequirement]) -> Clause
@@ -53,14 +54,17 @@ constructTCall (rt, reqs) i
 	= let	frees	= freesInRT rt ++ (reqs >>= freesInReq)
 		argTps	= defaultFreeNames & filter (not . (`elem` frees)) & take i
 		typ	= uncurriedTypes $ natType:(argTps |> RFree)++[rt] in
-		TCall ([typ], reqs) $ Signature builtInFQN "construct" ([typ], reqs)
+		TCall typ $ Signature builtInFQN "construct" (typ, reqs)
 
 destructTCall	:: (RType, RTypeReq) -> TExpression
 destructTCall (RCurry value result,reqs)
 		= let typ	= RCurry natType $ RCurry value result in
- 			TCall ([typ], reqs) $ Signature builtInFQN "deconstruct" ([typ], reqs)
+ 			TCall (typ, reqs) $ Signature builtInFQN "deconstruct" ([typ], reqs)
 
 isTCall		:: (RType, RTypeReq) -> TExpression
 isTCall (value, reqs)
 		= let typ	= RCurry natType $ RCurry value boolType in
 			TCall ([typ], reqs) $ Signature builtInFQN "is" ([typ], reqs)
+
+
+-}

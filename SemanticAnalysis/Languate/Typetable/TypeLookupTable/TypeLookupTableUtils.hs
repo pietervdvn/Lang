@@ -97,15 +97,9 @@ resolveSignature
 		:: TypeLookupTable -> FQN -> (Name, Type, [TypeRequirement])
 				-> Exc Signature
 resolveSignature tlt fqn (nm, tp, reqs)
-	= resolveSignature' tlt fqn (nm, topLevelConj tp, reqs)
-
-resolveSignature'	:: TypeLookupTable -> FQN -> (Name, [Type], [TypeRequirement])
-				-> Exc Signature
-resolveSignature' tlt fqn (nm, tps, reqs)
-	= do	rtps	<- tps |+> resolveType tlt
-		reqs	<- resolveReqs tlt reqs
-		let ctypeUn	= (rtps, reqs)	:: CTypeUnion
-		return $ Signature fqn nm ctypeUn
+	= do	rtp	<- resolveType tlt tp
+		reqs'	<- resolveReqs tlt reqs
+		return $ Signature fqn nm (rtp, reqs')
 
 
 

@@ -54,14 +54,14 @@ definedFuncSign m tlt fqn (SubDefStm (SubDef nm vis frees tps reqs))
 		let extraReq	= if singleType then [] else [(free, rtps)]
 		let funcT	= RCurry startT defType'
 		let funcReqs	= rreqs ++ extraReq
-		let sign	= Signature fqn ("as"++nm) ([funcT], funcReqs)
+		let sign	= Signature fqn ("as"++nm) (funcT, funcReqs)
 		return [FI sign Private True Nothing Nothing] -- TODO add implementation of "asSubType"
 
-definedFuncSign m tlt fqn (ClassDefStm cd)
+definedFuncSign m tlt fqn (CatDefStm cd)
 	= do	defType	<- resolveType tlt (Normal [] $ name cd)
 		let defFree	= take (length $ frees cd) $ defaultFreeNames
 		let defType'	= applyTypeArgsFree defType defFree
-		signs	<- decls cd |+> resolveSignature' tlt fqn
+		signs	<- decls cd |+> resolveSignature tlt fqn
 		repeat (Public, False, Just defType') & zip signs
 			|> (\(sign, (fiVis, fiGen, fiAbs)) -> FI sign fiVis fiGen fiAbs Nothing)
 			& return

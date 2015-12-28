@@ -64,9 +64,11 @@ typePattern tables@(ft, tt) rqs ls inTyp (Deconstruct n' pats)
 	-- we search all function with given name and type (A -> b) or (A -> Maybe b) (where b might be a tuple)
 	= do	let n	= if isUpper $ head n' then "from"++n' else n'
 		_funcs	<- visibleFuncs ft & M.lookup n ? ("No function with the name "++n++" found")
-		let funcs	= S.toList _funcs
-		funcs'	<- funcs |> (fst &&& id)|+> onSecond (onFirst (deconstructorArgs tt inTyp)) |> L.filter (isJust . fst . snd)
-				:: Exc [(Signature, (Maybe [[RType]], [FQN]))]
+		let funcs	= S.toList _funcs	:: [(Signature, [FQN])]
+		funcs'	<- funcs |> (fst &&& id)	-- [(Signature, (Signature, [FQN]))]
+				|+> onSecond (onFirst (deconstructorArgs tt inTyp))
+				|> L.filter (isJust . fst . snd)
+				:: Exc [(Signature, (Maybe [RType], [FQN]))]
 		haltIf (L.null funcs') $ "No suitable deconstructor function found for "++show n++indent ("\n"++
 			(funcs |> fst |> show |> ("Tried "++) |> (++" but it didn't have a suitable type") & unlines))
 		assert (length funcs' == 1) $ "Multiple deconstructor functions found for "++show n++indent ("\n"++
@@ -123,23 +125,20 @@ typePattern _ _ ls rt p
 
 
 -- Returns wether or not the type of this expression can be used. Expected is an intersection of the expected value to end in the pattern
-isValidEvalType		:: (FunctionTable, Typetable) -> CTypeUnion -> [RType] -> Exc Bool
-isValidEvalType (ft, tt) (rets, reqs) expected
+isValidEvalType		:: (FunctionTable, Typetable) -> CType -> [RType] -> Exc Bool
+isValidEvalType (ft, tt) (ret, reqs) expected
 	= do	let reqs'	= asConstraints reqs
 		-- first we check wether the return type is a subtype of the expected type, e.g. (Zero `elem` Nat) by binding
 		-- bind will assume the left is a subtype. We have a match if
-		rets	<- rets |> bind |+> allNeededConstraintsFor tt reqs'
 
 		return False -- TODO pickup
 
 
 
 -- it is a decons type if we take a single argument, and return a normal value, a tuple, or a maybe of a normal value/tuple
-deconstructorArgs	:: Typetable -> RType -> Signature -> Exc (Maybe [[RType]])
+deconstructorArgs	:: Typetable -> RType -> Signature -> Exc (Maybe [RType])
 deconstructorArgs tt originType sign
-	= do	(argTypess, rtTypes, reqs)	<- unpackArgs $ signTypes sign	:: Exc ([[RType]], [RType], RTypeReq)
-		if (length argTypess) /= 1 then return Nothing else do
-		let argTypes	= head argTypess
+	= do	(argTypes, rtType, reqs)	<- unpackArgs $ signType sign	:: Exc ([RType], RType, RTypeReq)
 		let reqs'	= asConstraints reqs
 		-- the originType will be passed into the function (as argType)
 		-- The originType might be *bigger* then the argTypes. If it's a non matching value, the pattern match will simply fail and move on
@@ -148,41 +147,37 @@ deconstructorArgs tt originType sign
 
 		-- at this point, we only have to take a look at the output type(s)
 		-- Are we dealing with a Maybe? If yes, then all return types should bind on "Maybe a"
-		constrs	<- rtTypes |> bind (RApplied maybeType $ RFree "_decons")
-				|+> allNeededConstraintsFor tt reqs'
-				|||>>> S.toList	:: Exc [Maybe [TypeConstraint]]
+		constrs	<- bind (RApplied maybeType $ RFree "_decons") rtType
+				& allNeededConstraintsFor tt reqs'
+				||>> S.toList	:: Exc (Maybe [TypeConstraint])
 					-- Returns the typeunion of what is in the maybe if this binding succeeded
-		let maybeArgs'	= unpackMaybeArgFromConstraints constrs	:: Maybe [RType]
-		let tupleArgs	= fromMaybe rtTypes maybeArgs'
+		let maybeArgs'	= unpackMaybeArgFromConstraints constrs	:: Maybe RType
+		let tupleArgs	= fromMaybe rtType maybeArgs'
 		-- TODO FIXME use actual binding! Use actual intersections on the type!
-		let args	= head tupleArgs & tupledTypes
-		return $ Just (args |> (:[]))
+		let args	= tupleArgs & tupledTypes
+		return $ Just args
 
 
-unpackMaybeArgFromConstraints	:: [Maybe [TypeConstraint]] -> Maybe [RType]
+unpackMaybeArgFromConstraints	:: Maybe [TypeConstraint] -> Maybe RType
 unpackMaybeArgFromConstraints constraints
- | not $ all isJust constraints	= Nothing
- | otherwise
-	= do	-- we assume the only left constraint is [SubTypeConstr (RFree "_decons") _actual tuple value_ ]
+	= do	constraints'	<- constraints
+		-- we assume the only left constraint is [SubTypeConstr (RFree "_decons") _actual tuple value_ ]
 		-- if any other constraint pops up, we can't bind and it's not a maybe type after all!
-		constraints & catMaybes |+> validConstr
-		where	validConstr [SubTypeConstr (RFree "_decons") tuplVal]	= Just tuplVal
-			validConstr _	= Nothing
+		case constraints' of
+			([SubTypeConstr (RFree "_decons") tuplVal])	-> return tuplVal
+			_	-> Nothing
 
 
 {- we get a signature of a function, which is applied on a single argument, namely inTyp.
 	We thus bind this argument type onto the
 	-}
-unpackArgs	:: CTypeUnion -> Exc ([[RType]], [RType], RTypeReq)
-unpackArgs (tps, reqs)
-	= do	-- TODO fix
-		let curried	= tps |> curriedTypes	-- [ [arg0 -> arg1 -> rt ], [arg0' -> arg1' -> rt'], ... ]
-		-- TODO fix for cases as "Commutative a b" = "a -> a -> b"
-		assert (curried |> length & allSame) $ "Contradictory number of argument in the different number of types:" ++ indent  ("\n" ++ tps |> show & unlines)
-		let argsRetTypes	= transpose curried	-- [ [arg0, arg0', arg0''], [arg1, arg1',...], [rt, rt', ...] ]
-		let argTypes	= init argsRetTypes
-		let rtTypes	= last argsRetTypes
-		return (argTypes, rtTypes, reqs)
+unpackArgs	:: CType -> Exc ([RType], RType, RTypeReq)
+unpackArgs (tp, reqs)
+	= do	-- TODO FIXME tp should be bound against (RCurry _a _b). If this succeeds, we now the first argument and have already a single type
+		let curried	= curriedTypes tp
+		let argTypes	= init curried
+		let rtType	= last curried
+		return (argTypes, rtType, reqs)
 
 -------------------- UTILS ---------------------
 

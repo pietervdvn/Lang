@@ -51,7 +51,7 @@ isTypeRelated (ADTDefStm{})
 		= True
 isTypeRelated (SubDefStm{})
 		= True
-isTypeRelated (ClassDefStm{})
+isTypeRelated (CatDefStm{})
 		= True
 isTypeRelated (InstanceStm{})
 		= True
@@ -64,8 +64,8 @@ declaredType (origin, ADTDefStm (ADTDef name frees reqs sums _))
 			Just (origin, name, frees, reqs, constructors)
 declaredType (origin, SubDefStm (SubDef name _ frees _ reqs))
 		= Just (origin, name, frees, reqs, noConstructors)
-declaredType (origin, ClassDefStm classDef)
-		= Just (origin, name classDef, frees classDef, classReqs classDef, noConstructors)
+declaredType (origin, CatDefStm catDef)
+		= Just (origin, name catDef, frees catDef, classReqs catDef, noConstructors)
 declaredType _	= Nothing
 
 
@@ -116,7 +116,7 @@ _declaredSuperType tlt (SubDefStm (SubDef name _ frees supers reqs))
 		supers'	<- resolveTypes tlt (supers >>= topLevelConj)
 		reqs'	<- resolveReqs tlt reqs |> reqAsConstraint
 		supers' |> (\super -> (typ, frees, super, reqs')) & return
-_declaredSuperType tlt (ClassDefStm cd)
+_declaredSuperType tlt (CatDefStm cd)
 	= do	typ	<- ([], AST.name cd) & resolveTypePath tlt
 		supers	<- (subclassFrom cd >>= topLevelConj) & resolveTypes tlt
 		reqs	<- classReqs cd & resolveReqs tlt |> reqAsConstraint
@@ -145,7 +145,7 @@ For CATEGORY- and TYPE-DECLARATIONS only, as the constraints imposed here are co
 
 -}
 constraintAdoptions	:: Map FQN TypeLookupTable -> TypeSTM -> Exc [(RType, RType)]
-constraintAdoptions tlts stm@(_, ClassDefStm _)
+constraintAdoptions tlts stm@(_, CatDefStm _)
 	-- ""cat X a:Y a"" : X (rt) only exists if the constraints on super are met
 	= declaredSuperType tlts stm ||>> (\(rt, frees, super, constraints) -> (applyTypeArgsFree rt frees, super))
 constraintAdoptions tlts stm@(origin, ADTDefStm adtDef@(ADTDef _ _ _ _ adopts))

@@ -20,6 +20,8 @@ import Languate.Typing.TypeExpression
 import Languate.Typing.TypePattern
 import Languate.Typetable
 
+import Languate.PrecedenceTable
+
 import Data.Map as M
 import Data.Set as S
 import Data.List as L
@@ -55,12 +57,12 @@ typeClauses tables sign clauses
 		= inside ("While typing the function "++show sign) $
 		  do	-- the signature contains a typeUNION, what means it should meet **all** of the given types.
 			-- TODO for now, we assume all these types have the same number of args
-			(argTypes, rtTypes, reqs)	<- unpackArgs $ signTypes sign
+			(argTypes, rtTypes, reqs)	<- unpackArgs $ signType sign
 			clauses |+> typeClause tables reqs argTypes rtTypes
 
-typeClause	:: (FunctionTable, Typetable) -> RTypeReq -> [[RType]] -> [RType] -> Clause -> Exc TClause
+typeClause	:: (FunctionTable, Typetable) -> RTypeReq -> [RType] -> RType -> Clause -> Exc TClause
 typeClause tables reqs args rt (Clause pats expr)
-		= do	let usedFrees	= (rt ++ concat args) >>= freesInRT
+		= do	let usedFrees	= (rt:args) >>= freesInRT
 			let usedFrees'	= usedFrees & L.filter (`L.notElem` (reqs |> fst))
 			let fullReqs	= Reqs $ (reqs ++ (zip usedFrees $ repeat []))
 			(tpats, lscope, curries)	<- typePatterns tables fullReqs M.empty args pats
@@ -72,10 +74,9 @@ rewriteClauseExprs	:: PrecedenceTable -> Clause -> Clause
 rewriteClauseExprs precT (Clause pats expr)
 	= let	expr'	= rewriteExpression precT expr
 		pats'	= pats |> rewritePatternExprs (rewriteExpression precT)
-		in
-		Clause pats' expr'
+		in Clause pats' expr'
 
 -- removes useless comments and rewrites the expression into it's prefix form
-rewriteExpression	:: PrecedenceTable -> Expression -> Exc Expression
+rewriteExpression	:: PrecedenceTable -> Expression -> Expression
 rewriteExpression precT expr
 	= expr & removeExpNl & expr2prefExpr precT

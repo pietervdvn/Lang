@@ -69,7 +69,7 @@ declaredOps (FunctionStm f)
 declaredOps (ADTDefStm (ADTDef _ _ _ sums _))	-- fields might be operators too!
 	= let   maybeFields	= (sums >>= (\(ADTSum _ _ fields) -> fields)) |> fst in
 		catMaybes maybeFields
-declaredOps (ClassDefStm cd)
+declaredOps (CatDefStm cd)
 	= decls cd |> (\(n,_,_) -> n)
 declaredOps _	= []
 

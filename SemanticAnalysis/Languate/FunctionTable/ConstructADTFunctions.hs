@@ -59,11 +59,11 @@ buildConstructorSign	:: FQN -> Name -> RTypeReq
 				-> [RType] -> RType -> Int
 				-> (Signature, [TClause])
 buildConstructorSign fqn n reqs args defType tag
-	= let   sign	= Signature fqn n ([uncurriedTypes (args++[defType])],reqs)
-		vars	= args |> (\a -> ([a],[])) & zip defaultFreeNames
-		pats	= vars |> fst |> TAssign
-		baseExpr= TApplication (signTypes sign)
-				(TCall (signTypes sign) (sign {signName= "#construct"}))
+	= let   sign	= Signature fqn n (uncurriedTypes (args++[defType]),reqs)
+		vars	= zip args defaultFreeNames
+		pats	= vars |> snd |> TAssign
+		baseExpr= TApplication (fst $ signType sign)
+				(TCall (fst $ signType sign) (sign {signName= "#construct"}))
 				(Tag tag)
 		expr	= vars |> uncurry TLocalCall & foldl simpleApply baseExpr
 		in (sign, [TClause pats expr])
@@ -73,7 +73,7 @@ buildConstructorSign fqn n reqs args defType tag
 
 buildIsConstrSign	:: FQN -> Name -> RTypeReq -> RType -> Int -> (Signature, [Clause])
 buildIsConstrSign fqn n reqs defType nArgs
-	= let	sign	= Signature fqn ("is"++n) ([RCurry defType boolType],reqs)
+	= let	sign	= Signature fqn ("is"++n) (RCurry defType boolType,reqs)
 		matchClause	= Clause [Deconstruct n (replicate nArgs DontCare)] (Call "True")
 		failClause	= Clause [DontCare] (Call "False")
 		in
@@ -85,13 +85,13 @@ buildDeconsSign fqn n reqs onlyCons tag defType args
 		-- if we have a unique constructor, we don't need to wrap it in a maybe
 		wrapper		= if onlyCons then id else RApplied maybeType
 		retTyp' 	= wrapper retTyp
-		sign		= Signature fqn ("from"++n) ([RCurry defType (wrapper retTyp)] , reqs)
+		sign		= Signature fqn ("from"++n) (RCurry defType (wrapper retTyp) , reqs)
 		failClause	= TClause [TDontCare] $ maybeTypeNothing retTyp'   -- only exists if multiple constructors
 
 		deconsSign  	= sign {signName = "#deconstruct"}
 		tagCheck    	= TEval $ Tag tag
-		vars        	= args |> (\a -> ([a], [])) & zip defaultFreeNames
-		pats		= vars |> fst |> TAssign
+		vars        	= zip args defaultFreeNames
+		pats		= vars |> snd |> TAssign
 		tupleResult	= buildTuple args (vars |> uncurry TLocalCall)
        		successClause   = TClause [TDeconstruct deconsSign (tagCheck : pats)]
        					tupleResult
@@ -184,7 +184,7 @@ buildFieldFunctionsSign	:: FQN -> Int -> RType -> [Name] -> LockedFrees -> RType
 				Exc [(Signature, [Clause])]
 buildFieldFunctionsSign fqn nrOfConstructors defType frees lockedFrees reqs fieldName consIndexes fieldType
 	= do 	let fullType	= applyTypeArgs defType (frees |> RFree)
-		let mkSign n tp	= Signature fqn n ([tp], reqs)	:: Signature
+		let mkSign n tp	= Signature fqn n (tp, reqs)	:: Signature
 		let (conss, indexes)	= unzip consIndexes
 
 		let mightFail	= nrOfConstructors /= length conss

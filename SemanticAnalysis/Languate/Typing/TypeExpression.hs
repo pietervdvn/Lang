@@ -34,7 +34,7 @@ typeExpr t r ls (Nat i)
 typeExpr (ft, _) reqs ls (Call str)
  | str `M.member` ls
  	= do	let (Just rtype)	= M.lookup str ls
- 		returns $ TLocalCall str ([rtype], unp reqs)
+ 		returns $ TLocalCall rtype str
  | otherwise
  	= do	let visib	= visibleFuncs ft
 		let available	= M.findWithDefault S.empty str visib
@@ -42,9 +42,10 @@ typeExpr (ft, _) reqs ls (Call str)
 			err $ show str ++ " is not known here.\n\t(Just like the study schedule of Iaason: 'Ik maak ook geen schemas' -- Iasoon)"
 			return []
 		else do
-			let subAway	= buildSafeSubs reqs
+			let subAway	= buildSafeSubs reqs ||>> RFree
 			let signs	= available & S.toList |> fst
-			types	<- (zip signs signs |> first signTypes) |+> (onFirst $ subsUnion subAway)	:: Exc [(CTypeUnion, Signature)]
+			types	<- (zip signs signs |> first (fst . signType))
+					|+> (onFirst $ subs subAway)	:: Exc [(RType, Signature)]
 			return (types |> uncurry TCall)
 typeExpr (ft, tt) reqs ls (Seq [exprs])
 	= todo
@@ -54,7 +55,7 @@ typeExpr _ _ _ (Operator str)
 typeExpr _ _ _ expr
 	=  do	warn $ "TODO: Expr " ++ show expr
 		-- TODO
-		returns $ TLocalCall ("") ([],[])
+		return []
 
 
 returns	:: Monad m => a -> m [a]

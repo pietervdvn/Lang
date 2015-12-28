@@ -162,12 +162,11 @@ checkSimpleKind	:: Typetable ->  (Signature, Coor) -> Check
 checkSimpleKind tt (sign, (line, _))
 	= inside ("While checking kinds of function types") $
 	  inside ("In the function declaration of "++show sign++", on line "++show line) $
-	  do	let (rtps, reqs)	= signTypes sign
-	  	let unusedFrees	= (rtps >>= freesInRT) L.\\ (reqs |> fst)
+	  do	let (rt, reqs)	= signType sign
+	  	let unusedFrees	= (rt & freesInRT) L.\\ (reqs |> fst)
 	  	let unusedReqs	= zip unusedFrees (repeat [anyType])
 	  	reqKinds	<- kindOfReqs tt (reqs++unusedReqs)
-	  	kinds		<-rtps |+> (try (\ e -> err e >> return Kind) . kindOf tt reqKinds)
-	  	let faulty	= zip rtps kinds & L.filter ((/=) Kind . snd)
-	  				|> (\(tp, kind) -> "Expecting "++plural (numberOfKindArgs kind) "more type argument"++" to "++
-	  					show tp++" :: "++show kind)	:: [String]
-	  	assert (L.null faulty) $ "Function types should have a normal kind:" ++indent ("\n"++unlines faulty)
+	  	kind		<- try (\ e -> err e >> return Kind) (kindOf tt reqKinds rt)
+	  	assert (Kind == kind) $ "Function types should have a normal kind:" ++ indent (
+	  		"\nExpecting "++plural (numberOfKindArgs kind) "more type argument" ++" to "++
+	  					show rt++" :: "++show kind)

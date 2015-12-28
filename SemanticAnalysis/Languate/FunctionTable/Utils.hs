@@ -19,7 +19,7 @@ functiontable2doc path fqn ft
 	  -- about the declared functions
 		defRow (sign, (visible, gen, abstract))
 			= [code $ signName sign
-				, signTypes sign & show & code
+				, signType sign & show & code
 				, Base $ if isPublic visible then "" else "Private"
 				, Base $ if gen then "Generated" else ""
 				, abstract |> show & fromMaybe "" & Base ]
@@ -33,7 +33,7 @@ functiontable2doc path fqn ft
 				importedBy |> show |> code & parags]
 		importT	= table ["Function name","Function type", "Defined in", "Imported from (in this module)"]
 				(ft & visibleFuncs |> S.toList & M.toList
-					& unmerge |> (\(nm, (sign, imports)) -> (nm, signTypes sign, signFQN sign, imports))
+					& unmerge |> (\(nm, (sign, imports)) -> (nm, signType sign, signFQN sign, imports))
 					|> impRow)
 		impDoc	= doc (path fqn ++ "Visible function signatures of "++show fqn) "What functions are visible in this module?"
 				importT
@@ -41,8 +41,8 @@ functiontable2doc path fqn ft
 	  -- about the implementations of locally declared functions
 	  	implRow (sign, imp)
 	  		= [code $ signName sign
-	  		  , signTypes sign & fst |> show |> code & parags
-	  		  , signTypes sign & snd & show & code
+	  		  , signType sign & fst & show & code
+	  		  , signType sign & snd & show & code
 	  		  , imp |> show |> code & parags
 	  		  ]
 	  	implT	= table ["Function name","Types","Type constraints","Implementations"] (ft & implementations & M.toList |> implRow)

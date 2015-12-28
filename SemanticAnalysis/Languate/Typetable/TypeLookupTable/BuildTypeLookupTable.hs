@@ -193,9 +193,9 @@ checkDouble t coors
 -- UTILS --
 -----------
 
-allTypes	:: (Name, [Type], [TypeRequirement]) -> [Type]
+allTypes	:: (Name, Type, [TypeRequirement]) -> [Type]
 allTypes (_,tps,treqs)
-		= tps ++ map snd treqs
+		= tps : map snd treqs
 
 -- graph operator
 addAll		:: (Ord k, Ord v) => [(k,v)] -> Map k (Set v) -> Map k (Set v)
