@@ -16,6 +16,7 @@ import Languate.FunctionTable.Def
 import Languate.FunctionTable.Utils
 import Languate.FunctionTable.ModuleTraverser
 import Languate.FunctionTable.BuildImplementationTables
+import Languate.PrecedenceTable
 
 import qualified Graphs.ExportCalculator as EC
 
@@ -42,11 +43,12 @@ How are the function tables built?
 type Signaturetable	= Map FQN (Visible, Generated, Abstract)
 
 buildFunctionTables	:: Package
+				-> PrecedenceTable
 				-> Map FQN TypeLookupTable
 				-> Map FQN Typetable
 				-> Map FQN Module
 				-> Exc (Map FQN FunctionTable)
-buildFunctionTables p tlts tts modules
+buildFunctionTables p precT tlts tts modules
  	= do	-- the basetables only contain declared function signatures
  		basetables'	<- dictMapM (buildLocalFunctionTable tlts tts) modules
  					:: Exc (Map FQN (FunctionTable, Map Signature [Clause]))
@@ -61,7 +63,7 @@ buildFunctionTables p tlts tts modules
 		let isImported'	=  isImported (importGraph' p)
 		let imported	=  EC.calculateImports (importGraph p) fetch isImported' exported	:: Map FQN (Set (Signature, [FQN]))
 		let imprtTables	=  M.mapWithKey (\fqn -> first (setImported imported fqn)) basetables'	:: Map FQN (FunctionTable, Map Signature [Clause])
-		implementTables	<- dictMapM (buildImplementations p tlts tts) imprtTables
+		implementTables	<- dictMapM (buildImplementations p precT tlts tts) imprtTables
 		return implementTables
 
 -- Asks wether the signature can be RE-exported further. This is only the case for public imports

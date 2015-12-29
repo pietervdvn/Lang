@@ -30,35 +30,35 @@ import Data.Tuple
 import Control.Arrow
 
 -- Builds the implementations for the given module (FQN), which already has the visible functions in it's function table (given)
-buildImplementations	:: Package -> Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> (FunctionTable, Map Signature [Clause]) -> Exc FunctionTable
-buildImplementations pack tlts tts fqn (ft, untClauses)
+buildImplementations	:: Package -> PrecedenceTable -> Map FQN TypeLookupTable -> Map FQN Typetable -> FQN -> (FunctionTable, Map Signature [Clause]) -> Exc FunctionTable
+buildImplementations pack precT tlts tts fqn (ft, untClauses)
 	= inside ("While building the implementations of the functions defined in "++show fqn) $
 	  do	mod	<- M.lookup fqn (modules pack) ? ("No module found")
 		tlt	<- M.lookup fqn tlts ? ("No tlt found")
 		tt	<- M.lookup fqn tts ? "No tt found"
 		let funcs = statements mod & L.filter isFunctionStm |> (\(FunctionStm f) -> f)	:: [Function]
-		imps 	<- funcs |+> buildImplementation tlt fqn (ft, tt) |> concat |> M.fromList
-		imps'	<- dictMapM  (typeClauses (ft, tt) ) untClauses
+		imps 	<- funcs |+> buildImplementation precT tlt fqn (ft, tt) |> concat |> M.fromList
+		imps'	<- dictMapM  (typeClauses precT (ft, tt) ) untClauses
 		return (ft {implementations = M.unions [imps, imps', implementations ft]})
 
 
 
-buildImplementation	:: TypeLookupTable -> FQN -> (FunctionTable, Typetable) -> Function -> Exc [(Signature, [TClause])]
-buildImplementation tlt fqn tables function
+buildImplementation	:: PrecedenceTable -> TypeLookupTable -> FQN -> (FunctionTable, Typetable) -> Function -> Exc [(Signature, [TClause])]
+buildImplementation precT tlt fqn tables function
 	= do	-- the function might have multiple declared types (e.g. (+) : Nat' -> Nat' -> Nat' and (+) : Nat -> Nat -> Nat)
 		-- we get all possible signatures here
 		rSigns	<- signs function |+> resolveSignature tlt fqn	:: Exc [Signature]
 		let cls	= clauses function
 		(zip rSigns (repeat cls) |> (fst &&& id)) 	-- [(Signature, (Signature, [Clause]))]
-			|+> onSecond (uncurry $ typeClauses tables)
+			|+> onSecond (uncurry $ typeClauses precT tables)
 
-typeClauses	:: (FunctionTable, Typetable) -> Signature -> [Clause] -> Exc [TClause]
-typeClauses tables sign clauses
+typeClauses	:: PrecedenceTable -> (FunctionTable, Typetable) -> Signature -> [Clause] -> Exc [TClause]
+typeClauses precT tables sign clauses
 		= inside ("While typing the function "++show sign) $
 		  do	-- the signature contains a typeUNION, what means it should meet **all** of the given types.
 			-- TODO for now, we assume all these types have the same number of args
 			(argTypes, rtTypes, reqs)	<- unpackArgs $ signType sign
-			clauses |+> typeClause tables reqs argTypes rtTypes
+			clauses |> rewriteClauseExprs precT |+> typeClause tables reqs argTypes rtTypes
 
 typeClause	:: (FunctionTable, Typetable) -> RTypeReq -> [RType] -> RType -> Clause -> Exc TClause
 typeClause tables reqs args rt (Clause pats expr)
@@ -66,8 +66,9 @@ typeClause tables reqs args rt (Clause pats expr)
 			let usedFrees'	= usedFrees & L.filter (`L.notElem` (reqs |> fst))
 			let fullReqs	= Reqs $ (reqs ++ (zip usedFrees $ repeat []))
 			(tpats, lscope, curries)	<- typePatterns tables fullReqs M.empty args pats
-			texprs	<- typeExpr tables fullReqs lscope $ normalize expr
-			assert (length texprs == 1) $ "Multiple implementations are possible"++indent ("\n"++(texprs |> show & unlines))
+			texprs	<- typeExpr tables fullReqs lscope expr
+			haltIf (length texprs == 0) $ "No valid typing found for "++show expr
+			assert (length texprs < 2) $ "Multiple implementations are possible"++indent ("\n"++(texprs |> show & unlines))
 			return $ TClause tpats $ head texprs
 
 rewriteClauseExprs	:: PrecedenceTable -> Clause -> Clause
@@ -79,4 +80,4 @@ rewriteClauseExprs precT (Clause pats expr)
 -- removes useless comments and rewrites the expression into it's prefix form
 rewriteExpression	:: PrecedenceTable -> Expression -> Expression
 rewriteExpression precT expr
-	= expr & removeExpNl & expr2prefExpr precT
+	= expr & removeExpNl & expr2prefExpr precT & normalize

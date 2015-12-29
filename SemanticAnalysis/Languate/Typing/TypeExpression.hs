@@ -47,16 +47,42 @@ typeExpr (ft, _) reqs ls (Call str)
 			types	<- (zip signs signs |> first (fst . signType))
 					|+> (onFirst $ subs subAway)	:: Exc [(RType, Signature)]
 			return (types |> uncurry TCall)
-typeExpr (ft, tt) reqs ls (Seq [exprs])
-	= todo
+typeExpr tables reqs ls (Seq [arg])
+	= halt $ "Compiler bug: expressions to type are not normalized: "++show arg
+typeExpr tables@(ft, tt) reqs ls (Seq (function:arg:rest))
+	= do	f'	<- typeExpr tables reqs ls function
+		arg'	<- typeExpr tables reqs ls arg
+		-- we build all possible combinations of function arg application
+		let fargs	= [(f, arg) | f <- f', arg <- arg']
+		-- we apply each of the types; we keep the combinations which can be bound
+		-- TODO pickup0
+		halt $ "TODO: application of "++show f' ++ " on "++show arg'
 typeExpr _ _ _ (Operator str)
 	= halt $ "BUG: the expression is not passed through the proper rewrites to remove operators and bring it in prefix form"
 
 typeExpr _ _ _ expr
 	=  do	warn $ "TODO: Expr " ++ show expr
 		-- TODO
-		return []
+		return [TLocalCall (RFree "a") "TODO"]
 
+
+applyExpression	:: Expression -> Expression -> Maybe Expression
+applyExpression f arg
+	= Nothing	-- TODO pickup 1
+
+
+
+{- Gives the result of applying the second type to the first.
+	e.g.
+	applyType (Int -> Bool) Int	= Bool
+	applyType (Bool -> Bool) Int 	= --- NOTHING ---
+	applyType (a -> List a) Int	= List Int
+	This is done by binding (function type -> function result) against (argType -> _resultType); binding will bind _resultType against the resulting type.
+	Note that all requirements should be fullfilled by the context
+-}
+applyTypes	:: RType -> RType -> Maybe RType
+applyType funcType argType
+	= Nothing	-- TODO pickup 2
 
 returns	:: Monad m => a -> m [a]
 returns	= return . (:[])
