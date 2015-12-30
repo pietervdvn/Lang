@@ -141,6 +141,8 @@ kindOfReqs tt reqs
 
 
 
+
+
 -- a simple kind calculator, which does not check kinds of arguments (only too much type arguments fails)
 simpleKindOf	:: Typetable -> (Name -> Exc Kind) -> RType -> Exc Kind
 simpleKindOf _ freeKinds (RFree free)
@@ -173,6 +175,10 @@ getTi tt rt	= do	tid	<- getTid rt
 
 getTid		:: RType -> Exc TypeID
 getTid rt	= getBaseTID rt ? ("No tid found for "++show rt)
+
+
+
+
 
 
 supertypesOf'	:: Typetable -> TypeID -> Exc [(RType, [TypeConstraint])]

@@ -56,7 +56,6 @@ buildTypetables p tlts mods
 		dictMapM (buildTypetable tlts) known'
 
 
-
 {- builds the 'defined' type table from the code.
 	-> Direct constraints on the free types are loaded
 

@@ -28,7 +28,8 @@ validateTypeSTMs	:: Map FQN TypeLookupTable -> FQN -> Module -> Check
 validateTypeSTMs tlts fqn mod
 	= inside ("In the module "++show fqn)$
 	  do	tlt	<- getTLT tlts fqn
-		mod & statements' |+> validateTypeSTM tlts fqn >> pass
+		mod & statements' |+> validateTypeSTM tlts fqn
+		pass
 
 validateTypeSTM	:: Map FQN TypeLookupTable -> FQN -> (Statement, Coor) -> Check
 validateTypeSTM tlts fqn (stm, (l,_))
@@ -56,6 +57,7 @@ validateDeclaration tlt (origin, declaredType, frees, treqs, cons)
 	= inside ("In the declaration of "++show origin++"."++declaredType) $
 	  do	assert (L.null $ dubbles cons) $ "Constructor names should be unique, you used "++(dubbles cons |> show & commas)++ " multiple times"
 		mapM_ (validateReq tlt frees) treqs
+		pass
 
 validateConstraintFrees	:: [Name] -> RType -> [TypeConstraint] -> Check
 validateConstraintFrees frees rt constrs
