@@ -115,7 +115,7 @@ typePattern tables rqs ls rts (Eval expr)
 		let tps	= texprs |> (id &&& typeOf)
 		-- TODO:
 		-- we also check that the type that gets in, has Eq as super type (as we want to compare it)
-		err $ show texprs	-- TODO remove err
+		warn $ show texprs	-- TODO remove err
 		return (TDontCare, ls)
 typePattern _ _ ls rt p
 	= do	warn $ "TODO: unsupported pattern "++show p++ " with expected type "++show rt
