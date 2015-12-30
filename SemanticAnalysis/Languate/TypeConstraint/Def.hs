@@ -52,6 +52,14 @@ flatten (All tcs)	= tcs
 flatten tc		= [tc]
 
 
+freesInConstraint	:: TypeConstraint -> [Name]
+freesInConstraint (SubTypeConstr a b)
+		= freesInRT a ++ freesInRT b
+freesInConstraint (Choose a b)
+		= freesInConstraint a ++ freesInConstraint b
+freesInConstraint (All tcs)
+		= tcs >>= freesInConstraint
+
 isTrivialConstraint	:: TypeConstraint -> Bool
 isTrivialConstraint (SubTypeConstr t0 t1)
 			= t0 == t1
@@ -63,8 +71,8 @@ isTrivialConstraint _	= False
 
 subsConstraint	:: [(Name, RType)] -> TypeConstraint -> Exc TypeConstraint
 subsConstraint mapping (SubTypeConstr a b)
-	= do	a'	<- subs mapping a
-		b'	<- subs mapping b
+	= do	a'	<- subs' False mapping a
+		b'	<- subs' False mapping b
 		return (SubTypeConstr a' b')
 subsConstraint mapping (Choose a b)
 	= do	a'	<- subsConstraint mapping a
