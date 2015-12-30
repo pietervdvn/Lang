@@ -36,21 +36,9 @@ buildImplementations pack precT tlts tts fqn (ft, untClauses)
 	  do	mod	<- M.lookup fqn (modules pack) ? ("No module found")
 		tlt	<- M.lookup fqn tlts ? ("No tlt found")
 		tt	<- M.lookup fqn tts ? "No tt found"
-		let funcs = statements mod & L.filter isFunctionStm |> (\(FunctionStm f) -> f)	:: [Function]
-		imps 	<- funcs |+> buildImplementation precT tlt fqn (ft, tt) |> concat |> M.fromList
-		imps'	<- dictMapM  (typeClauses precT (ft, tt) ) untClauses
-		return (ft {implementations = M.unions [imps, imps', implementations ft]})
+		imps	<- dictMapM  (typeClauses precT (ft, tt) ) untClauses
+		return (ft {implementations = M.unions [imps, implementations ft]})
 
-
-
-buildImplementation	:: PrecedenceTable -> TypeLookupTable -> FQN -> (FunctionTable, Typetable) -> Function -> Exc [(Signature, [TClause])]
-buildImplementation precT tlt fqn tables function
-	= do	-- the function might have multiple declared types (e.g. (+) : Nat' -> Nat' -> Nat' and (+) : Nat -> Nat -> Nat)
-		-- we get all possible signatures here
-		rSigns	<- signs function |+> resolveSignature tlt fqn	:: Exc [Signature]
-		let cls	= clauses function
-		(zip rSigns (repeat cls) |> (fst &&& id)) 	-- [(Signature, (Signature, [Clause]))]
-			|+> onSecond (uncurry $ typeClauses precT tables)
 
 typeClauses	:: PrecedenceTable -> (FunctionTable, Typetable) -> Signature -> [Clause] -> Exc [TClause]
 typeClauses precT tables sign clauses
@@ -67,9 +55,13 @@ typeClause tables reqs args rt (Clause pats expr)
 			let fullReqs	= Reqs $ (reqs ++ (zip usedFrees $ repeat []))
 			(tpats, lscope, curries)	<- typePatterns tables fullReqs M.empty args pats
 			texprs	<- typeExpr tables fullReqs lscope expr
-			haltIf (length texprs == 0) $ "No valid typing found for "++show expr
-			assert (length texprs < 2) $ "Multiple implementations are possible"++indent ("\n"++(texprs |> show & unlines))
-			return $ TClause tpats $ head texprs
+			if length texprs == 0 then do
+				err $ "No valid typing found for "++show expr
+				return $ TClause tpats (TLocalCall (RFree "a") "NO TYPING FOUND!")
+			else do
+				assert (length texprs < 2) $ "Multiple implementations are possible"++
+					indent ("\n"++(texprs |> (\e -> show e ++": "++show (typeOf e)) & unlines))
+				return $ TClause tpats $ head texprs
 
 rewriteClauseExprs	:: PrecedenceTable -> Clause -> Clause
 rewriteClauseExprs precT (Clause pats expr)

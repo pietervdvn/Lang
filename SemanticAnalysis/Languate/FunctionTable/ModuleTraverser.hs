@@ -28,7 +28,7 @@ data FunctionInfo	= FI { fiSign	:: Signature,
 	deriving (Show)
  -- (Signature, (Visible, Generated, Abstract)) -- , Either [Clause] [TClause]))
 
--- fetches the function signatures that are defined within the statement
+-- fetches the function signatures that are defined within the statement, and appropriate clauses, possibly typed when generated
 definedFuncSign	:: Module -> TypeLookupTable -> FQN -> Statement -> Exc [FunctionInfo]
 definedFuncSign m tlt fqn (FunctionStm function)
 	= do	defs	<- signs function |+> resolveSignature tlt fqn	:: Exc [Signature]
