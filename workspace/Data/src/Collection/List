@@ -41,7 +41,7 @@ Empty		= Nothing
 Empty ls	= ls
 (Elem a tail) ls= a : (tail + ls)
 
-prepend		: (b:a) -> [a] -> [a]
+prepend		: a -> [a] -> [a]
 		= Elem
 
 empty		: [a]

@@ -9,7 +9,7 @@ import Collection.Maybe
 import Collection.List
 
 
-type Char = {Char Nat}
+type Char = {Char ord:Nat}
 
 
 stringify	: Char -> [Char]
