@@ -112,6 +112,7 @@ charTypeID	= (charTypeFQN, "Char")
 charTypeFQN		= toFQN' "pietervdvn:Data:Data.Char"
 charTypeConstr	= TCall (RCurry natType charType) $
 		     Signature charTypeFQN "Char" (RCurry natType charType,[])
+charTypeConstr'	:: TExpression -> TExpression
 charTypeConstr'	= TApplication charType charTypeConstr
 
 

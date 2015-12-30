@@ -178,15 +178,20 @@ foldRT f _ t	= f t
 
 -------------- Free related
 
-freesInRT	:: RType -> [Name]
-freesInRT	=  nub . foldRT frees concat
+
+freesInRT	= nub . freesInRT'
+
+
+-- one occurance per time the free is occured
+freesInRT'	:: RType -> [Name]
+freesInRT'	=  foldRT frees concat
 			where 	frees	:: RType -> [Name]
 				frees (RFree a)	= [a]
 				frees _		= []
 
 freesInReq	:: (Name, [RType]) -> [Name]
 freesInReq (nm, tps)
-		= nm:(tps >>= freesInRT) & nub
+		= nub $ nm:(tps >>= freesInRT')
 
 buildSafeSubs	:: FullRTypeReq -> [(Name, Name)]
 buildSafeSubs (Reqs ls)
@@ -200,14 +205,16 @@ canonicalBinding	:: RType -> Map Name RType
 canonicalBinding t
 	= appliedTypes t & zip defaultFreeNames & fromList
 
+subs	= subs' True
 
-subs	:: [(Name, RType)] -> RType -> Exc RType
-subs dict rt
-	= do	let usedFrees	= freesInRT rt & nub			-- frees in the type
+subs'	:: Bool -> [(Name, RType)] -> RType -> Exc RType
+subs' warn dict rt
+	= inside ("In the substitution of "++show rt++" with "++show dict) $
+	  do	let usedFrees	= freesInRT rt & nub			-- frees in the type
 		let subsFrees	= dict |> snd >>= freesInRT		-- frees which might actually appear
 		let subsFrees'	= subsFrees L.\\ (dict |> fst)	-- frees which might actually appear and are not substituted away
 		let overlap	= dubbles (usedFrees ++ nub subsFrees')
-		assert (L.null overlap) ("The substitution overlaps, target types contain free type variables which are in the source type too: "++commas overlap)
+		errIf (warn && not (L.null overlap)) ("The substitution overlaps, target types contain free type variables which are in the source type too: "++commas overlap)
 		let fetch free	= L.lookup free dict & fromMaybe (RFree free)
 		traverseRT (onFree fetch) rt & return
 
@@ -251,6 +258,48 @@ nt (RFree a)		= do	(available, dict)	<- get
 nt t@(RNormal _ _)	= return t
 
 
+
+{- Normalizing the ctype is done by
+	- removing all useless constraints (constraints on frees that do not exist)
+	- removing all frees with a single occurance
+	- renaming all frees. The first occured free will be renamed a0, the next one a1, ...
+
+
+-}
+normalizeCType	:: CType -> Exc CType
+normalizeCType (rtp, reqs)
+	= do	let reqs'	= _addReq [] (rtp & freesInRT) (reqs |> (id &&& freesInReq))
+					& merge ||>> concat
+		-- we don't need the name of the req, it's not a problem if it appears there
+		let allFrees	= freesInRT' rtp ++ (reqs >>= snd >>= freesInRT)
+		-- what free does appear only once?
+		let uniquelyUsed	= nub allFrees L.\\ dubbles allFrees
+		-- what requirements are on these? None might apply
+		let (singleOccuranceReqs, restingReq)
+				= L.partition ( (`elem` uniquelyUsed) . fst) reqs'
+		let mapping	= singleOccuranceReqs ||>> RConj 	:: [(Name, RType)]
+		rtp'		<- subs mapping rtp
+		restingReq'	<- restingReq |+> onSecond (|+> subs mapping)	-- we substitute the values. Names cannot occur
+
+		-- And as last, we normalize the free variables
+		let origFrees	= nub (freesInRT rtp' ++ (restingReq' >>= freesInReq))
+		let newFrees	= zip origFrees defaultFreeNames	:: [(Name, Name)]
+		rtp''		<- subs (newFrees ||>> RFree) rtp'
+		restingReq''	<- subsReq newFrees restingReq'
+		return (rtp'', restingReq'')
+
+
+_addReq		:: [Name] -> [Name] -> [( (Name, [RType]), [Name])] -> RTypeReq
+_addReq _ [] _	= []
+_addReq _ _ []	= []
+_addReq seen usedFrees reqs
+	= let	usedIn nms	= nms |> (`elem` usedFrees) & or
+		(needed, unused)= reqs & L.partition (usedIn . snd)
+		seen'		= usedFrees ++ seen
+		newUsedFrees	= (needed >>= snd) L.\\ seen'
+		recNeeded	= _addReq seen' newUsedFrees unused
+		in
+		(needed |> fst) ++ recNeeded
 
 
 ------------------ SHOW RELATED -----------------

@@ -20,14 +20,14 @@ instance Show TExpression where
 -- Typed Expression to string
 showTE	:: TExpression -> String
 showTE (TApplication tp func arg)
-	= let	funcStr	= pars (show func)
-		argStr	= pars (show arg)
+	= let	funcStr	= show func
+		argStr	= show arg
 		tpStr	= show tp in
-		funcStr ++ " " ++ argStr ++ " :"++tpStr
+		pars (funcStr ++ " " ++ argStr) -- ++ " :"++tpStr
 showTE (TCall _ sign)
 	= signName sign
-showTE (TLocalCall nm _)
-	= show nm
+showTE (TLocalCall _ nm)
+	= nm
 showTE (Tag t)
 	= "§"++show t
 
