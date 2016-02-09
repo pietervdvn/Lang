@@ -33,14 +33,14 @@ Actual patterns
 -> (typed patterns, local scope (including previous scope), curried variables (start with _a))
 
 -}
-typePatterns	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [RType] -> [Pattern] -> Exc ([TPattern], LocalScope, [Name])
-typePatterns tables reqs ls args pats
+typePatterns	:: (FunctionTable, Typetable) -> [Name] -> LocalScope -> [CType] -> [Pattern] -> Exc ([TPattern], LocalScope, [Name])
+typePatterns tables usedFrees ls args pats
 		= inside ("In the typing of the pattern "++ (pats |> show & unwords & pars)++ " with expected types "++(args |> show & commas)) $
 			do	pats'		<- demultidontcare (length args) pats
 				let curried	= take ((length args) - (length pats')) defaultFreeNames |> ("_"++)
 				let pats''	= pats' ++ (curried |> Assign)
 				let typePat (acc, scope) (pat, arg)
-						= do	(pat', scope')	<- typePattern tables reqs scope pat arg
+						= do	(pat', scope')	<- typePattern tables usedFrees scope pat arg
 							return (acc++[pat'], scope')	:: Exc ([TPattern], LocalScope)
 				(tPats, newScope)	<- zip args pats'' & foldM typePat ([], ls)
 				return (tPats, newScope, curried)
@@ -49,18 +49,18 @@ typePatterns tables reqs ls args pats
 	Patterns may never match, then a big fat TFail get returned
 	The expected type (rts) might be an intersection. This can should expressed in the type requirements..
 -}
-typePattern	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> RType -> Pattern -> Exc (TPattern, LocalScope)
+typePattern	:: (FunctionTable, Typetable) -> [Name] -> LocalScope -> CType -> Pattern -> Exc (TPattern, LocalScope)
 typePattern _ _ ls _ DontCare
 	= return (TDontCare, ls)
-typePattern _ _ ls inTyp (Assign n)
+typePattern _ usedFrees ls inTyp (Assign n)
 	= do	ls'	<- safeUnion ls $ M.singleton n inTyp
 		return (TAssign n, ls')
-typePattern tables reqs ls inTyp (Multi pats)
-	= do	let typePat (acc, scope) pat	= do	(pat', scope')	<- typePattern tables reqs scope inTyp pat
+typePattern tables usedFrees ls inTyp (Multi pats)
+	= do	let typePat (acc, scope) pat	= do	(pat', scope')	<- typePattern tables usedFrees scope inTyp pat
 							return (acc++[pat'], scope')
 		(tpats, scope)	<- foldM typePat ([], ls) pats
 		return (TMulti tpats, scope)
-typePattern tables@(ft, tt) rqs ls inTyp (Deconstruct n' pats)
+typePattern tables@(ft, tt) usedFrees ls inTyp (Deconstruct n' pats)
 	-- we search all function with given name and type (A -> b) or (A -> Maybe b) (where b might be a tuple)
 	= do	let n	= if isUpper $ head n' then "from"++n' else n'
 		_funcs	<- visibleFuncs ft & M.lookup n ? ("No function with the name "++n++" found")
@@ -75,11 +75,11 @@ typePattern tables@(ft, tt) rqs ls inTyp (Deconstruct n' pats)
 			funcs' |> (\(sign, (_, impFrom)) -> show sign ++  "(imported from "++ (impFrom |> show & commas) ++")") & unlines
 			)
 		let (sign, argTps)	= head funcs' & second fst |> fromJust	-- we assume only one function is found, thus the head
-		(tpats, scope, curries)	<- typePatterns tables rqs ls argTps pats
+		(tpats, scope, curries)	<- typePatterns tables usedFrees ls argTps pats
 		assert (L.null curries) $ ("The destructor "++show n++" is not applied to enough arguments.")
 		return (TDeconstruct sign tpats, scope)
-typePattern tables rqs ls rts (Eval expr)
-	= do	texprs	<- typeExpr tables rqs ls expr	-- rqs is only used as to prevent overlapping frees
+typePattern tables usedFrees ls rts (Eval expr)
+	= do	texprs	<- typeExpr tables usedFrees ls expr
 		if L.null texprs then do
 			err $ "Could not type the 'same-as' pattern "++show expr
 			return (TFail, ls)
@@ -119,7 +119,7 @@ typePattern tables rqs ls rts (Eval expr)
 		--		|> L.filter snd
 		-- TODO
 		-- we also check that the type that gets in, has Eq as super type (as we want to compare it)
-		warn $ "SAME_AS-pattern: exprs: "++show tps++"\n,rqs: "++show (unp rqs)++"\nls: "++show ls++"\nrts: "++show rts	-- TODO remove err
+		warn $ "SAME_AS-pattern: exprs: "++show tps++"\n,used frees: "++show usedFrees++"\nls: "++show ls++"\nrts: "++show rts	-- TODO remove err
 		return (TDontCare, ls)
 typePattern _ _ ls rt p
 	= do	warn $ "TODO: unsupported pattern "++show p++ " with expected type "++show rt
@@ -135,7 +135,7 @@ typePattern _ _ ls rt p
 isValidEvalType		:: (FunctionTable, Typetable) -> CType -> RType -> Exc Bool
 isValidEvalType (ft, tt) expected got
 	= do	-- what are all the free variables used in the local signature? We have to subs away those frees in the given signature
-		(ret, reqs)	<- buildSafeCType expReqs rawCType
+		(ret, reqs)	<- buildSafeCType expected got
 		let ctypeReqs	= asConstraints reqs & S.toList
 		-- first we check wether the return type is a subtype of the expected type, e.g. (Zero `elem` Nat) by binding
 		-- bind will assume the left is a subtype.
@@ -150,7 +150,7 @@ isValidEvalType (ft, tt) expected got
 
 
 -- it is a decons type if we take a single argument, and return a normal value, a tuple, or a maybe of a normal value/tuple
-deconstructorArgs	:: Typetable -> RType -> Signature -> Exc (Maybe [RType])
+deconstructorArgs	:: Typetable -> CType -> Signature -> Exc (Maybe [RType])
 deconstructorArgs tt originType sign
 	= do	(argTypes, rtType, reqs)	<- unpackArgs $ signType sign	:: Exc ([RType], RType, RTypeReq)
 		let reqs'	= asConstraints reqs

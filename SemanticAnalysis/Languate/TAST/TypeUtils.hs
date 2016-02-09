@@ -193,12 +193,16 @@ freesInReq	:: (Name, [RType]) -> [Name]
 freesInReq (nm, tps)
 		= nub $ nm:(tps >>= freesInRT')
 
+buildSafeSubs'	:: [Name] -> [(Name, Name)]
+buildSafeSubs' used
+	= let	new = defaultFreeNames & L.filter (`notElem` used) & take (length used)
+		in zip used new
+
 buildSafeSubs	:: FullRTypeReq -> [(Name, Name)]
 buildSafeSubs (Reqs ls)
 	= let	used	= ls |> fst
-		new	= defaultFreeNames & L.filter (`notElem` used) & take (length used)
 		in
-		zip used new
+		buildSafeSubs' used
 
 
 -- renames all the free type variables to prevent name collisions.

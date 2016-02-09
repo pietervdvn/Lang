@@ -23,7 +23,7 @@ import Control.Arrow
 
 {-
 
-Types an expression within context (tables, requirements on free types and localscope).
+Types an expression within context (local function tables, localscope; requirements are inferred but already used free names are passed as to prevent overlap).
 
 Note that an expression might result in multiple typed expressions, as multiple possibilities exist.
 (e.g. (+) : Nat -> Nat -> Nat or Int -> Int -> Int).
@@ -32,7 +32,7 @@ Typing will return *both* options when a '+' is encountered and will remove the 
 The fullRTypeReqs are only used to prevent overlapping free names.
 
 -}
-typeExpr	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> Expression -> Exc [TExpression]
+typeExpr	:: (FunctionTable, Typetable) -> [Name] -> LocalScope -> Expression -> Exc [TExpression]
 typeExpr _ _ _ (Nat 0)
 	= returns natTypeZero
 typeExpr t r ls (Nat i)
@@ -41,7 +41,7 @@ typeExpr t r ls (Chr c)
 	= do	let i	= ord c
 		[nat]	<- typeExpr t r ls (Nat i)
 		returns $ charTypeConstr' nat
-typeExpr (ft, _) reqs ls (Call str)
+typeExpr (ft, _) usedFreeNames ls (Call str)
  | str `M.member` ls
  	= do	let (Just rtype)	= M.lookup str ls
  		returns $ TLocalCall rtype str
@@ -52,58 +52,61 @@ typeExpr (ft, _) reqs ls (Call str)
 			err $ show str ++ " is not known here.\n\t(Just like the study schedule of Iaason: 'Ik maak ook geen schemas' -- Iasoon)"
 			return []
 		else do
-			let subAway	= buildSafeSubs reqs ||>> RFree
-			let signs	= available & S.toList
-			types	<- (zip signs signs |> first (fst . signType))
-					|+> (onFirst $ subs subAway)	:: Exc [(CType, Signature)]
+			let subAway	= buildSafeSubs' usedFreeNames
+			let signs	= available & S.toList |> fst
+			types	<- signs |> (signType &&& id)
+					|+> (onFirst $ subsCType subAway)	:: Exc [(CType, Signature)]
 			return (types |> uncurry TCall)
-typeExpr tables reqs ls (Seq [arg])
+typeExpr tables usedFreeNames ls (Seq [arg])
 	= halt $ "Compiler bug: expressions to type are not normalized: "++show arg
-typeExpr tables reqs ls (Seq (function:args))
-	= do	f'	<- typeExpr tables reqs ls function
-		applyExpression' tables reqs ls f' args
+typeExpr tables usedFreeNames ls (Seq (function:args))
+	= do	f'	<- typeExpr tables usedFreeNames ls function
+		applyExpression' tables usedFreeNames ls f' args
 
 typeExpr _ _ _ (Operator str)
 	= halt $ "BUG: the expression is not passed through the proper rewrites to remove operators and bring it in prefix form"
 
 typeExpr _ _ _ expr
 	=  do	warn $ "TODO: Expr not supported yet: " ++ show expr
-		return [TLocalCall (RFree "a") ("TODO"++show expr)]
+		return [TLocalCall (RFree "a", []) ("TODO"++show expr)]
 
 
-applyExpression'	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [TExpression] -> [Expression] -> Exc [TExpression]
+applyExpression'	:: (FunctionTable, Typetable) -> [Name] -> LocalScope -> [TExpression] -> [Expression] -> Exc [TExpression]
 applyExpression' _ _ _ func []	= return func
-applyExpression' tables@(ft, tt) reqs ls func (arg:args)
+applyExpression' tables@(ft, tt) usedFreeNames ls func (arg:args)
 	= inside ("While calculating the type of "++(func |> (\te -> show te ++ ": "++show (typeOf te)) & commas)++" on "++((arg:args) |> show & unwords )) $
-	  do	arg'	<- typeExpr tables reqs ls arg
+	  do	arg'	<- typeExpr tables usedFreeNames ls arg
 		-- we build all possible combinations of function arg application
 		let fargs	= [(f, arg) | f <- func, arg <- arg']
 		-- we apply each of the types; we keep the combinations which can be bound
-		applied	<- fargs |+> uncurry (applyExpression tt reqs)
+		applied	<- fargs |+> uncurry (applyExpression tt usedFreeNames)
 				|> catMaybes
 
 
 		errIf (L.null applied) $ "No typing is possible for "++show func++" "++show arg++"\nTried:"
 				++indent (fargs >>= (\(f, arg) -> "\n"++ show f  ++ ": "++show (typeOf f)++"\n\t with: " ++ show arg ++"\n\t of type "++show (typeOf arg)) )
 		-- as soon as two expressions yield the same type, we should choose an implementation.
-		applied'	<- chooseImplementations (unp reqs) applied
-		applyExpression' tables reqs ls applied' args
+		applied'	<- chooseImplementations usedFreeNames applied
+		applyExpression' tables usedFreeNames ls applied' args
 
-applyExpression	:: Typetable -> FullRTypeReq -> TExpression -> TExpression -> Exc (Maybe TExpression)
-applyExpression tt reqs f arg
+applyExpression	:: Typetable -> [Name] -> TExpression -> TExpression -> Exc (Maybe TExpression)
+applyExpression tt usedFreeNames f arg
 	= do	let ft	= typeOf f
 		let argT	= typeOf arg
-		resultT	<- applyTypes tt reqs ft argT
+		resultT	<- applyTypes tt usedFreeNames ft argT	-- TODO
 		case resultT of
 			Nothing -> return Nothing
 			(Just t)-> return $ Just $ TApplication t f arg
 
 
-chooseImplementations	:: RTypeReq -> [TExpression] -> Exc [TExpression]
+chooseImplementations	:: [Name] -> [TExpression] -> Exc [TExpression]
 chooseImplementations _ [texpr]
 			= returns texpr
-chooseImplementations reqs exprs
-	= do	sortedExprs	<- exprs |> (typeOf &&& id)
+chooseImplementations usedNames exprs
+	= do	-- TODO FIXME
+		err $ "Choose between "++show exprs
+		return exprs
+		{-sortedExprs	<- exprs |> (typeOf &&& id)
 					|> first (id &&& const reqs)
 					|+> onFirst normalizeCType
 					|> merge
@@ -112,8 +115,9 @@ chooseImplementations reqs exprs
 			(thus with the smallest input parameters, as this functions can make more assumptions about it's inputs and will thus be the fastest)
 		-}
 		sortedExprs |+> _chooseBetween
+		-}
 
-
+{-
 _chooseBetween	:: (CType, [TExpression]) -> Exc TExpression
 _chooseBetween (_, [texpr])
 	= return texpr
@@ -124,11 +128,11 @@ _chooseBetween (ctype, exprs)
 
 			Differences might arise on the choosing of a specific implementation, e.g. the implementation of Nat -> Nat' -> Nat' or Nat -> Nat -> Nat for (+)
 			We walk the tree downwards until we find function with possible different signatures
-		-}
+		--}
 		err $ "Choose between " ++ show ctype ++ "\n" ++ show exprs
 		-- TODO pickup here!
 		return $ head exprs
-
+-}
 
 {- Gives the result of applying the second type to the first.
 	e.g.
@@ -138,20 +142,23 @@ _chooseBetween (ctype, exprs)
 	This is done by binding (function type -> function result) against (argType -> _resultType); binding will bind _resultType against the resulting type.
 	Note that all requirements should be fullfilled by the context, only a single constraint should thus rest
 -}
-applyTypes	:: Typetable -> FullRTypeReq -> RType -> RType -> Exc (Maybe RType)
-applyTypes tt reqs funcType argType
-	= do	let reqs'	= asConstraints $ unp reqs
-		let binder	= RCurry argType (RFree "_resultType")
-		let usedFrees	= "_resultType" : (unp reqs |> fst & nub)
-		maybeConstr	<- allNeededConstraintsFor tt reqs' (bind funcType binder)
-					||>> S.toList
+applyTypes	:: Typetable -> [Name] -> CType -> CType -> Exc (Maybe CType)
+applyTypes tt usedFreeNames (funcType, fconstr) (argType, argConstr)
+	= inside ("While applying ''"++show funcType++" "++ show argType ++"'', requirements are "++show fconstr++"; "++show argConstr ) $
+	  do	let binder	= RCurry argType (RFree "_resultType")
+		haltIf ("_resultType" `elem` usedFreeNames) $ "How is _resultType already used? Semantal/TypeExpr.hs"
+		let usedFrees	= "_resultType" : usedFreeNames
+		let reqs	= (fconstr ++ argConstr) & unmerge |> first RFree |> uncurry SubTypeConstr
+					& S.fromList
+		maybeConstr	<- allNeededConstraintsFor tt reqs (bind funcType binder)
+					||>> S.toList	:: Exc (Maybe [TypeConstraint])
 		maybeConstr'	<- flattenMaybeT (maybeConstr |> buildBoundConstr ("_resultType" ==))
 					||>> (removeUselessBinds usedFrees)
 		case maybeConstr' of
 			(Just [SubTypeConstr tp (RFree "_resultType")])
-				-> return $ Just tp
+				-> return $ Just (tp, [])	-- TODO what with resting constraints?
 			(Just extraConstraints)
-				-> inside ("With requirements "++show (nub $ unp reqs)) $ halt $ "EXTRA " ++ show extraConstraints
+				-> inside ("With used frees: "++show usedFreeNames) $ halt $ "EXTRA " ++ show extraConstraints
 			Nothing	-> return Nothing
 
 returns	:: Monad m => a -> m [a]

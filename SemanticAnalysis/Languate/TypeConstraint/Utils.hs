@@ -7,6 +7,7 @@ This module implements helper functions to make life easier with typeconstraints
 --}
 
 import StdDef
+import Exceptions
 import Languate.CheckUtils
 
 import Languate.TAST
@@ -27,7 +28,7 @@ asConstraints	:: RTypeReq -> Set TypeConstraint
 asConstraints reqs
 	= reqs |> first RFree & unmerge |> uncurry SubTypeConstr & S.fromList
 
-
+-- constructs bindings (type requirements) from constraints for under bounded types (e.g. Bool is a 'b'); noBind is excluded
 bindings	:: (Name -> Bool) -> TypeConstraint -> Maybe [(Name, RType)]
 bindings noBind (SubTypeConstr a (RFree b))
  | noBind b
@@ -67,13 +68,18 @@ _addConstraints seen used constraints
 		in
 		(needed |> fst) ++ recNeeded
 
+{-
+Constructs the bindings from the constraints (except for certain frees)
+e.g. buildBoundConstr ("_resultType" ==) [SubTypeConstr 'a' 'Int', SubTypeConstr 'Bool' 'b', SubTypeConstr '_resultType' 'a -> b']
+== Just [Constraint a is pietervdvn:Data:Data.Nat.Nat,Constraint _resultType is (a -> pietervdvn:Data:Data.Bool.Bool)]
+-}
 buildBoundConstr	:: (Name -> Bool) -> [TypeConstraint] -> Exc (Maybe [TypeConstraint])
 buildBoundConstr noBind constrs
 	= inside ("In the binding of frees in "++show constrs) $
 	  case bindings noBind $ All constrs of
 		Nothing		-> return Nothing
 		(Just binds)	-> All constrs & subsConstraint binds
-					 |> normalize |> flatten |> Just
+					|> normalize |> flatten |> Just
 
 
 isConstraintMet	:: Typetable -> TypeConstraint -> Exc Bool
