@@ -200,7 +200,14 @@ buildSafeSubs (Reqs ls)
 		in
 		zip used new
 
--- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... is hardcoded (defaultFreeNames)
+
+-- renames all the free type variables to prevent name collisions.
+buildSafeCType	:: FullRTypeReq -> CType -> Exc CType
+buildSafeCType reqs ctype
+	= do	let mapping	= buildSafeSubs reqs
+		subsCType mapping ctype
+
+-- Given "T x y z", gives a binding {a0 --> x, a1 --> y, a2 --> z}. Note: a0, a1, ... are hardcoded (defaultFreeNames)
 canonicalBinding	:: RType -> Map Name RType
 canonicalBinding t
 	= appliedTypes t & zip defaultFreeNames & fromList
@@ -231,6 +238,8 @@ subsCType sub (rTyp, reqs)
 	= do	rTyp'	<- rTyp & subs (sub ||>> RFree)
 		reqs'	<- subsReq sub reqs
 		return (rTyp', reqs')
+
+
 
 ------------------ NORMALIZING ---------------
 

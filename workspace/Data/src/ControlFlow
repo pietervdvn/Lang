@@ -21,7 +21,7 @@ a _	= a
 -- Conditional choice
 > if True 1 2	= 1
 > if False 1 2 	= 2
-if		: Bool -> (b:a) -> a -> a
+if		: Bool -> (b:a) -> (c:a) -> a
 True  a _	= a
 False _ b	= b
 

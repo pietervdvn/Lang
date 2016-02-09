@@ -45,8 +45,11 @@ d	= RFree "d"
 functionTesting str
 	= RNormal testingFQN str
 
-isSpr a b
-	= isConstraintMet tt (SubTypeConstr a b) & runExceptionsIO'
+help	= "Use 'testBind sub super' to test bind"
+
+testBind a b
+	= allNeededConstraintsFor tt S.empty (bind a b) & runExceptionsIO'
+
 
 (~>)	= RCurry
 (&&&) a b
@@ -59,4 +62,4 @@ scs a b	= cs [sc a b]
 sc	= SubTypeConstr
 
 -- return faulty either case "a is b"
-tc	= runExceptionsIO' $ allNeededConstraints tt S.empty [SubTypeConstr (bool) (list a)]
+tc x	= runExceptionsIO' $ allNeededConstraintsFor tt (asConstraints [("b", [a]), ("c",[a])  ]) (bind (b ~> (c ~> a))  x)

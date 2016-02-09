@@ -28,6 +28,9 @@ Types an expression within context (tables, requirements on free types and local
 Note that an expression might result in multiple typed expressions, as multiple possibilities exist.
 (e.g. (+) : Nat -> Nat -> Nat or Int -> Int -> Int).
 Typing will return *both* options when a '+' is encountered and will remove the options that are not needed/possible, based on the types of the parameters/return value
+
+The fullRTypeReqs are only used to prevent overlapping free names.
+
 -}
 typeExpr	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> Expression -> Exc [TExpression]
 typeExpr _ _ _ (Nat 0)
@@ -50,9 +53,9 @@ typeExpr (ft, _) reqs ls (Call str)
 			return []
 		else do
 			let subAway	= buildSafeSubs reqs ||>> RFree
-			let signs	= available & S.toList |> fst
+			let signs	= available & S.toList
 			types	<- (zip signs signs |> first (fst . signType))
-					|+> (onFirst $ subs subAway)	:: Exc [(RType, Signature)]
+					|+> (onFirst $ subs subAway)	:: Exc [(CType, Signature)]
 			return (types |> uncurry TCall)
 typeExpr tables reqs ls (Seq [arg])
 	= halt $ "Compiler bug: expressions to type are not normalized: "++show arg
@@ -64,9 +67,8 @@ typeExpr _ _ _ (Operator str)
 	= halt $ "BUG: the expression is not passed through the proper rewrites to remove operators and bring it in prefix form"
 
 typeExpr _ _ _ expr
-	=  do	warn $ "TODO: Expr " ++ show expr
-		-- TODO
-		return [TLocalCall (RFree "a") "TODO"]
+	=  do	warn $ "TODO: Expr not supported yet: " ++ show expr
+		return [TLocalCall (RFree "a") ("TODO"++show expr)]
 
 
 applyExpression'	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> [TExpression] -> [Expression] -> Exc [TExpression]
@@ -84,7 +86,7 @@ applyExpression' tables@(ft, tt) reqs ls func (arg:args)
 		errIf (L.null applied) $ "No typing is possible for "++show func++" "++show arg++"\nTried:"
 				++indent (fargs >>= (\(f, arg) -> "\n"++ show f  ++ ": "++show (typeOf f)++"\n\t with: " ++ show arg ++"\n\t of type "++show (typeOf arg)) )
 		-- as soon as two expressions yield the same type, we should choose an implementation.
-		applied'	<- chooseImplementations applied
+		applied'	<- chooseImplementations (unp reqs) applied
 		applyExpression' tables reqs ls applied' args
 
 applyExpression	:: Typetable -> FullRTypeReq -> TExpression -> TExpression -> Exc (Maybe TExpression)
@@ -97,19 +99,35 @@ applyExpression tt reqs f arg
 			(Just t)-> return $ Just $ TApplication t f arg
 
 
-chooseImplementations	:: [TExpression] -> Exc [TExpression]
-chooseImplementations [texpr]
+chooseImplementations	:: RTypeReq -> [TExpression] -> Exc [TExpression]
+chooseImplementations _ [texpr]
 			= returns texpr
-chooseImplementations exprs
-	= do	let sortedExprs	= exprs |> (typeOf &&& id) & sortOn fst
-		-- when all expressions have exactly the same type, we choose an implementation
+chooseImplementations reqs exprs
+	= do	sortedExprs	<- exprs |> (typeOf &&& id)
+					|> first (id &&& const reqs)
+					|+> onFirst normalizeCType
+					|> merge
+		-- when all (or some) expressions have exactly the same type, we choose an implementation
 		{- this implementation uses the *most specific* function possible
 			(thus with the smallest input parameters, as this functions can make more assumptions about it's inputs and will thus be the fastest)
 		-}
-		-- TODO
-		-- halt $ show sortedExprs
-		return exprs
+		sortedExprs |+> _chooseBetween
 
+
+_chooseBetween	:: (CType, [TExpression]) -> Exc TExpression
+_chooseBetween (_, [texpr])
+	= return texpr
+_chooseBetween (ctype, exprs)
+	= do	{- we now for sure that the structure of the expressions will be exactly the same, as the expressions will be the result of typing the same clause.
+			It doesn't matter much which implementation we pick, as the resulting type will be exactly the same;
+				only the time needed to run might be different (possibly by an infinite factor)
+
+			Differences might arise on the choosing of a specific implementation, e.g. the implementation of Nat -> Nat' -> Nat' or Nat -> Nat -> Nat for (+)
+			We walk the tree downwards until we find function with possible different signatures
+		-}
+		err $ "Choose between " ++ show ctype ++ "\n" ++ show exprs
+		-- TODO pickup here!
+		return $ head exprs
 
 
 {- Gives the result of applying the second type to the first.

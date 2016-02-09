@@ -22,9 +22,9 @@ data TExpression
 		As multiple implementations with the same types exist, multiple types could be returned.
 		A TApplication however representats only one of those, and selects those TExpressions which makes it possible.
 		This way, a typed expression, has only one possible type and one implementation to choose from. -}
-	TApplication RType TExpression TExpression
+	TApplication CType TExpression TExpression
 	-- we save the type independently as not to change the signature - we need it to look up the implementation
-	| TCall RType Signature
-	| TLocalCall RType Name
+	| TCall CType Signature
+	| TLocalCall CType Name
 	| Tag Int	-- The tag is used in combination of builtin functions to construct and deconstruct values
 	deriving (Eq)

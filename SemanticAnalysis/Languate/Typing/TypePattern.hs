@@ -46,8 +46,8 @@ typePatterns tables reqs ls args pats
 				return (tPats, newScope, curried)
 
 {- old scope is embedded within the new, returned scope
-	Patterns may never match, then a big fat N
-	The expected type might be an intersection. This can should expressed in the type requirements
+	Patterns may never match, then a big fat TFail get returned
+	The expected type (rts) might be an intersection. This can should expressed in the type requirements..
 -}
 typePattern	:: (FunctionTable, Typetable) -> FullRTypeReq -> LocalScope -> RType -> Pattern -> Exc (TPattern, LocalScope)
 typePattern _ _ ls _ DontCare
@@ -79,7 +79,7 @@ typePattern tables@(ft, tt) rqs ls inTyp (Deconstruct n' pats)
 		assert (L.null curries) $ ("The destructor "++show n++" is not applied to enough arguments.")
 		return (TDeconstruct sign tpats, scope)
 typePattern tables rqs ls rts (Eval expr)
-	= do	texprs	<- typeExpr tables rqs ls expr
+	= do	texprs	<- typeExpr tables rqs ls expr	-- rqs is only used as to prevent overlapping frees
 		if L.null texprs then do
 			err $ "Could not type the 'same-as' pattern "++show expr
 			return (TFail, ls)
@@ -110,12 +110,16 @@ typePattern tables rqs ls rts (Eval expr)
 
 		  The first clause will never match for the type signature "Nat' -> Nat' -> Nat'".
 		  In this case, the clause is dead (for this typing - it might be usefull for other types).
-		  We return a 'TFail'; the totality checker will pick it up and warn for clauses that are never used
+		  We return a 'TFail'; the totality checker will pick it up and warn for clauses that are never used.
+
+		  TLDR: we select only the matching expressions, there should be at most only one
 		-}
-		let tps	= texprs |> (id &&& typeOf)
-		-- TODO:
+		let tps	= texprs |> (id &&& typeOf)	-- TODO
+		--		|+> onSecond (isValidEvalType tables rts)
+		--		|> L.filter snd
+		-- TODO
 		-- we also check that the type that gets in, has Eq as super type (as we want to compare it)
-		warn $ show texprs	-- TODO remove err
+		warn $ "SAME_AS-pattern: exprs: "++show tps++"\n,rqs: "++show (unp rqs)++"\nls: "++show ls++"\nrts: "++show rts	-- TODO remove err
 		return (TDontCare, ls)
 typePattern _ _ ls rt p
 	= do	warn $ "TODO: unsupported pattern "++show p++ " with expected type "++show rt
@@ -124,14 +128,24 @@ typePattern _ _ ls rt p
 
 
 
--- Returns wether or not the type of this expression can be used. Expected is an intersection of the expected value to end in the pattern
-isValidEvalType		:: (FunctionTable, Typetable) -> CType -> [RType] -> Exc Bool
-isValidEvalType (ft, tt) (ret, reqs) expected
-	= do	let reqs'	= asConstraints reqs
+{- Returns wether or not the type of this expression can be used as "evaluated expression" in a pattern. Expected is the type the pattern should destructure
+	expected is the type we want to have (''rts'' in typePattern);
+	got is the type the expression returns. Note: free names should not overlap
+	-}
+isValidEvalType		:: (FunctionTable, Typetable) -> CType -> RType -> Exc Bool
+isValidEvalType (ft, tt) expected got
+	= do	-- what are all the free variables used in the local signature? We have to subs away those frees in the given signature
+		(ret, reqs)	<- buildSafeCType expReqs rawCType
+		let ctypeReqs	= asConstraints reqs & S.toList
 		-- first we check wether the return type is a subtype of the expected type, e.g. (Zero `elem` Nat) by binding
-		-- bind will assume the left is a subtype. We have a match if
+		-- bind will assume the left is a subtype.
+		let bnd sub super extra	= allNeededConstraintsFor tt reqs (bind sub super:extra )
+		bindingSub	<- bnd ret expected
+		-- same, but the other side around
+		bindingSuper	<- bnd expected ret
 
-		return False -- TODO pickup
+		return (isJust bindingSub || isJust bindingSuper)
+--}
 
 
 
