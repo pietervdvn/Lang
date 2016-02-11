@@ -45,19 +45,16 @@ typeClauses precT tables sign clauses
 		= inside ("While typing the function "++show sign) $
 		  do	-- the signature contains a typeUNION, what means it should meet **all** of the given types.
 			-- TODO for now, we assume all these types have the same number of args
-			(argTypes, rtTypes, reqs)	<- unpackArgs $ signType sign
-			clauses |> rewriteClauseExprs precT |+> typeClause tables reqs argTypes rtTypes
+			(argTypes, cType)	<- unpackArgs $ signType sign
+			clauses |> rewriteClauseExprs precT |+> typeClause tables (freesInCT cType) argTypes cType
 
-typeClause	:: (FunctionTable, Typetable) -> RTypeReq -> [RType] -> RType -> Clause -> Exc TClause
-typeClause tables reqs args rt (Clause pats expr)
-		= do	let usedFrees	= (rt:args) >>= freesInRT
-			let usedFrees'	= usedFrees & L.filter (`L.notElem` (reqs |> fst))
-			let fullReqs	= Reqs $ (reqs ++ (zip usedFrees $ repeat []))
-			(tpats, lscope, curries)	<- typePatterns tables fullReqs M.empty args pats
-			texprs	<- typeExpr tables fullReqs lscope expr
+typeClause	:: (FunctionTable, Typetable) -> [Name] -> [CType] -> CType -> Clause -> Exc TClause
+typeClause tables usedFrees args rt (Clause pats expr)
+		= do	(tpats, lscope, curries)	<- typePatterns tables usedFrees M.empty args pats
+			texprs	<- typeExpr tables usedFrees lscope expr
 			if length texprs == 0 then do
 				err $ "No valid typing found for "++show expr
-				return $ TClause tpats (TLocalCall (RFree "a") "NO TYPING FOUND!")
+				return $ TClause tpats (TLocalCall (RFree "a", []) "NO TYPING FOUND!")
 			else do
 				assert (length texprs < 2) $ "Multiple implementations are possible"++
 					indent ("\n"++(texprs |> (\e -> show e ++": "++show (typeOf e)) & unlines))

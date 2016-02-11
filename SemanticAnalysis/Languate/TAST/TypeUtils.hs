@@ -189,6 +189,10 @@ freesInRT'	=  foldRT frees concat
 				frees (RFree a)	= [a]
 				frees _		= []
 
+freesInCT	:: CType -> [Name]
+freesInCT (rt, reqs)
+		= nub (freesInRT rt ++ (reqs >>= freesInReq))
+
 freesInReq	:: (Name, [RType]) -> [Name]
 freesInReq (nm, tps)
 		= nub $ nm:(tps >>= freesInRT')

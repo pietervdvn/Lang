@@ -68,7 +68,7 @@ typePattern tables@(ft, tt) usedFrees ls inTyp (Deconstruct n' pats)
 		funcs'	<- funcs |> (fst &&& id)	-- [(Signature, (Signature, [FQN]))]
 				|+> onSecond (onFirst (deconstructorArgs tt inTyp))
 				|> L.filter (isJust . fst . snd)
-				:: Exc [(Signature, (Maybe [RType], [FQN]))]
+				:: Exc [(Signature, (Maybe [CType], [FQN]))]
 		haltIf (L.null funcs') $ "No suitable deconstructor function found for "++show n++indent ("\n"++
 			(funcs |> fst |> show |> ("Tried "++) |> (++" but it didn't have a suitable type") & unlines))
 		assert (length funcs' == 1) $ "Multiple deconstructor functions found for "++show n++indent ("\n"++
@@ -131,8 +131,8 @@ typePattern _ _ ls rt p
 {- Returns wether or not the type of this expression can be used as "evaluated expression" in a pattern. Expected is the type the pattern should destructure
 	expected is the type we want to have (''rts'' in typePattern);
 	got is the type the expression returns. Note: free names should not overlap
-	-}
-isValidEvalType		:: (FunctionTable, Typetable) -> CType -> RType -> Exc Bool
+	-- }
+isValidEvalType		:: (FunctionTable, Typetable) -> CType -> CType -> Exc Bool
 isValidEvalType (ft, tt) expected got
 	= do	-- what are all the free variables used in the local signature? We have to subs away those frees in the given signature
 		(ret, reqs)	<- buildSafeCType expected got
@@ -150,9 +150,9 @@ isValidEvalType (ft, tt) expected got
 
 
 -- it is a decons type if we take a single argument, and return a normal value, a tuple, or a maybe of a normal value/tuple
-deconstructorArgs	:: Typetable -> CType -> Signature -> Exc (Maybe [RType])
+deconstructorArgs	:: Typetable -> CType -> Signature -> Exc (Maybe [CType])
 deconstructorArgs tt originType sign
-	= do	(argTypes, rtType, reqs)	<- unpackArgs $ signType sign	:: Exc ([RType], RType, RTypeReq)
+	= do	(argTypes, ctype@(rType, reqs))	<- unpackArgs $ signType sign	:: Exc ([CType], CType)
 		let reqs'	= asConstraints reqs
 		-- the originType will be passed into the function (as argType)
 		-- The originType might be *bigger* then the argTypes. If it's a non matching value, the pattern match will simply fail and move on
@@ -161,37 +161,37 @@ deconstructorArgs tt originType sign
 
 		-- at this point, we only have to take a look at the output type(s)
 		-- Are we dealing with a Maybe? If yes, then all return types should bind on "Maybe a"
-		constrs	<- bind (RApplied maybeType $ RFree "_decons") rtType
+		constrs	<- bind (RApplied maybeType $ RFree "_decons") rType
 				& allNeededConstraintsFor tt reqs'
 				||>> S.toList	:: Exc (Maybe [TypeConstraint])
 					-- Returns the typeunion of what is in the maybe if this binding succeeded
-		let maybeArgs'	= unpackMaybeArgFromConstraints constrs	:: Maybe RType
-		let tupleArgs	= fromMaybe rtType maybeArgs'
+		let maybeArgs'	= unpackMaybeArgFromConstraints constrs	:: Maybe CType
+		let tupleArgs	= fromMaybe ctype maybeArgs'
 		-- TODO FIXME use actual binding! Use actual intersections on the type!
 		let args	= tupleArgs & tupledTypes
 		return $ Just args
 
 
-unpackMaybeArgFromConstraints	:: Maybe [TypeConstraint] -> Maybe RType
+unpackMaybeArgFromConstraints	:: Maybe [TypeConstraint] -> Maybe CType
 unpackMaybeArgFromConstraints constraints
 	= do	constraints'	<- constraints
 		-- we assume the only left constraint is [SubTypeConstr (RFree "_decons") _actual tuple value_ ]
 		-- if any other constraint pops up, we can't bind and it's not a maybe type after all!
 		case constraints' of
-			([SubTypeConstr (RFree "_decons") tuplVal])	-> return tuplVal
-			_	-> Nothing
+			([SubTypeConstr (RFree "_decons") tuplVal])	-> return (tuplVal, [])
+			_	-> Nothing	-- What with extra constraints
 
 
 {- we get a signature of a function, which is applied on a single argument, namely inTyp.
 	We thus bind this argument type onto the
 	-}
-unpackArgs	:: CType -> Exc ([RType], RType, RTypeReq)
+unpackArgs	:: CType -> Exc ([CType], CType)
 unpackArgs (tp, reqs)
 	= do	-- TODO FIXME tp should be bound against (RCurry _a _b). If this succeeds, we now the first argument and have already a single type
 		let curried	= curriedTypes tp
 		let argTypes	= init curried
 		let rtType	= last curried
-		return (argTypes, rtType, reqs)
+		return ((zip argTypes $ repeat reqs), (rtType, reqs))
 
 -------------------- UTILS ---------------------
 

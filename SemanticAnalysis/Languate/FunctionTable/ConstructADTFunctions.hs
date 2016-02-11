@@ -62,8 +62,8 @@ buildConstructorSign fqn n reqs args defType tag
 	= let   sign	= Signature fqn n (uncurriedTypes (args++[defType]),reqs)
 		vars	= zip args defaultFreeNames
 		pats	= vars |> snd |> TAssign
-		baseExpr= TApplication (fst $ signType sign)
-				(TCall (fst $ signType sign) (sign {signName= "#construct"}))
+		baseExpr= TApplication (signType sign)
+				(TCall (signType sign) (sign {signName= "#construct"}))
 				(Tag tag)
 		expr	= vars |> uncurry TLocalCall & foldl simpleApply baseExpr
 		in (sign, [TClause pats expr])
@@ -71,21 +71,21 @@ buildConstructorSign fqn n reqs args defType tag
 
 
 
-buildIsConstrSign	:: FQN -> Name -> RTypeReq -> RType -> Int -> (Signature, [Clause])
-buildIsConstrSign fqn n reqs defType nArgs
+buildIsConstrSign	:: FQN -> Name -> CType -> Int -> (Signature, [Clause])
+buildIsConstrSign fqn n (defType, reqs) nArgs
 	= let	sign	= Signature fqn ("is"++n) (RCurry defType boolType,reqs)
 		matchClause	= Clause [Deconstruct n (replicate nArgs DontCare)] (Call "True")
 		failClause	= Clause [DontCare] (Call "False")
 		in
 		(sign, [matchClause, failClause])
 
-buildDeconsSign		:: FQN -> Name -> RTypeReq -> UniqueConstructor -> Int -> RType -> [RType] -> (Signature, [TClause])
+buildDeconsSign		:: FQN -> Name -> RTypeReq -> UniqueConstructor -> Int -> CType -> [CType] -> (Signature, [TClause])
 buildDeconsSign fqn n reqs onlyCons tag defType args
-	= let	retTyp		= tupleTypes args   -- args are the arguments to the constructor, here the return types in a tuple
+	= let	retTyp		= tupleTypes args	:: CType   -- args are the arguments to the constructor, here the return types in a tuple
 		-- if we have a unique constructor, we don't need to wrap it in a maybe
-		wrapper		= if onlyCons then id else RApplied maybeType
-		retTyp' 	= wrapper retTyp
-		sign		= Signature fqn ("from"++n) (RCurry defType (wrapper retTyp) , reqs)
+		wrapper		= if onlyCons then id else first $ RApplied maybeType
+		retTyp' 	= wrapper retTyp	:: CType
+		sign		= Signature fqn ("from"++n) (RCurry (fst defType) (fst retTyp') , snd defType ++ snd retTyp')
 		failClause	= TClause [TDontCare] $ maybeTypeNothing retTyp'   -- only exists if multiple constructors
 
 		deconsSign  	= sign {signName = "#deconstruct"}
