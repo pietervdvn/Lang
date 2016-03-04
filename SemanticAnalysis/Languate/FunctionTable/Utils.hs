@@ -46,7 +46,7 @@ functiontable2doc path fqn ft
 	  		  , imp |> show |> code & parags
 	  		  ]
 	  	implT	= table ["Function name","Types","Type constraints","Implementations"] (ft & implementations & M.toList |> implRow)
-	  	implDoc	= doc (path fqn ++ "Implementions of functions in "++show fqn) "Internal table showing the actual implementations" implT
+	  	implDoc	= doc (path fqn ++ "Implementations of functions in "++show fqn) "Internal table showing the actual implementations" implT
 
 	  -- about the docstrings
 		docstrRow (sign, meta)
