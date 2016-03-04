@@ -44,12 +44,13 @@ sumDefFunctions	:: TypeLookupTable -> FQN -> RType -> RTypeReq -> UniqueConstruc
 			-> Exc [(Signature, Visible, Either [Clause] [TClause])]
 sumDefFunctions tlt fqn defType reqs onlyCons (TADTSum name vis fields, tag)
 	= inside ("In the constructor "++name) $
-	  do	let args	= fields |> snd	-- types of the arguments
+	  do	let args	= fields |> snd		:: [RType]-- types of the arguments
+	  	let args'	= args |> (id &&& const reqs)	:: [CType]
 		checkFieldsAreNamed fields
-		let constr	= [buildConstructorSign fqn name reqs args defType tag] |> second Right
-		let isContstr'	= if onlyCons then [] else [buildIsConstrSign fqn name reqs defType (length fields)]
-		let isContstr	= isContstr' |> second Left
-		let decons	= [buildDeconsSign fqn name reqs onlyCons tag defType args] |> second Right
+		let constr	= [buildConstructorSign fqn name reqs args defType tag] |> second Right	:: [(Signature, Either [Clause] [TClause])]
+		let isContstr'	= if onlyCons then [] else [buildIsConstrSign fqn name (defType, reqs) (length fields)]
+		let isContstr	= isContstr' |> second Left	:: [(Signature, Either [Clause] [TClause])]
+		let decons	= [buildDeconsSign fqn name reqs onlyCons tag (defType, reqs) args'] |> second Right	:: [(Signature, Either [Clause] [TClause])]
 		let funcs	= constr ++ isContstr ++ decons	:: [(Signature, Either [Clause] [TClause])]
 		let funcs'	= funcs |> (\(sign, clauses) -> (sign, vis, clauses))	:: [(Signature, Visible, Either [Clause] [TClause])]
 		funcs' & return
@@ -59,8 +60,8 @@ buildConstructorSign	:: FQN -> Name -> RTypeReq
 				-> [RType] -> RType -> Int
 				-> (Signature, [TClause])
 buildConstructorSign fqn n reqs args defType tag
-	= let   sign	= Signature fqn n (uncurriedTypes (args++[defType]),reqs)
-		vars	= zip args defaultFreeNames
+	= let   sign	= Signature fqn n (uncurriedTypes (args ++[defType]),reqs)
+		vars	= zip (args |> noReqs)  defaultFreeNames
 		pats	= vars |> snd |> TAssign
 		baseExpr= TApplication (signType sign)
 				(TCall (signType sign) (sign {signName= "#construct"}))
@@ -321,3 +322,9 @@ checkNoDubbleConsnames names
 
 checkOverlappingAdoptions	:: Check
 checkOverlappingAdoptions	= pass	-- TODO FIXME TODO: check wether adopted types don't overlap
+
+
+
+noReqs	:: RType -> CType
+noReqs rt
+	= (rt, [])
